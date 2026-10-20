@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-literature"
+version = "1.0.0"
+description = "Light-Literature：把外部论文变成项目内可核查、可复用的研究材料（Light-Science 子技能）"
+requires-python = ">=3.10"
+dependencies = [
+    "pymupdf>=1.24",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+# 公式可编译检查用 matplotlib 的 mathtext 解析器作为代理（见 light_literature/checks.py 说明）
+formula-check = ["matplotlib>=3.6"]
+
+[project.scripts]
+light-literature = "light_literature.cli:main"
+
+[tool.setuptools]
+packages = ["light_literature", "light_literature.engines"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

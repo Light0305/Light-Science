@@ -1,0 +1,26 @@
+# ---- Python 通用 ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# ---- 虚拟环境 ----
+.venv/
+.venv-*/
+venv/
+
+# ---- 密钥与本地配置（凭据只经连接器注入，绝不落盘入库） ----
+.env
+.env.*
+
+# ---- Light-Literature 运行产物（在使用者自己的项目目录产生，不属于技能包源码） ----
+# 论文原件 PDF 不入库（版权与体积）；如需强制收录个别文件用 git add -f
+*.pdf
+# 单篇工作文件（含本地状态机与分诊审计数值）
+**/paper.yaml
+# Doc2X 轨运行记录（run_record.json / doc2x_result.json 含 uid 与本地产物路径）
+**/doc2x/
+# Find 线原始响应缓存
+**/Literature/.find-cache/

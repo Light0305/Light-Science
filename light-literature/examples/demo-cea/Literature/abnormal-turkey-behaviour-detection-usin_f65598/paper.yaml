@@ -1,0 +1,83 @@
+# 结构示意（脱敏版）：字段与真实 paper.yaml 同构；已剔除原文 PDF 的
+# SHA-256 指纹、Doc2X 任务 uid 与时间戳等运行标识。书目信息为公开发表
+# 信息。分诊明细只保留第 1 页与汇总，其余页同构、省略。
+paper_id: abnormal-turkey-behaviour-detection-usin_f65598
+title: Abnormal turkey behaviour detection using self-supervised video anomaly detection
+  and multiple object tracking
+doi: 10.1016/j.compag.2025.110856
+source_version: version_of_record
+source: institutional repository (publisher version, CC BY-NC-ND OA)
+sha256: <原文.pdf 的 SHA-256，入库时自动计算>
+pages: 12
+ingested_at: '2026-10-20'
+locator_mode: page-grounded
+status:
+  ingested: true
+  triage: done
+  extract: done (parse, Doc2X 轨)
+  translate: done
+  notes: done
+  verify: done
+triage:
+  pages:
+  - page: 1
+    page_kind: born_digital
+    confidence: 0.95
+    mixed_usable: null
+    chars: 4914
+    garbled_ratio: 0.0
+    fonts:
+      fonts_total: 7
+      fonts_with_tounicode: 7
+      span_decodable_ratio: 0.9995
+      font_ok: true
+    coverage:
+      text_area_ratio: 0.4664
+      ink_ratio: 0.1295
+      suspicious: false
+    drawings: 8
+    full_bleed_image: false
+    graphics_page: false
+  # ……第 2–12 页同构，略……
+  summary:
+    born_digital: 12
+    mixed: 0
+    scanned: 0
+    mixed_usable: 0
+    mixed_unusable: 0
+  total_pages: 12
+authors:
+- Yubo Zhang
+- Liying Zheng
+- Piter Bijma
+- Zhuoshi Wang
+- Peter H.N. de With
+- Patrick P.J.H. Langenhuizen
+year: 2025
+venue: Computers and Electronics in Agriculture
+volume: '239'
+article_number: '110856'
+published_online: '2025-08-23'
+license: CC BY-NC-ND 4.0
+identity_status: verified
+retraction_status: clear
+verification:
+  study_id: ST001
+  checked_via: verify-identity (Crossref work + updates back-check)
+  detail: crossref:title_sim=1.0,author_ok=True,year_ok=True; no retraction/correction
+    signals
+parse:
+  backend: doc2x
+  status: done
+  engine_params:
+    model: v3-2026
+    formula_mode: dollar
+    formula_level: 0
+    merge_cross_page_forms: true
+  uid: <Doc2X 任务 uid，运行时落盘，此处脱敏>
+  anchors:
+    S: 161
+    C: 20
+    F: 8
+    T: 12
+    E: 11
