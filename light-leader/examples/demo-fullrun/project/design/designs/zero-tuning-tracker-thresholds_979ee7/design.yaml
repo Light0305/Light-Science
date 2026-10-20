@@ -1,0 +1,527 @@
+design_id: zero-tuning-tracker-thresholds_979ee7
+idea_id: zero-tuning-tracker-thresholds-predicted_77cdb7
+title: Zero-tuning tracker thresholds：留一视频交叉验证对照实验设计
+tier: full
+status: reviewed
+created: '2026-10-20'
+updated: '2026-10-20'
+registration:
+  visibility: no_runs_yet
+  existing_assets:
+  - 种子论文（Zhang et al., Computers and Electronics in Agriculture 239 (2025) 110856，DOI
+    10.1016/j.compag.2025.110856）附录 A 两组时长阈值取值（2.5/5 分钟组）——固定阈值下限锚的取值来源
+  - 种子论文精读卡（light-literature 演示产物，含附录 A 逐时长阈值扫描协议细节）
+  - light-idea 演示 C1 卡（pre_mortem_passed）及查新证据包（池 105 条，判定 PROCEED_WITH_CAUTION，REVIEW_UNAVAILABLE）
+  software_env: Byte³Track（ByteTrack 谱系）跟踪管线 + TrackEval 评估（MOTA/IDF1/HOTA 口径）；登记环境：light-design
+    演示，2026-10-20
+  designer:
+    model: claude-opus-4.8
+    family: anthropic-claude
+intake:
+  source_handoff:
+    path: light-idea/examples/demo-poultry/cards/zero-tuning-tracker-thresholds-predicted_77cdb7/idea.yaml
+    consumed_at: '2026-10-20'
+    handoff_hash: 722079bd7aa26da7
+  original_question: Zero-tuning tracker thresholds predicted from video-level statistics
+  spec_intake:
+  - item: datasets
+    handoff_value: '[{"name": "自建火鸡栏舍复现集", "version": "6 段视频（2.5/5 分钟各 3）", "access":
+      "自建采集（种子作者数据未公开）"}, {"name": "MOT17 train", "version": "公开基准", "access": "公开下载（仅方法先行验证，不作领域结论）"}]'
+    design_location: evaluation.data_protocol / plan.variables
+    status: accepted
+  - item: strongest_baseline
+    handoff_value: '{"name": "种子论文附录 A 的逐视频神谕阈值扫描协议（上限对照）；固定阈值取种子 2.5 分钟组取值（下限对照）",
+      "doi": "10.1016/j.compag.2025.110856"}'
+    design_location: contract.controls（status_quo）
+    status: accepted
+  - item: metrics
+    handoff_value: '[{"name": "MOTA", "convention_source": "MOTChallenge 与种子论文口径"},
+      {"name": "IDF1", "convention_source": "MOTChallenge 与种子论文口径"}, {"name": "HOTA",
+      "convention_source": "HOTA 原文（IJCV 2020）与种子论文口径"}]'
+    design_location: evaluation.primary_metric / guardrail_metrics
+    status: expanded
+  - item: ablations
+    handoff_value: '["去掉轨迹长度分布特征", "去掉检测置信分布特征", "去掉目标密度特征", "回归器换常数预测（固定阈值对照）", "只用前
+      30 秒统计量 vs 全程统计量"]'
+    design_location: contract.ablations
+    status: expanded
+  - item: resource_budget
+    handoff_value: '{"gpu_hours": 30, "data": "自建 6 段 + MOT17", "weeks": 3}'
+    design_location: resources.budget / power
+    status: expanded
+  - item: key_details
+    handoff_value: '["三阈值联合回归而非逐个独立回归（附录 A 显示三者耦合）", "统计量只许用视频前段", "留一视频交叉验证，禁止在留出段上调回归器超参"]'
+    design_location: plan / handoff.repro_fields
+    status: expanded
+  returned_items: []
+claims:
+  primary_claims:
+  - id: C1
+    statement: 视频级统计量（轨迹长度分布、检测置信分布、目标密度）与最优关联阈值之间存在稳定映射：由视频前 30 秒统计量联合回归出的三阈值，在留出视频上的
+      MOTA 达到逐段神谕扫描的 98% 以内（差 ≤2 点），且全面优于固定阈值。
+    why_it_matters: 成立则跟踪器部署免逐集人工调参——种子论文附录 A 的逐时长扫描正是当前部署的实际成本；不成立（走负向判读）同样有价值：证明逐集调参为何不可避免。
+    minimum_convincing_evidence: 6 段自建视频留一交叉：每段预测阈值 MOTA 距该段神谕 ≤2 点且高于固定阈值；ABL-04（常数预测）对照下回归优势
+      ≥SESOI 2 点，排除「随便给个常数就行」；ABL-06（去一切时长代理特征）后优势仍在，排除时长查表解释。
+    confirmatory: true
+  - id: C2
+    statement: 只用视频前 30 秒统计量预测的阈值不差于用全程统计量（段级差 <1 点）：部署可在视频开头即完成标定（承卡 unexpected_prediction）。
+    why_it_matters: 决定该方法是能在线部署（开头标定）还是只能离线逐段处理，是 C1 的部署形态分水岭。
+    minimum_convincing_evidence: ABL-05：全程统计量变体与主通道（前 30 秒）在 6 段留出 MOTA 上的段级配对差 <1
+      点。
+    confirmatory: true
+  supporting_claim: null
+  anti_claims:
+  - id: AC1
+    statement: 回归器只是学到「时长→阈值」查表：附录 A 本就按时长给了两组数，增量为零（承卡 strongest_objection）。
+    excluded_by: ABL-06（去掉一切时长代理特征后仍须成立）+ 自建集同等时长段间神谕 θ 本有差异，查表解释不掉该部分变异
+  - id: AC2
+    statement: 预测胜出只因下限基线太弱或调参不对等（自家方法拿到更高调参预算）。
+    excluded_by: 固定阈值取种子论文已发表取值（非自设弱基线）+ evaluation.tuning_parity 对等条款 + 神谕上限锚（须达
+      98%）双向夹逼
+  - id: AC3
+    statement: 映射只是自建复现集分布的产物（与种子作者数据分布不一致），换分布即失效。
+    excluded_by: 只能部分排除：S0 在 MOT17 上先验映射存在性；分布外推的残余登记在 validity.external，不许靠本设计声称排除
+plan:
+  design_type: 对照实验型
+  variables:
+  - name: threshold_source
+    group: treatment
+    domain:
+      kind: choice
+      values:
+      - regressed_prefix30s
+      - fixed_published
+      - oracle_scan
+      - constant_mean
+      - regressed_fullvideo
+  - name: feature_set
+    group: treatment
+    domain:
+      kind: choice
+      values:
+      - full
+      - no_track_length
+      - no_confidence_dist
+      - no_density
+      - no_duration_proxy
+  - name: held_out_segment
+    group: treatment
+    domain:
+      kind: choice
+      values:
+      - seg1
+      - seg2
+      - seg3
+      - seg4
+      - seg5
+      - seg6
+  - name: MOTA
+    group: outcome
+    domain:
+      kind: range
+      min: -100
+      max: 100
+  - name: IDF1
+    group: outcome
+    domain:
+      kind: range
+      min: 0
+      max: 100
+  - name: HOTA
+    group: outcome
+    domain:
+      kind: range
+      min: 0
+      max: 100
+  - name: segment_duration_min
+    group: covariate
+    domain:
+      kind: choice
+      values:
+      - 2.5
+      - 5.0
+  - name: mean_targets_per_frame
+    group: covariate
+    domain:
+      kind: range
+      min: 0
+      max: 100
+  - name: occlusion_rate
+    group: covariate
+    domain:
+      kind: range
+      min: 0
+      max: 1
+  variable_constraints:
+  - 三阈值由回归器联合输出，不许逐个独立回归后拼接（承 key_details：附录 A 显示三者耦合）
+  - 任一 run 的统计量输入帧号不许越过其登记窗口（前 30 秒口径 = 帧号 ≤ 30×fps）
+  - 留出段不许进入回归器训练样本与超参选择（承 key_details）
+  randomization:
+    method: 段级留一全枚举轮换（6 折确定性轮换，非随机抽折）；处理（阈值策略）在段级整体施加，段内不做处理随机化
+    seed_policy: 跟踪管线确定性推理；回归器拟合种子清单预登记 [20261020, 20261021, 20261022]，段级结果取 3 种子均值
+  blocking_stratification: 时长分层：2.5 分钟 ×3 段、5 分钟 ×3 段；每折训练集两时长俱全；结果按时长层分层报告
+  intervention_mechanism:
+  - variable: threshold_source
+    how: 跟踪运行启动前由脚本把该 run 登记的三阈值（预测/固定/神谕/常数来源）写入运行配置，运行日志回显实际生效三元组供核查
+  intervention_checkpoints:
+  - 每次跟踪运行前打印并落盘实际生效的 (θ_modIoU, θ_high, θ_low) 三元组，与该 run 登记取值逐字比对（自变量须真改变且留证：声称换了阈值实际恒定即整
+    run 作废）
+  - 统计量窗口审计：预测通道的统计量计算只读登记窗口内帧（前 30 秒口径帧号上限 = 30×fps），帧号范围落盘审计，越界即该 run 作废
+  - 留出段隔离断言：每折回归器训练样本段 id 清单落盘并断言不含留出段，断言记录留痕后才许开跑
+  replication_level: 视频段（独立采集单元）：处理在段级独立施加、留一折以段为单位，n = 6 段；帧与轨迹只是段内观测、不是独立重复（按帧计
+    n 即伪重复）
+  replication_counts:
+    segments: 6
+    folds: 6
+    regressor_seeds: 3
+contract:
+  controls:
+  - name: 种子论文附录 A 的逐视频神谕阈值扫描协议（上限对照）；固定阈值取种子 2.5 分钟组取值（下限对照）
+    role: control
+    status_quo: true
+    source: 10.1016/j.compag.2025.110856
+  - name: 部署现状对照：固定阈值（种子论文 2.5 分钟组已发表取值，部署时不做任何逐段调整）
+    role: control
+    status_quo: false
+    source: 10.1016/j.compag.2025.110856 附录 A
+  groups: []
+  ablations:
+  - id: ABL-01
+    claim_ref: C1
+    what_it_tests: 轨迹长度分布特征是否携带阈值信息（遮挡强度的代理）
+    expected_if_component_matters: 去掉后留出段 MOTA 明显下降（≥1 点）且距神谕差距扩大
+    type: feature_removal
+    form: 特征组置空，其余管线不变
+  - id: ABL-02
+    claim_ref: C1
+    what_it_tests: 检测置信分布特征是否携带阈值信息（检测质量的代理）
+    expected_if_component_matters: 去掉后留出段 MOTA 明显下降（≥1 点）且距神谕差距扩大
+    type: feature_removal
+    form: 特征组置空，其余管线不变
+  - id: ABL-03
+    claim_ref: C1
+    what_it_tests: 目标密度特征是否携带阈值信息（拥挤度的代理）
+    expected_if_component_matters: 去掉后留出段 MOTA 明显下降（≥1 点）且距神谕差距扩大
+    type: feature_removal
+    form: 特征组置空，其余管线不变
+  - id: ABL-04
+    claim_ref: C1
+    what_it_tests: 「统计量→阈值映射存在性」本身：回归相对常数预测（训练段神谕 θ 均值）有无增量
+    expected_if_component_matters: 回归段均值 MOTA 优于常数预测 ≥SESOI 2 点；若不优于，主张 C1 直接不成立（本条是对主张本身的判别消融）
+    type: substitution
+    form: 回归器替换为常数预测器
+  - id: ABL-05
+    claim_ref: C2
+    what_it_tests: 统计量窗口充分性：全程统计量 vs 前 30 秒统计量
+    expected_if_component_matters: 若前段统计量已充分（主张 C2），全程变体不优于主通道超过 1 点；明显更优则 C2 不成立
+    type: substitution
+    form: 统计量窗口由前 30 秒换为全程
+  - id: ABL-06
+    claim_ref: C1/AC1
+    what_it_tests: 时长查表反主张（AC1）：去掉一切时长代理特征（显式时长与时长单调派生量）后映射是否仍成立
+    expected_if_component_matters: 去掉后回归仍优于常数预测 ≥2 点且距神谕 ≤2 点的判读不变；优势消失则 AC1 成立、C1
+      须回炉
+    type: feature_removal
+    form: 特征组置空（承卡 pre-mortem 预置反制，交接五项消融之外的展开项）
+  unnecessary_ablations:
+  - what: 逐个独立回归 vs 联合回归的消融
+    reason: key_details 已写死三阈值联合回归（附录 A 显示耦合），独立回归是已排除的实现选择而非待证主张；资源优先给特征组消融
+  - what: 更换跟踪器骨干（检测器/关联算法变体）
+    reason: 本设计只问阈值策略，跟踪管线固定为种子论文 Byte³Track 管线；换骨干会引入构念混淆、稀释判别力
+  sanity_checks:
+  - 检测管线一致性抽查：同段同帧检测框计数与种子论文口径对账，偏差登记
+  - 神谕扫描网格覆盖三阈值全域、步长落盘登记，不许跑后补网格
+  runs:
+  - run_id: R-S0-MOT17
+    role: sanity
+    stage: S0
+    depends_on: []
+    note: 方法先行门：MOT17 上验证映射存在性（回归优于常数）；不过不进 S1
+  - run_id: R-ORACLE
+    role: control
+    stage: S1
+    depends_on: []
+    note: 6 段逐段神谕阈值扫描：生成（统计量→神谕θ）样本 + 神谕 MOTA 上限锚
+  - run_id: R-FIXED
+    role: control
+    stage: S1
+    depends_on: []
+    note: 固定阈值（种子 2.5 分钟组取值）逐段跑跟踪：下限锚
+  - run_id: R-PRED
+    role: treatment
+    stage: S2
+    control_run: R-FIXED
+    depends_on:
+    - R-ORACLE
+    - R-FIXED
+    note: 主通道：前 30 秒统计量联合回归三阈值，留一 6 折
+  - run_id: R-ABL-01
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-01
+  - run_id: R-ABL-02
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-02
+  - run_id: R-ABL-03
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-03
+  - run_id: R-ABL-04
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-04
+  - run_id: R-ABL-05
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-05
+  - run_id: R-ABL-06
+    role: ablation
+    stage: S2
+    depends_on:
+    - R-ORACLE
+    ablation_ref: ABL-06
+evaluation:
+  primary_metric:
+    name: MOTA
+    definition: 1 − (FN + FP + IDSW) / GT，逐段计算、段级汇总
+    direction: higher_is_better
+    convention_source: MOTChallenge 与种子论文（CEA 2025, DOI 10.1016/j.compag.2025.110856）正文口径（承卡
+      metrics）
+  guardrail_metrics:
+  - name: IDF1
+    bound: 段均值不得低于 R-FIXED 对照 1 点以上（不许靠牺牲身份保持换 MOTA）
+  - name: HOTA
+    bound: 段均值不得低于 R-FIXED 对照 1 点以上
+  - name: IDSW
+    bound: 段均值不高于 R-ORACLE 对照的 1.5 倍
+  construct_mapping:
+  - metric: MOTA（对神谕/固定双锚）
+    construct: 「部署免调参」的质量半：免调参通道质量不低于逐段调参（神谕）且优于不调（固定）
+    note: 构念的流程半（零人工介入、前 30 秒可完成标定）由流程事实承载、不由指标测得，残余登记见 validity.construct
+  data_protocol:
+    datasets: 自建火鸡栏舍复现集 v1：6 段（2.5/5 分钟各 3），采集后逐段登记 SHA-256；MOT17 train 官方版仅作 S0 方法门，不作领域结论
+    splits: 留一视频 6 折，折划分预先写死（held_out_segment 全枚举）
+  analysis_plan:
+    method: 段级配对差：逐段（预测 − 固定）与（预测 − 神谕）两组差 → 报均值与全段范围；判读只按 evaluation.readout 三向预设执行，不做事后子集挑选；消融按预设量级阈值（≥1
+      点）作机制归因判读，不逐条做显著性声称
+    predetermined_at: 设计定版（frozen）时，见任何结果之前
+  readout:
+    positive:
+      meaning: 留出段 MOTA 达神谕值 98% 以内（差 ≤2 点）且全面优于固定阈值：映射成立，进 Design
+      action: 主张成立口径落字：交 Analysis 按 expected_registry 对账后进 Write；部署标定流程（前 30 秒）写入方法结论
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假，回炉 facet
+      action: 假设为假：回炉 light-idea 机制 facet 并回写卡 lineage；不许在 Design 内改判读、换指标或缩段重试
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判，不许直接宣称成立
+      action: 判别力不足：先扩样本段数（6 → ≥10，资源区 amendment 留痕）或扩统计量特征集再判；扩样前不许宣称成立、也不许判死
+  exclusion_rules: 运行级作废条件预先写死：干预核查任一不过（阈值未真生效/统计量帧号越界/留出段泄漏）→ 该 run 作废重跑并留痕；段级排除只许因标注校验不过整段排除并登记；不许事后以结果难看为由排除段或
+    run
+  tuning_parity:
+    statement: 三方对等登记：自家回归器超参试验 ≤20 次且只许在训练折内选择；基线侧——神谕扫描为全网格穷举（上限锚、按定义即最强，不存在对基线放水的问题）、固定阈值取已发表取值零调参；任何一方预算外调参即整折作废。
+    details: 承卡 key_details『禁止在留出段上调回归器超参』；回归器超参清单与试验次数在 S2 开跑前落盘登记
+  seeds:
+    count: 3
+    policy: 清单预登记 [20261020, 20261021, 20261022]（回归器拟合）；跟踪推理确定性、无种子
+  repetitions: 6
+  exploratory_notes: 时长分层与密度分层的亚组结果只作探索性报告，不支撑确认性声称
+validity:
+  threats:
+  - category: conclusion
+    item: n=6 段下段级均值差的功效：2 点 SESOI 可能落在段间噪声内
+    status: mitigated
+    note: 功效替代口径核算（resources.power）：以段级配对差 SD≤1.5 点（附录 A 同等时长段间波动的收缩估计）为前提，6 段达 target_power
+      0.8；SD 恶化情形写进敏感性范围并设熔断（>2.5 点触发扩样或下调声称），不许硬判
+  - category: conclusion
+    item: 多重比较：6 条消融逐条判读膨胀假阳性
+    status: mitigated
+    note: 消融只作机制归因的量级判读（预设 ≥1 点差阈值），不逐条做显著性声称；确认性结论只由主张 C1/C2 的预设判读产生
+  - category: internal
+    item: 自变量未真改变：阈值注入失败、或统计量窗口越界偷用未来帧（时间泄漏）
+    status: mitigated
+    note: 干预核查点三条（生效三元组回显逐字比对、统计量帧号范围审计、留出段隔离断言）执行后留证，任一不过该 run 作废重跑
+  - category: internal
+    item: 回归器在留出段上调参/选特征（选择性泄漏）
+    status: mitigated
+    note: 承 key_details：超参只许在训练折内选、试验次数与清单预登记；留出段 id 断言检查留痕，违反即整折作废
+  - category: internal
+    item: 固定阈值下限锚过弱造成假胜出
+    status: mitigated
+    note: 下限取种子论文经同行评审的已发表取值而非自设弱值；且判读正向还须达神谕 98%，弱下限单独不足以判正
+  - category: construct
+    item: MOTA 是否测得「部署免调参」这一构念
+    status: residual
+    note: MOTA 只测跟踪质量、不测『免调参』本身。本设计把构念拆两半：质量半由 MOTA 对双锚判读；免调参半由流程事实承载（预测通道零人工介入、统计量只用前
+      30 秒即部署时点可得）。残余：真实部署的运维收益（省时、少出错）不在本设计测量范围内——声称边界止于『质量不低于逐段调参且流程无需人工调参』
+  - category: construct
+    item: 「视频级统计量」构念覆盖不足：三组特征未必穷尽阈值的主导因素（光照/遮挡率等场景因素未入特征集，承卡 risks）
+    status: residual
+    note: 正面回应卡上 risks 第 1 条：协变量（密度/遮挡率）只登记不入回归，消融与分层只能部分探测该缺口；若 ABL-04 显示映射不存在，优先怀疑构念覆盖不足——判读
+      null 向已预置扩特征/扩样的回炉路径，不许直接判想法死刑
+  - category: external
+    item: 自建复现集与种子作者数据分布不一致，结论外推受限（承卡 risks 第 2 条）
+    status: residual
+    note: 声称范围限自建集分布与 MOT17 方法层；向作者数据/其他栏舍外推须另行验证，不在本设计声称内
+  - category: external
+    item: 仅 2 种时长、单一栏舍场景
+    status: mitigated
+    note: 时长分层抽样且同等时长段间保留神谕 θ 差异（时长内变异在场）；场景单一性的残余并入上一条的声称边界
+  structural_checks:
+  - item: 数据泄漏（统计量用未来帧 / 留出段调参）
+    status: pass
+    note: 帧号审计 + 留出段隔离断言双查，见干预核查点
+  - item: 伪重复（以帧/轨迹当 n）
+    status: pass
+    note: n 只按段计，replication_level 已声明
+  - item: 基准污染
+    status: pass
+    note: MOT17 只作 S0 方法门、不作领域结论；自建集为新采集、无公开基准污染面
+  - item: 调参不公平
+    status: pass
+    note: tuning_parity 条款落盘：回归器预算上限、选择范围、基线口径全写死
+  - item: 选择性报告（只报好看的段/消融）
+    status: pass
+    note: 6 折全报 + 消融矩阵预登记，handoff.expected_registry 逐 run 登记供 Analysis 对账
+  - item: 序贯偷看改 n
+    status: pass
+    note: 段数 6 预先写死；扩样只走 amendment 且判读标准不变
+  failure_modes:
+  - mode: 自建采集延期或标注校验不过
+    response: 先以 MOT17 完成 S0 与管线联调，主实验顺延；判读与设计不变，延期走 blocked 登记不改设计
+  - mode: 神谕扫描算力超支
+    response: 触发熔断：改粗网格定位再细扫，网格变更留痕登记、不改判读
+resources:
+  power:
+    sesoi: MOTA 2 个百分点（预测 vs 固定的段级均值差；且预测距神谕 ≤2 点）
+    basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，不凭空发明效应量
+    alpha: 0.05
+    target_power: 0.8
+    method: 计算实验替代口径：段级配对差解析核算——以附录 A 同等时长段间 MOTA 波动的收缩估计 SD≈1.5 点为前提，n=6 段配对差检出 2
+      点差达 power 0.8
+    derived:
+      seeds: 3
+      repetitions: 6
+      eval_set_size: 6
+    sensitivity_range: SESOI 1 点 → 需 11 段；2 点 → 6 段（本设计）；3 点 → 4 段。若段级配对差 SD 恶化至 2.5
+      点，2 点 SESOI 需 11 段——超出预算即触发熔断：扩样或把主张下调为探索性，二选一落字
+    sufficient: true
+  budget:
+    compute: 30 GPU 小时（承卡 resource_budget；单卡 RTX 5000 级）
+    time: 3 周（承卡；含自建 6 段视频采集与标注校验）
+    human: 采集与标注校验约 2 人日
+  attempt_budget:
+    per_run: 每 run 同因失败重跑 ≤3 次，超限走熔断登记
+  stages:
+  - name: S0 方法先行（MOT17）
+    goal: 公开集上先验映射存在性 + 管线联调
+    entry_condition: 设计 frozen（本演示止于 reviewed，本阶段为定版后执行计划）
+    exit_condition: R-S0-MOT17 判读过门（回归优于常数）；不过则回炉 facet，不进 S1
+  - name: S1 神谕样本与双锚对照
+    goal: 6 段逐段神谕扫描生成样本 + 固定阈值对照跑完
+    entry_condition: S0 过门 + 自建集采集与标注校验完成
+    exit_condition: R-ORACLE / R-FIXED 全数完成且干预核查留证齐全（对照先行：S1 未完 S2 不开跑）
+  - name: S2 主实验与消融
+    goal: R-PRED 主通道 + 6 条消融 run
+    entry_condition: S1 退出条件达成 + 开跑前对齐校验三查通过
+    exit_condition: 全部 run 落盘，交 Analysis 按 expected_registry 逐条对账
+  circuit_breakers:
+  - metric: 神谕扫描 GPU 消耗
+    threshold: 累计 > 20 GPU 小时（总预算 2/3）而 S1 未完
+    action: 停扫：粗网格加密策略留痕登记后继续；不许挪用 S2 预算硬撑
+  - metric: 任一 run 同因失败次数
+    threshold: ≥3 次
+    action: 停该 run：失败分类（实现/根本）后决定重试或回炉，不许无限重试
+  - metric: 段级配对差 SD（S1 完成后预估）
+    threshold: '> 2.5 点'
+    action: 功效前提失效：暂停 S2，先扩样（≥10 段）走 amendment、或把主张 C1 下调为探索性，二选一落字
+  - metric: 总工期
+    threshold: '> 3 周'
+    action: 冻结新 run 启动，先保主张 C1 最小证据集（R-PRED + R-ABL-04 + R-ABL-06）
+freeze:
+  review:
+    reviewer: null
+    family: null
+    date: '2026-10-20'
+    items: {}
+    decision: null
+    review_status: REVIEW_UNAVAILABLE
+    review_id: RV-5baf031de4
+    source: review-unavailable
+    note: 演示环境仅有 anthropic-claude 单一模型家族，无异家族模型可评审（与 Idea 演示同构）
+  frozen_at: null
+  content_hash: null
+  amendments: []
+handoff:
+  expected_registry:
+  - run_id: R-S0-MOT17
+    expected: MOT17 留一序列下回归预测优于常数预测（映射存在性门）；不过 → 回炉 facet，不进 S1
+  - run_id: R-ORACLE
+    expected: 6 段逐段神谕三阈值与神谕 MOTA 落盘（含同等时长段间 θ 差异清单）
+  - run_id: R-FIXED
+    expected: 6 段固定阈值 MOTA/IDF1/HOTA 落盘（下限锚）
+  - run_id: R-PRED
+    expected: 按 evaluation.readout 三向判读：距神谕 ≤2 点且全面优于固定 = 正向；任一段低于固定阈值基线 = 负向信号，汇总判读不许挑段
+  - run_id: R-ABL-01
+    expected: 去轨迹长度特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+  - run_id: R-ABL-02
+    expected: 去置信分布特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+  - run_id: R-ABL-03
+    expected: 去密度特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+  - run_id: R-ABL-04
+    expected: 常数预测段均值 MOTA：回归优势 ≥2 点则映射存在；否则主张 C1 不成立
+  - run_id: R-ABL-05
+    expected: 全程统计量变体与主通道段级差：<1 点则主张 C2 成立
+  - run_id: R-ABL-06
+    expected: 去时长代理特征后判读不变则 AC1 被排除；优势消失则 AC1 成立、C1 回炉
+  repro_fields:
+    seeds:
+    - 20261020
+    - 20261021
+    - 20261022
+    environment: Byte³Track 管线 + TrackEval；单卡 RTX 5000 级；GPU 预算 30 小时
+    data_versions: 自建复现集 v1（6 段，采集后逐段登记 SHA-256）；MOT17 train 官方发布版
+    key_details:
+    - 三阈值联合回归而非逐个独立回归
+    - 统计量只许用视频前段（主通道前 30 秒）
+    - 留一视频交叉验证，禁止在留出段上调回归器超参
+  checkpoints:
+  - node: S0 方法门判定
+    human_confirm: true
+  - node: 自建集采集与标注校验完成
+    human_confirm: true
+  - node: S2 开跑前对齐校验（三查）
+    human_confirm: true
+  - node: 任一熔断线触发
+    human_confirm: true
+  alignment_gate: 开跑前对齐校验三查：① 实际生效三阈值与登记值逐字比对；② 统计量帧号范围不越登记窗口；③ 训练样本段 id 清单不含留出段。三查留证，不过不开跑（设计—实现对齐门）
+aux:
+  info_gain_estimates: R-PRED 与 R-ABL-04 信息增益最高（直接判主张 C1 与映射存在性）；R-ABL-05 次之（判主张 C2）；R-ABL-06
+    是时长查表反主张 AC1 的唯一排除者，不可省（暂定）
+  run_priority_notes: 算力熔断时保 R-PRED + R-ABL-04 + R-ABL-06 最小证据集（暂定）
+  similar_design_refs:
+  - light-idea 演示 C1 卡判别实验（本设计判读三向的承接来源）
+  history_refs: []
+status_history:
+- from: null
+  to: draft
+  date: '2026-10-20'
+  by: light-design new
+  note: 建书
+- from: draft
+  to: reviewed
+  date: '2026-10-20'
+  by: claude-opus-4.8（本演示执行者）
+  note: ''
+return_record: null
+block_record: null

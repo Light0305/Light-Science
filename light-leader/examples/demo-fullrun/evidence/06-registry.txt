@@ -1,0 +1,50 @@
+来源：project/memory/registry-view.json
+对象注册统一视图（light-memory/registry-view v1.0）：共 26 个对象，生成于 2026-10-20T14:29:25+00:00
+
+[analysis_package] 1 个
+  - analysis-pkg | 状态 active | 当前版本 4d14ed3424d7… | 项目 turkey-threshold-prediction | 结论包 analysis-pkg
+
+[claim] 2 个
+  - C1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 主张 C1
+  - F001 | 状态 referenced | 当前版本 — | 项目 turkey-threshold-prediction | 
+
+[concern] 6 个
+  - RV-C001 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 主张 C1 含未检验行 R-NEG（数据版本缺 seg-05/06、fundamental 失败 F-0001，unte
+  - RV-C002 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并
+  - RV-C003 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 精度缺口须以数字呈现：校正后 p=0.1378、Type M 最差 4.35、TOST 90% CI 半宽 6.55 对
+  - RV-C004 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 
+  - RV-C005 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 n
+  - RV-C006 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿
+
+[design] 2 个
+  - zero-tuning-tracker-thresholds_979ee7 | 状态 active | 当前版本 62b9976058d5… | 项目 turkey-threshold-prediction | Zero-tuning tracker thresholds：留一视频交叉验证对照实验设计
+  - video-threshold-predict_synth01 | 状态 referenced | 当前版本 — | 项目 turkey-threshold-prediction | 
+
+[execution] 1 个
+  - video-threshold-predict_synth01-b2 | 状态 active | 当前版本 557af52f78f9… | 项目 turkey-threshold-prediction | 执行包 video-threshold-predict_synth01-b2
+
+[figure] 2 个
+  - fig-1 | 状态 active | 当前版本 94216058b800… | 项目 turkey-threshold-prediction | 图 fig-1
+  - fig-2 | 状态 active | 当前版本 94216058b800… | 项目 turkey-threshold-prediction | 图 fig-2
+
+[journal_selection] 1 个
+  - abnormal-turkey-behaviour-detection-in-i_c771be | 状态 active | 当前版本 6b1e050e9540… | 项目 turkey-threshold-prediction | Abnormal turkey behaviour detection in intensive farming usi
+
+[manuscript] 1 个
+  - zero-tuning-tracker-thresholds-predicted_c8d0fc | 状态 active | 当前版本 0a7904fe629d… | 项目 turkey-threshold-prediction | Zero-tuning tracker thresholds predicted from video-level st
+
+[paper] 1 个
+  - abnormal-turkey-behaviour-detection-usin_f65598 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | Abnormal turkey behaviour detection using self-supervised video anomaly detection and multiple object tracking
+
+[review_package] 1 个
+  - review-pkg | 状态 active | 当前版本 200570319b67… | 项目 turkey-threshold-prediction | 评审包 review-pkg
+
+[run] 8 个
+  - R-FIX-a1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-FIX-a1
+  - R-FIX-a2 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-FIX-a2
+  - R-LONG-a1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-LONG-a1
+  - R-LONG-a2 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-LONG-a2
+  - R-NEG-a1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-NEG-a1
+  - R-ORA-a1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-ORA-a1
+  - R-PRED-a1 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-PRED-a1
+  - R-PRED-a2 | 状态 active | 当前版本 — | 项目 turkey-threshold-prediction | 运行 R-PRED-a2

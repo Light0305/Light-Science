@@ -1,0 +1,140 @@
+"""阶段规格表：全链接口图的机器可读形态（SKILL.md §2 与此表同源）。
+
+每阶段登记：阶段 id、技能名、标准目录、状态载体（登记头文件名与状态
+字段）、终态集合、开工条件与交接去向。总控的 status/route 全部由此
+表驱动；各包内部布局细节不在此表内（只指针引用各包 SKILL）。
+"""
+
+from __future__ import annotations
+
+#: 流水线顺序（Journal-Select 是 Write 前置扩展位，排在 Analysis 与
+#: Write 之间；Figure 在 Write 成稿后可并行；Memory 横贯全程单列）。
+PIPELINE = (
+    "literature", "idea", "design", "experiment", "analysis",
+    "journal-select", "write", "figure", "review",
+)
+
+STAGES = {
+    "literature": {
+        "skill": "light-literature",
+        "dir": "literature",
+        "carrier": "Literature/文献索引.csv（逐篇 status 列）",
+        "header": "文献索引.csv",
+        "terminal": (),  # 无状态机：以索引中出现精读完成篇目为可用标志
+        "opens_when": "项目启动即可（全链源头）",
+        "hands_to": "证据表.jsonl 与精读卡供 Idea/Design 承接；参考文献.bib 是 Write 引用的唯一来源",
+    },
+    "idea": {
+        "skill": "light-idea",
+        "dir": "idea",
+        "carrier": "cards/<idea_id>/idea.yaml 的 status 字段",
+        "header": "idea.yaml",
+        "terminal": ("finalized_executable", "finalized_conceptual"),
+        "design_ready": ("finalized_executable",),
+        "opens_when": "Literature 证据表已有可用证据行",
+        "hands_to": "定版卡导出 design_handoff.md + idea_card.json + memory_export.jsonl 供 Design 承接",
+    },
+    "design": {
+        "skill": "light-design",
+        "dir": "design",
+        "carrier": "designs/<design_id>/design.yaml 的 status 字段",
+        "header": "design.yaml",
+        "terminal": ("frozen",),
+        "opens_when": "Idea 有 finalized_executable 定版卡（conceptual 级不得直接开工）",
+        "hands_to": "冻结后导出 experiment_brief.md + design_card.json + expected_registry.jsonl + reproducibility.md 供 Experiment 承接",
+    },
+    "experiment": {
+        "skill": "light-experiment",
+        "dir": "experiment",
+        "carrier": "executions/<exec_id>/execution.yaml 的 status 字段",
+        "header": "execution.yaml",
+        "terminal": ("delivered",),
+        "opens_when": "Design 已 frozen 且交接四件套齐备",
+        "hands_to": "执行包（execution_card + events + reconciliation）供 Analysis 承接",
+    },
+    "analysis": {
+        "skill": "light-analysis",
+        "dir": "analysis",
+        "carrier": "analysis.yaml 的 status 字段",
+        "header": "analysis.yaml",
+        "terminal": ("delivered",),
+        "opens_when": "Experiment 执行包已 delivered",
+        "hands_to": "结论包（conclusion_card + verdicts + conclusions）供 Journal-Select 指纹与 Write 主张登记承接",
+    },
+    "journal-select": {
+        "skill": "light-journal-select",
+        "dir": "journal-select",
+        "carrier": "selection.yaml 的 status 字段",
+        "header": "selection.yaml",
+        "terminal": ("handed_off",),
+        "opens_when": "Analysis 结论包已 delivered（Write 前置扩展位：先选刊再开写）",
+        "hands_to": "定刊后 handoff 产物落项目 journal/target/（check-record.json 九组 + 下载清单），供 Write intake 消费",
+    },
+    "write": {
+        "skill": "light-write",
+        "dir": "write",
+        "carrier": "manuscript.yaml 的 status 字段",
+        "header": "manuscript.yaml",
+        "terminal": ("submission_ready",),
+        "opens_when": "Analysis 结论包 delivered + Journal-Select 已 handed_off（模板记录与目标刊就位）",
+        "hands_to": "稿件包（audited 后）供 Review 承接；投稿后真实审稿意见的返修走 Write 自己的 W7",
+    },
+    "figure": {
+        "skill": "light-figure",
+        "dir": "figure",
+        "carrier": "figure.yaml 的 status 字段",
+        "header": "figure.yaml",
+        "terminal": ("delivered",),
+        "opens_when": "Write 章节已 drafted（可与 Write 后段并行，不必等 submission_ready）",
+        "hands_to": "图包 delivery 供 Write 的 figures_manifest 对账与 Review 的数字↔图对账承接",
+    },
+    "review": {
+        "skill": "light-review",
+        "dir": "review",
+        "carrier": "review.yaml 的 status 字段",
+        "header": "review.yaml",
+        "terminal": ("delivered",),
+        "opens_when": "Write 稿件包已 audited（投稿前内部评审；以是否已收到真实审稿意见为界，未收到归 Review、已收到归 Write W7）",
+        "hands_to": "评审交付 + handoff_to_write 回填清单供 Write 修订；concern 关闭史供 Memory 收编",
+    },
+    "memory": {
+        "skill": "light-memory",
+        "dir": "memory",
+        "carrier": "memory.yaml 登记头 + objects/events/facts/relations 四账",
+        "header": "memory.yaml",
+        "terminal": (),  # 横贯层，无终态
+        "opens_when": "任一阶段有产物即可建；收编触发点在各阶段的定版/终态点",
+        "hands_to": "registry-view.json 对象注册统一视图供总控 registry 消费；recall 回供各阶段开工",
+    },
+}
+
+#: init 骨架要建的目录（阶段目录 + 选刊交接落点 + 项目级材料位）。
+SCAFFOLD_DIRS = (
+    "literature",
+    "idea/cards",
+    "design/designs",
+    "experiment",
+    "analysis",
+    "journal-select",
+    "journal/target/guideline",
+    "journal/target/templates",
+    "write",
+    "figure",
+    "review",
+    "memory",
+)
+
+#: REVIEW_UNAVAILABLE 式硬门在各包登记头里的落点（route 据此点名）。
+#: 字段名或路径逐包不同，值含 REVIEW_UNAVAILABLE 即视为门未过。
+GATE_FIELDS = {
+    "idea": ("review_status",),          # 查新区 review_status
+    "design": ("review_status",),        # freeze.review.review_status
+    "analysis": ("review_status",),      # 复核区 review_status；另有 blocked.reason
+    "write": ("submission_blocked_reason", "review_status"),
+}
+
+GATE_FIX_POINTER = (
+    "解法：把该包的复核包（review packet）交异家族模型复核，判定经该包"
+    "自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据"
+    "（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。"
+)

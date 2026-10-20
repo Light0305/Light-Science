@@ -1,0 +1,225 @@
+idea_id: zero-tuning-tracker-thresholds-predicted_77cdb7
+title: Zero-tuning tracker thresholds predicted from video-level statistics
+one_liner: 用视频级统计量回归跟踪关联阈值，免逐集人工扫描
+status: pre_mortem_passed
+operator: evolution_chain
+provenance:
+  chain_id: CH-2cd7ae29
+  path_string: SORT'16 → ByteTrack'22 → Zhang et al.'25 （附录 A 逐时长阈值扫描=断点 BP1）→ 本想法
+  combo: null
+  note: Literature 精读卡第 16 节候选 1 与此同源，链断点为据
+created: '2026-10-20'
+updated: '2026-10-20'
+seed_refs:
+- doi: 10.1016/j.compag.2025.110856
+  title: Abnormal turkey behaviour detection using self-supervised video anomaly detection
+    and multiple object tracking
+- doi: 10.1007/978-3-031-20047-2_1
+  title: 'ByteTrack: Multi-Object Tracking by Associating Every Detection Box'
+facets:
+  purpose:
+    phrase: tracker deployment without per-video threshold tuning
+    detail: 种子论文三个关联阈值须按视频时长逐集扫描选定（附录 A），部署到新视频没有现成取值；部署层三代跟踪改进都没碰。
+    source:
+      type: paper
+      doi: 10.1016/j.compag.2025.110856
+      title: Abnormal turkey behaviour detection using self-supervised video anomaly
+        detection and multiple object tracking
+  mechanism:
+    phrase: regress association thresholds from video-level statistics
+    detail: 以视频级统计量（轨迹长度分布、检测置信分布、目标密度）为输入回归 θ_modIoU / θ_high / θ_low 三阈值。
+    source:
+      type: chain_node
+      chain_id: CH-2cd7ae29
+      node: N5
+  evaluation:
+    phrase: leave-one-video-out MOTA versus per-video oracle thresholds
+    detail: 留一视频交叉验证：预测阈值的 MOTA 对照逐段神谕扫描（上限）与固定阈值（下限）。
+    source:
+      type: user
+body:
+  method_steps:
+  - 在多段视频上复现附录 A 的逐段阈值扫描，得到（视频统计量 → 最优三阈值）样本
+  - 拟合小型回归器（统计量只取视频前段，部署时不许用未来帧）
+  - 新视频推理时由前段统计量直接给出三阈值，零人工调参跑跟踪
+  - 留一视频交叉验证对账神谕上限与固定阈值下限
+  hypothesis: 视频级统计量与最优关联阈值之间存在稳定映射，可学且可迁移到留出视频
+  mechanism_rationale: 阈值本质是检测质量与遮挡强度的折中，而这两者都体现在轨迹长度、置信分布与密度统计里——统计量是阈值的因，逐集扫描只是在逐段重测这个因。
+  unexpected_prediction: 只用视频前 30 秒统计量预测的阈值，效果不差于用全程统计量——若成立，部署可在视频开头即完成标定
+  contribution_type: method
+feasibility:
+  compute_within_budget: true
+  compute_note: 回归器拟合可忽略；成本在逐段扫描样本生成与跟踪重跑，单卡约 30 GPU 小时，与种子论文单台 RTX5000 条件对齐
+  data_obtainable: true
+  data_note: 作者数据未公开（原文声明无共享许可）→ 自建 6 段火鸡视频复现集；方法可先在公开 MOT 集上验证再回领域
+exec_spec:
+  datasets:
+  - name: 自建火鸡栏舍复现集
+    version: 6 段视频（2.5/5 分钟各 3）
+    access: 自建采集（种子作者数据未公开）
+  - name: MOT17 train
+    version: 公开基准
+    access: 公开下载（仅方法先行验证，不作领域结论）
+  strongest_baseline:
+    name: 种子论文附录 A 的逐视频神谕阈值扫描协议（上限对照）；固定阈值取种子 2.5 分钟组取值（下限对照）
+    doi: 10.1016/j.compag.2025.110856
+  metrics:
+  - name: MOTA
+    convention_source: MOTChallenge 与种子论文口径
+  - name: IDF1
+    convention_source: MOTChallenge 与种子论文口径
+  - name: HOTA
+    convention_source: HOTA 原文（IJCV 2020）与种子论文口径
+  ablations:
+  - 去掉轨迹长度分布特征
+  - 去掉检测置信分布特征
+  - 去掉目标密度特征
+  - 回归器换常数预测（固定阈值对照）
+  - 只用前 30 秒统计量 vs 全程统计量
+  resource_budget:
+    gpu_hours: 30
+    data: 自建 6 段 + MOT17
+    weeks: 3
+  key_details:
+  - 三阈值联合回归而非逐个独立回归（附录 A 显示三者耦合）
+  - 统计量只许用视频前段
+  - 留一视频交叉验证，禁止在留出段上调回归器超参
+  discriminating_experiment:
+    description: 6 段自建视频上留一交叉验证：其余 5 段的（统计量→神谕θ）样本训练回归器，预测留出段三阈值并跑 Byte³Track
+    readout_positive: 留出段 MOTA 达神谕值 98% 以内（差 ≤2 点）且全面优于固定阈值：映射成立，进 Design
+    readout_negative: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假，回炉 facet
+    readout_null: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判，不许直接宣称成立
+negative:
+  strongest_objection: 审稿人会说：你只有 6 段视频，回归器学的不过是「时长→阈值」的查表，而附录 A 本来就按时长给了两组数——增量为零
+  risks:
+  - 主导阈值的变量可能是时长之外的场景因素（密度/光照/遮挡率），统计量未覆盖时预测失效
+  - 自建复现集与作者数据分布不一致，结论外推受限
+  why_not_selected_first: ''
+pre_mortem:
+  date: '2026-10-20'
+  checklist:
+    strongest_baseline_attack:
+      status: pass
+      note: 对照双锚：上限=种子附录 A 逐视频神谕扫描，下限=固定阈值。最狠的攻击是「6 段视频下回归器只学到时长查表」——已预置反制：特征消融含去掉一切时长代理特征后仍须成立，且自建集刻意取
+        2.5/5 分钟混合时长、神谕θ在同等时长段间仍有差异，查表解释不掉
+    metric_convention:
+      status: pass
+      note: MOTA/IDF1/HOTA 均为 MOTChallenge 与种子论文正文口径（原文 S062 的定义与文献指针），无自创指标；约定来源已逐个写入
+        exec_spec.metrics
+    ablations_complete:
+      status: pass
+      note: 核心主张有两条：①统计量→阈值映射存在——由常数预测消融对账（映射不存在时回归应不优于常数）；②多特征组各有贡献——三组特征各有对应消融行；③前段统计量足够——30
+        秒 vs 全程消融直接对应该子主张
+    resources_realistic:
+      status: pass
+      note: 30 GPU 小时主要花在逐段神谕扫描的样本生成与留一重跑；种子论文同等管线在单台 RTX5000 服务器上完成全套实验，本预算与其条件对齐；3
+        周含自建 6 段视频采集与标注校验
+    null_result_learning:
+      status: pass
+      note: 零结果（优于固定阈值但距神谕远）的学习已预写：统计量集不足以决定阈值，结论转为「逐集调参为何不可避免」的诊断——判别实验 readout_null
+        已把这种情况与阴性分开，不许硬宣称成立
+    method_instantiable:
+      status: pass
+      note: 第三方可照卡执行：输入=三组视频级统计量（只用视频前段）、输出=三阈值联合回归、验证=留一视频交叉、对照=神谕/固定双锚、判读=三分法；歧义点（三阈值联合而非独立回归）已在
+        key_details 写死
+  open_items: []
+finalization_level: null
+novelty:
+  checked_at: '2026-10-20'
+  search_scope:
+    sources:
+    - crossref
+    - openalex
+    - semanticscholar
+    - europepmc
+    pool_size: 105
+    known_blind_spots: OpenAlex 本次全部查询失败（HTTP 429：https://api.openalex.org/works）：该源独有覆盖可能漏检，本次结论须视为覆盖不全；Semantic
+      Scholar 本次全部查询失败（HTTP 429：https://api.semanticscholar.org/graph/v1/paper/search）：该源独有覆盖可能漏检，本次结论须视为覆盖不全；检索基于题名/摘要级元数据，未做全文比对：只在全文细节处撞车的论文可能漏检；相似度为离线文本粗排，仅作召回排序，不是判定依据（约束
+      3）
+  closest_works:
+  - paper_id: null
+    doi: 10.3390/jimaging12090411
+    title: 'Task-Specific Detector Adaptation for Edge MOT: Tracking and Deployment
+      Trade-Offs on the NVIDIA Jetson Nano.'
+    year: null
+    collided_facets:
+    - purpose
+    delta: 同问「MOT 如何部署」但对象不同：它面向边缘硬件约束做检测器适配与权衡，不涉及关联阈值，更不做视频内容统计量→阈值预测；本想法的部署变量是视频内容而非硬件
+    verified: true
+  - paper_id: null
+    doi: 10.3390/ani16152408
+    title: Robust Tracking and Quantification of Open-Beak Behavior for Heat Stress
+      Assessment in Multi-Tier Caged Rearing Broiler Breeders via Mobile Inspection.
+    year: null
+    collided_facets:
+    - purpose
+    delta: 同为家禽行为跟踪的部署型工作，但它解决特定行为（张口呼吸）的稳健量化，阈值仍是内部固定参数；本想法把阈值本身作为由统计量预测的对象
+    verified: true
+  - paper_id: null
+    doi: 10.1109/iicaiet67254.2025.11265378
+    title: Multi-level Support Thresholds for Association Mining
+    year: null
+    collided_facets:
+    - mechanism
+    delta: 仅词面撞车：其 association 指数据挖掘关联规则、thresholds 指支持度阈值，与多目标跟踪的关联阈值无关；列此条以明示判定读过粗排首位并逐面排除之
+    verified: true
+  verdict: PROCEED_WITH_CAUTION
+  caution_reason: delta 薄在证据覆盖：机制面与评测面在本池（Crossref+Europe PMC 两源 105 条）无实质撞车，但 OpenAlex
+    与 Semantic Scholar 本次全部 429，CS 会议/预印本恰是跟踪器超参自动整定类工作的主要栖息地，未撞车的结论覆盖不全；池内记录无摘要、判定止于题名级；且判定与生成同模型家族（降级通道），跨模型复核恢复后应优先复查机制面
+  receipt:
+    verdict_id: NV-71ac845123
+    judge_model: null
+    judge_family: null
+    executor_model: claude-opus-4.8
+    executor_family: anthropic-claude
+  review_status: REVIEW_UNAVAILABLE
+  evidence_package: novelty/zero-tuning-tracker-thresholds-predicted_77cdb7/
+aux:
+  pairwise_record:
+  - opponent: scale-robust-frame-aggregation-for-flock_1b4467
+    result: win
+    date: '2026-10-20'
+    by: 演示执行者 claude-opus-4.8（与生成同家族，仅 aux 排序信号）
+    note: 正序：C1 判别实验离线可判、部署价值直接；反序复核同判（C3 为诊断型贡献，杠杆较小）
+  - opponent: individual-abnormal-behaviour-profiles-b_fcefb8
+    result: win
+    date: '2026-10-20'
+    by: 演示执行者 claude-opus-4.8（与生成同家族，仅 aux 排序信号）
+    note: 正序：C1 判别实验最便宜且结论最 crisp；反序复核同判——C1 定为本周期 top pick
+  elo: 1531.2
+pilot:
+  status: not_run
+  note: ''
+lineage:
+  changed_from: null
+  revision_operator: null
+  revision_log: []
+  bad_case_refs: []
+dedup:
+  checked: true
+  max_similarity: 0.0
+  most_similar_to: null
+  adjudication: null
+status_history:
+- from: null
+  to: draft
+  date: '2026-10-20'
+  by: light-idea new
+  note: 建卡
+- from: draft
+  to: screened
+  date: '2026-10-20'
+  by: claude-opus-4.8（本周期执行者）
+  note: ''
+- from: screened
+  to: novelty_checked
+  date: '2026-10-20'
+  by: claude-opus-4.8
+  note: ''
+- from: novelty_checked
+  to: pre_mortem_passed
+  date: '2026-10-20'
+  by: claude-opus-4.8（扮演执行阶段评审者逐项过清单）
+  note: ''
+kill: null
+park: null

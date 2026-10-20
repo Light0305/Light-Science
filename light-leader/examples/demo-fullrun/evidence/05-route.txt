@@ -1,0 +1,11 @@
+[硬门] 以下阶段被复核硬门拦住：
+- idea：idea 定版硬门（跨模型判定）（登记头证据：REVIEW_UNAVAILABLE）
+  解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。
+- design：design 冻结门（Stage-1 五条 + 跨家族复核）（登记头证据：REVIEW_UNAVAILABLE）
+  解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。
+- analysis：analysis 交付门（判定复核）（登记头证据：REVIEW_UNAVAILABLE）
+  解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。
+- write：write 定版复核门（登记头证据：REVIEW_UNAVAILABLE：跨模型复核不可用，稿件停在 audited（与 Idea/Design/Analysis 同构降级，恢复后补复核再置真）；REVIEW_UNAVAILABLE）
+  解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。
+[下一步] 推进 light-idea —— 本阶段进行中（当前状态：pre_mortem_passed），终态为 finalized_executable/finalized_conceptual
+[提示] memory 收编触发点：已达终态的阶段（experiment、journal-select、figure、review）在各自定版点应已由 light-memory ingest 收编；以 memory.yaml 的 watermarks 核对是否漏收

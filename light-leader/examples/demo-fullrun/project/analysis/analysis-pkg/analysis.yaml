@@ -1,0 +1,196 @@
+analysis_id: analysis-pkg
+title: 合成演示执行包承接（身份明示：synthetic）
+status: blocked
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-analysis init
+- state: checked
+  at: '2026-10-20'
+  by: light-analysis advance
+- state: judged
+  at: '2026-10-20'
+  by: light-analysis advance
+- state: graded
+  at: '2026-10-20'
+  by: light-analysis advance
+- state: blocked
+  at: '2026-10-20'
+  by: light-analysis advance
+  target: delivered
+blocked:
+  from_state: graded
+  reason: 判定复核不可用（REVIEW_UNAVAILABLE）
+  at: '2026-10-20'
+execution_ref:
+  execution_id: video-threshold-predict_synth01-b2
+  package_path: light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2
+  execution_card: light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2/execution_card.json
+  execution_card_hash: 557af52f78f99e22e4f41f88cb31e8656e17eb47ddccb2e83e61c04445bf9886
+  card_status: delivered
+design_ref:
+  design_id: video-threshold-predict_synth01
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+  registry_hash: 55d1f9d66fdcd24028e2eddecab4f5f657b237c24604799de71bb38494da959a
+  registry_lines: 5
+  registry_path: light-experiment/examples/demo-synthetic/inputs/export-good/expected_registry.jsonl
+registry_snapshot:
+  line_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
+  lines:
+  - registry_line_id: R-FIX
+    role: baseline
+    claim_ref: null
+    judgeability: judgeable
+    void_supported: false
+    fundamental_failure: false
+    null_precision_warning: false
+    n_registered: 6
+    n_effective: 6
+    reasons: []
+  - registry_line_id: R-ORA
+    role: control
+    claim_ref: null
+    judgeability: judgeable
+    void_supported: false
+    fundamental_failure: false
+    null_precision_warning: false
+    n_registered: 6
+    n_effective: 6
+    reasons: []
+  - registry_line_id: R-PRED
+    role: treatment
+    claim_ref: null
+    judgeability: judgeable
+    void_supported: false
+    fundamental_failure: false
+    null_precision_warning: false
+    n_registered: 6
+    n_effective: 6
+    reasons: []
+  - registry_line_id: R-NEG
+    role: treatment
+    claim_ref: null
+    judgeability: untested_candidate
+    void_supported: false
+    fundamental_failure: true
+    null_precision_warning: true
+    n_registered: 6
+    n_effective: 4
+    reasons:
+    - 事实层比对为 incomparable：数据版本 vnext 缺 seg-05/06，留出集只有 4/6 段，分布覆盖不完整，不可与登记预期比对
+    - 支撑 run R-NEG-a1 有 fundamental 失败 F-0001（FM-2.3）：主张未被检验，不许落 negative
+    - 覆盖 n=4 < 登记 repetitions=6：先天精度不足，null 不可判（undetermined 预警）
+  - registry_line_id: R-LONG
+    role: treatment
+    claim_ref: null
+    judgeability: judgeable
+    void_supported: false
+    fundamental_failure: false
+    null_precision_warning: false
+    n_registered: 6
+    n_effective: 6
+    reasons: []
+claim_ids:
+- C1
+spec_version:
+  version: '0.1'
+  frozen_hash: null
+analyst:
+  name: light-analysis-phase1-demo
+  family: claude
+correction_families:
+- family_id: claim:all
+  member_line_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
+  method: fdr_bh
+  alpha: 0.05
+  basis: 登记行未带 claim_ref，退化为全行单族（待 Design 补 claim 映射后可在新包细分）
+review:
+  reviewer: null
+  family: null
+  review_status: REVIEW_UNAVAILABLE
+  receipt_id: null
+  reason: 本环境仅单一模型家族（claude），无异家族复核者可用；按拍板③显式落 REVIEW_UNAVAILABLE，不伪造收据
+  recorded_at: '2026-10-20'
+  via: unavailable
+counts:
+  positive: 0
+  negative: 0
+  'null': 0
+  undetermined: 4
+  untested: 1
+  total_lines: 5
+reflux:
+- reflux_id: RX-A001
+  kind: standard_gap
+  target: design
+  line_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
+  reason: SESOI 在合成 design 中只有文本形态（判读标准原文『差 ≤2 点』，design_card.json 无结构化数值字段）：本包快照经演示转写件登记。Design
+    侧应在登记行/设计卡中原生给出结构化 SESOI 字段，分析期不应靠转写推进
+  requested_at: '2026-10-20'
+  analysis_id: analysis-pkg
+  design_content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+spec:
+  sesoi:
+    R-FIX:
+      sesoi_pointer: evaluation.sesoi
+      sesoi_value: 2.0
+      source_path: inputs/design-sesoi-source.json
+      source_hash: 57d0c3977a062d04408a2d10302b9ea40e5957950b1b243f1dc5494c29d0e158
+      registered_at: '2026-10-20'
+    R-ORA:
+      sesoi_pointer: evaluation.sesoi
+      sesoi_value: 2.0
+      source_path: inputs/design-sesoi-source.json
+      source_hash: 57d0c3977a062d04408a2d10302b9ea40e5957950b1b243f1dc5494c29d0e158
+      registered_at: '2026-10-20'
+    R-PRED:
+      sesoi_pointer: evaluation.sesoi
+      sesoi_value: 2.0
+      source_path: inputs/design-sesoi-source.json
+      source_hash: 57d0c3977a062d04408a2d10302b9ea40e5957950b1b243f1dc5494c29d0e158
+      registered_at: '2026-10-20'
+    R-LONG:
+      sesoi_pointer: evaluation.sesoi
+      sesoi_value: 2.0
+      source_path: inputs/design-sesoi-source.json
+      source_hash: 57d0c3977a062d04408a2d10302b9ea40e5957950b1b243f1dc5494c29d0e158
+      registered_at: '2026-10-20'
+  judge_params:
+    gamma: 0.75
+    type_m_max: 2.0
+  primary_spec_id: S001
+judge_runs:
+- at: '2026-10-20'
+  data_file: judge-data.json
+  data_hash: d878675f88d0060b8113b6d7ad60e6cdcbd829feb05d273f7d2a6e9df0280f94
+  primary_spec_id: S001
+  lines_judged:
+  - R-FIX
+  - R-LONG
+  - R-ORA
+  - R-PRED
+  by: light-analysis-phase1-demo
+review_packet:
+  packet: review_packet.md
+  packet_hash: 457b265fd2c236a5376e480e38ff4afd2f098bb08beb939f5a75cf9fc6f573f0
+  prepared_at: '2026-10-20'
+  scope_line_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-LONG

@@ -1,0 +1,66 @@
+spec_version: '0.1'
+decisions:
+- point: estimator
+  options:
+  - name: mean_diff
+    valid: true
+  - name: median_diff
+    valid: true
+  theoretical_justification: 登记判据与 SESOI 均以段级均值差定义，主估计量取 Welch 均值差（mean_diff）；中位差配
+    Mann-Whitney 秩检验（median_diff）为稳健替代，检验判定对估计量选择的敏感性，两者回答同一 estimand（段级 MOTA 的处理-对照差）
+- point: outlier_handling
+  options:
+  - name: keep_all
+    valid: true
+  - name: trim_extremes
+    valid: true
+  theoretical_justification: 独立重复层级仅 6 段且无预注册剔除规则，主口径全段保留（keep_all）；极值段截尾（trim_extremes）只作敏感性留痕——v1
+    计算口径不随该决策点改变（见 README 已知局限），登记它是为了让自由度使没使过逐项可查
+constraints: []
+sampling: null
+reachable_count: 4
+specs:
+- spec_id: S001
+  choices:
+    estimator: mean_diff
+    outlier_handling: keep_all
+  gate:
+    theoretical: pass
+    statistical: pass
+    nonredundant: pass
+  status: included
+  exclude_reason: null
+  primary: true
+- spec_id: S002
+  choices:
+    estimator: mean_diff
+    outlier_handling: trim_extremes
+  gate:
+    theoretical: pass
+    statistical: pass
+    nonredundant: pass
+  status: included
+  exclude_reason: null
+- spec_id: S003
+  choices:
+    estimator: median_diff
+    outlier_handling: keep_all
+  gate:
+    theoretical: pass
+    statistical: pass
+    nonredundant: pass
+  status: included
+  exclude_reason: null
+- spec_id: S004
+  choices:
+    estimator: median_diff
+    outlier_handling: trim_extremes
+  gate:
+    theoretical: pass
+    statistical: pass
+    nonredundant: pass
+  status: included
+  exclude_reason: null
+expansions: []
+frozen_hash: c8f21d2cf235d11ef7e02179b935032d782612a6f9d1397ee70c76fc8b3a34a7
+frozen_at: '2026-10-20'

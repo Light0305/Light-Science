@@ -1,0 +1,48 @@
+kind: light-leader/project
+version: '1.0'
+leader_version: 1.0.0
+name: turkey-threshold-prediction
+title: 火鸡异常行为检测：零调参跟踪阈值预测（总控演示拼装）
+goal: ''
+created_at: '2026-10-20'
+stages:
+- stage: literature
+  skill: light-literature
+  dir: literature
+  carrier: Literature/文献索引.csv（逐篇 status 列）
+- stage: idea
+  skill: light-idea
+  dir: idea
+  carrier: cards/<idea_id>/idea.yaml 的 status 字段
+- stage: design
+  skill: light-design
+  dir: design
+  carrier: designs/<design_id>/design.yaml 的 status 字段
+- stage: experiment
+  skill: light-experiment
+  dir: experiment
+  carrier: executions/<exec_id>/execution.yaml 的 status 字段
+- stage: analysis
+  skill: light-analysis
+  dir: analysis
+  carrier: analysis.yaml 的 status 字段
+- stage: journal-select
+  skill: light-journal-select
+  dir: journal-select
+  carrier: selection.yaml 的 status 字段
+- stage: write
+  skill: light-write
+  dir: write
+  carrier: manuscript.yaml 的 status 字段
+- stage: figure
+  skill: light-figure
+  dir: figure
+  carrier: figure.yaml 的 status 字段
+- stage: review
+  skill: light-review
+  dir: review
+  carrier: review.yaml 的 status 字段
+- stage: memory
+  skill: light-memory
+  dir: memory
+  carrier: memory.yaml 登记头 + objects/events/facts/relations 四账

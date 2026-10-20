@@ -1,0 +1,199 @@
+exec_id: video-threshold-predict_synth01-b2
+design_ref:
+  design_id: video-threshold-predict_synth01
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+  frozen_content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+  amendments: 0
+  export_dir: light-experiment/examples/demo-synthetic/inputs/export-good
+status: delivered
+created: '2026-10-20'
+updated: '2026-10-20'
+backend: null
+identity_dimensions:
+- config
+- code_snapshot
+- data_version
+- environment
+budget_ledger:
+  limits:
+    wall_clock_s: null
+    gpu_hours: null
+    api_cost: null
+  spent:
+    wall_clock_s: 16.830000000000002
+    gpu_hours: 0
+    api_cost: 0
+  design_budget:
+    compute: 30 GPU 小时（合成演示：实际以秒级墙钟象征执行）
+    time: 3 周
+  circuit_breakers:
+  - metric: gpu_hours
+    threshold: 30
+    action: stop
+  last_check:
+    date: '2026-10-20'
+    tripped: []
+    candidates: []
+intake_report:
+  checked_at: '2026-10-20'
+  source_dir: light-experiment/examples/demo-synthetic/inputs/export-good
+  gaps: []
+  registry_run_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
+brief_runs:
+- run_id: R-FIX
+  role: baseline
+  control_run: null
+  depends_on: []
+  stage: baseline
+- run_id: R-ORA
+  role: control
+  control_run: null
+  depends_on: []
+  stage: main
+- run_id: R-PRED
+  role: treatment
+  control_run: R-FIX
+  depends_on:
+  - R-FIX
+  - R-ORA
+  stage: main
+- run_id: R-NEG
+  role: treatment
+  control_run: R-FIX
+  depends_on:
+  - R-PRED
+  stage: main
+- run_id: R-LONG
+  role: treatment
+  control_run: R-FIX
+  depends_on:
+  - R-PRED
+  stage: main
+registry_lines:
+- design_id: video-threshold-predict_synth01
+  run_id: R-FIX
+  role: baseline
+  control_run: null
+  stage: baseline
+  primary_metric:
+    name: MOTA
+    direction: higher
+  readout:
+    positive:
+      meaning: 预测臂留出段 MOTA 达神谕臂 98% 以内（差 ≤2 点）且全面优于固定阈值臂：映射成立
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判
+  expected: 73.0
+  seeds: 3
+  repetitions: 6
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+- design_id: video-threshold-predict_synth01
+  run_id: R-ORA
+  role: control
+  control_run: null
+  stage: main
+  primary_metric:
+    name: MOTA
+    direction: higher
+  readout:
+    positive:
+      meaning: 预测臂留出段 MOTA 达神谕臂 98% 以内（差 ≤2 点）且全面优于固定阈值臂：映射成立
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判
+  expected: null
+  seeds: 3
+  repetitions: 6
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+- design_id: video-threshold-predict_synth01
+  run_id: R-PRED
+  role: treatment
+  control_run: R-FIX
+  stage: main
+  primary_metric:
+    name: MOTA
+    direction: higher
+  readout:
+    positive:
+      meaning: 预测臂留出段 MOTA 达神谕臂 98% 以内（差 ≤2 点）且全面优于固定阈值臂：映射成立
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判
+  expected: null
+  seeds: 3
+  repetitions: 6
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+- design_id: video-threshold-predict_synth01
+  run_id: R-NEG
+  role: treatment
+  control_run: R-FIX
+  stage: main
+  primary_metric:
+    name: MOTA
+    direction: higher
+  readout:
+    positive:
+      meaning: 预测臂留出段 MOTA 达神谕臂 98% 以内（差 ≤2 点）且全面优于固定阈值臂：映射成立
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判
+  expected: null
+  seeds: 3
+  repetitions: 6
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+- design_id: video-threshold-predict_synth01
+  run_id: R-LONG
+  role: treatment
+  control_run: R-FIX
+  stage: main
+  primary_metric:
+    name: MOTA
+    direction: higher
+  readout:
+    positive:
+      meaning: 预测臂留出段 MOTA 达神谕臂 98% 以内（差 ≤2 点）且全面优于固定阈值臂：映射成立
+    negative:
+      meaning: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假
+    'null':
+      meaning: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判
+  expected: null
+  seeds: 3
+  repetitions: 6
+  content_hash: 1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f
+block_record: null
+status_history:
+- from: null
+  to: intake
+  date: '2026-10-20'
+  by: light-experiment intake
+  note: 承接建包
+- from: intake
+  to: sanity
+  date: '2026-10-20'
+  by: light-experiment
+  note: ''
+- from: sanity
+  to: executing
+  date: '2026-10-20'
+  by: light-experiment
+  note: ''
+- from: executing
+  to: reconciling
+  date: '2026-10-20'
+  by: light-experiment
+  note: ''
+- from: reconciling
+  to: delivered
+  date: '2026-10-20'
+  by: light-experiment
+  note: ''

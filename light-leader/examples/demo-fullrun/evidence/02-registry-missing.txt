@@ -1,0 +1,1 @@
+失败：未找到 registry-view.json。生成方式：在记忆项目目录运行 light-memory registry （export 刷新 registry-view.json 只读导出）；总控只消费不生成。

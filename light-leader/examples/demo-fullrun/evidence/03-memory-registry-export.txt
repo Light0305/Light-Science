@@ -1,0 +1,1 @@
+registry-view.json 已刷新：对象 26 个（按类型 {'analysis_package': 1, 'claim': 2, 'concern': 6, 'design': 2, 'execution': 1, 'figure': 2, 'journal_selection': 1, 'manuscript': 1, 'paper': 1, 'review_package': 1, 'run': 8}）

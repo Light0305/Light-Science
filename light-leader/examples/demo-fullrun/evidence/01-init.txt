@@ -1,0 +1,3 @@
+项目骨架已生成：project（登记头 project.yaml，项目名 turkey-threshold-prediction）
+阶段目录：literature、idea、design、experiment、analysis、journal-select、write、figure、review、memory、journal/target
+下一步：在各阶段目录内用对应技能的命令建包；随时 `light-leader status .` 看全项目状态。

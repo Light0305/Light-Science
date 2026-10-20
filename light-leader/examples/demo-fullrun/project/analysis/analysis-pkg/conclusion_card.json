@@ -1,0 +1,185 @@
+{
+  "kind": "light-analysis/conclusion-card",
+  "version": "1.0",
+  "analysis_id": "analysis-pkg",
+  "exported_at": "2026-10-20",
+  "status": "blocked",
+  "execution_ref": {
+    "execution_id": "video-threshold-predict_synth01-b2",
+    "package_path": "light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2",
+    "execution_card": "light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2/execution_card.json",
+    "execution_card_hash": "557af52f78f99e22e4f41f88cb31e8656e17eb47ddccb2e83e61c04445bf9886",
+    "card_status": "delivered"
+  },
+  "design_ref": {
+    "design_id": "video-threshold-predict_synth01",
+    "content_hash": "1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f",
+    "registry_hash": "55d1f9d66fdcd24028e2eddecab4f5f657b237c24604799de71bb38494da959a",
+    "registry_lines": 5,
+    "registry_path": "light-experiment/examples/demo-synthetic/inputs/export-good/expected_registry.jsonl"
+  },
+  "review": {
+    "reviewer": null,
+    "family": null,
+    "review_status": "REVIEW_UNAVAILABLE",
+    "receipt_id": null,
+    "reason": "本环境仅单一模型家族（claude），无异家族复核者可用；按拍板③显式落 REVIEW_UNAVAILABLE，不伪造收据",
+    "recorded_at": "2026-10-20",
+    "via": "unavailable"
+  },
+  "counts": {
+    "positive": 0,
+    "negative": 0,
+    "null": 0,
+    "undetermined": 4,
+    "untested": 1,
+    "total_lines": 5
+  },
+  "claims": [
+    {
+      "claim_id": "C1",
+      "support": "untested",
+      "grade": "insufficient",
+      "cap_reason": "主张含未检验行，强度封顶 insufficient；Type M 最差值 4.35 > 2.0，封顶 suggestive",
+      "line_verdicts": {
+        "R-FIX": "undetermined",
+        "R-ORA": "undetermined",
+        "R-PRED": "undetermined",
+        "R-NEG": "untested",
+        "R-LONG": "undetermined"
+      },
+      "aggregation_note": "逐行判定机械映射（R-FIX=undetermined、R-ORA=undetermined、R-PRED=undetermined、R-NEG=untested、R-LONG=undetermined），未压平"
+    }
+  ],
+  "boundaries": [
+    {
+      "claim_id": "C1",
+      "conditions": "判定只覆盖本执行包的 6 个留出段与 root_seed=42 确定性派生口径；段集、种子政策或数据版本变化后，须经新执行包 → 新分析包重新判定，本包判定不外推。",
+      "not_extrapolatable": "输入为合成自签执行包（数据 turkey-barn-repro-v3 为合成集），本包全部判定只验证 Analysis 判定链路本身，不构成对任何真实数据的结论。",
+      "would_change_if": "在同一冻结判据下扩大独立重复层级样本（更多留出段）后重开分析包——校正后 p 与 TOST 区间随之收窄，本次未过门的各行才有重新落字的材料基础。"
+    }
+  ],
+  "limitations": [
+    "SESOI 在合成 design 中只有文本形态（判读标准原文『差 ≤2 点』），本包的结构化快照来自演示转写件（inputs/design-sesoi-source.json）；原生结构化 SESOI 应由 Design 侧在登记行给出，已生成 standard_gap 回流条目。",
+    "段级配对结构未被 v1 计算集建模：各行处理/对照取自同一批留出段，工具按独立样本口径（Welch）计算，标准误偏大、判定偏保守；R-FIX 行处理/对照为同一分布的两次执行产物，逐段数值完全相同，等价区间仍按独立口径展开。",
+    "段内种子层变异未进入判定：n 按独立重复层级（视频段）计为 6，段内 3 个种子先均值化；段内变异只在 Experiment 事实层留痕。",
+    "校正族退化：登记行未带 claim_ref，校正族退化为单族 claim:all（BH-FDR），族口径粗于按主张分族（承接期已落字）。",
+    "固定阈值臂段间离散大（spread 5.717，seg-04 低至 62.187）是各行标准误的主要来源；该事实在 Experiment 对账层已留痕，分析期不做事后剔除。",
+    "跨模型复核缺位：本环境为单模型家族，复核走 REVIEW_UNAVAILABLE 显式通道，结论包停在 delivered 之前（blocked），未做执行者代判。"
+  ],
+  "number_provenance": [
+    {
+      "value": null,
+      "quantity": "no_numeric_result",
+      "verdict_line": "R-NEG#v1",
+      "registry_line_id": "R-NEG",
+      "run_refs": [],
+      "spec_id": null,
+      "calc_provenance": null
+    },
+    {
+      "value": 0.0,
+      "quantity": "effect_size",
+      "verdict_line": "R-FIX#v1",
+      "registry_line_id": "R-FIX",
+      "run_refs": [
+        "R-FIX-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 0.5,
+      "quantity": "p_ab",
+      "verdict_line": "R-FIX#v1",
+      "registry_line_id": "R-FIX",
+      "run_refs": [
+        "R-FIX-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 5.249333333333325,
+      "quantity": "effect_size",
+      "verdict_line": "R-ORA#v1",
+      "registry_line_id": "R-ORA",
+      "run_refs": [
+        "R-ORA-a1",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 0.7777777777777778,
+      "quantity": "p_ab",
+      "verdict_line": "R-ORA#v1",
+      "registry_line_id": "R-ORA",
+      "run_refs": [
+        "R-ORA-a1",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 5.197833333333335,
+      "quantity": "effect_size",
+      "verdict_line": "R-PRED#v1",
+      "registry_line_id": "R-PRED",
+      "run_refs": [
+        "R-PRED-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 0.7777777777777778,
+      "quantity": "p_ab",
+      "verdict_line": "R-PRED#v1",
+      "registry_line_id": "R-PRED",
+      "run_refs": [
+        "R-PRED-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 5.197833333333335,
+      "quantity": "effect_size",
+      "verdict_line": "R-LONG#v1",
+      "registry_line_id": "R-LONG",
+      "run_refs": [
+        "R-LONG-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    },
+    {
+      "value": 0.7777777777777778,
+      "quantity": "p_ab",
+      "verdict_line": "R-LONG#v1",
+      "registry_line_id": "R-LONG",
+      "run_refs": [
+        "R-LONG-a2",
+        "R-FIX-a1"
+      ],
+      "spec_id": "S001",
+      "calc_provenance": "welch_effect_and_ci"
+    }
+  ],
+  "reflux": [
+    {
+      "kind": "standard_gap",
+      "target": "design",
+      "detail": "RX-A001：SESOI 在合成 design 中只有文本形态（判读标准原文『差 ≤2 点』，design_card.json 无结构化数值字段）：本包快照经演示转写件登记。Design 侧应在登记行/设计卡中原生给出结构化 SESOI 字段，分析期不应靠转写推进（行 R-FIX/R-ORA/R-PRED/R-NEG/R-LONG）",
+      "reflux_id": "RX-A001"
+    }
+  ]
+}

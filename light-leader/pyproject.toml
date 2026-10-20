@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-leader"
+version = "1.0.0"
+description = "light-leader：Light-Science 总控——项目骨架、只读状态扫描、阶段路由与对象注册统一视图消费（薄编排，不重实现任何阶段包逻辑）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-leader = "light_leader.cli:main"
+
+[tool.setuptools]
+packages = ["light_leader"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
