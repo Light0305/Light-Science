@@ -1,0 +1,16 @@
+{
+  "reflux_id": "RX-A001",
+  "kind": "standard_gap",
+  "target": "design",
+  "line_ids": [
+    "R-FIX",
+    "R-ORA",
+    "R-PRED",
+    "R-NEG",
+    "R-LONG"
+  ],
+  "reason": "SESOI 在合成 design 中只有文本形态（判读标准原文『差 ≤2 点』，design_card.json 无结构化数值字段）：本包快照经演示转写件登记。Design 侧应在登记行/设计卡中原生给出结构化 SESOI 字段，分析期不应靠转写推进",
+  "requested_at": "2026-10-20",
+  "analysis_id": "analysis-pkg",
+  "design_content_hash": "1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f"
+}

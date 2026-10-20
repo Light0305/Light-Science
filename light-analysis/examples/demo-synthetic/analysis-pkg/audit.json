@@ -1,0 +1,83 @@
+{
+  "analysis_id": "analysis-pkg",
+  "checked_at": "2026-10-20",
+  "execution_id": "video-threshold-predict_synth01-b2",
+  "execution_card_hash": "557af52f78f99e22e4f41f88cb31e8656e17eb47ddccb2e83e61c04445bf9886",
+  "design_content_hash": "1ed8de06e50e72257c1f57de3b3ce74fb39247e16cfe6de36280653a44d3475f",
+  "registry_hash": "55d1f9d66fdcd24028e2eddecab4f5f657b237c24604799de71bb38494da959a",
+  "hash_alignment": "pass",
+  "lines": [
+    {
+      "registry_line_id": "R-FIX",
+      "role": "baseline",
+      "claim_ref": null,
+      "judgeability": "judgeable",
+      "void_supported": false,
+      "fundamental_failure": false,
+      "null_precision_warning": false,
+      "n_registered": 6,
+      "n_effective": 6,
+      "reasons": []
+    },
+    {
+      "registry_line_id": "R-ORA",
+      "role": "control",
+      "claim_ref": null,
+      "judgeability": "judgeable",
+      "void_supported": false,
+      "fundamental_failure": false,
+      "null_precision_warning": false,
+      "n_registered": 6,
+      "n_effective": 6,
+      "reasons": []
+    },
+    {
+      "registry_line_id": "R-PRED",
+      "role": "treatment",
+      "claim_ref": null,
+      "judgeability": "judgeable",
+      "void_supported": false,
+      "fundamental_failure": false,
+      "null_precision_warning": false,
+      "n_registered": 6,
+      "n_effective": 6,
+      "reasons": []
+    },
+    {
+      "registry_line_id": "R-NEG",
+      "role": "treatment",
+      "claim_ref": null,
+      "judgeability": "untested_candidate",
+      "void_supported": false,
+      "fundamental_failure": true,
+      "null_precision_warning": true,
+      "n_registered": 6,
+      "n_effective": 4,
+      "reasons": [
+        "事实层比对为 incomparable：数据版本 vnext 缺 seg-05/06，留出集只有 4/6 段，分布覆盖不完整，不可与登记预期比对",
+        "支撑 run R-NEG-a1 有 fundamental 失败 F-0001（FM-2.3）：主张未被检验，不许落 negative",
+        "覆盖 n=4 < 登记 repetitions=6：先天精度不足，null 不可判（undetermined 预警）"
+      ]
+    },
+    {
+      "registry_line_id": "R-LONG",
+      "role": "treatment",
+      "claim_ref": null,
+      "judgeability": "judgeable",
+      "void_supported": false,
+      "fundamental_failure": false,
+      "null_precision_warning": false,
+      "n_registered": 6,
+      "n_effective": 6,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "judgeable": 4,
+    "untested_candidate": 1,
+    "undetermined_candidate": 0,
+    "null_precision_warnings": 1
+  },
+  "failures": []
+}

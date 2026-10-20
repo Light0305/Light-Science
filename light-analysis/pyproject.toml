@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-analysis"
+version = "1.0.0"
+description = "Light-Analysis：按 Design 冻结登记行逐行回写正式判定——可审计的分析结论包（Light-Science 子技能，v1.0）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-analysis = "light_analysis.cli:main"
+
+[tool.setuptools]
+packages = ["light_analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
