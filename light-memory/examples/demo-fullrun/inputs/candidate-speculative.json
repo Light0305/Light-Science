@@ -1,0 +1,1 @@
+{"nomination":{"fact":{"fact_type":"lesson","object_id":"run:R-NEG-a1","statement":"教训：逐个体异常分数流的 CUSUM 累积监测可直接迁移到其他畜种的慢发异常预警，无需重新验证阈值与累积参数","valid_at":"2026-10-20"},"nominator":"demo-driver（判断性提炼）","rationale":"由 Idea 演示中留 draft 的 CUSUM 卡（cusum-accumulation-over-per-bird-anomaly_7cea6d）外推：提名者认为异常分数流累积监测可跨畜种迁移。","verdict":"store"}}

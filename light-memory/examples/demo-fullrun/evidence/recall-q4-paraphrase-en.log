@@ -1,0 +1,24 @@
+$ light-memory recall light-memory/examples/demo-fullrun/world/proj-a predicting tracker thresholds from video-level statistics --recipe paraphrase
+[exit 0]
+回供：配方 paraphrase，作用域 turkey-threshold-prediction，命中 20 条（上限 20）
+  · 降级：索引与真相不一致（stale）：events.jsonl、facts.jsonl、relations.jsonl；结果基于旧索引，索引重建后复核
+  1. [turkey-threshold-prediction] note:notes/idea-dossier/zero-tuning-tracker-thresholds-predicted_77cdb7.md#top 分 0.032973（路：fts/vector）
+  2. [turkey-threshold-prediction] note:notes/idea-dossier/interaction-graph-burst-detection-of-soc_17632e.md#想法卡留痕：Interaction-graph burst detection of social abnormal-behaviour events 分 0.028989（路：fts/vector）
+  3. [turkey-threshold-prediction] note:notes/idea-dossier/cusum-accumulation-over-per-bird-anomaly_7cea6d.md#想法卡留痕：CUSUM accumulation over per-bird anomaly streams for slow-onset welfare warnings 分 0.02871（路：fts/vector）
+  4. [turkey-threshold-prediction] note:notes/idea-dossier/zero-tuning-tracker-thresholds-predicted_77cdb7.md#想法卡留痕：Zero-tuning tracker thresholds predicted from video-level statistics 分 0.028242（路：fts/vector）
+  5. [turkey-threshold-prediction] note:notes/idea-dossier/scale-robust-frame-aggregation-for-flock_1b4467.md#想法卡留痕：Scale-robust frame aggregation for flock-level anomaly alarms 分 0.028066（路：fts/vector）
+  6. [turkey-threshold-prediction] note:notes/idea-dossier/individual-abnormal-behaviour-profiles-b_fcefb8.md#想法卡留痕：Individual abnormal-behaviour profiles built on tracking identities 分 0.026246（路：fts/vector）
+  7. [turkey-threshold-prediction] fact_07030cae6e2f 分 0.02623（路：vector）
+  8. [turkey-threshold-prediction] fact_1401df7e9fb4 分 0.025806（路：vector）
+  9. [turkey-threshold-prediction] note:notes/idea-dossier/self-correcting-head-box-labels-via-temp_5d7185.md#想法卡留痕：Self-correcting head-box labels via temporal tracking consistency 分 0.02567（路：fts/vector）
+  10. [turkey-threshold-prediction] fact_e7b1016fa13d 分 0.025（路：vector）
+  11. [turkey-threshold-prediction] fact_b4282a9043ef 分 0.024615（路：vector）
+  12. [turkey-threshold-prediction] note:notes/idea-dossier/scale-robust-frame-aggregation-for-flock_1b4467.md#top 分 0.024242（路：vector）
+  13. [turkey-threshold-prediction] fact_879ea59628d9 分 0.023881（路：vector）
+  14. [turkey-threshold-prediction] fact_a86e30097d19 分 0.023529（路：vector）
+  15. [turkey-threshold-prediction] fact_0c5017d20256 分 0.023188（路：vector）
+  16. [turkey-threshold-prediction] fact_cc25b1bc3d18 分 0.022857（路：vector）
+  17. [turkey-threshold-prediction] fact_a116a64934f8 分 0.022535（路：vector）
+  18. [turkey-threshold-prediction] fact_fe8f5b873066 分 0.022222（路：vector）
+  19. [turkey-threshold-prediction] fact_de79fe9b29a3 分 0.021918（路：vector）
+  20. [turkey-threshold-prediction] fact_82554c0a8e6e 分 0.021622（路：vector）

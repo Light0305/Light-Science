@@ -1,0 +1,4 @@
+$ light-memory index light-memory/examples/demo-fullrun/world/proj-a rebuild
+[exit 0]
+索引已从真相全量重建：块 42 （事实 30、笔记 12），后端 python-json
+  有效嵌入：deterministic-test（模型 deterministic-test-v1，维度 64）——未登记嵌入提供者，使用确定性测试嵌入

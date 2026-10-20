@@ -1,0 +1,61 @@
+$ light-memory facts light-memory/examples/demo-fullrun/world/proj-a --as-of 2026-10-20
+[exit 0]
+as-of 2026-10-20 有效事实 29 条：
+  fact_cc25b1bc3d18 [evidence] 异常检测（YOLOX 检测 + HF²-VAD）在 7 段含异常事件的测试视频上取得 AUROC 92.1%
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_48ead41270f3 [evidence] Byte³Track 跟踪性能：2.5 分钟视频平均 MOTA 87.7%、MOTP 80.4%、IDF1 90.8%、HOTA 72.0%；5 分钟视频 MOTA 85.4%、MOTP 82.6%、IDF1 89.1%、HOTA 72.5%
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_05f9a32d58ec [evidence] 与原版 ByteTrack 相比（2.5 分钟视频平均）：MOTA +8.2、MOTP +0.3、IDF1 +2.7、HOTA +2.2 个百分点，身份切换数 N_ID 减少 166
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_cfb6611dc088 [evidence] 消融（2.5 分钟平均，表 3）：modIoU 版 MOTA 87.682 / IDF1 90.849 / HOTA 71.95，优于 IoU 版（80.615 / 88.563 / 70.098）与原版 ByteTrack（79.493 / 88.173 / 69.782）
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_a116a64934f8 [evidence] modIoU 版并非全指标占优：2.5 分钟消融中其 N_ID=169，高于 IoU 版的 140（表 3）——modIoU 以更多身份切换换取整体跟踪性能
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_fe8f5b873066 [evidence] 5 分钟视频基准（表 6）：Byte³Track 五项指标全部最佳（MOTA 85.431、MOTP 82.563、IDF1 89.128、HOTA 72.523、N_ID 78）
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_de79fe9b29a3 [evidence] 遮挡个例（图 5）：火鸡身体大部被遮挡时，靠仍可见的头部在第 846 帧被重识别，ByteTrack 则赋予新 ID
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_149263c2d134 [evidence] 检测数据集规模：人工标注 1,808 帧、共 35,489 只火鸡；头部区域标注由颜色范围与闭运算自动生成
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_3f8620933ca6 [evidence] 异常检测数据：训练集 8 段视频（每段 300 帧、30 fps、仅正常行为、无标注）；测试集 7 段、共 2,167 帧、带帧级标注
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_a86e30097d19 [evidence] 作者自述局限：头部区域采用自动标注，其边界框可能不如人工标注准确；作者预期人工标注训练可带来更好性能
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_07030cae6e2f [evidence] 作者自述局限：系统只检测异常行为、不将其分类到具体行为类别，分类留作未来工作
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_9a86260a9686 [evidence] 数据可用性：作者声明没有共享数据的许可，三套自建数据集未公开
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_0c5017d20256 [evidence] 跟踪阈值经附录 A 逐参数扫描选定且两套时长取值不同：2.5 分钟视频 θ_modIoU=0.99、θ_high=0.7、θ_low=0.68；5 分钟视频 θ_modIoU=0.95、θ_high=0.4、θ_low=0.3
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_89ff0bca0377 [evidence] 训练配置：HF²-VAD 沿用 Ped2 参数（batch size 128、80 epochs、w_r=1.0、w_p=0.1、k=4）；YOLOX 训练 400 epochs、batch 16；硬件为 RTX5000（16 GB）服务器
+      对象 paper:abnormal-turkey-behaviour-detection-usin_f65598，有效 2026-10-20 → …，状态 current
+  fact_56e2ee3f2c33 [design_claim] 视频级统计量（轨迹长度分布、检测置信分布、目标密度）与最优关联阈值之间存在稳定映射：由视频前 30 秒统计量联合回归出的三阈值，在留出视频上的 MOTA 达到逐段神谕扫描的 98% 以内（差 ≤2 点），且全面优于固定阈值。
+      对象 design:zero-tuning-tracker-thresholds_979ee7，有效 2026-10-20 → …，状态 current
+  fact_7b4439d05507 [design_claim] 只用视频前 30 秒统计量预测的阈值不差于用全程统计量（段级差 <1 点）：部署可在视频开头即完成标定（承卡 unexpected_prediction）。
+      对象 design:zero-tuning-tracker-thresholds_979ee7，有效 2026-10-20 → …，状态 current
+  fact_b4282a9043ef [failure_record] 承接条目登记的数据版本 turkey-barn-vnext-v1 交付不完整（seg-05/06 缺失），登记的实验对象不存在完整形态；执行端无从补齐未交付数据——设计期数据可得性假设在该版本上被证伪
+      对象 run:R-NEG-a1，有效 2026-10-20 → …，状态 current
+  fact_82554c0a8e6e [failure_record] FM-3.1|
+      对象 run:R-LONG-a1，有效 2026-10-20 → …，状态 current
+  fact_48b4c288251c [conclusion_verdict] 主张 C1 判定：support=untested，grade=insufficient（主张含未检验行，强度封顶 insufficient；Type M 最差值 4.35 > 2.0，封顶 suggestive）
+      对象 claim:C1，有效 2026-10-20 → 2026-10-21，状态 superseded
+  fact_f56397578932 [figure_provenance] 图 fig-1（data 线）：backend=python
+      对象 figure:fig-1，有效 2026-10-20 → …，状态 current
+  fact_e7b1016fa13d [figure_provenance] 图 fig-2（schematic 线）：提示词版本 1：生成模型 local PIL script (demo stand-in)
+      对象 figure:fig-2，有效 2026-10-20 → …，状态 current
+  fact_1542bf200d9d [review_concern] 主张 C1 含未检验行 R-NEG（数据版本缺 seg-05/06、fundamental 失败 F-0001，untested 终态）而成稿：未检验状态须在摘要与讨论中保持 可见，不得被 limitations 定位稀释。
+      对象 concern:RV-C001，有效 2026-10-20 → …，状态 current
+  fact_879ea59628d9 [review_concern] R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并列陈述五行时须披露同源或合并陈述。
+      对象 concern:RV-C002，有效 2026-10-20 → …，状态 current
+  fact_1401df7e9fb4 [review_concern] 精度缺口须以数字呈现：校正后 p=0.1378、Type M 最差 4.35、TOST 90% CI 半宽 6.55 对等价界 ±2；结果叙述只写 undetermined 而不带 区间宽度会让读者低估不确定性。
+      对象 concern:RV-C003，有效 2026-10-20 → …，状态 current
+  fact_16f866ceb226 [review_concern] 判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 未闭环）；方法节须声明其来源与冻结 时点。
+      对象 concern:RV-C004，有效 2026-10-20 → …，状态 current
+  fact_8f534c58ed6e [review_concern] 图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 not_assessable）；投稿包组装前 图源链应闭合。
+      对象 concern:RV-C005，有效 2026-10-20 → …，状态 current
+  fact_1113f5aa515f [review_concern] 外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿件讨论不得外推且合成 数据性质须在摘要层可见。
+      对象 concern:RV-C006，有效 2026-10-20 → …，状态 current
+  fact_afd6337cc9c2 [generic] 稿件对主张 C1 的表述口径：writable_ceiling=limitations_only，仅以 insufficient 天花板写入 limitations 段（Write claims_register 登记） [stale]
+      对象 claim:C1，有效 2026-10-20 → …，状态 current
+  fact_d0e2be643aa3 [lesson] 教训：承接执行前必须核验登记数据版本的完整交付（逐段清单对账）——数据版本交付不完整时，登记对象不存在完整形态、执行端无从补齐，设计期的数据可得性假设会被直接证伪（F-0001，FM-2.3）
+      对象 run:R-NEG-a1，有效 2026-10-20 → …，状态 current

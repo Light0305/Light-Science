@@ -1,0 +1,4 @@
+$ light-memory readback light-memory/examples/demo-fullrun/world/proj-a
+[exit 0]
+标注回读：新增候选 1 条、未变 0 处（标注只产候选，未 accept 不入账）
+  · cand_a2d6377faafd

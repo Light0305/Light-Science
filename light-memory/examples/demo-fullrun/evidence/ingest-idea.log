@@ -1,0 +1,4 @@
+$ light-memory ingest light-memory/examples/demo-fullrun/world/proj-a --package idea --source light-idea/examples/demo-poultry
+[exit 1]
+被拦（逐项缺口）：
+  · idea 收编源缺失：light-idea/examples/demo-poultry/memory_export.jsonl

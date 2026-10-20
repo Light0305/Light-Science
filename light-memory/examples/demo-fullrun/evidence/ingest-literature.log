@@ -1,0 +1,4 @@
+$ light-memory ingest light-memory/examples/demo-fullrun/world/proj-a --package literature --source light-literature/examples/demo-cea/Literature
+[exit 0]
+[literature] 收编完成：对象登记 14、新事件 0、新事实 14、新关系 0、前向引用补解 0
+  · 缺口：撤稿/Find 线结果无结构化文件，撤稿事件未收编（事件 schema 待 Literature 侧回填后接入）

@@ -1,0 +1,3 @@
+$ light-memory promote light-memory/examples/demo-fullrun/world/global confirm --id cand_abf97c6e0218 --by demo-user
+[exit 0]
+晋升生效：PRM-0001，副本 fact_d0e2be643aa3 已入全局层（原件留在项目层）

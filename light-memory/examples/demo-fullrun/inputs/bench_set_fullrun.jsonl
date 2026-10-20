@@ -1,0 +1,50 @@
+{"qid": "ku-01", "category": "knowledge_update", "root": "a", "query": "主张 C1 当前的判定口径是什么", "expect": {"include_statements": ["第二代结论包·构造演示"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "ku-02", "category": "knowledge_update", "root": "a", "query": "C1 的 support 为什么维持 untested，第二代结论包改了什么", "expect": {"include_statements": ["support 维持 untested"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "ku-03", "category": "knowledge_update", "root": "a", "as_of": "2026-10-20", "query": "在 2026 年 10 月 20 日当时，主张 C1 的判定口径是什么", "expect": {"include_statements": ["Type M 最差值 4.35"], "exclude_statements": ["第二代结论包·构造演示"]}}
+{"qid": "ku-04", "category": "knowledge_update", "root": "a", "as_of": "2026-10-20", "query": "当时 C1 的强度为什么被封顶", "expect": {"include_statements": ["强度封顶 insufficient"], "exclude_statements": ["口径收紧为"]}}
+{"qid": "ku-05", "category": "knowledge_update", "root": "a", "query": "最新一代结论包对 C1 结论的适用范围有什么收紧", "expect": {"include_statements": ["结论仅适用于数据版本完整交付的登记条目"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "ku-06", "category": "knowledge_update", "root": "a", "query": "R-NEG 行在最新结论包里是什么状态", "expect": {"include_statements": ["R-NEG 行仍无可判数据"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "ku-07", "category": "knowledge_update", "root": "a", "query": "主张 C1 现在按什么 grade 判定，哪一代结论包说了算", "expect": {"include_statements": ["第二代结论包·构造演示"], "exclude_statements": ["封顶 suggestive"]}}
+{"qid": "ku-08", "category": "knowledge_update", "root": "a", "as_of": "2026-10-20", "query": "第二代结论包出现之前，C1 的判定依据是什么", "expect": {"include_statements": ["主张含未检验行"], "exclude_statements": ["构造演示"]}}
+{"qid": "ku-09", "category": "knowledge_update", "root": "a", "query": "哪一代结论包是当前有效的，旧口径还作数吗", "expect": {"include_statements": ["第二代结论包·构造演示"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "ku-10", "category": "knowledge_update", "root": "a", "query": "C1 判定口径最新版与第一版的差别在哪里", "expect": {"include_statements": ["口径收紧为"], "exclude_statements": ["Type M 最差值 4.35"]}}
+{"qid": "cx-01", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "视频级统计量预测关联阈值的设计主张在两个项目中分别如何表述", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction", "在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "cx-02", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "阈值预测映射在留出视频上达到神谕扫描 98% 的主张出自哪个项目", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction"}}}
+{"qid": "cx-03", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "MOT17 基线项目的设计主张 M1 是什么", "expect": {"include_by_project": {"在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "cx-04", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "哪个项目用留一序列验证阈值回归，哪个用留出视频", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction", "在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "cx-05", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "两个项目对视频级统计量与神谕阈值关系的设计主张有何不同", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction", "在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "cx-06", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "火鸡项目的设计主张 C1 讲了什么", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction"}}}
+{"qid": "cx-07", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "基线项目的设计主张讲了什么", "expect": {"include_by_project": {"在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "cx-08", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "设计层面关于关联阈值预测力的主张汇总", "expect": {"include_by_project": {"与最优关联阈值之间存在稳定映射": "turkey-threshold-prediction", "在 MOT17 train 序列上，视频级统计量对逐序列神谕关联阈值有可测预测力": "mot17-threshold-baseline"}}}
+{"qid": "fr-01", "category": "failure_reuse", "root": "a", "recipe": "failure-lookup", "query": "新项目承接执行前，数据交付方面必须核验什么", "expect": {"include_statements": ["承接执行前必须核验登记数据版本的完整交付"]}}
+{"qid": "fr-02", "category": "failure_reuse", "root": "a", "query": "哪个数据版本交付不完整导致了运行失败", "expect": {"include_statements": ["turkey-barn-vnext-v1 交付不完整"]}}
+{"qid": "fr-03", "category": "failure_reuse", "root": "a", "query": "视频段缺失造成了什么后果", "expect": {"include_statements": ["seg-05/06 缺失"]}}
+{"qid": "fr-04", "category": "failure_reuse", "root": "a", "query": "设计期的数据可得性假设被证伪是怎么回事", "expect": {"include_statements": ["设计期数据可得性假设在该版本上被证伪"]}}
+{"qid": "fr-05", "category": "failure_reuse", "root": "a", "query": "登记对象不存在完整形态指的是哪次失败", "expect": {"include_statements": ["登记的实验对象不存在完整形态"]}}
+{"qid": "fr-06", "category": "failure_reuse", "root": "a", "recipe": "failure-lookup", "query": "F-0001 这次失败沉淀下来的教训是什么", "expect": {"include_statements": ["承接执行前必须核验登记数据版本的完整交付"]}}
+{"qid": "fr-07", "category": "failure_reuse", "root": "a", "query": "FM-2.3 失败的根因是什么", "expect": {"include_statements": ["turkey-barn-vnext-v1 交付不完整"]}}
+{"qid": "fr-08", "category": "failure_reuse", "root": "a", "query": "FM-3.1 对应哪条失败登记", "expect": {"include_statements": ["FM-3.1"]}}
+{"qid": "fr-09", "category": "failure_reuse", "root": "a", "query": "执行端为什么无从补齐未交付的数据", "expect": {"include_statements": ["执行端无从补齐未交付数据"]}}
+{"qid": "fr-10", "category": "failure_reuse", "root": "a", "recipe": "failure-lookup", "query": "逐段清单对账是哪条教训提出的要求", "expect": {"include_statements": ["逐段清单对账"]}}
+{"qid": "rf-01", "category": "refusal", "root": "a", "query": "Smart Agricultural Technology 的影响因子是多少", "expect": {"refusal": true}}
+{"qid": "rf-02", "category": "refusal", "root": "a", "query": "火鸡脑电信号的采集方案与电极布置", "expect": {"refusal": true}}
+{"qid": "rf-03", "category": "refusal", "root": "a", "query": "量子纠缠对葡萄糖代谢通路的影响", "expect": {"refusal": true}}
+{"qid": "rf-04", "category": "refusal", "root": "a", "query": "番茄炒蛋先放蛋还是先放番茄", "expect": {"refusal": true}}
+{"qid": "rf-05", "category": "refusal", "root": "a", "query": "北京下周的天气预报和气温", "expect": {"refusal": true}}
+{"qid": "rf-06", "category": "refusal", "root": "a", "query": "哪只股票适合长期持有", "expect": {"refusal": true}}
+{"qid": "rf-07", "category": "refusal", "root": "a", "query": "儿童学小提琴从哪首曲子开始", "expect": {"refusal": true}}
+{"qid": "rf-08", "category": "refusal", "root": "a", "query": "毛肚火锅的蘸料怎么调", "expect": {"refusal": true}}
+{"qid": "rf-09", "category": "refusal", "root": "a", "query": "composition of lunar regolith samples", "expect": {"refusal": true}}
+{"qid": "rf-10", "category": "refusal", "root": "a", "query": "如何给猫接种疫苗", "expect": {"refusal": true}}
+{"qid": "pp-01", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "AUROC of the abnormal behaviour detection model on test videos", "expect": {"include_statements": ["取得 AUROC 92.1%"]}}
+{"qid": "pp-02", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "detection 数据集一共人工标注了多少帧", "expect": {"include_statements": ["人工标注 1,808 帧"]}}
+{"qid": "pp-03", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "异常行为检测模型在测试视频上的曲线下面积是多少", "expect": {"include_statements": ["取得 AUROC 92.1%"]}}
+{"qid": "pp-04", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "逐参数扫描选定的跟踪阈值在 2.5 分钟视频下取什么值", "expect": {"include_statements": ["θ_high=0.7、θ_low=0.68"]}}
+{"qid": "pp-05", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "改良 IoU 版本相对原版的身份切换是变多还是变少", "expect": {"include_statements": ["以更多身份切换换取整体跟踪性能"]}}
+{"qid": "pp-06", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "这套系统能不能把异常行为再细分成具体类别", "expect": {"include_statements": ["系统只检测异常行为、不将其分类到具体行为类别"]}}
+{"qid": "pp-07", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "作者的自建数据集对外开放了没有", "expect": {"include_statements": ["三套自建数据集未公开"]}}
+{"qid": "pp-08", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "只看开头半分钟的统计特征能不能定出阈值", "expect": {"include_statements": ["只用视频前 30 秒统计量预测的阈值不差于用全程统计量"]}}
+{"qid": "pp-09", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "tracker thresholds predicted from video-level statistics without per-video tuning", "expect": {"include_statements": ["与最优关联阈值之间存在稳定映射"]}}
+{"qid": "pp-10", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "校正之后的 p 值与等价界的数字呈现是多少", "expect": {"include_statements": ["校正后 p=0.1378"]}}
+{"qid": "pp-11", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "fig-1 的生成后端是什么", "expect": {"include_statements": ["图 fig-1（data 线）：backend=python"]}}
+{"qid": "pp-12", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "稿件里 C1 只能写到什么程度", "expect": {"include_statements": ["writable_ceiling=limitations_only"]}}

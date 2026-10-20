@@ -1,0 +1,5 @@
+$ light-memory init light-memory/examples/demo-fullrun/world/global --project global --title 全局层（跨项目晋升落点）
+[exit 0]
+记忆项目已建：light-memory/examples/demo-fullrun/world/global
+  登记头 memory.yaml + 四账（objects/events/facts/relations）+ disputes/promotions 账 + notes/candidates/profile/obsidian/.index 目录
+  Phase 2 待办已登记在 memory.yaml 的 phase2_pending

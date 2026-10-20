@@ -1,0 +1,5 @@
+$ light-memory ingest light-memory/examples/demo-fullrun/world/proj-a --package journal-select --source light-journal-select/examples/demo-fullrun/selection-pkg/selection.json
+[exit 0]
+[journal-select] 收编完成：对象登记 1、新事件 0、新事实 0、新关系 0、前向引用补解 0
+  · 缺口：selection 尚无定刊记录（状态 gated），未生成决策事实
+  · 缺口：候选刊均无已核验指标，未生成期刊事实（未核验不落值）

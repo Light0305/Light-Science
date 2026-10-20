@@ -1,0 +1,3 @@
+$ light-memory verdict light-memory/examples/demo-fullrun/world/proj-a --file light-memory/examples/demo-fullrun/inputs/nominations-derived.json
+[exit 0]
+  [store] stored（事实 fact_afd6337cc9c2）

@@ -16,7 +16,7 @@
 | [Light-Journal-Select](light-journal-select/) | 选刊（**Write 前置扩展位**，不占十件套编号）：Analysis 出结论后先选刊——先例路统计 + 逐刊核验 + 风险门出三档证据卡，用户定刊后备齐模板与九组检查记录再交 Write 开工 | **v1.0 已发布** |
 | [Light-Figure](light-figure/) | 作图：图合同先行、双线生成（数据图代码线 / 方法图提示词→Visio 重绘线）、七门实测审计与交付 | **v1.0 已发布** |
 | [Light-Review](light-review/) | 评审：投稿前内部评审（法医式四方对账 + GRIM 族、模拟审稿人组与共识门、校准门决定建议、自审门、concern 回填清单） | **v1.0 已发布** |
-| Light-Memory | 记忆：跨阶段沉淀、检索与 Obsidian 轻量图谱视图（贯穿全部阶段，最后建设） | 规划中 |
+| [Light-Memory](light-memory/) | 记忆：跨阶段沉淀与 Obsidian 图谱——收编九包 + 选刊产物为事件/事实/笔记三层，双时间取代链、候选沉淀门、三路检索回供与 Obsidian 单向投影（贯穿全部阶段，最后建设） | **v1.0 已发布** |
 
 建设顺序按科研实际流程推进：Literature 已定版，其后依次为 Idea → Design → Experiment → Analysis → Write → Figure → Review，Memory 与图谱视图放最后——等各阶段产物形态都定型后再做沉淀与连接，返工最少。
 

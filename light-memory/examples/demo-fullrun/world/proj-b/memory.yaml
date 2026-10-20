@@ -1,0 +1,62 @@
+kind: light-memory/project
+version: '0.1'
+memory_id: proj-b
+project:
+  id: mot17-threshold-baseline
+  title: MOT17 阈值预测极简基线（跨项目对照）
+  scope: project
+created_at: '2026-10-20T14:08:14+00:00'
+updated_at: '2026-10-20T14:08:16+00:00'
+embedder:
+  provider: null
+  model: null
+  dim: null
+settle:
+  triggers:
+    count_threshold: 20
+    idle_days: 7
+    warmup:
+    - 1
+    - 2
+    - 4
+    - 8
+  recipes:
+  - default
+  - paraphrase
+  - failure-lookup
+  - as-of
+  - cross-project
+watermarks:
+  design:
+    source: light-design/examples/demo-poultry-design/designs/mot17_0aed08/design.yaml
+    snapshot_hash: 956d72cbac3281c8d5ec18483b5ff48c73d0fbeb43e82c2185ec9a71e06648ed
+    previous_hash: null
+    adapter_version: '1.0'
+    ingested_at: '2026-10-20T14:08:16+00:00'
+    counts:
+      objects: 1
+      events: 1
+      facts: 1
+      relations: 0
+      forward_refs_resolved: 0
+adapters:
+  design: '1.0'
+index:
+  status: built
+  embedder_effective: deterministic-test
+  model: deterministic-test-v1
+  built_at: '2026-10-20T14:08:16+00:00'
+  truth_manifest_hash: ae57fd51c1115d9a56f708ebb7c46a56f3d167d25b07ee1088f83b869d90a597
+counts:
+  objects: 1
+  events: 1
+  facts: 1
+  relations: 0
+  disputes_open: 0
+phase2_pending:
+- 'candidates: 判断性提炼候选通道与 accept 生效门（MM-13c）'
+- 'retrieval: 检索三路融合与渐进披露三级（MM-19 至 MM-23）'
+- 'obsidian: Obsidian 视图投影生成与标注回读（MM-27 至 MM-29）'
+- 'profile: 画像视图再生与项目立场视图（MM-31）'
+- 'eval: 自建评测集运行器与配置报表（MM-32）'
+- 'promote: 跨项目晋升通道与撤回对账（拍板 6）'

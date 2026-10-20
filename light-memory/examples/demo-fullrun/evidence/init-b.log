@@ -1,0 +1,5 @@
+$ light-memory init light-memory/examples/demo-fullrun/world/proj-b --project mot17-threshold-baseline --title MOT17 阈值预测极简基线（跨项目对照）
+[exit 0]
+记忆项目已建：light-memory/examples/demo-fullrun/world/proj-b
+  登记头 memory.yaml + 四账（objects/events/facts/relations）+ disputes/promotions 账 + notes/candidates/profile/obsidian/.index 目录
+  Phase 2 待办已登记在 memory.yaml 的 phase2_pending

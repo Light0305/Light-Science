@@ -1,0 +1,16 @@
+{
+ "nomination": {
+  "fact": {
+   "fact_type": "lesson",
+   "object_id": "run:R-NEG-a1",
+   "statement": "教训：承接执行前必须核验登记数据版本的完整交付（逐段清单对账）——数据版本交付不完整时，登记对象不存在完整形态、执行端无从补齐，设计期的数据可得性假设会被直接证伪（F-0001，FM-2.3）",
+   "valid_at": "2026-10-20",
+   "derived_from": [
+    "fact_b4282a9043ef"
+   ]
+  },
+  "nominator": "demo-driver（判断性提炼）",
+  "rationale": "由 Experiment 演示包失败 F-0001（FM-2.3，failure_class=fundamental）提炼：根因是承接条目登记的数据版本 turkey-barn-vnext-v1 交付不完整（seg-05/06 缺失），设计期数据可得性假设被证伪。此教训跨项目通用，提名入长期层，待人工确认生效。",
+  "verdict": "store"
+ }
+}

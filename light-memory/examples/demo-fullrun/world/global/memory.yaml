@@ -1,0 +1,48 @@
+kind: light-memory/project
+version: '0.1'
+memory_id: global
+project:
+  id: global
+  title: 全局层（跨项目晋升落点）
+  scope: project
+created_at: '2026-10-20T14:08:14+00:00'
+updated_at: '2026-10-20T14:08:19+00:00'
+embedder:
+  provider: null
+  model: null
+  dim: null
+settle:
+  triggers:
+    count_threshold: 20
+    idle_days: 7
+    warmup:
+    - 1
+    - 2
+    - 4
+    - 8
+  recipes:
+  - default
+  - paraphrase
+  - failure-lookup
+  - as-of
+  - cross-project
+watermarks: {}
+adapters: {}
+index:
+  status: absent
+  embedder_effective: null
+  model: null
+  built_at: null
+  truth_manifest_hash: null
+counts:
+  objects: 1
+  events: 3
+  facts: 1
+  relations: 0
+  disputes_open: 0
+phase2_pending:
+- 'candidates: 判断性提炼候选通道与 accept 生效门（MM-13c）'
+- 'retrieval: 检索三路融合与渐进披露三级（MM-19 至 MM-23）'
+- 'obsidian: Obsidian 视图投影生成与标注回读（MM-27 至 MM-29）'
+- 'profile: 画像视图再生与项目立场视图（MM-31）'
+- 'eval: 自建评测集运行器与配置报表（MM-32）'

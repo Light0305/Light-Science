@@ -1,0 +1,6 @@
+{"qid": "q-upd-1", "category": "knowledge_update", "root": "a", "query": "跟踪器 MOTA 提升了多少个百分点", "expect": {"include_statements": ["跟踪器在 7 段视频上 MOTA 提升 3.10 个百分点（复核修正版）"], "exclude_statements": ["跟踪器在 7 段视频上 MOTA 提升 5.25 个百分点"]}}
+{"qid": "q-fail-1", "category": "failure_reuse", "root": "a", "recipe": "failure-lookup", "query": "新项目数据交付前要核验什么", "expect": {"include_statements": ["教训：数据交付前须先核验版本完整性与登记对象完整形态"]}}
+{"qid": "q-cross-1", "category": "cross_project", "root": "a", "recipe": "cross-project", "extra_roots": ["b"], "query": "阈值预测映射的稳定性如何", "expect": {"include_by_project": {"阈值预测映射在顶视固定机位下稳定成立": "turkey-a", "阈值预测映射在移动机位下不稳定，须人工校准后使用": "turkey-b"}}}
+{"qid": "q-ref-1", "category": "refusal", "root": "a", "query": "量子纠缠对火鸡情绪识别的影响", "expect": {"refusal": true}}
+{"qid": "q-para-1", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "视频统计量预测跟踪阈值的方法", "expect": {"include_statements": ["零调参阈值可由视频级统计量预测"]}}
+{"qid": "q-para-2", "category": "paraphrase", "root": "a", "recipe": "paraphrase", "query": "predicting tracker thresholds from video-level statistics", "expect": {"include_statements": ["零调参阈值可由视频级统计量预测"]}}

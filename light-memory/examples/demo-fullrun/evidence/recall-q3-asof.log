@@ -1,0 +1,24 @@
+$ light-memory recall light-memory/examples/demo-fullrun/world/proj-a 主张 C1 判定口径 --as-of 2026-10-20
+[exit 0]
+回供：配方 default，作用域 turkey-threshold-prediction，命中 20 条（上限 20）
+  · 降级：索引与真相不一致（stale）：events.jsonl、facts.jsonl、relations.jsonl；结果基于旧索引，索引重建后复核
+  1. [turkey-threshold-prediction] fact_48b4c288251c 分 0.032018（路：fts/vector） [as-of 当时有效]
+  2. [turkey-threshold-prediction] fact_56e2ee3f2c33 分 0.032002（路：fts/vector） [as-of 当时有效]
+  3. [turkey-threshold-prediction] fact_1542bf200d9d 分 0.031514（路：fts/vector） [as-of 当时有效]
+  4. [turkey-threshold-prediction] fact_7b4439d05507 分 0.031258（路：fts/vector） [as-of 当时有效]
+  5. [turkey-threshold-prediction] fact_879ea59628d9 分 0.030077（路：fts/vector） [as-of 当时有效]
+  6. [turkey-threshold-prediction] fact_0c5017d20256 分 0.029907（路：fts/vector） [as-of 当时有效]
+  7. [turkey-threshold-prediction] note:notes/idea-dossier/interaction-graph-burst-detection-of-soc_17632e.md#想法卡留痕：Interaction-graph burst detection of social abnormal-behaviour events 分 0.029236（路：fts/vector）
+  8. [turkey-threshold-prediction] note:notes/idea-dossier/zero-tuning-tracker-thresholds-predicted_77cdb7.md#想法卡留痕：Zero-tuning tracker thresholds predicted from video-level statistics 分 0.029139（路：fts/vector）
+  9. [turkey-threshold-prediction] fact_1401df7e9fb4 分 0.028814（路：fts/vector） [as-of 当时有效]
+  10. [turkey-threshold-prediction] note:notes/idea-dossier/cusum-accumulation-over-per-bird-anomaly_7cea6d.md#想法卡留痕：CUSUM accumulation over per-bird anomaly streams for slow-onset welfare warnings 分 0.028778（路：fts/vector）
+  11. [turkey-threshold-prediction] note:notes/idea-dossier/scale-robust-frame-aggregation-for-flock_1b4467.md#想法卡留痕：Scale-robust frame aggregation for flock-level anomaly alarms 分 0.028595（路：fts/vector）
+  12. [turkey-threshold-prediction] note:notes/idea-dossier/self-correcting-head-box-labels-via-temp_5d7185.md#想法卡留痕：Self-correcting head-box labels via temporal tracking consistency 分 0.028191（路：fts/vector）
+  13. [turkey-threshold-prediction] fact_16f866ceb226 分 0.028039（路：fts/vector） [as-of 当时有效]
+  14. [turkey-threshold-prediction] note:notes/idea-dossier/individual-abnormal-behaviour-profiles-b_fcefb8.md#想法卡留痕：Individual abnormal-behaviour profiles built on tracking identities 分 0.027984（路：fts/vector）
+  15. [turkey-threshold-prediction] fact_89ff0bca0377 分 0.014085（路：vector） [as-of 当时有效]
+  16. [turkey-threshold-prediction] fact_8f534c58ed6e 分 0.013158（路：vector） [as-of 当时有效]
+  17. [turkey-threshold-prediction] fact_a86e30097d19 分 0.012987（路：vector） [as-of 当时有效]
+  18. [turkey-threshold-prediction] fact_b4282a9043ef 分 0.012821（路：vector） [as-of 当时有效]
+  19. [turkey-threshold-prediction] fact_82554c0a8e6e 分 0.012658（路：vector） [as-of 当时有效]
+  20. [turkey-threshold-prediction] fact_f56397578932 分 0.0125（路：vector） [as-of 当时有效]

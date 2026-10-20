@@ -1,0 +1,21 @@
+[
+ {
+  "verdict": "supersede",
+  "nominator": "demo-driver（构造第二代结论包）",
+  "rationale": "【构造演示，非真实上游产物】真实 Analysis 演示只有一代结论包；此处按一期冒烟已验证的形态构造第二代：假设补跑 R-NEG 所缺 seg-05/06 后重判，R-NEG 行仍无可判数据，判定维持并收紧边界口径。valid_at 记为次日 2026-10-21 以使区间算术与 as-of 分界真实可检。",
+  "provenance": {
+   "source_package": "analysis",
+   "source_artifact": "conclusion_card.gen2-CONSTRUCTED.json",
+   "source_anchor": "conclusion_card.json",
+   "source_version": "constructed-demo",
+   "ingested_at": "2026-10-20T14:08:15+00:00"
+  },
+  "target_fact_id": "fact_48b4c288251c",
+  "fact": {
+   "statement": "主张 C1 判定：support=untested，grade=insufficient（第二代结论包·构造演示：补跑 R-NEG 所缺 seg-05/06 后重判，R-NEG 行仍无可判数据，support 维持 untested；口径收紧为：结论仅适用于数据版本完整交付的登记条目）",
+   "fact_type": "conclusion_verdict",
+   "object_id": "claim:C1",
+   "valid_at": "2026-10-21"
+  }
+ }
+]

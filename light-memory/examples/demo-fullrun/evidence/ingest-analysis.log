@@ -1,0 +1,3 @@
+$ light-memory ingest light-memory/examples/demo-fullrun/world/proj-a --package analysis --source light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
+[exit 0]
+[analysis] 收编完成：对象登记 4、新事件 1、新事实 1、新关系 2、前向引用补解 0

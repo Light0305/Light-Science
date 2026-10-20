@@ -1,0 +1,524 @@
+{
+ "steps": [
+  {
+   "step": "init",
+   "roots": [
+    "proj-a",
+    "proj-b",
+    "global"
+   ]
+  },
+  {
+   "step": "ingest:literature",
+   "objects": 1,
+   "events": 0,
+   "facts": 14,
+   "relations": 0
+  },
+  {
+   "step": "ingest:design",
+   "objects": 1,
+   "events": 2,
+   "facts": 2,
+   "relations": 0
+  },
+  {
+   "step": "ingest:experiment",
+   "objects": 9,
+   "events": 60,
+   "facts": 2,
+   "relations": 8
+  },
+  {
+   "step": "ingest:analysis",
+   "objects": 3,
+   "events": 1,
+   "facts": 1,
+   "relations": 2
+  },
+  {
+   "step": "ingest:write",
+   "objects": 1,
+   "events": 6,
+   "facts": 0,
+   "relations": 0
+  },
+  {
+   "step": "ingest:figure",
+   "objects": 2,
+   "events": 7,
+   "facts": 2,
+   "relations": 0
+  },
+  {
+   "step": "ingest:journal-select",
+   "objects": 1,
+   "events": 0,
+   "facts": 0,
+   "relations": 0
+  },
+  {
+   "step": "ingest:review",
+   "objects": 8,
+   "events": 0,
+   "facts": 6,
+   "relations": 5
+  },
+  {
+   "step": "ingest:idea（预期点名失败）",
+   "exit": 1,
+   "delta": {
+    "objects": 0,
+    "events": 0,
+    "facts": 0,
+    "relations": 0
+   }
+  },
+  {
+   "step": "ingest:proj-b design",
+   "objects": 1,
+   "events": 1,
+   "facts": 1,
+   "facts_current": 1,
+   "facts_superseded": 0,
+   "relations": 0,
+   "disputes": 0
+  },
+  {
+   "step": "dossier",
+   "notes": 6
+  },
+  {
+   "step": "counts_after_ingest",
+   "objects": 26,
+   "events": 76,
+   "facts": 27,
+   "facts_current": 27,
+   "facts_superseded": 0,
+   "relations": 15,
+   "disputes": 0
+  },
+  {
+   "step": "supersede（构造第二代）",
+   "gen1": "superseded",
+   "derived_stale": true
+  },
+  {
+   "step": "candidates",
+   "accepted": "cand_b96241dafbe9",
+   "rejected": "cand_1a6ff0e060a9"
+  },
+  {
+   "step": "recalls",
+   "files": [
+    "q1_cross_stage",
+    "q2_failure_reuse",
+    "q3_asof",
+    "q4_paraphrase_en"
+   ]
+  },
+  {
+   "step": "obsidian",
+   "notes": 15,
+   "annotation_candidate": "cand_a2d6377faafd",
+   "annotation_events": 1
+  },
+  {
+   "step": "profile",
+   "built": true
+  },
+  {
+   "step": "promotion",
+   "global_facts": 1,
+   "promotions_rows": 1
+  },
+  {
+   "step": "validate_final",
+   "objects": 26,
+   "events": 88,
+   "facts": 30,
+   "facts_current": 29,
+   "facts_superseded": 1,
+   "relations": 16,
+   "disputes": 0
+  },
+  {
+   "step": "bench",
+   "total": 50,
+   "correct": 34
+  }
+ ],
+ "ingest": [
+  {
+   "package": "literature",
+   "source": "light-literature/examples/demo-cea/Literature",
+   "exit": 0,
+   "objects": 1,
+   "events": 0,
+   "facts": 14,
+   "relations": 0
+  },
+  {
+   "package": "design",
+   "source": "light-design/examples/demo-poultry-design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml",
+   "exit": 0,
+   "objects": 1,
+   "events": 2,
+   "facts": 2,
+   "relations": 0
+  },
+  {
+   "package": "experiment",
+   "source": "light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2",
+   "exit": 0,
+   "objects": 9,
+   "events": 60,
+   "facts": 2,
+   "relations": 8
+  },
+  {
+   "package": "analysis",
+   "source": "light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json",
+   "exit": 0,
+   "objects": 3,
+   "events": 1,
+   "facts": 1,
+   "relations": 2
+  },
+  {
+   "package": "write",
+   "source": "light-write/examples/demo-fullrun/manuscript-pkg/manuscript.yaml",
+   "exit": 0,
+   "objects": 1,
+   "events": 6,
+   "facts": 0,
+   "relations": 0
+  },
+  {
+   "package": "figure",
+   "source": "light-figure/examples/demo-fullrun/figure-pkg/provenance.yaml",
+   "exit": 0,
+   "objects": 2,
+   "events": 7,
+   "facts": 2,
+   "relations": 0
+  },
+  {
+   "package": "journal-select",
+   "source": "light-journal-select/examples/demo-fullrun/selection-pkg/selection.json",
+   "exit": 0,
+   "objects": 1,
+   "events": 0,
+   "facts": 0,
+   "relations": 0
+  },
+  {
+   "package": "review",
+   "source": "light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json",
+   "exit": 0,
+   "objects": 8,
+   "events": 0,
+   "facts": 6,
+   "relations": 5
+  },
+  {
+   "package": "idea",
+   "source": "light-idea/examples/demo-poultry",
+   "exit": 1,
+   "objects": 0,
+   "events": 0,
+   "facts": 0,
+   "relations": 0,
+   "expected_failure": true,
+   "output_tail": [
+    "被拦（逐项缺口）：",
+    "  · idea 收编源缺失：light-idea/examples/demo-poultry/memory_export.jsonl"
+   ]
+  }
+ ],
+ "dossier": [
+  {
+   "idea_id": "cusum-accumulation-over-per-bird-anomaly_7cea6d",
+   "status": "draft",
+   "note": "world/proj-a/notes/idea-dossier/cusum-accumulation-over-per-bird-anomaly_7cea6d.md"
+  },
+  {
+   "idea_id": "individual-abnormal-behaviour-profiles-b_fcefb8",
+   "status": "screened",
+   "note": "world/proj-a/notes/idea-dossier/individual-abnormal-behaviour-profiles-b_fcefb8.md"
+  },
+  {
+   "idea_id": "interaction-graph-burst-detection-of-soc_17632e",
+   "status": "screened",
+   "note": "world/proj-a/notes/idea-dossier/interaction-graph-burst-detection-of-soc_17632e.md"
+  },
+  {
+   "idea_id": "scale-robust-frame-aggregation-for-flock_1b4467",
+   "status": "screened",
+   "note": "world/proj-a/notes/idea-dossier/scale-robust-frame-aggregation-for-flock_1b4467.md"
+  },
+  {
+   "idea_id": "self-correcting-head-box-labels-via-temp_5d7185",
+   "status": "screened",
+   "note": "world/proj-a/notes/idea-dossier/self-correcting-head-box-labels-via-temp_5d7185.md"
+  },
+  {
+   "idea_id": "zero-tuning-tracker-thresholds-predicted_77cdb7",
+   "status": "pre_mortem_passed",
+   "note": "world/proj-a/notes/idea-dossier/zero-tuning-tracker-thresholds-predicted_77cdb7.md"
+  }
+ ],
+ "counts_after_ingest": {
+  "objects": 26,
+  "events": 76,
+  "facts": 27,
+  "facts_current": 27,
+  "facts_superseded": 0,
+  "relations": 15,
+  "disputes": 0
+ },
+ "supersede": {
+  "constructed": true,
+  "gen1_fact_id": "fact_48b4c288251c",
+  "gen1_statement": "主张 C1 判定：support=untested，grade=insufficient（主张含未检验行，强度封顶 insufficient；Type M 最差值 4.35 > 2.0，封顶 suggestive）",
+  "gen1_status_after": "superseded",
+  "gen1_invalid_at": "2026-10-21",
+  "gen1_superseded_by": "fact_25989f2c29e5",
+  "derived_fact_id": "fact_afd6337cc9c2",
+  "derived_stale": true,
+  "derived_stale_reason": "源事实 ['fact_48b4c288251c'] 已被 fact_25989f2c29e5 取代，派生内容待按新版再生",
+  "event_types_tail": [
+   "verdict",
+   "verdict",
+   "supersede",
+   "propagation"
+  ],
+  "cli_output": [
+   "[supersede] superseded（事实 fact_25989f2c29e5），失效 ['fact_48b4c288251c']，派生标 stale 1 条"
+  ],
+  "retraction_note": "真实撤稿数据无结构化源（Literature 适配器已点名缺口）；撤稿传播钩子（refutes 边 + 同套 stale 传播）已备，本次以结论包取代实测同一传播路径。"
+ },
+ "candidates": {
+  "accepted": {
+   "candidate_id": "cand_b96241dafbe9",
+   "fact_id": "fact_d0e2be643aa3",
+   "statement": "教训：承接执行前必须核验登记数据版本的完整交付（逐段清单对账）——数据版本交付不完整时，登记对象不存在完整形态、执行端无从补齐，设计期的数据可得性假设会被直接证伪（F-0001，FM-2.3）"
+  },
+  "rejected": {
+   "candidate_id": "cand_1a6ff0e060a9",
+   "note": "推测性跨域迁移、无证据，驳回留痕"
+  }
+ },
+ "recalls": {
+  "q1_cross_stage": "recall-q1-cross-stage.log",
+  "q2_failure_reuse": "recall-q2-failure-reuse.log",
+  "q3_asof": [
+   "facts-asof-2026-10-20.log",
+   "recall-q3-asof.log",
+   "facts-current.log"
+  ],
+  "q4_paraphrase_en": "recall-q4-paraphrase-en.log"
+ },
+ "obsidian": {
+  "vault_files": [
+   "claim-c1.md",
+   "concern-rv-c001.md",
+   "concern-rv-c002.md",
+   "concern-rv-c003.md",
+   "concern-rv-c004.md",
+   "concern-rv-c005.md",
+   "concern-rv-c006.md",
+   "design-zero-tuning-tracker-thresholds-979ee7.md",
+   "figure-fig-1.md",
+   "figure-fig-2.md",
+   "index.md",
+   "paper-abnormal-turkey-behaviour-detection-usin-f65598.md",
+   "relations-guide.md",
+   "run-r-long-a1.md",
+   "run-r-neg-a1.md"
+  ],
+  "vault_note_count": 15,
+  "manifest": {
+   "kind": "light-memory/projection",
+   "version": "1.0",
+   "notes": {
+    "paper-abnormal-turkey-behaviour-detection-usin-f65598.md": {
+     "object_id": "paper:abnormal-turkey-behaviour-detection-usin_f65598",
+     "source_hash": "3bbc7e9134c7acc7047ec9653064305347c1b94ff4d4e60c587fc64255d1c7bc",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "design-zero-tuning-tracker-thresholds-979ee7.md": {
+     "object_id": "design:zero-tuning-tracker-thresholds_979ee7",
+     "source_hash": "f37bd125e87ae6549d815ccbd919dadbdb5b3a9bc8564acaf208e910a67781fe",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "run-r-neg-a1.md": {
+     "object_id": "run:R-NEG-a1",
+     "source_hash": "d0d7d3cb934d0e94b2a6fe3e62cb6156679f87feee676f45fecd440ef23c53e5",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "run-r-long-a1.md": {
+     "object_id": "run:R-LONG-a1",
+     "source_hash": "a0c0b55240a8570deea20480817806ccb7c35c60b84bfdd7e301d066f61abc86",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "claim-c1.md": {
+     "object_id": "claim:C1",
+     "source_hash": "e47c3b70e36d19da1612428a8429ef50bdc3a51f97c47f68280f2350ece8ebe5",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "figure-fig-1.md": {
+     "object_id": "figure:fig-1",
+     "source_hash": "5ae2df94d74d6948f85f75f5693158979f265326718c88dc650da47cc6de7c57",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "figure-fig-2.md": {
+     "object_id": "figure:fig-2",
+     "source_hash": "efcb7324da92e815ad9dc3495ccd473aa09ca821898a17be3fe7dd2ed3931c18",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c001.md": {
+     "object_id": "concern:RV-C001",
+     "source_hash": "425911658ddb9bf6d8d65a6a1cb32e5d581c9ceca2cf2a0f885deb5a7013114f",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c002.md": {
+     "object_id": "concern:RV-C002",
+     "source_hash": "2e260bf3a7c548ed1de67b409d7d8f16b2c55f510c54acfd986475a8526a13d1",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c003.md": {
+     "object_id": "concern:RV-C003",
+     "source_hash": "9ae6470bb99403af58b98b913cc80676c67ff8f78682937c5c89a018ad3d7a36",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c004.md": {
+     "object_id": "concern:RV-C004",
+     "source_hash": "dac0777d57f3d3d38dc7980f6745bab9313ee39eac7474972544c259507e3a3c",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c005.md": {
+     "object_id": "concern:RV-C005",
+     "source_hash": "8c969db404bc40bebf219d7edf8e620c31d524e6bed0d5c46ca0d33b35c534a4",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "concern-rv-c006.md": {
+     "object_id": "concern:RV-C006",
+     "source_hash": "0ef13b6438dcdb39bb0ecd908fe104a0a8e5133d21be52ea647998c11e8a6e3a",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "index.md": {
+     "object_id": null,
+     "source_hash": "74188f29438af4bd659a9a08aeb920d9d2257357122296bb5e8b201922e8d3f7",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    },
+    "relations-guide.md": {
+     "object_id": null,
+     "source_hash": "4fe0ed2de0aa77e9084ff632a6668cdb67c00e35c7980ba83c855b02698e26a7",
+     "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+     "annotations_read_hash": null
+    }
+   },
+   "generated_at": "2026-10-20T14:08:18+00:00"
+  },
+  "annotated_note": "world/proj-a/obsidian/claim-c1.md",
+  "annotation_candidate_id": "cand_a2d6377faafd",
+  "annotation_events": 1
+ },
+ "promotion": {
+  "candidate_id": "cand_abf97c6e0218",
+  "source_fact_id": "fact_d0e2be643aa3",
+  "global_facts": 1,
+  "global_copy_statement": "教训：承接执行前必须核验登记数据版本的完整交付（逐段清单对账）——数据版本交付不完整时，登记对象不存在完整形态、执行端无从补齐，设计期的数据可得性假设会被直接证伪（F-0001，FM-2.3）",
+  "promotions_rows": 1,
+  "confirm_output": [
+   "晋升生效：PRM-0001，副本 fact_d0e2be643aa3 已入全局层（原件留在项目层）"
+  ]
+ },
+ "counts_final": {
+  "proj-a": {
+   "objects": 26,
+   "events": 88,
+   "facts": 30,
+   "facts_current": 29,
+   "facts_superseded": 1,
+   "relations": 16,
+   "disputes": 0
+  },
+  "proj-b": {
+   "objects": 1,
+   "events": 1,
+   "facts": 1,
+   "facts_current": 1,
+   "facts_superseded": 0,
+   "relations": 0,
+   "disputes": 0
+  },
+  "global": {
+   "objects": 1,
+   "events": 3,
+   "facts": 1,
+   "facts_current": 1,
+   "facts_superseded": 0,
+   "relations": 0,
+   "disputes": 0
+  }
+ },
+ "bench": {
+  "set": "inputs/bench_set_fullrun.jsonl",
+  "overall": {
+   "total": 50,
+   "correct": 34
+  },
+  "categories": {
+   "knowledge_update": {
+    "total": 10,
+    "correct": 5,
+    "rate": 0.5
+   },
+   "cross_project": {
+    "total": 8,
+    "correct": 7,
+    "rate": 0.875
+   },
+   "failure_reuse": {
+    "total": 10,
+    "correct": 6,
+    "rate": 0.6
+   },
+   "refusal": {
+    "total": 10,
+    "correct": 7,
+    "rate": 0.7
+   },
+   "paraphrase": {
+    "total": 12,
+    "correct": 9,
+    "rate": 0.75
+   }
+  },
+  "embedder": {
+   "registered_provider": null,
+   "registered_model": null,
+   "effective": "deterministic-test",
+   "model": "deterministic-test-v1",
+   "dim": 64,
+   "note": "未登记嵌入提供者，使用确定性测试嵌入"
+  },
+  "verdict": "not_judged"
+ }
+}

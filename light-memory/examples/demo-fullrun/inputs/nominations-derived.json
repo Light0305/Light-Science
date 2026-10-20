@@ -1,0 +1,23 @@
+[
+ {
+  "verdict": "store",
+  "nominator": "demo-driver（Write 表述口径登记）",
+  "rationale": "Write 演示稿件 claims_register 对 C1 的可写口径（writable_ceiling=limitations_only）派生自结论判定，登记为派生事实以演示失效传播。",
+  "provenance": {
+   "source_package": "write",
+   "source_artifact": "claims_register.yaml",
+   "source_anchor": "claims_register:C1",
+   "source_version": "4d14ed3424d720312529b9a66f421f05fe73b199fb4352c5511b23e51cb11996",
+   "ingested_at": "2026-10-20T14:08:15+00:00"
+  },
+  "fact": {
+   "statement": "稿件对主张 C1 的表述口径：writable_ceiling=limitations_only，仅以 insufficient 天花板写入 limitations 段（Write claims_register 登记）",
+   "fact_type": "generic",
+   "object_id": "claim:C1",
+   "valid_at": "2026-10-20",
+   "derived_from": [
+    "fact_48b4c288251c"
+   ]
+  }
+ }
+]

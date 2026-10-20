@@ -1,0 +1,24 @@
+$ light-memory recall light-memory/examples/demo-fullrun/world/proj-a 数据版本交付不完整造成过什么失败，承接新执行前要核验什么 --recipe failure-lookup
+[exit 0]
+回供：配方 failure-lookup，作用域 turkey-threshold-prediction，命中 20 条（上限 20）
+  · 降级：索引与真相不一致（stale）：events.jsonl、facts.jsonl、relations.jsonl；结果基于旧索引，索引重建后复核
+  1. [turkey-threshold-prediction] fact_de79fe9b29a3 分 0.023929（路：fts/vector）
+  2. [turkey-threshold-prediction] fact_b4282a9043ef 分 0.023926（路：fts/vector）
+  3. [turkey-threshold-prediction] fact_e7b1016fa13d 分 0.02357（路：fts/vector）
+  4. [turkey-threshold-prediction] fact_0c5017d20256 分 0.02355（路：fts/vector）
+  5. [turkey-threshold-prediction] fact_a116a64934f8 分 0.023509（路：fts/vector）
+  6. [turkey-threshold-prediction] fact_56e2ee3f2c33 分 0.023419（路：fts/vector）
+  7. [turkey-threshold-prediction] fact_879ea59628d9 分 0.023088（路：fts/vector）
+  8. [turkey-threshold-prediction] fact_25989f2c29e5 分 0.022951（路：relation）
+  9. [turkey-threshold-prediction] fact_7b4439d05507 分 0.022899（路：fts/vector）
+  10. [turkey-threshold-prediction] fact_cfb6611dc088 分 0.022427（路：fts/vector）
+  11. [turkey-threshold-prediction] fact_149263c2d134 分 0.022184（路：fts/vector）
+  12. [turkey-threshold-prediction] fact_1542bf200d9d 分 0.021637（路：fts/vector）
+  13. [turkey-threshold-prediction] fact_3f8620933ca6 分 0.021533（路：fts/vector）
+  14. [turkey-threshold-prediction] fact_07030cae6e2f 分 0.021521（路：fts/vector）
+  15. [turkey-threshold-prediction] fact_9a86260a9686 分 0.021233（路：fts/vector）
+  16. [turkey-threshold-prediction] note:notes/idea-dossier/individual-abnormal-behaviour-profiles-b_fcefb8.md#想法卡留痕：Individual abnormal-behaviour profiles built on tracking identities 分 0.021233（路：fts/vector）
+  17. [turkey-threshold-prediction] note:notes/idea-dossier/scale-robust-frame-aggregation-for-flock_1b4467.md#想法卡留痕：Scale-robust frame aggregation for flock-level anomaly alarms 分 0.021176（路：fts/vector）
+  18. [turkey-threshold-prediction] fact_1113f5aa515f 分 0.021144（路：fts/vector）
+  19. [turkey-threshold-prediction] fact_16f866ceb226 分 0.021085（路：fts/vector）
+  20. [turkey-threshold-prediction] fact_a86e30097d19 分 0.020929（路：fts/vector）

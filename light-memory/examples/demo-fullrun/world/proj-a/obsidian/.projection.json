@@ -1,0 +1,97 @@
+{
+  "kind": "light-memory/projection",
+  "version": "1.0",
+  "notes": {
+    "paper-abnormal-turkey-behaviour-detection-usin-f65598.md": {
+      "object_id": "paper:abnormal-turkey-behaviour-detection-usin_f65598",
+      "source_hash": "3bbc7e9134c7acc7047ec9653064305347c1b94ff4d4e60c587fc64255d1c7bc",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "design-zero-tuning-tracker-thresholds-979ee7.md": {
+      "object_id": "design:zero-tuning-tracker-thresholds_979ee7",
+      "source_hash": "f37bd125e87ae6549d815ccbd919dadbdb5b3a9bc8564acaf208e910a67781fe",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "run-r-neg-a1.md": {
+      "object_id": "run:R-NEG-a1",
+      "source_hash": "d0d7d3cb934d0e94b2a6fe3e62cb6156679f87feee676f45fecd440ef23c53e5",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "run-r-long-a1.md": {
+      "object_id": "run:R-LONG-a1",
+      "source_hash": "a0c0b55240a8570deea20480817806ccb7c35c60b84bfdd7e301d066f61abc86",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "claim-c1.md": {
+      "object_id": "claim:C1",
+      "source_hash": "e47c3b70e36d19da1612428a8429ef50bdc3a51f97c47f68280f2350ece8ebe5",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": "6242a5ae47b0fbb94d66a5d0bf3a1b22ad1aefa9cd59fea2dd3d6b22bd3d858c"
+    },
+    "figure-fig-1.md": {
+      "object_id": "figure:fig-1",
+      "source_hash": "5ae2df94d74d6948f85f75f5693158979f265326718c88dc650da47cc6de7c57",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "figure-fig-2.md": {
+      "object_id": "figure:fig-2",
+      "source_hash": "efcb7324da92e815ad9dc3495ccd473aa09ca821898a17be3fe7dd2ed3931c18",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c001.md": {
+      "object_id": "concern:RV-C001",
+      "source_hash": "425911658ddb9bf6d8d65a6a1cb32e5d581c9ceca2cf2a0f885deb5a7013114f",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c002.md": {
+      "object_id": "concern:RV-C002",
+      "source_hash": "2e260bf3a7c548ed1de67b409d7d8f16b2c55f510c54acfd986475a8526a13d1",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c003.md": {
+      "object_id": "concern:RV-C003",
+      "source_hash": "9ae6470bb99403af58b98b913cc80676c67ff8f78682937c5c89a018ad3d7a36",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c004.md": {
+      "object_id": "concern:RV-C004",
+      "source_hash": "dac0777d57f3d3d38dc7980f6745bab9313ee39eac7474972544c259507e3a3c",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c005.md": {
+      "object_id": "concern:RV-C005",
+      "source_hash": "8c969db404bc40bebf219d7edf8e620c31d524e6bed0d5c46ca0d33b35c534a4",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "concern-rv-c006.md": {
+      "object_id": "concern:RV-C006",
+      "source_hash": "0ef13b6438dcdb39bb0ecd908fe104a0a8e5133d21be52ea647998c11e8a6e3a",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "index.md": {
+      "object_id": null,
+      "source_hash": "74188f29438af4bd659a9a08aeb920d9d2257357122296bb5e8b201922e8d3f7",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    },
+    "relations-guide.md": {
+      "object_id": null,
+      "source_hash": "4fe0ed2de0aa77e9084ff632a6668cdb67c00e35c7980ba83c855b02698e26a7",
+      "annotations_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "annotations_read_hash": null
+    }
+  },
+  "generated_at": "2026-10-20T14:08:18+00:00"
+}

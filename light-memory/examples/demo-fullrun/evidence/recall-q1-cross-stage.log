@@ -1,0 +1,54 @@
+$ light-memory recall light-memory/examples/demo-fullrun/world/proj-a 主张 C1 的判定 support 与 grade 是什么，承接自哪个执行包 --depth 1
+[exit 0]
+回供：配方 default，作用域 turkey-threshold-prediction，命中 20 条（上限 20）
+  · 降级：索引与真相不一致（stale）：events.jsonl、facts.jsonl、relations.jsonl；结果基于旧索引，索引重建后复核
+  1. [turkey-threshold-prediction] fact_56e2ee3f2c33 分 0.030282（路：fts/vector）
+     视频级统计量（轨迹长度分布、检测置信分布、目标密度）与最优关联阈值之间存在稳定映射：由视频前 30 秒统计量联合回归出的三阈值，在留出视频上的 MOTA 达到逐段神谕扫描的 98% 以内（差 ≤2 点），且全面优于固定阈值。
+  2. [turkey-threshold-prediction] fact_a116a64934f8 分 0.029911（路：fts/vector）
+     modIoU 版并非全指标占优：2.5 分钟消融中其 N_ID=169，高于 IoU 版的 140（表 3）——modIoU 以更多身份切换换取整体跟踪性能
+  3. [turkey-threshold-prediction] fact_1542bf200d9d 分 0.029462（路：fts/vector）
+     主张 C1 含未检验行 R-NEG（数据版本缺 seg-05/06、fundamental 失败 F-0001，untested 终态）而成稿：未检验状态须在摘要与讨论中保持 可见，不得被 limitations 定位稀释。
+  4. [turkey-threshold-prediction] fact_0c5017d20256 分 0.029236（路：fts/vector）
+     跟踪阈值经附录 A 逐参数扫描选定且两套时长取值不同：2.5 分钟视频 θ_modIoU=0.99、θ_high=0.7、θ_low=0.68；5 分钟视频 θ_modIoU=0.95、θ_high=0.4、θ_low=0.3
+  5. [turkey-threshold-prediction] fact_cfb6611dc088 分 0.029031（路：fts/vector）
+     消融（2.5 分钟平均，表 3）：modIoU 版 MOTA 87.682 / IDF1 90.849 / HOTA 71.95，优于 IoU 版（80.615 / 88.563 / 70.098）与原版 ByteTrack（79.493 / 88.173 / 69.782）
+  6. [turkey-threshold-prediction] fact_879ea59628d9 分 0.029031（路：fts/vector）
+     R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并列陈述五行时须披露同源或合并陈述。
+  7. [turkey-threshold-prediction] fact_b4282a9043ef 分 0.028898（路：fts/vector）
+     承接条目登记的数据版本 turkey-barn-vnext-v1 交付不完整（seg-05/06 缺失），登记的实验对象不存在完整形态；执行端无从补齐未交付数据——设计期数据可得性假设在该版本上被证伪
+  8. [turkey-threshold-prediction] fact_7b4439d05507 分 0.028405（路：fts/vector）
+     只用视频前 30 秒统计量预测的阈值不差于用全程统计量（段级差 <1 点）：部署可在视频开头即完成标定（承卡 unexpected_prediction）。
+  9. [turkey-threshold-prediction] fact_9a86260a9686 分 0.02837（路：fts/vector）
+     数据可用性：作者声明没有共享数据的许可，三套自建数据集未公开
+  10. [turkey-threshold-prediction] fact_8f534c58ed6e 分 0.028283（路：fts/vector）
+     图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 not_assessable）；投稿包组装前 图源链应闭合。
+  11. [turkey-threshold-prediction] fact_07030cae6e2f 分 0.028191（路：fts/vector）
+     作者自述局限：系统只检测异常行为、不将其分类到具体行为类别，分类留作未来工作
+  12. [turkey-threshold-prediction] fact_05f9a32d58ec 分 0.028034（路：fts/vector）
+     与原版 ByteTrack 相比（2.5 分钟视频平均）：MOTA +8.2、MOTP +0.3、IDF1 +2.7、HOTA +2.2 个百分点，身份切换数 N_ID 减少 166
+  13. [turkey-threshold-prediction] fact_149263c2d134 分 0.027497（路：fts/vector）
+     检测数据集规模：人工标注 1,808 帧、共 35,489 只火鸡；头部区域标注由颜色范围与闭运算自动生成
+  14. [turkey-threshold-prediction] note:notes/idea-dossier/zero-tuning-tracker-thresholds-predicted_77cdb7.md#想法卡留痕：Zero-tuning tracker thresholds predicted from video-level statistics 分 0.026553（路：fts/vector）
+     - [折返] 用视频级统计量回归跟踪关联阈值，免逐集人工扫描（算子 evolution_chain；种子：10.1016/j.compag.2025.110856、10.1007/978-3-031-20047-2_1）
+- derived-from [[paper:abnormal-turkey-behaviour-detection-usin_f65598]]（种子文献）
+
+主路线（未定版留痕
+  15. [turkey-threshold-prediction] fact_a86e30097d19 分 0.026471（路：fts/vector）
+     作者自述局限：头部区域采用自动标注，其边界框可能不如人工标注准确；作者预期人工标注训练可带来更好性能
+  16. [turkey-threshold-prediction] fact_1113f5aa515f 分 0.026389（路：fts/vector）
+     外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿件讨论不得外推且合成 数据性质须在摘要层可见。
+  17. [turkey-threshold-prediction] fact_16f866ceb226 分 0.026334（路：fts/vector）
+     判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 未闭环）；方法节须声明其来源与冻结 时点。
+  18. [turkey-threshold-prediction] note:notes/idea-dossier/individual-abnormal-behaviour-profiles-b_fcefb8.md#想法卡留痕：Individual abnormal-behaviour profiles built on tracking identities 分 0.025528（路：fts/vector）
+     - [折返] 以个体轨迹为分组键，把帧级异常落成个体级异常档案并分类（算子 evolution_chain；种子：10.1016/j.compag.2025.110856、10.1109/iccv48922.2021.01333）
+- backtracks-to [[idea_card:zero-tuning-tracker-thresholds-predicted_77cdb7]]（入选主路线）
+  19. [turkey-threshold-prediction] note:notes/idea-dossier/interaction-graph-burst-detection-of-soc_17632e.md#想法卡留痕：Interaction-graph burst detection of social abnormal-behaviour events 分 0.024706（路：fts/vector）
+     - [折返] 以轨迹互动图的边爆发检测啄羽等社会性异常事件（算子 collider；种子：10.1016/j.compag.2025.110856、10.1016/j.compag.2022.107545）
+- backtracks-to [[idea_card:zero-tuning-tracker-thresholds-predicted_77cdb7]]（入选主路线）
+
+死胡同（折返留痕）：
+  20. [turkey-threshold-prediction] note:notes/idea-dossier/cusum-accumulation-over-per-bird-anomaly_7cea6d.md#想法卡留痕：CUSUM accumulation over per-bird anomaly streams for slow-onset welfare warnings 分 0.024541（路：fts/vector）
+     - [折返] 对逐个体异常分数流做 CUSUM 累积，预警跛行等慢发福利问题（算子 collider；种子：10.1016/j.compag.2025.110856）
+- backtracks-to [[idea_card:zero-tuning-tracker-thresholds-predicted_77cdb7]]（入选主路线）
+
+死胡同（折返留痕）：Idea 阶段状态 draft，未入选主
