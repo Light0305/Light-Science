@@ -1,0 +1,138 @@
+kind: light-figure/provenance
+version: '1.0'
+entries:
+- fig_id: fig-1
+  line: data
+  opened_at: '2026-10-20'
+  backend: python
+  runtime_version: python 3.12.3 / matplotlib 3.11.2
+  script_hash: 78f0a48f885d19192a8b8164e62a6fb2f3c5fee7774c9d6670a24e19832cc77f
+  source_data_hash: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
+  style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
+  palette_registry_version: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+- fig_id: fig-2
+  line: schematic
+  opened_at: '2026-10-20'
+  prompt_version: '1'
+  generation_model: &id001
+    name: local PIL script (demo stand-in)
+    version: run_demo.py
+  reference_image_hash: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
+  reference_acceptance: &id002
+    done: true
+    by: demo-author
+    at: '2026-10-20'
+    checks:
+      labels_verbatim: true
+      structures_factual: true
+      formulas_values_checked: true
+  redraw_source: &id005
+    path: schematic/redraw/fig-2.vsdx
+    hash: 0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a
+  label_check: &id003
+    done: true
+    by: demo-author
+    at: '2026-10-20'
+  policy_snapshot_ref: figure.yaml#ai_policy_snapshot
+  manual_corrections_log: null
+history:
+- fig_id: fig-1
+  at: '2026-10-20T10:52:49+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: 90fb6fd0fe66d5203e954f0471a2175ad5a4484a2e9c882ede5cf1b65139d8fc
+  row_hash: d0f17ac64caefeaa1458cd92e69aa3c13562d159de8d98c73735fd39b57b8f4d
+  changes:
+    backend:
+      from: null
+      to: python
+    runtime_version:
+      from: null
+      to: python 3.12.3 / matplotlib 3.11.2
+    script_hash:
+      from: null
+      to: 78f0a48f885d19192a8b8164e62a6fb2f3c5fee7774c9d6670a24e19832cc77f
+    source_data_hash:
+      from: null
+      to: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
+    style_build_hash:
+      from: null
+      to: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
+    palette_registry_version:
+      from: null
+      to: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+- fig_id: fig-2
+  at: '2026-10-20T10:52:49+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: 1d464371a680f8e98e149bbf0b4b50988cec2029b4bc8c7945e7395f0c916727
+  row_hash: 74f7b140f352614783c7b77d8a4573a4de1e4e7669085d550b8739bc1ab9ebaa
+  changes:
+    prompt_version:
+      from: null
+      to: '1'
+    policy_snapshot_ref:
+      from: null
+      to: figure.yaml#ai_policy_snapshot
+- fig_id: fig-2
+  at: '2026-10-20T10:52:50+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: 74f7b140f352614783c7b77d8a4573a4de1e4e7669085d550b8739bc1ab9ebaa
+  row_hash: 23f402041bc2427b584b8d8f05d890a4c9ae4bd3cdddc98a6cbbc813aa0ab0b1
+  changes:
+    reference_image_hash:
+      from: null
+      to: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
+    generation_model:
+      from: null
+      to: *id001
+- fig_id: fig-2
+  at: '2026-10-20T10:52:50+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: 23f402041bc2427b584b8d8f05d890a4c9ae4bd3cdddc98a6cbbc813aa0ab0b1
+  row_hash: 24aa197efdfc5ac235ec559ff317344fa71b1983dd40aedb2309b766343621dc
+  changes:
+    reference_acceptance:
+      from:
+        done: false
+        by: null
+        at: null
+        checks: {}
+      to: *id002
+- fig_id: fig-2
+  at: '2026-10-20T10:52:52+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: 24aa197efdfc5ac235ec559ff317344fa71b1983dd40aedb2309b766343621dc
+  row_hash: ed38e26876d43beb8e7a25a47f6ab6d17b48c806b78174436d4ca188f8c029e6
+  changes:
+    redraw_source:
+      from: null
+      to: &id004
+        path: schematic/redraw/fig-2.vsdx
+        hash: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+- fig_id: fig-2
+  at: '2026-10-20T10:52:52+00:00'
+  date: '2026-10-20'
+  by: demo-author
+  supersedes: ed38e26876d43beb8e7a25a47f6ab6d17b48c806b78174436d4ca188f8c029e6
+  row_hash: 9ce8c0d7d1202ab3c10ee140cf3923f5267de88a68d3502c7129b305e0b393fc
+  changes:
+    label_check:
+      from:
+        done: false
+        by: null
+        at: null
+      to: *id003
+- fig_id: fig-2
+  at: '2026-10-20T10:52:55+00:00'
+  date: '2026-10-20'
+  by: light-figure redraw build
+  supersedes: 9ce8c0d7d1202ab3c10ee140cf3923f5267de88a68d3502c7129b305e0b393fc
+  row_hash: 4b52e0e7c75812d683e5780e8a445072f39512aff1c4e3989a8fa1b61e00c8ba
+  changes:
+    redraw_source:
+      from: *id004
+      to: *id005

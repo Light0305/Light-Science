@@ -1,0 +1,49 @@
+fig_id: fig-2
+line: schematic
+core_conclusion: 方法以视频级统计量预测逐轨迹阈值，全程无需逐视频人工调参。
+results_question: 读者能否一段内复述检测—跟踪—预测—判定流水线？
+archetype: schematic_led_composite
+panel_map:
+- panel_id: a
+  role: setup_schematic
+  content: 棚舍视频输入与多目标跟踪轨迹
+  evidence_tier: hero
+- panel_id: b
+  role: mechanistic_evidence
+  content: 视频级统计量 → 阈值预测 → 逐轨迹应用 → 异常标记
+  evidence_tier: validation
+evidence_requirements:
+  statistics: none
+  source_data: none
+  image_integrity_notes: 示意图无实验图像，代表性不适用
+density_stance:
+  stance: density_first
+  reason: 方法图须自包含复述全部模块与数据流
+export_contract_ref:
+  journal_contract: journal_contract.yaml
+  overrides: []
+reviewer_risk:
+- risk: 示意模块与论文方法节命名不一致
+  disposition: 六个模块标签与方法节小节标题逐字对齐
+data_integrity:
+  exclusions: none
+sister_library_refs:
+  method_gallery:
+    entry_id: MG-DEMO-SEED-001
+    version: '0.1'
+    style_anchor: anchor-pipeline-flow
+    prompt_version: '1'
+  visio_components:
+  - component_id: VC-DEMO-SEED-ARROW
+    version: '0.1'
+  data_gallery: null
+policy_check:
+  policy_snapshot_ref: figure.yaml#ai_policy_snapshot
+  reference_not_in_delivery: true
+  degradation_path: normal
+role_palette_ref:
+  entry_id: PAL-ROLE-METHOD
+  version: '1.2'
+palette_confirmation:
+  confirmed_by: demo-author
+  confirmed_at: '2026-10-20'

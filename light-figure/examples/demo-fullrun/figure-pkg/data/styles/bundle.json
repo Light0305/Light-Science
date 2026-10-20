@@ -1,0 +1,95 @@
+{
+  "kind": "light-figure/style-bundle",
+  "journal": "Demo Journal (Nature Figure Guide anchors)",
+  "journal_version": "2026",
+  "columns_mm": {
+    "single": 89.0,
+    "double": 183.0
+  },
+  "max_height_mm": 170.0,
+  "font": {
+    "family": "Arial",
+    "base_pt": 7.0,
+    "small_pt": 6.0,
+    "glyph_floor_pt": 5.0
+  },
+  "palettes": {
+    "categorical": {
+      "entry_id": "PAL-OI-8",
+      "version": "2002.1",
+      "palette_type": "categorical",
+      "perceptually_uniform": false,
+      "colorblind_safe": true,
+      "grayscale_ordered": false,
+      "license": "public domain（Okabe & Ito 2002 通用色板）",
+      "data_version": "Okabe-Ito 2002",
+      "colors": [
+        "#e69f00",
+        "#56b4e9",
+        "#009e73",
+        "#f0e442",
+        "#0072b2",
+        "#d55e00",
+        "#cc79a7",
+        "#000000"
+      ]
+    },
+    "continuous": {
+      "entry_id": "PAL-BATLOW",
+      "version": "8.0",
+      "palette_type": "sequential",
+      "perceptually_uniform": true,
+      "colorblind_safe": true,
+      "grayscale_ordered": true,
+      "license": "CC BY 4.0（Fabio Crameri scientific colour maps）",
+      "data_version": "8.0",
+      "colors": [
+        "#011959",
+        "#0d315d",
+        "#114360",
+        "#175262",
+        "#226061",
+        "#356a59",
+        "#4d734d",
+        "#677b3e",
+        "#828231",
+        "#a18a2b",
+        "#c09036",
+        "#dd954d",
+        "#f29d6d",
+        "#fca993",
+        "#fdb4b6",
+        "#fcc0d8",
+        "#faccfa"
+      ]
+    }
+  },
+  "rcparams": {
+    "font.family": "Arial",
+    "font.size": 7.0,
+    "axes.titlesize": 7.0,
+    "axes.labelsize": 7.0,
+    "xtick.labelsize": 6.0,
+    "ytick.labelsize": 6.0,
+    "legend.fontsize": 6.0,
+    "axes.prop_cycle_colors": [
+      "#e69f00",
+      "#56b4e9",
+      "#009e73",
+      "#f0e442",
+      "#0072b2",
+      "#d55e00",
+      "#cc79a7",
+      "#000000"
+    ],
+    "image.cmap": "light_seq",
+    "pdf.fonttype": 42,
+    "svg.fonttype": "none",
+    "ps.fonttype": 42,
+    "savefig.dpi": 300,
+    "axes.spines.top": false,
+    "axes.spines.right": false
+  },
+  "default_panel_aspect": 0.75,
+  "style_build_hash": "f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f"
+}

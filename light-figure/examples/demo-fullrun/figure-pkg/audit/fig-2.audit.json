@@ -1,0 +1,123 @@
+{
+  "kind": "light-figure/audit",
+  "fig_id": "fig-2",
+  "line": "schematic",
+  "artifact": "schematic/redraw/fig-2.vsdx",
+  "artifact_sha256": "34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0",
+  "audited_at": "2026-10-20T10:52:57+00:00",
+  "tool_version": "0.2.0",
+  "tolerances": {
+    "alignment_pt": 1.5,
+    "collision_inset_pt": 0.6,
+    "collision_min_overlap_ratio": 0.05,
+    "collision_clip_pt": 0.5,
+    "collision_background_exempt_ratio": 0.2,
+    "glyph_floor_pt": 5.0
+  },
+  "gates": {
+    "alignment": {
+      "gate": "alignment",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "alignment.not_applicable",
+          "message": "对齐门量测对象是数据图最终 PDF 的 plot-area 矩形"
+        }
+      ],
+      "metrics": {}
+    },
+    "collisions": {
+      "gate": "collisions",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "collisions.not_applicable",
+          "message": "碰撞门量测对象是最终 PDF 几何；方法图 Phase 2 无 PDF 交付物"
+        }
+      ],
+      "metrics": {}
+    },
+    "glyph": {
+      "gate": "glyph",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "glyph.not_applicable",
+          "message": "字形门量测对象是最终 PDF 内容流 Tf；方法图 Phase 2 无 PDF 交付物"
+        }
+      ],
+      "metrics": {}
+    },
+    "contract": {
+      "gate": "contract",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "contract.ok",
+          "message": "尺寸/格式/文本/色板与期刊合同相符"
+        }
+      ],
+      "metrics": {
+        "route": "file_build",
+        "build_recorded": true
+      }
+    },
+    "native": {
+      "gate": "native",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "native.ok",
+          "message": "首页 12 个原生形状、位图 0 个均有登记"
+        }
+      ],
+      "metrics": {
+        "page1_shapes": 12,
+        "media": [],
+        "raster_count": 0,
+        "declared_residues": []
+      }
+    },
+    "honesty": {
+      "gate": "honesty",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "honesty.not_applicable",
+          "message": "诚实门只审数据图（拍板 D6）"
+        }
+      ],
+      "metrics": {}
+    },
+    "policy_block": {
+      "gate": "policy_block",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "policy_block.clear",
+          "message": "交付集 2 个文件均与参考图哈希不符（重绘成品不拦）"
+        }
+      ],
+      "metrics": {
+        "checked_files": 2,
+        "reference_hash_prefix": "ede26be2a7fc"
+      }
+    }
+  },
+  "overall": "PASS",
+  "review_dispositions": {}
+}

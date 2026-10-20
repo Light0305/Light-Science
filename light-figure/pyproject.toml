@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-figure"
+version = "1.0.0"
+description = "Light-Figure：承接 Write 图表清单的图包——图合同先行、双线生成（数据图代码线 / 方法图提示词→Visio 重绘线）、审计门与 provenance 一本账（Light-Science 子技能）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    # 审计引擎在最终 PDF 上实测几何/字形（对齐/碰撞/字形三门，
+    # 学 Yuan 审计器形态）；缺此依赖时三门如实落 NOT_AUDITABLE。
+    "PyMuPDF>=1.24",
+    # 数据图生产路径的执行后端（默认 Python 线）与样式编译
+    # 的色板/cmap 注册；R 线只产 theme 文本产物，不在此执行。
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-figure = "light_figure.cli:main"
+
+[tool.setuptools]
+packages = ["light_figure"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

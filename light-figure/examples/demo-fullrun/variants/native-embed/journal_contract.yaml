@@ -1,0 +1,37 @@
+registered: true
+journal: Demo Journal (Nature Figure Guide anchors)
+version: '2026'
+checked_at: '2026-10-20'
+source_url: https://research-figure-guide.nature.com/
+columns_mm:
+  single: 89.0
+  double: 183.0
+max_height_mm: 170.0
+font:
+  family: Arial
+  min_pt: 5.0
+  max_pt: 7.0
+  glyph_floor_pt: 5.0
+formats_main:
+- pdf
+- eps
+- svg
+preview:
+  tiff_dpi: 600
+  png: true
+palettes:
+  categorical:
+    entry_id: PAL-OI-8
+    version: '2002.1'
+  continuous:
+    entry_id: PAL-BATLOW
+    version: '8.0'
+tolerances:
+  alignment_pt: 1.5
+  collision_inset_pt: 0.6
+  collision_min_overlap_ratio: 0.05
+  collision_clip_pt: 0.5
+  collision_background_exempt_ratio: 0.2
+  glyph_floor_pt: 5.0
+tolerance_exemptions: []
+overrides: []

@@ -1,0 +1,66 @@
+kind: light-figure/delivery
+version: 1
+status: current
+tool_version: 0.2.0
+package_id: turkey-behaviour-figures-light-figure-de_1b4072
+package_status: audited
+generated_at: '2026-10-20'
+generated_by: demo-author
+numbering:
+  frozen: true
+  frozen_at: '2026-10-20'
+  frozen_by: demo-author
+figures:
+- fig_id: fig-1
+  kind: data
+  line: data
+  caption_hash: a245711a459b070db1297dfe3822f338d3c7e0a4b2a489b5442be3480eeaa427
+  files:
+  - path: exports/fig-1.pdf
+    sha256: bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8
+    role: main_pdf
+  - path: data/previews/fig-1.png
+    sha256: 9c686724311c8238b48c4669b2140d11a1c8e32317be553fc48c83275bc34622
+    role: preview
+  provenance:
+    backend: python
+    runtime_version: python 3.12.3 / matplotlib 3.11.2
+    script_hash: 78f0a48f885d19192a8b8164e62a6fb2f3c5fee7774c9d6670a24e19832cc77f
+    source_data_hash: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
+    style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
+    palette_registry_version: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+- fig_id: fig-2
+  kind: schematic
+  line: schematic
+  caption_hash: a3d95f89b2ffb95e272326d0d15397eac32f34389d81a31b2125ec91eb767f38
+  files:
+  - path: schematic/redraw/fig-2.vsdx
+    sha256: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+    role: visio_source
+  visio_verified: false
+  visio_note: 文件级路线产物，未过 Visio 实机验证（拍板 D4：如实标注）
+  provenance:
+    ledger_ref: provenance.yaml#fig-2
+    prompt_version: '1'
+    generation_model: &id001
+      name: local PIL script (demo stand-in)
+      version: run_demo.py
+    reference_image_hash: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
+    redraw_source:
+      path: schematic/redraw/fig-2.vsdx
+      hash: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+  ai_disclosure:
+    generation_model: *id001
+    prompt_version: '1'
+    redraw_route: file_build
+    reference_not_in_delivery: true
+  sister_library_refs:
+    method_gallery:
+      entry_id: MG-DEMO-SEED-001
+      version: '0.1'
+      style_anchor: anchor-pipeline-flow
+      prompt_version: '1'
+    visio_components:
+    - component_id: VC-DEMO-SEED-ARROW
+      version: '0.1'
+    data_gallery: null

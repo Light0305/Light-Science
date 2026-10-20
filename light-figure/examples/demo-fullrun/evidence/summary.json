@@ -1,0 +1,53 @@
+{
+  "final_status": "delivered",
+  "final_advanced": true,
+  "delivery": {
+    "delivery": "exports/delivery.yaml",
+    "version": 1,
+    "figures": [
+      "fig-1",
+      "fig-2"
+    ],
+    "numbering_frozen": true
+  },
+  "audit_overall": {
+    "fig-1": "PASS",
+    "fig-2": "PASS"
+  },
+  "audit_gates": {
+    "fig-1": {
+      "alignment": "PASS",
+      "collisions": "PASS",
+      "glyph": "PASS",
+      "contract": "PASS",
+      "honesty": "PASS"
+    },
+    "fig-2": {
+      "contract": "PASS",
+      "native": "PASS",
+      "policy_block": "PASS"
+    }
+  },
+  "variant_honesty_inverted": {
+    "overall": "FIX_BEFORE_DELIVERY",
+    "artifact": "exports/fig-1.pdf",
+    "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+    "gates": {
+      "alignment": "PASS",
+      "collisions": "PASS",
+      "glyph": "PASS",
+      "contract": "PASS",
+      "honesty": "FIX_BEFORE_DELIVERY"
+    }
+  },
+  "variant_native_embed": {
+    "overall": "FIX_BEFORE_DELIVERY",
+    "artifact": "schematic/redraw/fig-2.vsdx",
+    "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+    "gates": {
+      "contract": "PASS",
+      "native": "FIX_BEFORE_DELIVERY",
+      "policy_block": "PASS"
+    }
+  }
+}

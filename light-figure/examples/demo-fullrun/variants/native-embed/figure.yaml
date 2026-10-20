@@ -1,0 +1,60 @@
+package_id: turkey-behaviour-figures-light-figure-de_1b4072
+title: Turkey Behaviour Figures (Light-Figure demo)
+status: produced
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-figure init
+- state: contracted
+  at: '2026-10-20'
+  by: light-figure advance
+- state: produced
+  at: '2026-10-20'
+  by: light-figure advance
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+intake:
+  source_kind: write_manifest
+  source_ref: ../../inputs/figures_manifest.yaml
+  source_hash: 149813eb3d18eae4bed1decf2c5360d3d50b49f4c167844d59549324c9524ecd
+  intake_at: '2026-10-20'
+  by: demo-author
+  entries_snapshot:
+  - figure_id: fig-1
+    kind: data
+    line: data
+    intext_anchor: results:p2
+    caption_draft_hash: a245711a459b070db1297dfe3822f338d3c7e0a4b2a489b5442be3480eeaa427
+  - figure_id: fig-2
+    kind: schematic
+    line: schematic
+    intext_anchor: methods:p1
+    caption_draft_hash: a3d95f89b2ffb95e272326d0d15397eac32f34389d81a31b2125ec91eb767f38
+target_journal:
+  template_record_id: TPL-DEMO-001
+  journal_contract_ref: journal_contract.yaml
+  ai_policy_snapshot:
+    ai_images_prohibited: true
+    exhibit_exemption: null
+    disclosure_required: true
+    source_url: https://example.org/ai-policy-demo-fixture
+    verified_at: '2026-10-20'
+    review_cycle_days: 180
+figures:
+- fig_id: fig-1
+  kind: data
+  line: data
+  contract_ref: contracts/fig-1.yaml
+  backend: python
+  stage: produced
+  audit_final: pending
+  delivery_status: pending
+- fig_id: fig-2
+  kind: schematic
+  line: schematic
+  contract_ref: contracts/fig-2.yaml
+  backend: null
+  stage: produced
+  audit_final: pending
+  delivery_status: pending
+reflux: []

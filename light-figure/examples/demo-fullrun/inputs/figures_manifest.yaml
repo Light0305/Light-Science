@@ -1,0 +1,13 @@
+figures:
+- caption: 'Three tracker-threshold strategies on the turkey-barn benchmark: per-segment
+    MOTA (a) and arm means with 95% CI across segments (b).'
+  figure_id: fig-1
+  intext_refs:
+  - results:p2
+  kind: data
+- caption: Pipeline of the zero-tuning threshold-prediction method for abnormal turkey
+    behaviour detection.
+  figure_id: fig-2
+  intext_refs:
+  - methods:p1
+  kind: schematic

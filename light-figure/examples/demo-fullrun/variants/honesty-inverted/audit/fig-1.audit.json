@@ -1,0 +1,127 @@
+{
+  "kind": "light-figure/audit",
+  "fig_id": "fig-1",
+  "line": "data",
+  "artifact": "exports/fig-1.pdf",
+  "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+  "audited_at": "2026-10-20T10:52:54+00:00",
+  "tool_version": "0.2.0",
+  "tolerances": {
+    "alignment_pt": 1.5,
+    "collision_inset_pt": 0.6,
+    "collision_min_overlap_ratio": 0.05,
+    "collision_clip_pt": 0.5,
+    "collision_background_exempt_ratio": 0.2,
+    "glyph_floor_pt": 5.0
+  },
+  "gates": {
+    "alignment": {
+      "gate": "alignment",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "alignment.within_tolerance",
+          "message": "全部可比组边偏差 ≤ 1.5 pt"
+        }
+      ],
+      "metrics": {
+        "panels": 2,
+        "max_deviation_pt": 0.0,
+        "tolerance_pt": 1.5,
+        "exemptions": []
+      }
+    },
+    "collisions": {
+      "gate": "collisions",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [],
+      "metrics": {
+        "text_boxes": 27,
+        "fail": 0,
+        "warn": 0,
+        "contained_info": 0
+      }
+    },
+    "glyph": {
+      "gate": "glyph",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "glyph.above_floor",
+          "message": "实测最小字号 6.00 pt ≥ 地板 5.0 pt"
+        }
+      ],
+      "metrics": {
+        "min_pt": 6.0,
+        "samples": 30,
+        "floor_pt": 5.0,
+        "below_floor": 0
+      }
+    },
+    "contract": {
+      "gate": "contract",
+      "applicable": true,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "contract.ok",
+          "message": "尺寸/格式/文本/色板与期刊合同相符"
+        }
+      ],
+      "metrics": {
+        "width_mm": 183.0,
+        "height_mm": 47.58,
+        "text_spans": 27
+      }
+    },
+    "native": {
+      "gate": "native",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "native.not_applicable",
+          "message": "原生性门只审方法图 .vsdx"
+        }
+      ],
+      "metrics": {}
+    },
+    "honesty": {
+      "gate": "honesty",
+      "applicable": true,
+      "verdict": "FIX_BEFORE_DELIVERY",
+      "findings": [
+        {
+          "level": "fail",
+          "code": "honesty.reversed_axis",
+          "message": "轴 y 为反转轴（direction=decreasing）：D6 分层硬度——反转轴阻断（Pandey 2015：反转轴错误结论率 79%）"
+        }
+      ],
+      "metrics": {
+        "axes_checked": 2
+      }
+    },
+    "policy_block": {
+      "gate": "policy_block",
+      "applicable": false,
+      "verdict": "PASS",
+      "findings": [
+        {
+          "level": "info",
+          "code": "policy_block.not_applicable",
+          "message": "政策硬拦对象是方法图的 AI 参考图本体（数据图无参考图）"
+        }
+      ],
+      "metrics": {}
+    }
+  },
+  "overall": "FIX_BEFORE_DELIVERY",
+  "review_dispositions": {}
+}
