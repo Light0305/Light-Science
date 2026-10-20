@@ -1,0 +1,7 @@
+# Discussion
+
+The comparison at the centre of this study is reported descriptively: across the held-out segments, a difference between the predicted-threshold arm and the fixed-threshold arm was observed [claim:C1]. The analysis lines behind this comparison were not tested and returned no verdict [rev:RC001]. The analysis lines are untested or undetermined, and the effect estimates carry wide uncertainty, so the difference is stated here as an observation from a synthetic demonstration rather than as evidence that predicted thresholds improve detection.
+
+Several limits bound this account. The study rests on a single-barn setting and on a modest number of held-out segments, so the observed difference may not transfer to other barns, cameras, or species. The segment-level pairing of arms was not modelled, which leaves the uncertainty around each comparison wider than a paired analysis would report. The control arm showed wide segment-to-segment spread, and that spread dominates the uncertainty of the whole comparison. Widening the set of held-out segments under the same frozen criteria is the step that would give the comparison a firmer basis.
+
+Within these limits, the study records a complete and auditable account of how the comparison was produced: frozen configurations, recorded deviations, and analysis lines whose verdicts are stated without being strengthened in the telling.

@@ -1,0 +1,16 @@
+locked: true
+terms:
+- canonical: predicted-threshold arm
+  first_use_full: predicted-threshold arm (thresholds predicted from video-level statistics)
+  variants:
+  - prediction arm
+  - predicted arm
+- canonical: fixed-threshold arm
+  first_use_full: fixed-threshold arm (thresholds carried over from earlier work)
+  variants:
+  - fixed arm
+- canonical: held-out segment
+  first_use_full: held-out segment (a video segment excluded from all tuning)
+  variants:
+  - holdout segment
+  - held out segment

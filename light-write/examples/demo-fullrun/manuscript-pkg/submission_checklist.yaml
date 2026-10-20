@@ -1,0 +1,62 @@
+items:
+- item_id: CHK-01
+  source: journal_requirement
+  requirement: 引言须交代研究空白与本研究目的
+  status: addressed
+  tier: baseline
+  stage: initial
+  applicability: required
+  location:
+    kind: section
+    file: 01-introduction.md
+    anchor: has not been examined
+- item_id: CHK-02
+  source: declaration
+  requirement: 数据可用性声明在场且与 datasets 映射一致
+  status: addressed
+  tier: baseline
+  stage: initial
+  applicability: required
+  location:
+    kind: declarations
+    key: data_availability
+- item_id: CHK-03
+  source: reporting_guideline:preregistration
+  requirement: 方法节须述明预注册分析计划
+  status: addressed
+  tier: full
+  stage: initial
+  applicability: required
+  location:
+    kind: section
+    file: 02-methods.md
+    anchor: preregistered analysis plan
+- item_id: stats-independent-unit
+  tier: baseline
+  requirement: Independent experimental unit defined; biological/technical replicates
+    and repeated measures reported separately (no pseudo-replication)
+  stage: initial
+  applicability: required
+  status: addressed
+  source: light-write D-W14 (nature-statistics)
+  location:
+    kind: section
+    file: 02-methods.md
+    anchor: independent experimental unit
+  note: add-stats 初始形态为 status=open + AUTHOR_INPUT_NEEDED 占位锚；演示中由作者补落点后置 addressed（D-W14
+    口径）
+- item_id: stats-claim-analysis-map
+  tier: baseline
+  requirement: 'Claim-to-analysis mapping present: comparison/model, test family,
+    assumptions, multiplicity correction, effect size, uncertainty, exact-p policy;
+    missing fields marked AUTHOR_INPUT_NEEDED, never invented'
+  stage: initial
+  applicability: required
+  status: addressed
+  source: light-write D-W14 (nature-statistics)
+  location:
+    kind: section
+    file: 02-methods.md
+    anchor: claim-to-analysis mapping
+  note: add-stats 初始形态为 status=open + AUTHOR_INPUT_NEEDED 占位锚；演示中由作者补落点后置 addressed（D-W14
+    口径）

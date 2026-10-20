@@ -1,0 +1,25 @@
+figures:
+- figure_id: F001
+  kind: figure
+  status: backfilled
+  source_ref: assets/fig1_threshold_arms.svg
+  source_hash: 7f3f0c76bf958ac7380631ef5bfbf37de56b063e20cfcd74d025f3a5b4a5d1a8
+  caption: Distribution of segment-level scores for the fixed-threshold arm, the oracle
+    arm, and the predicted-threshold arm; each distribution summarises held-out segments,
+    the replication unit of the study.
+  caption_text_hash: 3eb622455a76f0e505ed347f3da6d92de1eee5d371a5794922f7d94aef02daba
+  intext_refs:
+  - file: 03-results.md
+    line: 5
+  display_number: 1
+  display_label: Figure 1
+numbering:
+  frozen: true
+  frozen_at: '2026-10-20'
+  order: &id001
+  - F001
+  changes:
+  - at: '2026-10-20'
+    action: freeze
+    order: *id001
+    manuscript_hash: 62270e26a533ccab9ef7e624a1cb905f2795330b6188905a1b03646b4a1b8370

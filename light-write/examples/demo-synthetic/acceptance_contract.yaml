@@ -1,0 +1,7 @@
+kind: light-write/acceptance-contract
+version: '1.0'
+status: draft
+frozen: false
+frozen_at: null
+content_hash: null
+assertions: []

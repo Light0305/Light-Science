@@ -1,0 +1,28 @@
+numbers:
+- num_id: N001
+  value_as_printed: '5.25'
+  trace_ref: R-ORA#v1
+  verdict_ref: R-ORA
+  spec_ref: S001
+  calc_provenance: welch_effect_and_ci
+  locations:
+  - section: 03-results.md
+  rounding: 呈现 2 位小数，半上舍入自溯源值 5.249333…
+- num_id: N002
+  value_as_printed: '5.20'
+  trace_ref: R-PRED#v1
+  verdict_ref: R-PRED
+  spec_ref: S001
+  calc_provenance: welch_effect_and_ci
+  locations:
+  - section: 03-results.md
+  rounding: 呈现 2 位小数，半上舍入自溯源值 5.197833…
+- num_id: N003
+  value_as_printed: '0.0'
+  trace_ref: R-FIX#v1
+  verdict_ref: R-FIX
+  spec_ref: S001
+  calc_provenance: welch_effect_and_ci
+  locations:
+  - section: 03-results.md
+  rounding: 呈现 1 位小数，溯源值 0.0

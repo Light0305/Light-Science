@@ -1,0 +1,26 @@
+bound_manuscript_hash: 182d184263f470b7bd1e721b106ef429d0bf7f249c24991d64125dc745b8115b
+bound_at: '2026-10-20'
+responses:
+- comment_id: RC001
+  decision: accept
+  rationale: 已在主张句后紧邻处新增一句明示句：支撑该比较的分析行未获检验且未出判定，比较在本稿中仅作局限性记述（[rev:RC001] 实位见讨论节第一段）。
+  change_anchors:
+  - file: 04-discussion.md
+    marker: RC001
+  responded_at: '2026-10-20'
+- comment_id: RC002
+  decision: accept
+  rationale: 已在方法节首次出现处补入 held-out segment 的定义从句：一段连续录像，且在运行开始前即被排除于一切阈值调参与配置选择之外（[rev:RC002]
+    实位见方法节第三段）。
+  change_anchors:
+  - file: 02-methods.md
+    marker: RC002
+  responded_at: '2026-10-20'
+- comment_id: RC003
+  decision: partial
+  rationale: 已改图注：点名每条分布汇总的是 held-out segments（本研究的复制单元），图注经 figures caption 重登记且与正文逐字一致（[rev:RC003]
+    实位见结果节首段）。部分接受理由：审稿人附带期望的逐段原始分数附表属补充材料范畴，本轮不新增，留待正式投稿轮次随补充材料一并处理。
+  change_anchors:
+  - file: 03-results.md
+    marker: RC003
+  responded_at: '2026-10-20'

@@ -1,0 +1,40 @@
+claims:
+- claim_id: C1
+  analysis_claim_ref: C1
+  upstream_status: untested
+  strength_grade: insufficient
+  cap_reason: 主张含未检验行，强度封顶 insufficient；Type M 最差值 4.35 > 2.0，封顶 suggestive
+  line_verdicts:
+    R-FIX: undetermined
+    R-ORA: undetermined
+    R-PRED: undetermined
+    R-NEG: untested
+    R-LONG: undetermined
+  writable_ceiling: limitations_only
+  writable_form: limitations_only
+  form_choice_note: intake 按规则表导出上限形态（untested×insufficient）
+  wording_ceiling:
+    language: en
+    grade: insufficient
+    ceiling_label: minimal
+    allowed_terms:
+    - was observed
+    - is reported descriptively
+    banned_terms:
+    - proves
+    - proved
+    - proof that
+    - no effect
+    - not significant
+    - highly significant
+  claim_text: null
+  text_hash: null
+  manuscript_locations: []
+  evidence_refs:
+  - kind: analysis_verdict_lines
+    refs:
+    - R-FIX
+    - R-LONG
+    - R-NEG
+    - R-ORA
+    - R-PRED

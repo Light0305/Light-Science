@@ -1,0 +1,30 @@
+comments:
+- comment_id: RC001
+  reviewer: Reviewer 1
+  text: 讨论节对中心比较的表述可能被读成确认性结论：主张句旁须明示支撑该比较的分析行未获检验、未出判定（与 C1 登记的判定状态一致），使 limitations_only
+    的落法在正文自明。
+  category: major
+  claim_ids:
+  - C1
+  section_ids:
+  - S-discussion
+  round: 1
+  registered_at: '2026-10-20'
+- comment_id: RC002
+  reviewer: Reviewer 2
+  text: 独立实验单元须在方法节首次出现处给出定义（held-out segment 的纳入准则），而非仅在后文默认读者已知。
+  category: minor
+  claim_ids: []
+  section_ids:
+  - S-methods
+  round: 1
+  registered_at: '2026-10-20'
+- comment_id: RC003
+  reviewer: Reviewer 1
+  text: 图注须点名复制单元，使读者不看正文也能知道每条分布的观测单位。
+  category: minor
+  claim_ids: []
+  section_ids:
+  - S-results
+  round: 1
+  registered_at: '2026-10-20'

@@ -1,0 +1,80 @@
+{
+  "kind": "light-write/references-lock",
+  "version": "1.0",
+  "generated_at": "2026-10-20T08:59:40+00:00",
+  "source": {
+    "path": "../../../../light-literature/examples/demo-find/Literature/候选池.jsonl",
+    "set_hash": "4281319cb286d278306d8caac114fb4def4222403e42c6f64cbc35247cd7cc11",
+    "entry_count": 4
+  },
+  "entries": [
+    {
+      "key": "dong2025-is",
+      "entry_id": "ST001",
+      "doi": "10.1109/aiccsa66935.2025.11315233",
+      "title": "Is Attention All Security Domain Needs? A Systematic Review of Self-attention Mechanism in Cybersecurity",
+      "authors": [
+        "Huiyao Dong"
+      ],
+      "year": 2025,
+      "venue": "2025 IEEE/ACS 22nd International Conference on Computer Systems and Applications (AICCSA)",
+      "entry_type": "proceedings-article",
+      "verified_by": "light-literature verify-identity",
+      "verified_at": "2026-10-19T17:33:30+00:00",
+      "retraction_state": "clean",
+      "retraction_note": null,
+      "entry_hash": "4f1d00ed53971e70b8ae8108ca2a6381b7051e80594d37d8e1f3c550b95b29c2"
+    },
+    {
+      "key": "bai2021-enet",
+      "entry_id": "ST002",
+      "doi": "10.21203/rs.3.rs-425438/v1",
+      "title": "Enet Semantic Segmentation Combined with Attention Mechanism",
+      "authors": [
+        "Wei Bai"
+      ],
+      "year": 2021,
+      "venue": "",
+      "entry_type": "posted-content",
+      "verified_by": "light-literature verify-identity",
+      "verified_at": "2026-10-19T17:33:31+00:00",
+      "retraction_state": "clean",
+      "retraction_note": null,
+      "entry_hash": "b464ae43d6e9478398b0c8958f02f0b40de42e6f1ea7274ca41550f590f8576a"
+    },
+    {
+      "key": "2023-review",
+      "entry_id": "ST003",
+      "doi": "10.1002/mhs2.26/v1/review1",
+      "title": "Review for \"Examining adverse childhood experiences and attention deficit/hyperactivity disorder: A systematic review\"",
+      "authors": [],
+      "year": 2023,
+      "venue": "",
+      "entry_type": "peer-review",
+      "verified_by": "light-literature verify-identity",
+      "verified_at": "2026-10-19T17:33:33+00:00",
+      "retraction_state": "clean",
+      "retraction_note": null,
+      "entry_hash": "5ff23c725c2896606b2edced8c55b3271af3ce5b4345411d3a105cc95eac5900"
+    },
+    {
+      "key": "wang2022-attention",
+      "entry_id": "ST005",
+      "doi": "10.1109/access.2022.3147726",
+      "title": "Attention-Based Applications in Extended Reality to Support Autistic Users: A Systematic Review",
+      "authors": [
+        "Katherine Wang",
+        "Simon Julier",
+        "Youngjun Cho"
+      ],
+      "year": 2022,
+      "venue": "arXiv",
+      "entry_type": "preprint",
+      "verified_by": "light-literature verify-identity",
+      "verified_at": "2026-10-19T17:33:36+00:00",
+      "retraction_state": "clean",
+      "retraction_note": null,
+      "entry_hash": "55b05e75d42fee01ddd6e3a4a1199e5263d2c8573bf301c83c4996dd4f11973e"
+    }
+  ]
+}

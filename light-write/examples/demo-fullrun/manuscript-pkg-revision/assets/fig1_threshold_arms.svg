@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="white"/>
+  <text x="320" y="30" text-anchor="middle" font-family="sans-serif" font-size="15">Segment-level scores by arm (synthetic demo figure)</text>
+  <line x1="80" y1="300" x2="580" y2="300" stroke="black"/>
+  <line x1="80" y1="300" x2="80" y2="60" stroke="black"/>
+  <rect x="130" y="150" width="70" height="150" fill="#8aa8c8"/>
+  <rect x="290" y="90" width="70" height="210" fill="#c8a88a"/>
+  <rect x="450" y="95" width="70" height="205" fill="#8ac8a0"/>
+  <text x="165" y="325" text-anchor="middle" font-family="sans-serif" font-size="12">fixed-threshold arm</text>
+  <text x="325" y="325" text-anchor="middle" font-family="sans-serif" font-size="12">oracle arm</text>
+  <text x="485" y="325" text-anchor="middle" font-family="sans-serif" font-size="12">predicted-threshold arm</text>
+</svg>

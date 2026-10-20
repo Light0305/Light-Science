@@ -1,0 +1,7 @@
+# Introduction
+
+Automated detection of abnormal behaviour in housed animals depends on tracking pipelines whose decision thresholds are usually tuned by hand for each barn, camera, and lighting condition. Hand tuning is slow, hard to reproduce, and rarely reported in enough detail for another group to repeat it. A threshold rule that transfers across recordings without further tuning would remove a quiet source of variation between studies.
+
+Attention mechanisms have become a standard component of detection and segmentation pipelines, and their use has been surveyed repeatedly. A systematic review of self-attention mechanisms in an applied detection setting is given by [@dong2025-is], and attention-based applications have likewise been reviewed systematically by [@wang2022-attention]. These reviews describe where attention helps; they do not address how the decision thresholds of a tracking pipeline should be set, and threshold setting itself has not been examined as a study object in the sources available to this manuscript.
+
+This study therefore asks a narrower question: can the thresholds of a tracker be predicted from statistics of the video itself, computed before any tracking takes place? The question is examined on held-out segments with three arms, a fixed-threshold arm, an oracle arm, and a predicted-threshold arm. Because the analysis behind the comparison is incomplete, the study is reported as a descriptive account with explicit limitations rather than as a confirmatory test.

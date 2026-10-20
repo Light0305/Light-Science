@@ -1,0 +1,81 @@
+{
+  "kind": "light-write/audit-report",
+  "version": "1.0",
+  "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
+  "manuscript_hash": "467eb9dbbac2d594b9b6471e3b2547deed6c4fe25b088d27176cfc307deff7ea",
+  "audited_at": "2026-10-20T09:00:50+00:00",
+  "audited_date": "2026-10-20",
+  "online_mode": "offline",
+  "overall": "fail",
+  "gates": [
+    {
+      "gate": "citations",
+      "title": "门一 · 引用两段核对",
+      "status": "unverified",
+      "findings": [
+        {
+          "level": "warning",
+          "code": "cite.offline",
+          "message": "未注入在线权威记录：门一整门 honest-unverified——引用两段核对未执行，不许声称查过（约束 14）",
+          "where": null
+        }
+      ],
+      "details": {
+        "cited_count": 3,
+        "entries": [
+          {
+            "entry_id": "ST001",
+            "key": "dong2025-is",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          },
+          {
+            "entry_id": "ST002",
+            "key": "bai2021-enet",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          },
+          {
+            "entry_id": "ST005",
+            "key": "wang2022-attention",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          }
+        ],
+        "support_assessments": [],
+        "relevance_pending": []
+      }
+    },
+    {
+      "gate": "numbers",
+      "title": "门二 · 数字对账",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "numbers_checked": 3
+      }
+    },
+    {
+      "gate": "wording",
+      "title": "门三 · 强度措辞门",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "claim_sentences_checked": 1
+      }
+    },
+    {
+      "gate": "landing",
+      "title": "门四 · 落点映射复核",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "items_checked": 5,
+        "baseline_missing": []
+      }
+    }
+  ]
+}

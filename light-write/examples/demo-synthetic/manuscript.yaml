@@ -1,0 +1,58 @@
+manuscript_id: zero-tuning-tracker-thresholds-synthetic_7e1290
+title: Zero-tuning tracker thresholds (synthetic demo intake)
+language: en
+status: intake
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-write init
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+intake:
+  conclusion_card:
+    path: ../../../light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
+    sha256: 4d14ed3424d720312529b9a66f421f05fe73b199fb4352c5511b23e51cb11996
+    analysis_id: analysis-pkg
+    analysis_status: blocked
+    exported_at: '2026-10-20'
+    review_status: REVIEW_UNAVAILABLE
+    review_reason: 本环境仅单一模型家族（claude），无异家族复核者可用；按拍板③显式落 REVIEW_UNAVAILABLE，不伪造收据
+  card_claims_hash: 6b954637677db24835fc949139c896176893e1d76663ab397985e5223577cd95
+  number_provenance_hash: 48486ccc533dabcf5d005bd252e8d6048a7ffc17d8b75f94441b8211ae9760df
+  number_provenance_count: 9
+  claim_ids:
+  - C1
+  literature:
+    source_path: ../../../light-literature/examples/demo-find/Literature/候选池.jsonl
+    set_hash: 4281319cb286d278306d8caac114fb4def4222403e42c6f64cbc35247cd7cc11
+    entry_count: 4
+  intake_at: '2026-10-20'
+  intake_by: light-write phase1 demo
+  upstream_flags:
+  - 'analysis_not_delivered: 上游结论包状态为 blocked（非 delivered），主张按降级口径登记'
+  - 'analysis_review_status: REVIEW_UNAVAILABLE（原样落字）'
+target_journal: null
+authors: []
+guarantor: null
+declarations:
+  data_availability:
+    state: absent
+    note: null
+  ethics:
+    state: absent
+    note: null
+  conflict:
+    state: absent
+    note: null
+  funding:
+    state: absent
+    note: null
+use_log: []
+sections: []
+acceptance_contract:
+  file: acceptance_contract.yaml
+  status: unset
+  content_hash: null
+contract_contested: false
+submission_blocked_reason: null
+reflux: []

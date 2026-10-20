@@ -1,0 +1,49 @@
+{
+  "ST001": {
+    "exists": true,
+    "title": "Is Attention All Security Domain Needs? A Systematic Review of Self-attention Mechanism in Cybersecurity",
+    "authors": [
+      "Huiyao Dong"
+    ],
+    "year": 2025,
+    "venue": "2025 IEEE/ACS 22nd International Conference on Computer Systems and Applications (AICCSA)",
+    "doi": "10.1109/aiccsa66935.2025.11315233",
+    "doi_resolves": true,
+    "retraction_state": "clean",
+    "_fetched_from": "https://api.crossref.org/works/10.1109/aiccsa66935.2025.11315233",
+    "_fetched_at": "2026-10-20",
+    "_updates_total_results": 0
+  },
+  "ST002": {
+    "exists": true,
+    "title": "Enet Semantic Segmentation Combined with Attention Mechanism",
+    "authors": [
+      "Wei Bai"
+    ],
+    "year": 2021,
+    "venue": "",
+    "doi": "10.21203/rs.3.rs-425438/v1",
+    "doi_resolves": true,
+    "retraction_state": "clean",
+    "_fetched_from": "https://api.crossref.org/works/10.21203/rs.3.rs-425438/v1",
+    "_fetched_at": "2026-10-20",
+    "_updates_total_results": 0
+  },
+  "ST005": {
+    "exists": true,
+    "title": "Attention-Based Applications in Extended Reality to Support Autistic Users: A Systematic Review",
+    "authors": [
+      "Katherine Wang",
+      "Simon J. Julier",
+      "Youngjun Cho"
+    ],
+    "year": 2022,
+    "venue": "IEEE Access",
+    "doi": "10.1109/access.2022.3147726",
+    "doi_resolves": true,
+    "retraction_state": "clean",
+    "_fetched_from": "https://api.crossref.org/works/10.1109/access.2022.3147726",
+    "_fetched_at": "2026-10-20",
+    "_updates_total_results": 0
+  }
+}

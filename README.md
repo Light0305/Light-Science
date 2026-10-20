@@ -12,7 +12,7 @@
 | Light-Design | 设计：把想法落成可执行的研究/实验设计 | **v1.0 已发布**（light-design/） |
 | Light-Experiment | 实验：执行设计、记录过程与原始产物 | **v1.0 已发布**（light-experiment/） |
 | [Light-Analysis](light-analysis/) | 分析：按冻结登记行逐行回写正式判定，产出可审计的分析结论包 | **v1.0 已发布** |
-| Light-Write | 写作：基于证据行成稿，引用只走核实过的文献 | 规划中 |
+| [Light-Write](light-write/) | 写作：基于证据行成稿，引用只走核实过的文献 | **v1.0 已发布** |
 | Light-Figure | 作图：方法/机制图与数据图 | 规划中 |
 | Light-Review | 评审：成稿自审与投稿前检查 | 规划中 |
 | Light-Memory | 记忆：跨阶段沉淀、检索与 Obsidian 轻量图谱视图（贯穿全部阶段，最后建设） | 规划中 |

@@ -1,0 +1,675 @@
+=== init ===
+{
+  "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
+  "status": "intake",
+  "language": "en"
+}
+=== intake ===
+{
+  "claims_registered": [
+    "C1"
+  ],
+  "writable_forms": {
+    "C1": "limitations_only"
+  },
+  "literature_entries_locked": 4,
+  "upstream_flags": [
+    "analysis_not_delivered: 上游结论包状态为 blocked（非 delivered），主张按降级口径登记",
+    "analysis_review_status: REVIEW_UNAVAILABLE（原样落字）"
+  ],
+  "gaps": [
+    "主张 C1 上游未给规范文本：text_hash 未登记，登记期留空待补（不许临场编造）"
+  ]
+}
+=== register-template ===
+{
+  "template_record_id": "TPL-DEMO-FIXTURE-001",
+  "journal_name": "Journal of Synthetic Demonstrations (demo fixture, not a real journal)",
+  "record_hash": "6ccabf7a663e1ec5c50c031f96ea334a16d74ea5c763338b9a5cab4162f8947a",
+  "warnings": []
+}
+=== freeze-contract ===
+{
+  "status": "agreed",
+  "content_hash": "c3ba413a2a9f2a1d716a56a94ac494a399b3c202cfbf89a2897ff69cf19aa83a",
+  "assertions": 12,
+  "contested": false
+}
+=== validate (pre-outline) ===
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "level": "warning",
+      "code": "claims.text_pending",
+      "message": "主张 C1 规范文本未登记（text_hash 待补）",
+      "where": null
+    }
+  ],
+  "error_count": 0,
+  "warning_count": 1
+}
+=== advance -> outlined ===
+{
+  "advanced": true,
+  "from": "intake",
+  "to": "outlined",
+  "gaps": []
+}
+=== terms (预期触发变体错误) ===
+{
+  "ok": false,
+  "issues": [
+    {
+      "level": "error",
+      "code": "terms.variant_in_text",
+      "message": "术语账已锁定：变体 'prediction arm' 仍出现在 02-methods.md（canonical='predicted-threshold arm'）；改名 = 全稿替换 + 账本更新，本校验只报不改",
+      "where": "terminology:predicted-threshold arm"
+    }
+  ]
+}
+terms exit=1
+=== terms (修正后) ===
+{
+  "ok": true,
+  "issues": []
+}
+terms exit=0
+=== checklist add-stats ===
+{
+  "added": [
+    "stats-independent-unit",
+    "stats-claim-analysis-map"
+  ],
+  "total_items": 5
+}
+=== figures add/caption/delivered/sync/check ===
+{
+  "figure_id": "F001",
+  "kind": "figure",
+  "status": "placeholder",
+  "source_ref": null,
+  "source_hash": null,
+  "caption": null,
+  "caption_text_hash": null,
+  "intext_refs": [],
+  "display_number": null
+}
+{
+  "figure_id": "F001",
+  "caption_text_hash": "7fd799ab9591be809e96cab34855e0f914a6e2a2993c62607c5ea30c2db999fd"
+}
+{
+  "figure_id": "F001",
+  "status": "backfilled"
+}
+{
+  "synced": [
+    "F001"
+  ],
+  "figures_with_refs": [
+    "F001"
+  ]
+}
+{
+  "ok": true,
+  "findings": []
+}
+=== allocation (预期触发未入图出现处) ===
+{
+  "ok": false,
+  "issues": [
+    {
+      "level": "error",
+      "code": "allocation.unmapped_occurrence",
+      "message": "正文主张出现处未入位置图：C1 @ S-discussion（enforced 模式下每处出现须标功能）",
+      "where": "allocation:C1"
+    }
+  ]
+}
+allocation exit=1
+=== allocation (补全后) ===
+{
+  "ok": true,
+  "issues": []
+}
+=== validate (drafted 门前) ===
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "level": "warning",
+      "code": "claims.text_pending",
+      "message": "主张 C1 规范文本未登记（text_hash 待补）",
+      "where": null
+    }
+  ],
+  "error_count": 0,
+  "warning_count": 1
+}
+=== advance -> drafted ===
+{
+  "advanced": true,
+  "from": "outlined",
+  "to": "drafted",
+  "gaps": [],
+  "lock_narrowing": {
+    "cited": [
+      "ST001",
+      "ST002",
+      "ST005"
+    ],
+    "uncited": [
+      "ST003"
+    ]
+  }
+}
+=== disclose ===
+{
+  "generated": [
+    {
+      "position": "declarations",
+      "section_file": "05-declarations.md",
+      "text_hash": "9d3a1e2e72760dc5572edb595b6502992d535c9874598f8f226bd558e32bf4d0",
+      "policy_hash": "5d9129c8c839c5f492ada8c0c0d15fd3ad7cd61369746aa7ec9c34881b99cc42",
+      "use_log_hash": "e2ca9a93c2cef22bb123a1089a96726d7bf5dd97f0c2eb996a31a26b059c9d64",
+      "generated_at": "2026-10-20"
+    }
+  ],
+  "positions": [
+    "declarations"
+  ]
+}
+=== disclose-status ===
+{
+  "required": true,
+  "complete": true,
+  "stale": false,
+  "positions_recorded": [
+    "declarations"
+  ]
+}
+=== audit #1 (offline) ===
+{
+  "kind": "light-write/audit-report",
+  "version": "1.0",
+  "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
+  "manuscript_hash": "467eb9dbbac2d594b9b6471e3b2547deed6c4fe25b088d27176cfc307deff7ea",
+  "audited_at": "2026-10-20T09:00:50+00:00",
+  "audited_date": "2026-10-20",
+  "online_mode": "offline",
+  "overall": "fail",
+  "gates": [
+    {
+      "gate": "citations",
+      "title": "门一 · 引用两段核对",
+      "status": "unverified",
+      "findings": [
+        {
+          "level": "warning",
+          "code": "cite.offline",
+          "message": "未注入在线权威记录：门一整门 honest-unverified——引用两段核对未执行，不许声称查过（约束 14）",
+          "where": null
+        }
+      ],
+      "details": {
+        "cited_count": 3,
+        "entries": [
+          {
+            "entry_id": "ST001",
+            "key": "dong2025-is",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          },
+          {
+            "entry_id": "ST002",
+            "key": "bai2021-enet",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          },
+          {
+            "entry_id": "ST005",
+            "key": "wang2022-attention",
+            "identity": "honest-unverified",
+            "verification_status": "unverifiable",
+            "note": "无在线权威记录注入：本条未做在线核查（honest-unverified，不许声称查过）"
+          }
+        ],
+        "support_assessments": [],
+        "relevance_pending": []
+      }
+    },
+    {
+      "gate": "numbers",
+      "title": "门二 · 数字对账",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "numbers_checked": 3
+      }
+    },
+    {
+      "gate": "wording",
+      "title": "门三 · 强度措辞门",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "claim_sentences_checked": 1
+      }
+    },
+    {
+      "gate": "landing",
+      "title": "门四 · 落点映射复核",
+      "status": "pass",
+      "findings": [],
+      "details": {
+        "items_checked": 5,
+        "baseline_missing": []
+      }
+    }
+  ]
+}
+audit exit=1
+=== STALE 演示：改一字后 audit-status ===
+{
+  "exists": true,
+  "stale": true,
+  "overall": "fail",
+  "manuscript_hash": "467eb9dbbac2d594b9b6471e3b2547deed6c4fe25b088d27176cfc307deff7ea",
+  "current_hash": "62270e26a533ccab9ef7e624a1cb905f2795330b6188905a1b03646b4a1b8370",
+  "audited_at": "2026-10-20T09:00:50+00:00"
+}
+=== audit #2 (offline, 复审) ===
+audit exit=1
+overall: fail | hash: 62270e26a533
+citations unverified
+numbers pass
+wording pass
+landing pass
+=== audit-status (复审后) ===
+{
+  "exists": true,
+  "stale": false,
+  "overall": "fail",
+  "manuscript_hash": "62270e26a533ccab9ef7e624a1cb905f2795330b6188905a1b03646b4a1b8370",
+  "current_hash": "62270e26a533ccab9ef7e624a1cb905f2795330b6188905a1b03646b4a1b8370",
+  "audited_at": "2026-10-20T09:00:55+00:00"
+}
+=== audit #3 (support 缺逐字句，预期门一 error) ===
+audit exit=1
+gate1: unverified
+error cite.support_no_quote 条目 ST005 支撑判定为 partial 但无逐字支撑句：无逐字句不确认（双角色对抗协议，D-W12）
+warning cite.offline 未注入在线权威记录：门一整门 honest-unverified——引用两段核对未执行，不许声称查过（约束 14）
+=== audit #4 (online, Crossref 现拉记录注入) ===
+audit exit=0
+overall: pass | online_mode: injected
+— citations pass
+    warning cite.venue_variant venue 变体差异：lock 'arXiv' vs 权威 'IEEE Access'（缩写/全称等价口径，只警告）
+    warning cite.relevance_pending 相关性轴待人工/复核（不自动定罪）：['ST001', 'ST002', 'ST005']
+   entry ST001 verified_online verified negative
+   entry ST002 verified_online verified negative
+   entry ST005 verified_online check_suggested negative
+   support: [{'token': 'ST001', 'level': 'background', 'claim_id': None, 'rejection_reason': None}, {'token': 'ST002', 'level': 'partial', 'claim_id': None, 'rejection_reason': None}, {'token': 'ST005', 'level': 'background', 'claim_id': None, 'rejection_reason': None}]
+   relevance_pending: ['ST001', 'ST002', 'ST005']
+— numbers pass
+— wording pass
+— landing pass
+=== figures freeze ===
+{
+  "frozen": true,
+  "already": false,
+  "order": [
+    "F001"
+  ]
+}
+=== figures check (frozen) ===
+{
+  "ok": true,
+  "findings": []
+}
+=== advance -> audited ===
+{
+  "advanced": false,
+  "from": "drafted",
+  "to": "audited",
+  "gaps": [
+    "审计产物 STALE：稿件在审计后已变动（哈希漂移），须重跑 audit"
+  ]
+}
+=== review prepare ===
+{
+  "packet": "review_packet.md",
+  "packet_hash": "ea8fa3f03198083754c99d08149ca6716392708670c218c6ac0f16af8641f7a4",
+  "manuscript_hash": "447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794",
+  "prepared_at": "2026-10-20",
+  "scope_claim_ids": [
+    "C1"
+  ]
+}
+=== review unavailable ===
+usage: light-write [-h]
+                   {init,intake,register-template,freeze-contract,validate,advance,status,audit,audit-status,disclose,disclose-status,reverify-claim,review,revision,terms,allocation,checklist,figures}
+                   ...
+light-write: error: unrecognized arguments: --by light-write phase3 demo operator
+=== advance -> submission_ready (预期被拦) ===
+{
+  "advanced": false,
+  "from": "drafted",
+  "to": "audited",
+  "gaps": [
+    "审计产物 STALE：稿件在审计后已变动（哈希漂移），须重跑 audit"
+  ]
+}
+advance exit=1
+=== status (终点) ===
+{
+  "exists": true,
+  "readiness": "blocked",
+  "evidence_readiness_open_fact_markers": 0,
+  "open_directives": 0,
+  "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
+  "title": "Zero-tuning tracker thresholds predicted from video-level statistics (synthetic full-run demo)",
+  "language": "en",
+  "status": "drafted",
+  "claims": 1,
+  "lock_entries": 4,
+  "numbers": 3,
+  "figures": 1,
+  "target_journal": "Journal of Synthetic Demonstrations (demo fixture, not a real journal)",
+  "contract_status": "agreed",
+  "contract_contested": false,
+  "submission_blocked_reason": null,
+  "audit": {
+    "exists": true,
+    "stale": true,
+    "overall": "pass",
+    "manuscript_hash": "62270e26a533ccab9ef7e624a1cb905f2795330b6188905a1b03646b4a1b8370",
+    "current_hash": "447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794",
+    "audited_at": "2026-10-20T09:01:19+00:00"
+  },
+  "review_status": null,
+  "review_receipt": null,
+  "disclosures": 1,
+  "figures_numbering_frozen": true,
+  "validate_errors": 0,
+  "validate_warnings": 1
+}
+=== audit #5 (online, 冻结后重审) ===
+audit exit=0
+overall: pass | hash: 447ab38f6890
+citations pass
+numbers pass
+wording pass
+landing pass
+=== advance -> audited ===
+{
+  "advanced": true,
+  "from": "drafted",
+  "to": "audited",
+  "gaps": []
+}
+=== review unavailable ===
+{
+  "reviewer": null,
+  "family": null,
+  "review_status": "REVIEW_UNAVAILABLE",
+  "receipt_id": null,
+  "reason": "本环境仅有 Claude 单一模型家族：跨模型复核需异家族 reviewer 或用户本人，不可得；不伪造收据（与上游 Analysis 结论卡 REVIEW_UNAVAILABLE 同因）",
+  "recorded_at": "2026-10-20",
+  "via": "unavailable"
+}
+=== advance -> submission_ready (预期被 REVIEW_UNAVAILABLE 拦) ===
+{
+  "advanced": false,
+  "from": "audited",
+  "to": "submission_ready",
+  "gaps": [
+    "REVIEW_UNAVAILABLE：跨模型复核不可用，停在 audited 不许置真（执行者不许自判自赦）"
+  ]
+}
+advance exit=1
+=== status (终点) ===
+{
+ "status": "audited",
+ "submission_blocked_reason": "REVIEW_UNAVAILABLE：跨模型复核不可用，稿件停在 audited（与 Idea/Design/Analysis 同构降级，恢复后补复核再置真）",
+ "review_status": "REVIEW_UNAVAILABLE",
+ "contract_status": "agreed",
+ "figures_numbering_frozen": true,
+ "validate_errors": 0
+}
+audit: {'exists': True, 'stale': False, 'overall': 'pass', 'manuscript_hash': '447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794', 'current_hash': '447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794', 'audited_at': '2026-10-20T09:02:53+00:00'}
+=== revision add-comment x3 ===
+{
+  "comment_id": "RC001",
+  "reviewer": "Reviewer 1",
+  "text": "讨论节对中心比较的表述可能被读成确认性结论：主张句旁须明示支撑该比较的分析行未获检验、未出判定（与 C1 登记的判定状态一致），使 limitations_only 的落法在正文自明。",
+  "category": "major",
+  "claim_ids": [
+    "C1"
+  ],
+  "section_ids": [
+    "S-discussion"
+  ],
+  "round": 1,
+  "registered_at": "2026-10-20"
+}
+{
+  "comment_id": "RC002",
+  "reviewer": "Reviewer 2",
+  "text": "独立实验单元须在方法节首次出现处给出定义（held-out segment 的纳入准则），而非仅在后文默认读者已知。",
+  "category": "minor",
+  "claim_ids": [],
+  "section_ids": [
+    "S-methods"
+  ],
+  "round": 1,
+  "registered_at": "2026-10-20"
+}
+{
+  "comment_id": "RC003",
+  "reviewer": "Reviewer 1",
+  "text": "图注须点名复制单元，使读者不看正文也能知道每条分布的观测单位。",
+  "category": "minor",
+  "claim_ids": [],
+  "section_ids": [
+    "S-results"
+  ],
+  "round": 1,
+  "registered_at": "2026-10-20"
+}
+=== figures caption (返修后重登记) ===
+{
+  "figure_id": "F001",
+  "caption_text_hash": "3eb622455a76f0e505ed347f3da6d92de1eee5d371a5794922f7d94aef02daba"
+}
+=== figures check (返修副本) ===
+{
+  "ok": true,
+  "findings": []
+}
+=== revision respond x3 ===
+usage: light-write revision respond [-h] --comment COMMENT --decision
+                                    {accept,partial,reject} --rationale
+                                    RATIONALE [--anchors ANCHORS]
+                                    root
+light-write revision respond: error: the following arguments are required: --decision, --rationale
+usage: light-write revision respond [-h] --comment COMMENT --decision
+                                    {accept,partial,reject} --rationale
+                                    RATIONALE [--anchors ANCHORS]
+                                    root
+light-write revision respond: error: the following arguments are required: --decision, --rationale
+usage: light-write revision respond [-h] --comment COMMENT --decision
+                                    {accept,partial,reject} --rationale
+                                    RATIONALE [--anchors ANCHORS]
+                                    root
+light-write revision respond: error: the following arguments are required: --decision, --rationale
+=== revision check ===
+{
+  "ok": false,
+  "findings": [
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC001 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC002 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC003 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 02-methods.md 的改动标记 [rev:RC002] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 03-results.md 的改动标记 [rev:RC003] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 04-discussion.md 的改动标记 [rev:RC001] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    }
+  ],
+  "coverage": {
+    "comments": 3,
+    "responses": 0
+  },
+  "stale": null
+}
+=== revision bind ===
+{
+  "ok": false,
+  "gaps": [
+    "意见 RC001 无回复：意见须全覆盖",
+    "意见 RC002 无回复：意见须全覆盖",
+    "意见 RC003 无回复：意见须全覆盖",
+    "正文 02-methods.md 的改动标记 [rev:RC002] 未被任何回复锚点回指：改动须全回指（双向对账）",
+    "正文 03-results.md 的改动标记 [rev:RC003] 未被任何回复锚点回指：改动须全回指（双向对账）",
+    "正文 04-discussion.md 的改动标记 [rev:RC001] 未被任何回复锚点回指：改动须全回指（双向对账）"
+  ]
+}
+=== revision check (bind 后) ===
+{
+  "ok": false,
+  "findings": [
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC001 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC002 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unanswered",
+      "message": "意见 RC003 无回复：意见须全覆盖"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 02-methods.md 的改动标记 [rev:RC002] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 03-results.md 的改动标记 [rev:RC003] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    },
+    {
+      "level": "error",
+      "code": "revision.unclaimed_change",
+      "message": "正文 04-discussion.md 的改动标记 [rev:RC001] 未被任何回复锚点回指：改动须全回指（双向对账）"
+    }
+  ],
+  "coverage": {
+    "comments": 3,
+    "responses": 0
+  },
+  "stale": null
+}
+=== revision respond x3 (正确参数) ===
+{
+  "comment_id": "RC001",
+  "decision": "accept",
+  "rationale": "已在主张句后紧邻处新增一句明示句：支撑该比较的分析行未获检验且未出判定，比较在本稿中仅作局限性记述（[rev:RC001] 实位见讨论节第一段）。",
+  "change_anchors": [
+    {
+      "file": "04-discussion.md",
+      "marker": "RC001"
+    }
+  ],
+  "responded_at": "2026-10-20"
+}
+{
+  "comment_id": "RC002",
+  "decision": "accept",
+  "rationale": "已在方法节首次出现处补入 held-out segment 的定义从句：一段连续录像，且在运行开始前即被排除于一切阈值调参与配置选择之外（[rev:RC002] 实位见方法节第三段）。",
+  "change_anchors": [
+    {
+      "file": "02-methods.md",
+      "marker": "RC002"
+    }
+  ],
+  "responded_at": "2026-10-20"
+}
+{
+  "comment_id": "RC003",
+  "decision": "partial",
+  "rationale": "已改图注：点名每条分布汇总的是 held-out segments（本研究的复制单元），图注经 figures caption 重登记且与正文逐字一致（[rev:RC003] 实位见结果节首段）。部分接受理由：审稿人附带期望的逐段原始分数附表属补充材料范畴，本轮不新增，留待正式投稿轮次随补充材料一并处理。",
+  "change_anchors": [
+    {
+      "file": "03-results.md",
+      "marker": "RC003"
+    }
+  ],
+  "responded_at": "2026-10-20"
+}
+=== revision check ===
+{
+  "ok": true,
+  "findings": [],
+  "coverage": {
+    "comments": 3,
+    "responses": 3
+  },
+  "stale": null
+}
+=== revision bind ===
+{
+  "bound_manuscript_hash": "182d184263f470b7bd1e721b106ef429d0bf7f249c24991d64125dc745b8115b",
+  "letter": "examples/demo-fullrun/manuscript-pkg-revision/revision/response_letter.md",
+  "responses": 3
+}
+=== revision check (bind 后) ===
+{
+  "ok": true,
+  "findings": [],
+  "coverage": {
+    "comments": 3,
+    "responses": 3
+  },
+  "stale": false
+}
+=== 返修副本重跑在线审计 ===
+audit exit=0
+overall: pass
+citations pass []
+numbers pass []
+wording pass []
+landing pass []
+=== 返修副本 status ===
+audited | review: REVIEW_UNAVAILABLE | audit: pass stale: False
