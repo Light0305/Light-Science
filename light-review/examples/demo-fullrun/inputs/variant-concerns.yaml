@@ -1,0 +1,9 @@
+concerns:
+  - concern_id: V-C001
+    statement: 主张 C1 含未检验行 R-NEG，未检验状态须在稿件中保持可见。
+    raised_by: [V1]
+    severity_proposals: {V1: minor}
+    close_criterion: 稿件摘要与讨论明示 C1 含一行未检验。
+    pointers:
+      claim_pointer: "claims_register:C1"
+      evidence_pointer: "conclusions:C1#line_verdicts.R-NEG=untested"

@@ -1,0 +1,185 @@
+manuscript_id: zero-tuning-tracker-thresholds-predicted_c8d0fc
+title: Zero-tuning tracker thresholds predicted from video-level statistics (synthetic
+  full-run demo)
+language: en
+status: audited
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-write init
+- state: outlined
+  at: '2026-10-20'
+  by: light-write advance
+- state: drafted
+  at: '2026-10-20'
+  by: light-write advance
+- state: audited
+  at: '2026-10-20'
+  by: light-write advance
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+intake:
+  conclusion_card:
+    path: light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
+    sha256: 4d14ed3424d720312529b9a66f421f05fe73b199fb4352c5511b23e51cb11996
+    analysis_id: analysis-pkg
+    analysis_status: blocked
+    exported_at: '2026-10-20'
+    review_status: REVIEW_UNAVAILABLE
+    review_reason: 本环境仅单一模型家族（claude），无异家族复核者可用；按拍板③显式落 REVIEW_UNAVAILABLE，不伪造收据
+  card_claims_hash: 6b954637677db24835fc949139c896176893e1d76663ab397985e5223577cd95
+  number_provenance_hash: 48486ccc533dabcf5d005bd252e8d6048a7ffc17d8b75f94441b8211ae9760df
+  number_provenance_count: 9
+  claim_ids:
+  - C1
+  literature:
+    source_path: light-literature/examples/demo-find/Literature/候选池.jsonl
+    set_hash: 4281319cb286d278306d8caac114fb4def4222403e42c6f64cbc35247cd7cc11
+    entry_count: 4
+  intake_at: '2026-10-20'
+  intake_by: light-write phase3 demo
+  upstream_flags:
+  - 'analysis_not_delivered: 上游结论包状态为 blocked（非 delivered），主张按降级口径登记'
+  - 'analysis_review_status: REVIEW_UNAVAILABLE（原样落字）'
+target_journal:
+  template_record_id: TPL-DEMO-FIXTURE-001
+  journal_name: Journal of Synthetic Demonstrations (demo fixture, not a real journal)
+  journal_language: en
+  record_hash: 6ccabf7a663e1ec5c50c031f96ea334a16d74ea5c763338b9a5cab4162f8947a
+  verified_at: '2026-10-15'
+  bundled: generic_scaffold
+  source_record_path: light-write/examples/demo-fullrun/fixtures/journal_record.json
+authors:
+- name: Demo Author A
+  affiliation: Synthetic Demo Group
+  corresponding: true
+- name: Demo Author B
+  affiliation: Synthetic Demo Group
+  corresponding: false
+guarantor: Demo Author A
+declarations:
+  data_availability:
+    state: present
+    note: Synthetic datasets and execution records are deposited with the synthetic
+      execution package (see datasets mapping).
+  ethics:
+    state: na
+    note: 'Synthetic data only: no live animals, no human participants, no field collection.'
+  conflict:
+    state: present
+    note: The authors declare no competing interests.
+  funding:
+    state: present
+    note: Synthetic demonstration; no external funding.
+use_log:
+- tool: Claude
+  model: Claude Opus
+  model_version: opus-4.5 (demo session)
+  purpose: drafting assistance and language editing
+  section: all sections
+  date: '2026-10-20'
+  risk_tier: assistive
+- tool: Claude
+  model: Claude Opus
+  model_version: opus-4.5 (demo session)
+  purpose: interpretation of analysis verdicts when drafting the limitations section
+  section: discussion
+  date: '2026-10-20'
+  risk_tier: evaluative_interpretive
+  human_verified: Demo operator checked every limitations-section sentence against
+    conclusion card C1 (untested, insufficient) on 2026-10-20.
+sections:
+- section_id: S-abstract
+  file: 00-abstract.md
+  role: abstract
+  goal: abstract 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids: []
+- section_id: S-introduction
+  file: 01-introduction.md
+  role: introduction
+  goal: introduction 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids: []
+- section_id: S-methods
+  file: 02-methods.md
+  role: methods
+  goal: methods 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids: []
+- section_id: S-results
+  file: 03-results.md
+  role: results
+  goal: results 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids: []
+- section_id: S-discussion
+  file: 04-discussion.md
+  role: discussion
+  goal: discussion 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids:
+  - C1
+- section_id: S-declarations
+  file: 05-declarations.md
+  role: declarations
+  goal: declarations 的功能目标（演示稿）
+  required_info:
+  - 必备信息元见 SKILL §10 逐节规程卡
+  claim_ids: []
+acceptance_contract:
+  file: acceptance_contract.yaml
+  status: agreed
+  content_hash: c3ba413a2a9f2a1d716a56a94ac494a399b3c202cfbf89a2897ff69cf19aa83a
+protected_statements: []
+datasets:
+- name: Segment-level scores of the synthetic execution package (turkey-barn-repro-v3,
+    synthetic)
+  access_path: public_repository
+  location: light-experiment synthetic demo execution package (video-threshold-predict_synth01-b2)
+contract_contested: false
+submission_blocked_reason: REVIEW_UNAVAILABLE：跨模型复核不可用，稿件停在 audited（与 Idea/Design/Analysis
+  同构降级，恢复后补复核再置真）
+reflux: []
+executor:
+  name: Claude (light-write demo operator)
+  family: claude
+lock_check:
+  at: '2026-10-20'
+  cited_entry_ids:
+  - ST001
+  - ST002
+  - ST005
+  uncited_entry_ids:
+  - ST003
+  uncited_keys:
+  - 2023-review
+  note: 收窄只列清单不删条目：未被引条目保留在 lock 中（后续起草可能引用），bib 仍按全 lock 渲染
+disclosures:
+- position: declarations
+  section_file: 05-declarations.md
+  text_hash: 9d3a1e2e72760dc5572edb595b6502992d535c9874598f8f226bd558e32bf4d0
+  policy_hash: 5d9129c8c839c5f492ada8c0c0d15fd3ad7cd61369746aa7ec9c34881b99cc42
+  use_log_hash: e2ca9a93c2cef22bb123a1089a96726d7bf5dd97f0c2eb996a31a26b059c9d64
+  generated_at: '2026-10-20'
+review_packet:
+  packet: review_packet.md
+  packet_hash: ea8fa3f03198083754c99d08149ca6716392708670c218c6ac0f16af8641f7a4
+  manuscript_hash: 447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794
+  prepared_at: '2026-10-20'
+  scope_claim_ids:
+  - C1
+review:
+  reviewer: null
+  family: null
+  review_status: REVIEW_UNAVAILABLE
+  receipt_id: null
+  reason: 本环境仅有 Claude 单一模型家族：跨模型复核需异家族 reviewer 或用户本人，不可得；不伪造收据（与上游 Analysis 结论卡
+    REVIEW_UNAVAILABLE 同因）
+  recorded_at: '2026-10-20'
+  via: unavailable

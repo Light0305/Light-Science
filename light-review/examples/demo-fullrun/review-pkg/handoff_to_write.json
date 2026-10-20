@@ -1,0 +1,98 @@
+{
+  "kind": "light-review/handoff-to-write",
+  "version": 1,
+  "review_id": "review-pkg",
+  "round": 1,
+  "generated_at": "2026-10-20",
+  "decision_mode": "full",
+  "items": [
+    {
+      "concern_id": "RV-C001",
+      "severity": "major",
+      "statement": "主张 C1 含未检验行 R-NEG（数据版本缺 seg-05/06、fundamental 失败 F-0001，untested 终态）而成稿：未检验状态须在摘要与讨论中保持 可见，不得被 limitations 定位稀释。",
+      "claim_pointer": "claims_register:C1",
+      "evidence_pointer": "conclusions:C1#line_verdicts.R-NEG=untested；verdicts.jsonl R-NEG note（fundamental 失败 F-0001）",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S1",
+        "S2"
+      ],
+      "consensus": true,
+      "close_criterion": "稿件摘要与讨论明示 C1 含一行未检验（附缺段原因），且 limitations 定位与结论包 support=untested 一致。"
+    },
+    {
+      "concern_id": "RV-C002",
+      "severity": "major",
+      "statement": "R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并列陈述五行时须披露同源或合并陈述。",
+      "claim_pointer": "claims_register:C1",
+      "evidence_pointer": "verdicts.jsonl:R-LONG 与 R-PRED inputs_hash 同为 62ccc7ade1…",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S1",
+        "S3"
+      ],
+      "consensus": true,
+      "close_criterion": "稿件在结果呈现处注明 R-LONG 与 R-PRED 处理臂同源（或合并为一行 陈述），不再读作五份独立支持。"
+    },
+    {
+      "concern_id": "RV-C003",
+      "severity": "major",
+      "statement": "精度缺口须以数字呈现：校正后 p=0.1378、Type M 最差 4.35、TOST 90% CI 半宽 6.55 对等价界 ±2；结果叙述只写 undetermined 而不带 区间宽度会让读者低估不确定性。",
+      "claim_pointer": "claims_register:C1",
+      "evidence_pointer": "conclusions:C1/strength.inputs.type_sm_worst=4.345",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S2"
+      ],
+      "consensus": false,
+      "close_criterion": "结果段明示主比较的 CI 宽度与 SESOI 界的对比数字。"
+    },
+    {
+      "concern_id": "RV-C004",
+      "severity": "minor",
+      "statement": "判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 未闭环）；方法节须声明其来源与冻结 时点。",
+      "claim_pointer": "sections/02-methods.md",
+      "evidence_pointer": "analysis inputs/design-sesoi-source.json + reflux/RX-A001",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S1",
+        "S3"
+      ],
+      "consensus": true,
+      "close_criterion": "方法节写明 SESOI ±2 点的来源（设计判读标准原文）与冻结时点，或 Design 侧补结构化 SESOI 字段后回指登记行。"
+    },
+    {
+      "concern_id": "RV-C005",
+      "severity": "minor",
+      "statement": "图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 not_assessable）；投稿包组装前 图源链应闭合。",
+      "claim_pointer": "figures_manifest:F001",
+      "evidence_pointer": "delivery:fig-1（exports/fig-1.pdf、data/previews/fig-1.png）",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S3"
+      ],
+      "consensus": false,
+      "close_criterion": "稿件图登记改指图包交付文件，或图包补登记 SVG 资产并给出哈希 对应。"
+    },
+    {
+      "concern_id": "RV-C006",
+      "severity": "major",
+      "statement": "外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿件讨论不得外推且合成 数据性质须在摘要层可见。",
+      "claim_pointer": "claims_register:C1",
+      "evidence_pointer": "conclusions:C1/boundaries",
+      "action_class": "fixable-in-text",
+      "action_basis": "pointers_complete（双指针齐，正文侧可修）",
+      "source_seats": [
+        "S2",
+        "S3"
+      ],
+      "consensus": true,
+      "close_criterion": "讨论逐条对齐结论包 boundaries 三项（段集/种子口径、合成集、不外 推），摘要出现合成数据性质声明。"
+    }
+  ]
+}

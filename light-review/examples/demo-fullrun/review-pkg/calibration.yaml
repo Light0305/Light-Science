@@ -1,0 +1,54 @@
+version: '1.0'
+journal: Smart Agricultural Technology
+scale:
+  name: overall-10
+  version: '1.0'
+  anchors:
+  - score: 10
+    percentile: top 2%
+    meaning: 改变领域理解的彻底工作（strong accept）
+  - score: 8
+    percentile: top 10%
+    meaning: 全部主张有充分支持、方法高度原创（accept）
+  - score: 6
+    percentile: top 50% of accepted
+    meaning: 主要主张有支持，少量补强非必需（borderline accept）
+  - score: 5
+    percentile: borderline
+    meaning: 主要主张大体成立，有次要缺口（borderline reject）
+  - score: 3
+    percentile: bottom quartile
+    meaning: 主要主张支持不足或方法问题重大（reject）
+  - score: 1
+    percentile: bottom
+    meaning: 未达发表门槛或与目标刊无关（strong reject）
+  anti_inflation: rebuttal 前多数稿 ≤5 分；非卓越原创不许给 7 分以上
+caps:
+- cap_id: CAP-01
+  trigger: open_confirmed_error
+  effect:
+    kind: max_favorable
+    band: major_revision
+  description: 存在未裁决的法医 confirmed error 时，决定建议不许比 major_revision 更有利
+  source: RV-14 硬门封顶 / R2 硬度 a
+- cap_id: CAP-02
+  trigger: unverified_facts_present
+  effect:
+    kind: max_favorable
+    band: minor_revision
+  description: 按刊事实含 UNVERIFIED（过期/未核查）时，未核实事实不许驱动定级：决定建议不许到 ready
+  source: RV-14 未核实不驱动定级 / RV-17
+- cap_id: CAP-03
+  trigger: clerical_only
+  effect:
+    kind: min_favorable
+    band: minor_revision
+  description: 问题全为文书类（concern 全 minor 且无法医错误）时，决定建议不许比 minor_revision 更不利（文书错误封顶）
+  source: RV-14 文书类错误一律 minor（reviewer2 C 型强制 minor）
+asymmetry:
+  reject_weight: 1.5
+  accept_weight: 1.0
+  note: AI 分数不对称使用：模拟 reject/强负信号权重高于模拟 accept（评分通胀 +4.9pp 的先验修正，P04）；置信表达与人类自身 23%
+    分歧的天花板相称（P09）
+bench:
+  report_ref: reports/bench_report.json

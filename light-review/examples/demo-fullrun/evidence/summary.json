@@ -1,0 +1,747 @@
+{
+  "main": {
+    "calibration_before_bench_rc": 1,
+    "status": "delivered",
+    "isolation": {
+      "mode": "degraded",
+      "reason": "本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）"
+    },
+    "delivery": {
+      "delivered_at": "2026-10-20",
+      "degradation_statement": "本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts 物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新 round 重跑本轮评审。",
+      "manifest_hash": "8a34556f67a38fb0cd55d68723aa3044c44938a60cb84c89f2f85ab2fef1b2b9"
+    },
+    "decision": {
+      "at": "2026-10-20",
+      "meta_review": "reports/meta_review.md",
+      "calibration_complete": true,
+      "calibration_missing": [],
+      "mode": "full",
+      "band": "reject_risk",
+      "caps_applied": [],
+      "decision_file": "reports/decision.md",
+      "problem_list_file": null
+    },
+    "domain_summary": {
+      "checked": 11,
+      "hits": 1,
+      "misses": 7,
+      "not_applicable": 3,
+      "effective_hits": 1
+    },
+    "domain_fact": {
+      "record_path": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json",
+      "verified_at": "2026-10-20",
+      "fact_status": "verified"
+    },
+    "handoff_items": 6,
+    "counts": {
+      "findings": 0,
+      "confirmed_error_open": 0,
+      "not_assessable": 0,
+      "concerns": 6,
+      "consensus": 4
+    },
+    "edges": [
+      {
+        "type": "summary",
+        "edge": "claims_evidence",
+        "checked": 1,
+        "assessable": 1,
+        "not_assessable": 0,
+        "errors": 0,
+        "decision_errors": 0
+      },
+      {
+        "type": "summary",
+        "edge": "numbers_numbers",
+        "checked": 3,
+        "assessable": 3,
+        "not_assessable": 0,
+        "errors": 0,
+        "decision_errors": 0
+      },
+      {
+        "type": "summary",
+        "edge": "numbers_figures",
+        "checked": 1,
+        "assessable": 0,
+        "not_assessable": 1,
+        "errors": 0,
+        "decision_errors": 0
+      },
+      {
+        "type": "summary",
+        "edge": "citations_claims",
+        "checked": 5,
+        "assessable": 5,
+        "not_assessable": 0,
+        "errors": 0,
+        "decision_errors": 0
+      }
+    ],
+    "edge_rows": [
+      {
+        "type": "check",
+        "check_id": "F-CE-001",
+        "edge": "claims_evidence",
+        "subject_ref": "C1",
+        "result": "pass",
+        "detail": "结论行存在，grade/support/逐行判定/形态上限一致",
+        "claim_pointer": "claims_register:C1",
+        "evidence_pointer": "conclusions:C1",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-NN-001",
+        "edge": "numbers_numbers",
+        "subject_ref": "N001",
+        "result": "pass",
+        "detail": "呈现值 5.25 与正文 1 处一致；复算值 5.249333333333325（spec_results:S001@R-ORA）与呈现值舍入相容",
+        "claim_pointer": null,
+        "evidence_pointer": "numbers_ledger:N001",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-NN-002",
+        "edge": "numbers_numbers",
+        "subject_ref": "N002",
+        "result": "pass",
+        "detail": "呈现值 5.20 与正文 1 处一致；复算值 5.197833333333335（spec_results:S001@R-PRED）与呈现值舍入相容",
+        "claim_pointer": null,
+        "evidence_pointer": "numbers_ledger:N002",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-NN-003",
+        "edge": "numbers_numbers",
+        "subject_ref": "N003",
+        "result": "pass",
+        "detail": "呈现值 0.0 与正文 1 处一致；复算值 0.0（spec_results:S001@R-FIX）与呈现值舍入相容",
+        "claim_pointer": null,
+        "evidence_pointer": "numbers_ledger:N003",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-NF-001",
+        "edge": "numbers_figures",
+        "subject_ref": "F001",
+        "result": "not_assessable",
+        "detail": "无同名文件或稿件侧未登记 source_hash，哈希对应未检",
+        "claim_pointer": null,
+        "evidence_pointer": "figures_manifest:F001",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-CC-001",
+        "edge": "citations_claims",
+        "subject_ref": "[@bai2021-enet]",
+        "result": "pass",
+        "detail": "lock 条目与归档哈希指针齐",
+        "claim_pointer": null,
+        "evidence_pointer": "references.lock:bai2021-enet",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-CC-002",
+        "edge": "citations_claims",
+        "subject_ref": "[@dong2025-is]",
+        "result": "pass",
+        "detail": "lock 条目与归档哈希指针齐",
+        "claim_pointer": null,
+        "evidence_pointer": "references.lock:dong2025-is",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-CC-003",
+        "edge": "citations_claims",
+        "subject_ref": "[@wang2022-attention]",
+        "result": "pass",
+        "detail": "lock 条目与归档哈希指针齐",
+        "claim_pointer": null,
+        "evidence_pointer": "references.lock:wang2022-attention",
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-CC-004",
+        "edge": "citations_claims",
+        "subject_ref": "C1",
+        "result": "pass",
+        "detail": "evidence_refs 全部指向现存登记行",
+        "claim_pointer": "claims_register:C1",
+        "evidence_pointer": null,
+        "raw": null
+      },
+      {
+        "type": "check",
+        "check_id": "F-CC-005",
+        "edge": "citations_claims",
+        "subject_ref": "write_audit_archive",
+        "result": "pass",
+        "detail": "Write 审计归档件存在，核对指针可回溯",
+        "claim_pointer": null,
+        "evidence_pointer": "manuscript:audit/",
+        "raw": null
+      }
+    ],
+    "findings": [],
+    "grim_rows": [
+      {
+        "stat_id": "GS001",
+        "kind": "percent",
+        "result": "compatible",
+        "detail": "存在整数计数 k=4 与报告百分比相容",
+        "formula_evidence": "真值百分比 ∈ [99.95, 100.05)，计数 k 须 ∈ [3.998, 4.002)（n=4，0 ≤ k ≤ n），取 k=4",
+        "metadata": {
+          "value": "100.0",
+          "decimals": 1,
+          "n": 4,
+          "items": null,
+          "scale_type": "count"
+        },
+        "missing": []
+      },
+      {
+        "stat_id": "GS002",
+        "kind": "percent",
+        "result": "compatible",
+        "detail": "存在整数计数 k=28 与报告百分比相容",
+        "formula_evidence": "真值百分比 ∈ [77.777777777777775, 77.777777777777785)，计数 k 须 ∈ [27.999999999999999, 28.0000000000000026)（n=36，0 ≤ k ≤ n），取 k=28",
+        "metadata": {
+          "value": "77.77777777777778",
+          "decimals": 14,
+          "n": 36,
+          "items": null,
+          "scale_type": "count"
+        },
+        "missing": []
+      },
+      {
+        "stat_id": "GS003",
+        "kind": "mean",
+        "result": "not_assessable",
+        "detail": "量表类型 continuous 非整数粒度（连续量不适用 GRIM，硬检将造假阳性）",
+        "formula_evidence": null,
+        "metadata": {
+          "value": "72.638",
+          "decimals": 3,
+          "n": 6,
+          "items": 3,
+          "scale_type": "continuous"
+        },
+        "missing": []
+      },
+      {
+        "stat_id": "GS004",
+        "kind": "mean",
+        "result": "not_assessable",
+        "detail": "量表类型 continuous 非整数粒度（连续量不适用 GRIM，硬检将造假阳性）",
+        "formula_evidence": null,
+        "metadata": {
+          "value": "77.835",
+          "decimals": 3,
+          "n": 6,
+          "items": 3,
+          "scale_type": "continuous"
+        },
+        "missing": []
+      }
+    ],
+    "domain_rows": [
+      {
+        "type": "domain_check",
+        "item_id": "DG-U01",
+        "layer": "universal",
+        "axis": "Validity",
+        "title": "每个主张都登记了证据指针（evidence_refs 非空）",
+        "severity_if_hit": "major",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "upstream:claims_register",
+        "detail": "1 条主张证据指针齐全",
+        "source_kind": "generic_quality",
+        "fact": null
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-U02",
+        "layer": "universal",
+        "axis": "Data",
+        "title": "每个登记数字都有溯源（trace_ref + calc_provenance）",
+        "severity_if_hit": "major",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "upstream:numbers_ledger",
+        "detail": "3 个数字溯源齐全",
+        "source_kind": "generic_quality",
+        "fact": null
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-U03",
+        "layer": "universal",
+        "axis": "Compliance",
+        "title": "引用条目的撤稿状态全部已登记（非 unknown/缺失）",
+        "severity_if_hit": "major",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "upstream:references.lock",
+        "detail": "4 条引用撤稿状态已登记",
+        "source_kind": "generic_quality",
+        "fact": null
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-U04",
+        "layer": "universal",
+        "axis": "Clarity",
+        "title": "每幅登记图都有图注（caption 非空）",
+        "severity_if_hit": "minor",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "upstream:figures_manifest",
+        "detail": "1 幅图图注齐全",
+        "source_kind": "generic_quality",
+        "fact": null
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-U05",
+        "layer": "universal",
+        "axis": "Structure",
+        "title": "章节结构齐备（方法类与结果类章节都在）",
+        "severity_if_hit": "minor",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "upstream:sections",
+        "detail": "方法类与结果类章节都在",
+        "source_kind": "generic_quality",
+        "fact": null
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J01",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "全文词数不超目标刊限额",
+        "severity_if_hit": "major",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_total",
+        "detail": "全文词数 1000 vs 限额 8000",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "D.word_limit_total",
+          "value": 8000,
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J02",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "摘要词数不超目标刊限额",
+        "severity_if_hit": "minor",
+        "result": "miss",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_abstract",
+        "detail": "摘要词数 84 vs 限额 250",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "D.word_limit_abstract",
+          "value": 250,
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J03",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "图数不超目标刊限额",
+        "severity_if_hit": "minor",
+        "result": "not_applicable",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.figure_limit",
+        "detail": "目标刊记录未登记 D.figure_limit，本条未触发",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "D.figure_limit",
+          "value": null,
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J04",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "参考文献数不超目标刊限额",
+        "severity_if_hit": "minor",
+        "result": "not_applicable",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.reference_limit",
+        "detail": "目标刊记录未登记 D.reference_limit，本条未触发",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "D.reference_limit",
+          "value": null,
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J05",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "目标刊要求 AI 披露时稿件带披露声明",
+        "severity_if_hit": "major",
+        "result": "hit",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#G.ai_policy",
+        "detail": "目标刊要求 AI 披露（disclosure_required），稿件章节中未检出披露声明（机械检索口径）",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "G.ai_policy",
+          "value": {
+            "has_guideline": true,
+            "ai_authorship_banned": true,
+            "disclosure_required": true,
+            "disclosure_content_standard": "tool name and purpose",
+            "disclosure_title": "Declaration of generative AI use",
+            "disclosure_wording_template": null,
+            "disclosure_positions": [
+              "Methods",
+              "Acknowledgments"
+            ],
+            "language_editing_stance": "allowed with disclosure",
+            "publisher_conflict": {
+              "conflict": false,
+              "resolution_note": null
+            },
+            "output_validity_evaluation": null
+          },
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      },
+      {
+        "type": "domain_check",
+        "item_id": "DG-J06",
+        "layer": "journal_fact",
+        "axis": "Compliance",
+        "title": "关键词数不超目标刊限额",
+        "severity_if_hit": "minor",
+        "result": "not_applicable",
+        "effective": true,
+        "superseded_by": null,
+        "overrides": null,
+        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#C.keyword_limit",
+        "detail": "稿件未登记关键词清单，本条无对象",
+        "source_kind": "explicit_object",
+        "fact": {
+          "field": "C.keyword_limit",
+          "value": 6,
+          "verified_at": "2026-10-20",
+          "fact_status": "verified",
+          "cycle_days": 180,
+          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+        }
+      }
+    ],
+    "concerns": [
+      {
+        "concern_id": "RV-C001",
+        "statement": "主张 C1 含未检验行 R-NEG（数据版本缺 seg-05/06、fundamental 失败 F-0001，untested 终态）而成稿：未检验状态须在摘要与讨论中保持 可见，不得被 limitations 定位稀释。",
+        "raised_by": [
+          "S1",
+          "S2"
+        ],
+        "severity_proposals": {
+          "S1": "major",
+          "S2": "major"
+        },
+        "severity": "major",
+        "tally": 2,
+        "corroboration_count": 2,
+        "consensus": true,
+        "consensus_basis": {
+          "independent_seats": 2,
+          "via_escalation": false
+        },
+        "close_criterion": "稿件摘要与讨论明示 C1 含一行未检验（附缺段原因），且 limitations 定位与结论包 support=untested 一致。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "claims_register:C1",
+          "evidence_pointer": "conclusions:C1#line_verdicts.R-NEG=untested；verdicts.jsonl R-NEG note（fundamental 失败 F-0001）"
+        }
+      },
+      {
+        "concern_id": "RV-C002",
+        "statement": "R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并列陈述五行时须披露同源或合并陈述。",
+        "raised_by": [
+          "S1",
+          "S3"
+        ],
+        "severity_proposals": {
+          "S1": "major",
+          "S3": "minor"
+        },
+        "severity": "major",
+        "tally": 2,
+        "corroboration_count": 2,
+        "consensus": true,
+        "consensus_basis": {
+          "independent_seats": 2,
+          "via_escalation": false
+        },
+        "close_criterion": "稿件在结果呈现处注明 R-LONG 与 R-PRED 处理臂同源（或合并为一行 陈述），不再读作五份独立支持。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "claims_register:C1",
+          "evidence_pointer": "verdicts.jsonl:R-LONG 与 R-PRED inputs_hash 同为 62ccc7ade1…"
+        }
+      },
+      {
+        "concern_id": "RV-C003",
+        "statement": "精度缺口须以数字呈现：校正后 p=0.1378、Type M 最差 4.35、TOST 90% CI 半宽 6.55 对等价界 ±2；结果叙述只写 undetermined 而不带 区间宽度会让读者低估不确定性。",
+        "raised_by": [
+          "S2"
+        ],
+        "severity_proposals": {
+          "S2": "major"
+        },
+        "severity": "major",
+        "tally": 1,
+        "corroboration_count": 1,
+        "consensus": false,
+        "consensus_basis": {
+          "independent_seats": 1,
+          "via_escalation": false
+        },
+        "close_criterion": "结果段明示主比较的 CI 宽度与 SESOI 界的对比数字。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "claims_register:C1",
+          "evidence_pointer": "conclusions:C1/strength.inputs.type_sm_worst=4.345"
+        }
+      },
+      {
+        "concern_id": "RV-C004",
+        "statement": "判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 未闭环）；方法节须声明其来源与冻结 时点。",
+        "raised_by": [
+          "S1",
+          "S3"
+        ],
+        "severity_proposals": {
+          "S1": "minor",
+          "S3": "minor"
+        },
+        "severity": "minor",
+        "tally": 2,
+        "corroboration_count": 2,
+        "consensus": true,
+        "consensus_basis": {
+          "independent_seats": 2,
+          "via_escalation": false
+        },
+        "close_criterion": "方法节写明 SESOI ±2 点的来源（设计判读标准原文）与冻结时点，或 Design 侧补结构化 SESOI 字段后回指登记行。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "sections/02-methods.md",
+          "evidence_pointer": "analysis inputs/design-sesoi-source.json + reflux/RX-A001"
+        }
+      },
+      {
+        "concern_id": "RV-C005",
+        "statement": "图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 not_assessable）；投稿包组装前 图源链应闭合。",
+        "raised_by": [
+          "S3"
+        ],
+        "severity_proposals": {
+          "S3": "minor"
+        },
+        "severity": "minor",
+        "tally": 1,
+        "corroboration_count": 1,
+        "consensus": false,
+        "consensus_basis": {
+          "independent_seats": 1,
+          "via_escalation": false
+        },
+        "close_criterion": "稿件图登记改指图包交付文件，或图包补登记 SVG 资产并给出哈希 对应。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "figures_manifest:F001",
+          "evidence_pointer": "delivery:fig-1（exports/fig-1.pdf、data/previews/fig-1.png）"
+        }
+      },
+      {
+        "concern_id": "RV-C006",
+        "statement": "外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿件讨论不得外推且合成 数据性质须在摘要层可见。",
+        "raised_by": [
+          "S2",
+          "S3"
+        ],
+        "severity_proposals": {
+          "S2": "minor",
+          "S3": "major"
+        },
+        "severity": "major",
+        "tally": 2,
+        "corroboration_count": 2,
+        "consensus": true,
+        "consensus_basis": {
+          "independent_seats": 2,
+          "via_escalation": false
+        },
+        "close_criterion": "讨论逐条对齐结论包 boundaries 三项（段集/种子口径、合成集、不外 推），摘要出现合成数据性质声明。",
+        "status": "open",
+        "close_reason": null,
+        "pointers": {
+          "claim_pointer": "claims_register:C1",
+          "evidence_pointer": "conclusions:C1/boundaries"
+        }
+      }
+    ],
+    "bench": {
+      "passed_all": true,
+      "false_positive": {
+        "total": 4,
+        "flagged": 0,
+        "rate": 0.0
+      },
+      "by_class": {
+        "citation_gap": {
+          "total": 1,
+          "detected": 1,
+          "detection_rate": 1.0
+        },
+        "claim_overreach": {
+          "total": 1,
+          "detected": 1,
+          "detection_rate": 1.0
+        },
+        "grim_incompatible": {
+          "total": 1,
+          "detected": 1,
+          "detection_rate": 1.0
+        },
+        "missing_evidence": {
+          "total": 1,
+          "detected": 1,
+          "detection_rate": 1.0
+        },
+        "number_inconsistency": {
+          "total": 1,
+          "detected": 1,
+          "detection_rate": 1.0
+        }
+      },
+      "cases": 9
+    },
+    "selfcheck": {
+      "passed": true,
+      "tests": [
+        {
+          "test_id": "vague_unsupported",
+          "result": "pass"
+        },
+        {
+          "test_id": "wrong_object",
+          "result": "pass"
+        },
+        {
+          "test_id": "praise_only",
+          "result": "pass"
+        },
+        {
+          "test_id": "mere_restatement",
+          "result": "pass"
+        },
+        {
+          "test_id": "contradicts_frozen",
+          "result": "pass"
+        }
+      ]
+    },
+    "handoff_actions": {
+      "null": 6
+    }
+  },
+  "variant": {
+    "tamper": "[num:N001] 正文实印值 5.25 → 5.52（稿件副本 sections/03-results.md，台账仍 5.25）",
+    "findings": [
+      {
+        "type": "finding",
+        "finding_id": "F001",
+        "check_id": "F-NN-001",
+        "edge": "numbers_numbers",
+        "category": "confirmed_error",
+        "layer": "inconsistency",
+        "flag_only": false,
+        "claim_pointer": null,
+        "evidence_pointer": "numbers_ledger:N001",
+        "raw": "[num:N001] 5.52",
+        "detail": "数字 N001 正文实印 5.52 ≠ 登记 5.25",
+        "at": "2026-10-20"
+      }
+    ],
+    "confirmed_open": [
+      "F001"
+    ],
+    "blocked_rc": 1,
+    "blocked_named": [
+      "F001"
+    ],
+    "final_status": "adjudicated"
+  }
+}

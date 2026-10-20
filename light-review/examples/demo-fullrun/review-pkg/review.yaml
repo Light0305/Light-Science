@@ -1,0 +1,157 @@
+review_id: review-pkg
+title: Zero-tuning tracker thresholds predicted from video-level statistics（投稿前内部评审演示）
+round: 1
+status: delivered
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-review init
+- state: forensic_checked
+  at: '2026-10-20'
+  by: light-review advance
+- state: paneled
+  at: '2026-10-20'
+  by: light-review advance
+- state: reported
+  at: '2026-10-20'
+  by: light-review advance
+- state: adjudicated
+  at: '2026-10-20'
+  by: light-review advance
+- state: delivered
+  at: '2026-10-20'
+  by: light-review deliver
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+intake:
+  manuscript:
+    package_path: light-write/examples/demo-fullrun/manuscript-pkg
+    files:
+      manuscript.yaml: 0a7904fe629d9b09a394c2326cec2083bb995925e6e5c2d1fcb68d64f5268be2
+      claims_register.yaml: 6bacd16c87c23077a2896f732f5a1c731c4dcf33848141797fd4a2ed483ba4c3
+      numbers_ledger.yaml: 6defcf0c7f6aee347892130ff3853cc032e83d928e024f46cda11d9c6075dd80
+      references.lock.json: 3aa64febf8516c0621ab56987a5f72fe571e73ea747b0b24004b0bb2910543eb
+      figures_manifest.yaml: 93626673d42c13ad1762e91a104481bcf5f7b5f2b4669b26b459ff05d112c617
+      sections/00-abstract.md: 1026eac5a2f45ae10bb652457a78e2a422313cab9188e0579b49cbbad7caa2c9
+      sections/01-introduction.md: 41d8ab19c1fe0ed7f19b7a895433c3ef7e76370fb1da83dca94eaed19776df30
+      sections/02-methods.md: c30acd3a71feffbf5bee12787c19255204cfc844cd17600f011b42d1780c966f
+      sections/03-results.md: c210ad01ef6dce27f19ffdf295de5472c7bbc16201858ad1fee4cd3e7e634c28
+      sections/04-discussion.md: 7b549b8f5eb973f9dabbee016d810e307732967755628b31a1ba6ac59f48f88b
+      sections/05-declarations.md: 4ba5ded470ead99d72f4f7a406ecbccd34c13981f14b1d1307a21dca8ac38596
+    package_hash: e346ed3ca4296833bf6cb65ea64b45bf78761ee106cacd4be430edb4cba49957
+    manuscript_id: zero-tuning-tracker-thresholds-predicted_c8d0fc
+    manuscript_status: audited
+    sections: &id001
+    - 00-abstract.md
+    - 01-introduction.md
+    - 02-methods.md
+    - 03-results.md
+    - 04-discussion.md
+    - 05-declarations.md
+  analysis:
+    package_path: light-analysis/examples/demo-synthetic/analysis-pkg
+    files:
+      conclusions.yaml: 96a8c25952159d4ba63cbc5be47ed643b6a7cb59ae476469f9e05ccedf42d37d
+      verdicts.jsonl: c996b0448a71e9024bc630c0935201e669221b1a7c44881264a4934d57bc9efc
+      spec_results.jsonl: 5ce34d692dca1c8021634d5e92d53018ca47af87945454ea77b7509099b71222
+    package_hash: fd86f587d70f6a20f866f7acf62d3fd75327552234fdf175a0caffbf2a9fde0f
+  figure:
+    package_path: light-figure/examples/demo-fullrun/figure-pkg/exports
+    files:
+      delivery.yaml: 78a6a8252bb90f9c85c9fad355b70cc061ff8bb0fe0506500a634e1f0621ac3e
+    package_hash: 0de5817028512cee35f9586bbaae0eabdd11a0a59ffe0bc6bae32d736e34febb
+  figure_note: null
+  target_journal:
+    name: Smart Agricultural Technology
+    record:
+      path: light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json
+      sha256: 3db822b266e6a9973a3bdea096015b78518c050feeca9bed1aba496458b89051
+      verified_at: null
+    note: null
+  input_scope:
+    manuscript_sections: *id001
+    packages:
+    - manuscript
+    - analysis
+    - figure
+  intake_at: '2026-10-20'
+  intake_by: light-review intake
+constraints:
+  intensity: standard
+  seats_spec: full
+  want_decision: true
+isolation:
+  mode: degraded
+  reason: 本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）
+freezes:
+- seat_id: S1
+  report_hash: e3bdcc7af62c72aecbbce4f6ce09e3bc175c7fe478d8385e89eba66df8406a5a
+  at: '2026-10-20'
+  by: light-review freeze
+- seat_id: S2
+  report_hash: f957bfb49caff2631bdca202c731d0a793812a6f633772bb410104fba903482e
+  at: '2026-10-20'
+  by: light-review freeze
+- seat_id: S3
+  report_hash: 70b1ce76d345a7ab89b103267e2c1e07d77bbe65d363183f4aaf47cdc4a8c26b
+  at: '2026-10-20'
+  by: light-review freeze
+delivery:
+  delivered_at: '2026-10-20'
+  degradation_statement: 本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts
+    物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新
+    round 重跑本轮评审。
+  manifest_hash: 8a34556f67a38fb0cd55d68723aa3044c44938a60cb84c89f2f85ab2fef1b2b9
+phase2_pending: []
+counts:
+  findings: 0
+  confirmed_error_open: 0
+  not_assessable: 0
+  concerns: 6
+  consensus: 4
+forensic_run:
+  run_at: '2026-10-20'
+  grim_registered: true
+  grim_checked: 4
+  edges:
+  - claims_evidence
+  - numbers_numbers
+  - numbers_figures
+  - citations_claims
+calibration:
+  initialized_at: '2026-10-20'
+  journal: Smart Agricultural Technology
+bench:
+  ran_at: '2026-10-20'
+  config_hash: 51e3bc3342a6b2494b7716017bf3b8e117394f672ec8d1957dcb70186d20d008
+  report_ref: reports/bench_report.json
+  passed_all: true
+domain:
+  ran_at: '2026-10-20'
+  overlay: null
+  fact_source:
+    record_path: light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json
+    verified_at: '2026-10-20'
+    fact_status: verified
+  summary:
+    checked: 11
+    hits: 1
+    misses: 7
+    not_applicable: 3
+    effective_hits: 1
+decision:
+  at: '2026-10-20'
+  meta_review: reports/meta_review.md
+  calibration_complete: true
+  calibration_missing: []
+  mode: full
+  band: reject_risk
+  caps_applied: []
+  decision_file: reports/decision.md
+  problem_list_file: null
+handoff:
+  exported_at: '2026-10-20'
+  items: 6
+  files:
+  - handoff_to_write.md
+  - handoff_to_write.json

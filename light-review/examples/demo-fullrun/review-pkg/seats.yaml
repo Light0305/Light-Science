@@ -1,0 +1,85 @@
+seats:
+- seat_id: S1
+  role: methods
+  model_family: claude
+  persona: 方法学审稿人：设计与主张的可检验性、对照与消融充分性
+  knows_authors: false
+  visibility:
+    panel:
+    - manuscript
+    - forensic
+    - own_materials
+    reported:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+    adjudication:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+  status: frozen
+  draft_path: reports/drafts/S1.md
+  report_path: reports/S1.md
+  report_hash: e3bdcc7af62c72aecbbce4f6ce09e3bc175c7fe478d8385e89eba66df8406a5a
+  frozen_at: '2026-10-20'
+  degraded_note: null
+- seat_id: S2
+  role: statistics
+  model_family: claude
+  persona: 统计审稿人：推断口径、精度与多重性、等价检验
+  knows_authors: false
+  visibility:
+    panel:
+    - manuscript
+    - forensic
+    - own_materials
+    reported:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+    adjudication:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+  status: frozen
+  draft_path: reports/drafts/S2.md
+  report_path: reports/S2.md
+  report_hash: f957bfb49caff2631bdca202c731d0a793812a6f633772bb410104fba903482e
+  frozen_at: '2026-10-20'
+  degraded_note: null
+- seat_id: S3
+  role: domain
+  model_family: claude
+  persona: 领域审稿人（精准畜牧/计算机视觉）：领域惯例、基线与部署语境
+  knows_authors: false
+  visibility:
+    panel:
+    - manuscript
+    - forensic
+    - own_materials
+    reported:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+    adjudication:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+  status: frozen
+  draft_path: reports/drafts/S3.md
+  report_path: reports/S3.md
+  report_hash: 70b1ce76d345a7ab89b103267e2c1e07d77bbe65d363183f4aaf47cdc4a8c26b
+  frozen_at: '2026-10-20'
+  degraded_note: null

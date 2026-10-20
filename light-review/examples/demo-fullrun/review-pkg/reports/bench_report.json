@@ -1,0 +1,113 @@
+{
+  "kind": "light-review/bench-report",
+  "version": 1,
+  "ran_at": "2026-10-20",
+  "config_hash": "51e3bc3342a6b2494b7716017bf3b8e117394f672ec8d1957dcb70186d20d008",
+  "cases": [
+    {
+      "case_id": "B-CLM-01",
+      "defect_class": "claim_overreach",
+      "expected_detect": true,
+      "detected": true,
+      "passed": true,
+      "evidence": "writable_form=full 越 ceiling=limitations_only"
+    },
+    {
+      "case_id": "B-CLM-02",
+      "defect_class": "missing_evidence",
+      "expected_detect": true,
+      "detected": true,
+      "passed": true,
+      "evidence": "主张回指不存在的结论行 C404"
+    },
+    {
+      "case_id": "B-NUM-01",
+      "defect_class": "number_inconsistency",
+      "expected_detect": true,
+      "detected": true,
+      "passed": true,
+      "evidence": "正文实印 5.52 ≠ 登记 5.25"
+    },
+    {
+      "case_id": "B-CIT-01",
+      "defect_class": "citation_gap",
+      "expected_detect": true,
+      "detected": true,
+      "passed": true,
+      "evidence": "正文引用 [@ghost2099] 在 lock 中无条目"
+    },
+    {
+      "case_id": "B-GRIM-01",
+      "defect_class": "grim_incompatible",
+      "expected_detect": true,
+      "detected": true,
+      "passed": true,
+      "evidence": "均值 2.33（n=7, items=1）无整数解"
+    },
+    {
+      "case_id": "B-CLEAN-01",
+      "defect_class": "clean",
+      "expected_detect": false,
+      "detected": false,
+      "passed": true,
+      "evidence": "干净主张不应被标 error"
+    },
+    {
+      "case_id": "B-CLEAN-02",
+      "defect_class": "clean",
+      "expected_detect": false,
+      "detected": false,
+      "passed": true,
+      "evidence": "干净数字不应被标 error"
+    },
+    {
+      "case_id": "B-CLEAN-03",
+      "defect_class": "clean",
+      "expected_detect": false,
+      "detected": false,
+      "passed": true,
+      "evidence": "干净引用不应被标 error"
+    },
+    {
+      "case_id": "B-CLEAN-04",
+      "defect_class": "clean",
+      "expected_detect": false,
+      "detected": false,
+      "passed": true,
+      "evidence": "相容均值不应判败"
+    }
+  ],
+  "by_class": {
+    "citation_gap": {
+      "total": 1,
+      "detected": 1,
+      "detection_rate": 1.0
+    },
+    "claim_overreach": {
+      "total": 1,
+      "detected": 1,
+      "detection_rate": 1.0
+    },
+    "grim_incompatible": {
+      "total": 1,
+      "detected": 1,
+      "detection_rate": 1.0
+    },
+    "missing_evidence": {
+      "total": 1,
+      "detected": 1,
+      "detection_rate": 1.0
+    },
+    "number_inconsistency": {
+      "total": 1,
+      "detected": 1,
+      "detection_rate": 1.0
+    }
+  },
+  "false_positive": {
+    "total": 4,
+    "flagged": 0,
+    "rate": 0.0
+  },
+  "passed_all": true
+}

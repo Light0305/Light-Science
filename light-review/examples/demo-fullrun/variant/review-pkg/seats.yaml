@@ -1,0 +1,29 @@
+seats:
+- seat_id: V1
+  role: methods
+  model_family: claude
+  persona: 方法学审稿人（变体演示）
+  knows_authors: false
+  visibility:
+    panel:
+    - manuscript
+    - forensic
+    - own_materials
+    reported:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+    adjudication:
+    - manuscript
+    - forensic
+    - own_materials
+    - other_reports
+    - consensus
+  status: frozen
+  draft_path: reports/drafts/V1.md
+  report_path: reports/V1.md
+  report_hash: 246f642d162768d6cc798376f2511a3f80016a8aa10af9fb3af42de12de56f54
+  frozen_at: '2026-10-20'
+  degraded_note: null

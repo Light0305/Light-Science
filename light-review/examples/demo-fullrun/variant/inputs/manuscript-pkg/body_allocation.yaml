@@ -1,0 +1,13 @@
+enforced: true
+locations:
+- claim_id: C1
+  section: S-discussion
+  role: interpret
+  note: C1 唯一出现处：局限段的描述性落字（limitations_only 形态）
+results:
+- function: qualification
+  destination: main_text
+  note: 臂间差异连同不确定性与判定状态一并报告（results/discussion）
+deletion_log:
+- what: 摘要中一处复述臂间差异的草稿段
+  reason: 与 results 账重复；摘要在本演示中保持描述性且不用数字

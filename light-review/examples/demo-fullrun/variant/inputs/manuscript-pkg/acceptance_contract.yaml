@@ -1,0 +1,55 @@
+kind: light-write/acceptance-contract
+version: '1.0'
+status: agreed
+frozen: true
+frozen_at: '2026-10-20'
+content_hash: c3ba413a2a9f2a1d716a56a94ac494a399b3c202cfbf89a2897ff69cf19aa83a
+assertions:
+- assertion_id: A01
+  text: 终稿对主张 C1 的全部表述仅出现在讨论（局限）节，且每处措辞不超 minimal 档
+  checkable_via: 人工读终稿 + audit 门三
+  status: agreed
+- assertion_id: A02
+  text: 正文每个数字均以 [num:] 标记出现，且能在结论卡 number_provenance 中找到对应行
+  checkable_via: audit 门二
+  status: agreed
+- assertion_id: A03
+  text: 正文引用只出现 [@key] 占位符，且 key 全部在 references.lock 内
+  checkable_via: validate + audit 门一
+  status: agreed
+- assertion_id: A04
+  text: 参考文献表由 lock 回填生成、未手改（bib 条目集哈希对齐）
+  checkable_via: validate
+  status: agreed
+- assertion_id: A05
+  text: 主张 C1 不出现在摘要中，也不出现在任何结论性表述中
+  checkable_via: 人工读终稿
+  status: agreed
+- assertion_id: A06
+  text: AI 披露文本按模板记录 G 组生成，且落在 declarations 节的全部登记位置
+  checkable_via: disclose-status
+  status: agreed
+- assertion_id: A07
+  text: 图表 F001 有正文引用点，图注文本与清单 caption_text_hash 对齐
+  checkable_via: figures check
+  status: agreed
+- assertion_id: A08
+  text: 声明四项无 absent（ethics 为 na 且理由落字）
+  checkable_via: validate + 人工读登记头
+  status: agreed
+- assertion_id: A09
+  text: 数字呈现值与溯源值按呈现精度半上舍入逐串一致
+  checkable_via: audit 门二
+  status: agreed
+- assertion_id: A10
+  text: 术语账 canonical 形式全稿一致、无已见变体残留
+  checkable_via: terms 校验
+  status: agreed
+- assertion_id: A11
+  text: 检查清单底线层条目全部 addressed 且落点在稿件中实位存在
+  checkable_via: audit 门四
+  status: agreed
+- assertion_id: A12
+  text: 稿件语言为 en 且与模板记录期刊语言一致
+  checkable_via: validate + register-template 记录
+  status: agreed

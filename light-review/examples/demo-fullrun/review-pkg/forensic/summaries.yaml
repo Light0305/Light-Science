@@ -1,0 +1,36 @@
+entries:
+- stat_id: GS001
+  kind: percent
+  value: '100.0'
+  decimals: 1
+  n: 4
+  scale_type: count
+  note: 方向一致率：Analysis 结论包 conclusions.yaml strength.inputs .worst_direction_share=1.0、verdicts.jsonl
+    各行 joint.direction_share =1.0——主规格集 S001–S004 四个规格效应方向全同向，100.0% × n=4。
+- stat_id: GS002
+  kind: percent
+  value: '77.77777777777778'
+  decimals: 14
+  n: 36
+  scale_type: count
+  note: P(A>B)：verdicts.jsonl R-ORA 行 p_ab=0.7777777777777778，即处理臂 6 段 × 对照臂 6 段共
+    36 个段对中 A>B 的比例（77.7778%，计数 28/36）。
+- stat_id: GS003
+  kind: mean
+  value: '72.638'
+  decimals: 3
+  n: 6
+  items: 3
+  scale_type: continuous
+  note: 固定阈值臂段级 MOTA 均值：Analysis judge-data.json R-FIX reference 六段 [75.446, 68.821,
+    77.293, 62.187, 79.169, 72.909]，均值 72.6375， Experiment 对账 readout 报 72.638（3 位小数）。段值本身是段内
+    3 个种子的均值、MOTA 为连续量——按适用性硬门应落 not_assessable。
+- stat_id: GS004
+  kind: mean
+  value: '77.835'
+  decimals: 3
+  n: 6
+  items: 3
+  scale_type: continuous
+  note: 预测阈值臂段级 MOTA 均值：judge-data.json R-PRED treatment 六段 [79.09, 76.642, 79.623,
+    73.899, 80.589, 77.169]，均值 77.83533…， readout 报 77.835。连续量，同 GS003 应落 not_assessable。

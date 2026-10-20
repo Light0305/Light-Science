@@ -1,0 +1,2 @@
+{"type": "finding", "finding_id": "F001", "check_id": "F-NN-001", "edge": "numbers_numbers", "category": "confirmed_error", "layer": "inconsistency", "flag_only": false, "claim_pointer": null, "evidence_pointer": "numbers_ledger:N001", "raw": "[num:N001] 5.52", "detail": "数字 N001 正文实印 5.52 ≠ 登记 5.25", "at": "2026-10-20"}
+{"type": "adjudication", "finding_id": "F001", "outcome": "confirmed", "adjudicator": "demo-adjudicator（演示裁决）", "reason": "变体注入的正文数字与 numbers_ledger 登记值不符属实，确认错误成立；本变体不进交付，裁决只为演示裁决位解除阻断的路径。", "at": "2026-10-20"}

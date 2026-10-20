@@ -1,0 +1,23 @@
+# 支撑五级量表 + 双角色对抗协议（D-W07/D-W12）演示登记。
+# proposer 给源 + 逐字支撑句；skeptic 独立一遍默认拒绝、无逐字句不确认。
+assessments:
+  - entry_id: ST001
+    claim_id: null
+    level: background
+    proposer: "demo operator (proposer role)"
+    skeptic: "demo operator (skeptic role, separate pass)"
+    note: "引言背景引用：自注意力机制在应用检测领域已有系统综述；不支撑本研究任何主张，skeptic 同意 background 级"
+  - entry_id: ST002
+    claim_id: null
+    level: partial
+    verbatim_quote: "Firstly, dilated convolution is used, and a smaller downsampling factor is used to maintain the resolution of the image and obtain the detailed information of the image."
+    proposer: "demo operator (proposer role)"
+    skeptic: "demo operator (skeptic role, separate pass)"
+    note: "逐字句取自 Crossref 记录摘要（候选池原文）；支撑方法节「注意力模块与编码器-解码器分割网络结合的先例」一句，skeptic 以 partial 确认（只支撑先例存在，不支撑本研究设计选择）"
+  - entry_id: ST005
+    claim_id: null
+    level: background
+    verbatim_quote: "Here, we conducted a systematic review of 59 research articles that explored the role of attention in XR interventions for autistic users."
+    proposer: "demo operator (proposer role)"
+    skeptic: "demo operator (skeptic role, separate pass)"
+    note: "引言背景引用：注意力类应用已有系统综述；与本研究主题距离远，skeptic 拒绝 proposer 初提的 partial（无逐字句且主题不贴合），改判 background"

@@ -1,0 +1,69 @@
+{
+  "kind": "light-review/selfcheck",
+  "version": 1,
+  "ran_at": "2026-10-20",
+  "target_hash": "8cad3daddd13744968a5ae84fdad9364edefc4277627cd29a17474b849ae5b9d",
+  "passed": true,
+  "tests": [
+    {
+      "test_id": "vague_unsupported",
+      "result": "pass",
+      "detail": "合成叙述逐行带库存锚点或数字依据",
+      "offenders": [],
+      "model_judgment": null
+    },
+    {
+      "test_id": "wrong_object",
+      "result": "pass",
+      "detail": "产物引用的对象全在冻结库存内",
+      "offenders": [],
+      "model_judgment": null
+    },
+    {
+      "test_id": "praise_only",
+      "result": "pass",
+      "detail": "无无锚表扬",
+      "offenders": [],
+      "model_judgment": null
+    },
+    {
+      "test_id": "mere_restatement",
+      "result": "pass",
+      "detail": "叙述行无与冻结报告近重复者",
+      "offenders": [],
+      "model_judgment": null
+    },
+    {
+      "test_id": "contradicts_frozen",
+      "result": "pass",
+      "detail": "与冻结清单无矛盾",
+      "offenders": [],
+      "model_judgment": null
+    }
+  ],
+  "reconciliation": {
+    "frozen_concern_ids": [
+      "RV-C001",
+      "RV-C002",
+      "RV-C003",
+      "RV-C004",
+      "RV-C005",
+      "RV-C006"
+    ],
+    "meta_referenced_ids": [
+      "RV-C001",
+      "RV-C002",
+      "RV-C003",
+      "RV-C004",
+      "RV-C005",
+      "RV-C006"
+    ],
+    "missing_from_meta": [
+      "RV-C003",
+      "RV-C004",
+      "RV-C005",
+      "RV-C006"
+    ],
+    "unknown_in_meta": []
+  }
+}

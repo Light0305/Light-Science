@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-review"
+version = "1.0.0"
+description = "Light-Review：投稿前内部评审包——法医式一致性核查（四方对账 + GRIM 族）+ 模拟审稿人组（可见性矩阵/报告冻结/共识门）+ 人工裁决位（Light-Science 子技能，Phase 1）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-review = "light_review.cli:main"
+
+[tool.setuptools]
+packages = ["light_review"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
