@@ -10,7 +10,7 @@
 | [Light-Literature](light-literature/) | 文献：检索核实、双轨解析、四件套、精读卡与证据行 | **v1.0 已发布** |
 | Light-Idea | 想法：基于证据矩阵与笔记生成、查新并筛选研究想法 | **v1.0 已发布**（light-idea/） |
 | Light-Design | 设计：把想法落成可执行的研究/实验设计 | **v1.0 已发布**（light-design/） |
-| Light-Experiment | 实验：执行设计、记录过程与原始产物 | 规划中 |
+| Light-Experiment | 实验：执行设计、记录过程与原始产物 | **v1.0 已发布**（light-experiment/） |
 | Light-Analysis | 分析：数据分析与结果核查 | 规划中 |
 | Light-Write | 写作：基于证据行成稿，引用只走核实过的文献 | 规划中 |
 | Light-Figure | 作图：方法/机制图与数据图 | 规划中 |
