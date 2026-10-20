@@ -14,6 +14,11 @@
   正态近似闭式）。D 只许外部代入（冻结 SESOI / 外部先验），本模块
   不从数据效应反推 D——事后功效禁令在调用层由字段纪律守（约束 11）。
 - `stouffer_combine`：带方向的 Stouffer 合并（规格集联合推断用）。
+- 配对/区组口径（ANA-D03）：`align_by_keys` 按对齐键作差（缺对侧
+  点名抛错）、`block_contrasts` 区组内对照序列、`paired_effect_and_ci`
+  差值序列单样本 t 口径、`p_superiority_paired` 配对符号口径、
+  `sign_test_p` 精确二项符号检验、`tost_paired` 配对版 TOST
+  （SE=0 退化情形按点落界判定，不编造 SE）。
 
 每个公开计算函数返回 dict，带 `provenance`（method / inputs_hash /
 params）：落 spec_results 与判定行后可按同一口径机械复算。
@@ -324,6 +329,170 @@ def tost_from_samples(a, b, sesoi, alpha=0.05) -> dict:
     diff, se, df = _welch_core(_mean(a), _var(a), len(a),
                                _mean(b), _var(b), len(b))
     return tost(diff, se, df, sesoi, alpha=alpha)
+
+
+# ---------------------------------------------------------------- 配对/区组
+
+def align_by_keys(a, keys_a, b, keys_b) -> list:
+    """按对齐键逐元素作差：返回以处理臂键序为准的差值序列 a−b。
+
+    键是配对的身份，不是位置：两臂键集必须相同、各自无重复，
+    任一侧缺对侧即抛错并点名缺失键（ANA-D03：声明配对而缺对侧
+    不许静默按位置或独立样本凑数）。
+    """
+    a = [float(x) for x in a]
+    b = [float(x) for x in b]
+    keys_a = list(keys_a)
+    keys_b = list(keys_b)
+    if len(keys_a) != len(a) or len(keys_b) != len(b):
+        raise ValueError("对齐键长度与臂长不一致（treatment "
+                         f"{len(keys_a)}/{len(a)}、reference "
+                         f"{len(keys_b)}/{len(b)}）")
+    for tag, keys in (("treatment", keys_a), ("reference", keys_b)):
+        dup = sorted({k for k in keys if keys.count(k) > 1})
+        if dup:
+            raise ValueError(f"{tag} 臂对齐键重复：{dup}（一键只许配一个元素）")
+    bmap = dict(zip(keys_b, b))
+    missing = [k for k in keys_a if k not in bmap]
+    extra = [k for k in keys_b if k not in set(keys_a)]
+    if missing or extra:
+        raise ValueError(f"配对缺对侧：treatment 有而 reference 缺 {missing}；"
+                         f"reference 有而 treatment 缺 {extra}")
+    return [x - bmap[k] for x, k in zip(a, keys_a)]
+
+
+def block_contrasts(a, blocks_a, b, blocks_b) -> list:
+    """区组内对照序列：逐区组取（处理臂均值 − 对照臂均值），按区组键序返回。
+
+    区组是判定单位：每区组两臂元素各至少 1 个，缺臂区组抛错点名
+    （ANA-D03：区组缺臂不许静默丢弃或按独立样本判）。
+    """
+    a = [float(x) for x in a]
+    b = [float(x) for x in b]
+    blocks_a = list(blocks_a)
+    blocks_b = list(blocks_b)
+    if len(blocks_a) != len(a) or len(blocks_b) != len(b):
+        raise ValueError("区组键长度与臂长不一致（treatment "
+                         f"{len(blocks_a)}/{len(a)}、reference "
+                         f"{len(blocks_b)}/{len(b)}）")
+    ga: dict = {}
+    gb: dict = {}
+    for x, k in zip(a, blocks_a):
+        ga.setdefault(k, []).append(x)
+    for x, k in zip(b, blocks_b):
+        gb.setdefault(k, []).append(x)
+    labels = sorted(set(ga) | set(gb), key=str)
+    out = []
+    for k in labels:
+        if k not in ga or k not in gb:
+            side = "reference" if k not in gb else "treatment"
+            raise ValueError(f"区组 {k} 缺 {side} 臂元素：区组内对照无从计算")
+        out.append(_mean(ga[k]) - _mean(gb[k]))
+    return out
+
+
+def _one_sample_core(diffs):
+    """差值序列单样本核心量：均值、SD、SE、df（n≥2）。"""
+    diffs = [float(x) for x in diffs]
+    n = len(diffs)
+    if n < 2:
+        raise ValueError("配对/区组判定至少需要 2 个配对单位（对或区组）")
+    m = _mean(diffs)
+    if all(x == diffs[0] for x in diffs):
+        return m, 0.0, 0.0, n - 1
+    var = _var(diffs, m)
+    sd = math.sqrt(var)
+    return m, sd, sd / math.sqrt(n), n - 1
+
+
+def paired_effect_and_ci(diffs, level=0.95) -> dict:
+    """配对口径效应：差值序列的单样本 t 均值 + 区间 + 标准化 dz + 双侧 p。
+
+    差值全同（SD=0）的退化情形：SE=0、区间退化为点、p 按均值是否为 0
+    取 0/1、dz 无定义落 None——如实落字，不编造 SE（ANA-D03）。
+    """
+    diffs = [float(x) for x in diffs]
+    m, sd, se, df = _one_sample_core(diffs)
+    if se > 0:
+        tcrit = t_ppf(0.5 + level / 2.0, df)
+        ci = (m - tcrit * se, m + tcrit * se)
+        t_stat = m / se
+        p_two = 2.0 * (1.0 - t_cdf(abs(t_stat), df))
+        # 标准化差值 dz = m/sd + Hedges 小样本校正 J(df)
+        j = 1.0 - 3.0 / (4.0 * df - 1.0) if df > 1 else 1.0
+        dz = j * (m / sd)
+    else:
+        ci = (m, m)
+        t_stat = None
+        p_two = 0.0 if m != 0 else 1.0
+        dz = 0.0 if m == 0 else None
+    return {"mean_diff": m, "sd": sd, "se": se, "df": df, "n_units": len(diffs),
+            "ci": {"level": level, "lo": ci[0], "hi": ci[1]},
+            "hedges_g": dz, "t_stat": t_stat,
+            "p_two_sided": min(1.0, max(0.0, p_two)),
+            "provenance": _prov("paired_effect_and_ci", {"diffs": diffs},
+                                {"level": level})}
+
+
+def p_superiority_paired(diffs) -> dict:
+    """配对符号口径 P(A>B)：差为正的对占比，差为 0 的对计 0.5。"""
+    diffs = [float(x) for x in diffs]
+    if not diffs:
+        raise ValueError("p_superiority_paired 需要非空差值序列")
+    pos = sum(1 for d in diffs if d > 0)
+    ties = sum(1 for d in diffs if d == 0)
+    value = (pos + 0.5 * ties) / len(diffs)
+    return {"value": value, "positive": pos, "ties": ties,
+            "pairs": len(diffs),
+            "provenance": _prov("paired_sign_p_superiority",
+                                {"diffs": diffs}, {"ties": 0.5})}
+
+
+def sign_test_p(diffs) -> dict:
+    """符号检验双侧精确 p（剔除零差后对正号数做二项检验）。"""
+    diffs = [float(x) for x in diffs]
+    nz = [d for d in diffs if d != 0]
+    n = len(nz)
+    if n == 0:
+        return {"p_two_sided": 1.0, "n_nonzero": 0, "positive": 0,
+                "provenance": _prov("sign_test_exact", {"diffs": diffs}, {})}
+    k = sum(1 for d in nz if d > 0)
+    lo = sum(math.comb(n, i) for i in range(0, k + 1))
+    hi = sum(math.comb(n, i) for i in range(k, n + 1))
+    p = min(1.0, 2.0 * min(lo, hi) / (2 ** n))
+    return {"p_two_sided": p, "n_nonzero": n, "positive": k,
+            "provenance": _prov("sign_test_exact", {"diffs": diffs}, {})}
+
+
+def tost_paired(diffs, sesoi, alpha=0.05) -> dict:
+    """配对版 TOST：差值序列均值/SE/df 走 tost()；SE=0 退化按点落界判定。"""
+    diffs = [float(x) for x in diffs]
+    m, sd, se, df = _one_sample_core(diffs)
+    if se > 0:
+        out = tost(m, se, df, sesoi, alpha=alpha)
+        out["provenance"] = _prov("tost_paired",
+                                  {"diffs": diffs},
+                                  {"sesoi": sesoi, "alpha": alpha})
+        return out
+    if sesoi <= 0:
+        raise ValueError("TOST bounds 的 SESOI 必须为正")
+    in_bounds = -sesoi <= m <= sesoi
+    if abs(m) < sesoi:
+        p_tost = 0.0
+    elif abs(m) == sesoi:
+        p_tost = 0.5
+    else:
+        p_tost = 1.0
+    passed = (p_tost < alpha) and in_bounds
+    return {"p_tost": p_tost, "p_lower": p_tost, "p_upper": p_tost,
+            "ci90": {"lo": m, "hi": m},
+            "ci90_in_bounds": in_bounds,
+            "result": "pass" if passed else "fail",
+            "bounds": {"lo": -sesoi, "hi": sesoi},
+            "degenerate_se0": True,
+            "provenance": _prov("tost_paired_degenerate_se0",
+                                {"diffs": diffs},
+                                {"sesoi": sesoi, "alpha": alpha})}
 
 
 # ---------------------------------------------------------------- 多重校正

@@ -104,9 +104,11 @@ def check_template_record(record, rep: Report, today_date=None):
     ai = group_g.get("ai_policy")
     if isinstance(ai, dict):
         for field in schema.TEMPLATE_GROUPS["G"]["ai_policy_required"]:
-            if ai.get(field) is None:
+            if field not in ai:
                 rep.error("template.ai_policy_field",
-                          f"AI 政策组缺子字段 {field}", where="template.G.ai_policy")
+                          f"AI 政策组缺子字段 {field}（逐项必填，WRT-D08(5)；"
+                          "无此项口径的刊以 null 落字，不许整项缺席）",
+                          where="template.G.ai_policy")
         if ai.get("disclosure_required"):
             positions = ai.get("disclosure_positions")
             if not positions or not isinstance(positions, list):
@@ -122,9 +124,24 @@ def check_template_record(record, rep: Report, today_date=None):
         decls = group_g.get("declarations")
         if isinstance(decls, list):
             for d in decls:
-                if not isinstance(d, dict) or not d.get("type") or "position" not in d:
+                # WRT-D08(3)：四键实查（此前只查 type/position 两键，
+                # 报错文案却自称四件——采补齐校验，不改文案降格）
+                missing = []
+                if not isinstance(d, dict):
+                    missing = ["type", "required", "position", "field_name"]
+                else:
+                    if not d.get("type"):
+                        missing.append("type")
+                    if "required" not in d:
+                        missing.append("required")
+                    if "position" not in d:
+                        missing.append("position")
+                    if not d.get("field_name"):
+                        missing.append("field_name")
+                if missing:
                     rep.error("template.declaration_shape",
-                              "声明清单条目须含 {type, required, position, field_name}",
+                              "声明清单条目须含 {type, required, position, "
+                              f"field_name}}，本条缺 {missing}",
                               where="template.G.declarations")
     group_h = record.get("H") or {}
     verified_at = group_h.get("verified_at")
@@ -132,6 +149,8 @@ def check_template_record(record, rep: Report, today_date=None):
         try:
             vdate = date.fromisoformat(str(verified_at)[:10])
             cycle = group_h.get("review_cycle_days") or schema.TEMPLATE_EXPIRY_DEFAULT_DAYS
+            if isinstance(cycle, bool) or not isinstance(cycle, (int, float)):
+                cycle = schema.TEMPLATE_EXPIRY_DEFAULT_DAYS  # 类型错误由 D08(4) 检查点名
             age = (today_date - vdate).days
             if age > cycle:
                 rep.warning("template.expired",
@@ -149,6 +168,25 @@ def check_template_record(record, rep: Report, today_date=None):
     if group_h.get("bundled") and group_h["bundled"] not in schema.BUNDLED_VALUES:
         rep.error("template.bundled",
                   f"bundled {group_h['bundled']!r} 不在 {schema.BUNDLED_VALUES}（库存诚实）")
+    # WRT-D08(4)：official_channel 词表 + 两处数值类型加严
+    if group_h.get("official_channel") is not None and \
+            group_h["official_channel"] not in schema.OFFICIAL_CHANNELS:
+        rep.error("template.official_channel_vocab",
+                  f"official_channel {group_h['official_channel']!r} 不在词表 "
+                  f"{schema.OFFICIAL_CHANNELS}（新增取值须改 schema 落字）",
+                  where="template.H.official_channel")
+    cycle = group_h.get("review_cycle_days")
+    if cycle is not None and (isinstance(cycle, bool)
+                              or not isinstance(cycle, (int, float))):
+        rep.error("template.review_cycle_type",
+                  f"review_cycle_days 须为数值（天），实为 {cycle!r}",
+                  where="template.H.review_cycle_days")
+    group_c = record.get("C") or {}
+    kw = group_c.get("keyword_limit")
+    if kw is not None and (isinstance(kw, bool) or not isinstance(kw, int)):
+        rep.error("template.keyword_limit_type",
+                  f"keyword_limit 须为整数，实为 {kw!r}",
+                  where="template.C.keyword_limit")
 
 
 def template_record_expired(record, today_date=None) -> bool:
@@ -183,6 +221,7 @@ def validate_package(root) -> dict:
                   "（语言按目标期刊定，一篇稿一个语言）")
 
     _check_intake(root, pkg, rep)
+    _check_contribution(pkg, rep)
     _check_claims(pkg, rep, language)
     _check_lock_and_bib(root, pkg, rep)
     _check_sections(pkg, rep)
@@ -339,6 +378,34 @@ def _check_intake(root, pkg, rep: Report):
     elif lit_path:
         rep.warning("intake.literature_missing",
                     f"verified 集源文件已不存在，集哈希未复核（未核查）：{lit_path}")
+
+
+def _check_contribution(pkg, rep: Report):
+    """贡献确认回执的防篡改与防漂移（WRT-D04）。"""
+    from .intake import claims_source_hash
+    from .util import sha256_text
+
+    manuscript = pkg["manuscript"]
+    contribution = manuscript.get("contribution")
+    if contribution is None:
+        if manuscript.get("intake"):
+            rep.warning("contribution.missing",
+                        "已 intake 但无贡献陈述草案/回执（存量包形态）："
+                        "outlined 门须先补签认（WRT-D04）")
+        return
+    if contribution.get("status") != "signed":
+        return
+    receipt = contribution.get("receipt") or {}
+    statement = receipt.get("statement")
+    if not statement or receipt.get("statement_hash") != sha256_text(statement):
+        rep.error("contribution.receipt_hash_drift",
+                  "贡献回执的陈述文本与 statement_hash 不符：签认后改陈述"
+                  "被检出，须重新 confirm-contribution 签认")
+    rows = (pkg["claims"] or {}).get("claims") or []
+    if receipt.get("source_claims_hash") != claims_source_hash(rows):
+        rep.error("contribution.source_drift",
+                  "上游主张集已不同于签认时点（主张文本/集合漂移）："
+                  "贡献陈述须按新主张重新生成草案并重签（WRT-D04）")
 
 
 def _check_claims(pkg, rep: Report, language):
@@ -531,6 +598,20 @@ def _check_numbers_figures_checklist(pkg, rep: Report):
         if not n.get("trace_ref"):
             rep.error("numbers.no_trace",
                       f"数字 {nid} 缺溯源表条目指针 trace_ref（无溯源数字不许进成稿）")
+        else:
+            # WRT-D13：trace_ref 量名后缀形态 + 与 quantity 字段的一致性
+            ref = str(n["trace_ref"])
+            if ":" in ref:
+                base, _, qty = ref.rpartition(":")
+                if not base or not qty:
+                    rep.error("numbers.trace_format",
+                              f"数字 {nid} trace_ref {ref!r} 形态不对："
+                              "须为 '<判定行>' 或 '<判定行>:<量名>'")
+                elif n.get("quantity") and n["quantity"] != qty:
+                    rep.error("numbers.trace_quantity_conflict",
+                              f"数字 {nid} trace_ref 量名后缀 {qty!r} 与账行 "
+                              f"quantity 字段 {n['quantity']!r} 不一致"
+                              "（三元组两处登记须同值）")
     figures = (pkg["figures"] or {}).get("figures") or []
     seen = set()
     for f in figures:

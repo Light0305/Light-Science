@@ -25,6 +25,13 @@
   reconcile   对账实质化（fill 逐行回填事实层；check 逐行清零检查）
   budget      预算闸（check 对照熔断线触发即停报；无任何放宽命令）
   export-card 导出 execution_card.json（给 Analysis 的结构化投影）
+
+三期命令（v1.1）：
+  stale       事前 stale 清单（EXP-D02）：以现行设计链 + --spec 声明
+              逐维比对出生证明，输出 current/stale/voided 三态清单
+              （机读 JSON + 人读 MD 两份）；只读，不改包状态。
+  （run-finish 内置 EXP-D03 干预机械核验：声称 vs 实际生效值由工具
+   按登记的核验方式机械比对，不符自动转 deviated 候选。）
 """
 
 from __future__ import annotations
@@ -71,6 +78,7 @@ from .project import load_acceptance
 from .reconcile import check_reconciliation, export_card, fill_row
 from .render import render_report
 from .schema import PKG_STATES, RUN_STATES, validate_package
+from .stale import compute_stale_report, write_stale_reports
 from .util import load_structured, today
 
 
@@ -182,6 +190,20 @@ def cmd_run_finish(args) -> int:
         return 1
     print(f"已终止：{args.run_id} → {run['status']}"
           f"（exit_status={args.exit_status}）")
+    ver = (run.get("conclusion") or {}).get("intervention_verification") or {}
+    results = ver.get("results") or []
+    if results:
+        print(f"  干预机械核验（EXP-D03）：总判 {ver.get('verdict')}"
+              f"（{len(results)} 条核查点，实际值由工具从产物机械读取）")
+        for r in results:
+            if r.get("status") != "pass":
+                print(f"  🔴 {r.get('point')}：{r.get('status')}——"
+                      f"{r.get('detail')}")
+            else:
+                print(f"  ✓ {r.get('point')}：pass（{r.get('detail')}）")
+        if run["status"] == "deviated" and args.exit_status == "completed":
+            print("  核验不符已自动标 deviated 候选：不许静默通过，"
+                  "按偏离规程处置（登记/替代）后再对账")
     return 0
 
 
@@ -610,6 +632,42 @@ def cmd_export_card(args) -> int:
     return 0
 
 
+def cmd_stale(args) -> int:
+    root = Path(args.project)
+    spec = None
+    if args.spec:
+        try:
+            spec = _load_spec(args.spec)
+        except (FileNotFoundError, ValueError) as e:
+            return _fail(str(e))
+    try:
+        report = compute_stale_report(
+            root, args.exec_id, current_spec=spec,
+            spec_source=str(args.spec) if args.spec else "")
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    out_json, out_md = write_stale_reports(
+        root, args.exec_id, report,
+        out_json=Path(args.out_json) if args.out_json else None,
+        out_md=Path(args.out_md) if args.out_md else None)
+    s = report["summary"]
+    print(f"stale 预检：{args.exec_id}（current {s['current']} · "
+          f"stale {s['stale']} · voided {s['voided']}）")
+    print(f"  报告：{out_json}（机读）/ {out_md}（人读）；只读视图，"
+          "未改任何包状态")
+    if report["uncompared_dimensions"]:
+        print(f"  未比对维度：{'、'.join(report['uncompared_dimensions'])}"
+              "（现行参照未覆盖，不下结论）")
+    for e in report["runs"]:
+        if e["state"] == "stale":
+            dims = "、".join(d["dimension"] for d in e["stale_dimensions"])
+            print(f"  🟠 {e['run_id']} stale（触发维 {dims}）：{e['advice']}")
+        elif e["state"] == "voided":
+            print(f"  ⚫ {e['run_id']} voided（作废于 "
+                  f"{'、'.join(e['voided_by'])}，既成事实）")
+    return 1 if s["stale"] else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-experiment",
@@ -838,6 +896,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("exec_id")
     p.add_argument("--out", help="输出路径（默认包目录内 execution_card.json）")
     p.set_defaults(func=cmd_export_card)
+
+    p = sub.add_parser("stale", help="事前 stale 清单（EXP-D02，只读三态视图）")
+    p.add_argument("project")
+    p.add_argument("exec_id")
+    p.add_argument("--spec", help="现行状态声明文件（JSON/YAML）：按条目键 "
+                                  "{design_run_id: spec} 或全包一份 spec；"
+                                  "逐维与出生证明比对")
+    p.add_argument("--out-json", dest="out_json",
+                   help="机读报告路径（默认包目录内 stale_report.json）")
+    p.add_argument("--out-md", dest="out_md",
+                   help="人读报告路径（默认包目录内 STALE_REPORT.md）")
+    p.set_defaults(func=cmd_stale)
 
     args = parser.parse_args(argv)
     return args.func(args)

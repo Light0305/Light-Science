@@ -308,6 +308,16 @@ def produce_data_figure(root, fig_id: str, by: str | None = None) -> dict:
 
     cat = bundle["palettes"]["categorical"]
     cont = bundle["palettes"]["continuous"]
+    # FIG-D08：数据图线的配色决定在 produce 落显性记录（决定来源取
+    # 自图合同 palette_decision，实际消费的色板条目与版本同记）。
+    decision = (contract or {}).get("palette_decision") or {}
+    palette_decision_record = {
+        "source": decision.get("source"),
+        "basis": decision.get("basis"),
+        "categorical": f"{cat['entry_id']}@{cat['version']}",
+        "continuous": f"{cont['entry_id']}@{cont['version']}",
+        "style_build_hash": bundle["style_build_hash"],
+    }
     update_provenance_row(root, fig_id, {
         "backend": "python",
         "runtime_version": f"python {platform.python_version()} / "
@@ -318,6 +328,7 @@ def produce_data_figure(root, fig_id: str, by: str | None = None) -> dict:
         "palette_registry_version":
             f"{cat['entry_id']}@{cat['version']} + "
             f"{cont['entry_id']}@{cont['version']}",
+        "palette_decision_record": palette_decision_record,
     }, by=by or "light-figure produce")
 
     return {
@@ -329,4 +340,5 @@ def produce_data_figure(root, fig_id: str, by: str | None = None) -> dict:
         "alignment_input": f"audit/{fig_id}.alignment-input.json",
         "panels_measured": len(panels),
         "font_substituted": font_substituted,
+        "palette_decision_record": palette_decision_record,
     }

@@ -1,6 +1,8 @@
 """GRIM 族相容性检查（RV-09）+ 舍入区间法（RV-08，statcheck 口径）。
 
-三件：均值粒度（GRIM 本体）、百分比粒度、合计相容性。
+四件：均值粒度（GRIM 本体）、百分比粒度、合计相容性、GRIMMER
+（mean/SD/n 三元组相容，v1.1 REV-D07：登记元数据扩 SD 字段后，
+整数总和与整数平方和须同时存在，判定走精确有理数不经 float）。
 
 共同纪律：
 - 容差不由人拍：由报告值的小数位导出真值区间 [v − step/2, v + step/2)，
@@ -17,6 +19,7 @@
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
+from fractions import Fraction
 
 from . import schema
 
@@ -89,6 +92,8 @@ def _base_row(entry: dict, result: str, detail: str, evidence=None) -> dict:
             "n": entry.get("n"),
             "items": entry.get("items"),
             "scale_type": entry.get("scale_type"),
+            "sd": entry.get("sd"),
+            "sd_decimals": entry.get("sd_decimals"),
         },
         "missing": [],
     }
@@ -209,11 +214,100 @@ def grim_total(entry: dict) -> dict:
                      evidence)
 
 
-_CHECKS = {"mean": grim_mean, "percent": grim_percent, "total": grim_total}
+# ---------------------------------------------------------------- GRIMMER
+
+def _ceil_frac(x: Fraction) -> int:
+    return -(-x.numerator // x.denominator)
+
+
+def grim_grimmer(entry: dict) -> dict:
+    """GRIMMER：mean/SD/n 三元组相容（原始整数值的总和与平方和同存）。
+
+    判定：存在整数 T（总和）与整数 SS（平方和）使 T/n 落报告均值的
+    舍入区间、且 sqrt((SS - T^2/n)/(n-1)) 落报告 SD 的舍入区间；
+    附加同余约束 SS ≡ T (mod 2)（整数平方与自身同奇偶，恒等式）。
+    全程 Fraction 精确运算，区间边界口径与 GRIM 三件一致（半上）。
+    适用性硬门同口径：元数据不齐 / 非整数粒度 / n<2 / 复合均值
+    （items>1 时参与者分数粒度为 1/items，三元组本体不适用）一律
+    not_assessable，不许硬算造假阳性。
+    """
+    entry = dict(entry)
+    entry["kind"] = "grimmer"
+    missing = _missing_meta(entry, ["value", "sd", "n", "scale_type"])
+    if entry.get("decimals") is None \
+            and decimals_of(entry.get("value")) is None:
+        missing.append("decimals")
+    if entry.get("sd_decimals") is None \
+            and decimals_of(entry.get("sd")) is None \
+            and "sd" not in missing:
+        missing.append("sd_decimals")
+    if missing:
+        return _not_assessable(
+            entry, "元数据不齐，适用性硬门未过：" + "、".join(missing), missing)
+    if entry["scale_type"] not in schema.INTEGER_SCALE_TYPES:
+        return _not_assessable(
+            entry, f"量表类型 {entry['scale_type']} 非整数粒度"
+                   "（GRIMMER 只对整数值数据成立，硬检将造假阳性）")
+    try:
+        n = int(entry["n"])
+    except (TypeError, ValueError):
+        return _not_assessable(entry, "n 非整数，适用性硬门未过")
+    if n < 2:
+        return _not_assessable(
+            entry, "n<2 时样本 SD 无定义，GRIMMER 不适用")
+    items = entry.get("items")
+    if items is not None and int(items) != 1:
+        return _not_assessable(
+            entry, f"items={items} 的复合均值粒度为 1/items："
+                   "GRIMMER 三元组对原始整数值成立，复合分数不硬算")
+    iv_m = rounding_interval(entry["value"])
+    iv_s = rounding_interval(entry["sd"])
+    if iv_m is None or iv_s is None:
+        return _not_assessable(entry, "报告均值或 SD 非数值")
+    lo_m, hi_m, _ = (Fraction(x) for x in iv_m)
+    lo_s, hi_s, _ = (Fraction(x) for x in iv_s)
+    if hi_s <= 0:
+        return _not_assessable(entry, "报告 SD 非正，无法构成舍入区间")
+    lo_s = max(lo_s, Fraction(0))
+    lo2, hi2 = lo_s * lo_s, hi_s * hi_s
+    t_first = _ceil_frac(lo_m * n)
+    t_last = _ceil_frac(hi_m * n) - 1     # T/n < hi_m → T < hi_m * n
+    evidence_head = (f"均值真值 ∈ [{iv_m[0]}, {iv_m[1]})，"
+                     f"SD 真值 ∈ [{iv_s[0]}, {iv_s[1]})，n={n}，"
+                     f"整数总和 T 须 ∈ [{t_first}, {t_last}]")
+    if t_first > t_last:
+        return _base_row(entry, "incompatible",
+                         "无整数总和与报告均值相容（GRIM 层已判败）",
+                         evidence_head + "，T 区间为空")
+    for t in range(t_first, t_last + 1):
+        base = Fraction(t * t, n)
+        ss_lo = (n - 1) * lo2 + base
+        ss_hi = (n - 1) * hi2 + base
+        k = _ceil_frac(ss_lo)
+        for cand in (k, k + 1):
+            if cand < ss_hi and (cand - t) % 2 == 0:
+                return _base_row(
+                    entry, "compatible",
+                    f"存在整数总和 T={t} 与平方和 SS={cand} 同时满足"
+                    "均值与 SD 的舍入区间",
+                    evidence_head + f"，取 T={t}、SS={cand}"
+                    f"（SS 须 ∈ [{ss_lo}, {ss_hi}) 且 SS≡T mod 2）")
+    return _base_row(entry, "incompatible",
+                     "不存在整数 (总和, 平方和) 对同时满足报告均值与 SD"
+                     "（旗标，归因待人工裁决）",
+                     evidence_head + "，逐 T 检验均无合规整数平方和")
+
+
+_CHECKS = {"mean": grim_mean, "percent": grim_percent, "total": grim_total,
+           "grimmer": grim_grimmer}
 
 
 def run_grim(entries) -> list:
-    """对登记表逐条跑相容性检查，返回 compatibility 行列表。"""
+    """对登记表逐条跑相容性检查，返回 compatibility 行列表。
+
+    kind=mean 且登记了 sd 的条目，GRIM 行后追加一行 GRIMMER
+    三元组行（同 stat_id）；kind=grimmer 的条目只跑三元组。
+    """
     rows = []
     for i, entry in enumerate(entries or []):
         e = dict(entry)
@@ -221,7 +315,9 @@ def run_grim(entries) -> list:
         kind = e.get("kind")
         if kind not in _CHECKS:
             rows.append(_not_assessable(
-                e, f"kind {kind!r} 不在 GRIM 三件词表 {schema.GRIM_KINDS}"))
+                e, f"kind {kind!r} 不在 GRIM 族词表 {schema.GRIM_KINDS}"))
             continue
         rows.append(_CHECKS[kind](e))
+        if kind == "mean" and e.get("sd") is not None:
+            rows.append(grim_grimmer(e))
     return rows

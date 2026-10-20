@@ -1,0 +1,53 @@
+kind: light-patent/support-map
+case_id: PT-case_4b3e0c
+rows:
+- claim_no: 1
+  feature_ref: CF-01
+  support_state: explicit
+  anchors:
+  - P001
+  spec_section: 发明内容
+- claim_no: 1
+  feature_ref: CF-02
+  support_state: explicit
+  anchors:
+  - P001
+  - E001
+  spec_section: 发明内容
+- claim_no: 1
+  feature_ref: CF-03
+  support_state: explicit
+  anchors:
+  - E001
+  spec_section: 发明内容
+- claim_no: 1
+  feature_ref: CF-04
+  support_state: inherent
+  anchors:
+  - P001
+  spec_section: 发明内容
+- claim_no: 2
+  feature_ref: CF-05
+  support_state: explicit
+  anchors:
+  - C001
+  spec_section: 具体实施方式
+- claim_no: 3
+  feature_ref: CF-06
+  support_state: explicit
+  anchors:
+  - F001
+  spec_section: 附图说明
+- claim_no: 3
+  feature_ref: CF-07
+  support_state: explicit
+  anchors:
+  - F001
+  spec_section: 附图说明
+- claim_no: 4
+  feature_ref: CF-08
+  support_state: explicit
+  anchors:
+  - C001
+  spec_section: 具体实施方式
+built_at: '2026-10-20'

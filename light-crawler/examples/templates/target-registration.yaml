@@ -1,0 +1,34 @@
+# light-crawler 目标登记空白模板（S7：随包只发空白模板与脱敏范例）
+# 填写后执行：light-crawler --root <项目>/data-sources register --file 本文件
+# 登记只是第一步：抓取前还必须过 precheck（高危通道另须具名 confirm）。
+
+target_id: ""            # 必填，工作区内唯一，如 openalex-works
+name: ""                 # 必填，源名（人读）
+base_url: ""             # 必填，http(s) 基址；抓取 URL 只许在此域名内
+url_patterns: []         # 可选，预检逐个查 robots 的附加 URL
+project: ""              # 必填，所属项目
+purpose_kind: ""         # 必填，五选一（S5）：
+                         # literature_leads_batch | fulltext_batch |
+                         # dataset_batch | page_snapshot | project_data
+consumer: ""             # 必填，供哪个包的哪个环节，如 light-experiment 数据入口
+channel: ""              # 必填，official_api | open_data | web_page | browser
+                         # 优先级：官方 API > 开放数据 > 公开网页 > 浏览器
+terms_basis: ""          # 条款依据指针（条款页 URL 或项目内文件）；缺失则预检 incomplete
+official_alternative:    # 若本目标其实有官方 API/开放数据替代，在此声明；
+  available: false       # available=true 时 web_page/browser 通道预检直接出局（HC-3）
+  channel_ref: ""
+  note: ""
+login_state: none        # v1 只许 none（S2 全关）；登录墙后数据走人工导出 + import
+personal_data_risk: none # none | low（low 须 scope_note）；high 拒收（HC-5）
+scope_note: ""           # risk=low 时必填：最小必要范围说明
+browser_enabled: false   # channel=browser 才有意义（S1）：逐目标开启
+browser_reason: ""       # 开启浏览器通道的理由（开启时必填）
+clean_profile: html_text_v1
+rhythm: manual           # manual | daily | weekly
+rate:
+  registered_interval_sec: null  # 秒/请求；低于模板下限须 rate_basis（S6）
+  rate_basis: ""                 # 许可该速率的条款依据指针
+  max_requests_per_run: 200      # 总量上限默认值，可调小
+  max_requests_per_day: 1000
+concurrency: 1           # 定版只能为 1（S6）
+retention_tier: lightweight_raw_plus_hash  # v1 唯一档（S3）

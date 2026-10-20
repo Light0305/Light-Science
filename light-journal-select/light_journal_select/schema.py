@@ -58,9 +58,13 @@ SOURCE_STATUSES = ["succeeded", "attempted", "partial", "skipped"]
 # ---------------------------------------------------------------- 核验指标
 
 # 指标词表（JS-01 指标零记忆：每值必须带来源+年份+查询日期三元组）。
+# acceptance_rate 为 v1.1 增补（JS-10）：录用率口径最严——未官方
+# 公布一律未确认，verified 只许 provenance=official，校验层拒收
+# 无源/非官方录用率数值（verify.check_metric_entry 落此口径）。
 METRIC_KEYS = ["impact_factor", "quartile_jcr", "quartile_cas",
                "apc", "review_cycle", "indexing", "scope_fit",
-               "self_cite_rate", "annual_volume", "warning_status"]
+               "self_cite_rate", "annual_volume", "warning_status",
+               "acceptance_rate"]
 
 VERIFICATION_STATUSES = ["verified", "unconfirmed"]
 
@@ -115,6 +119,60 @@ CARD_TIERS = ["challenge", "target", "safety"]
 # 证据卡总数口径（草案 §三.5）：三档共 3–5 刊。
 CARD_MIN, CARD_MAX = 3, 5
 
+# 卡位证据量门槛（JS-D01，v1.1）：分档取卡前先过门，与入池门槛
+# 同构的三叉——先例篇数不少于 3，或覆盖检索式不少于 2 式且篇数
+# 不少于 2 篇，或单式名次不大于 3。阈值以 demo-fullrun 演示数据
+# 回放校准定版（构建单 phase3-journal-select.md 判断 J1）：旗舰刊
+# 7 篇/3 式稳过门；微型刊 1 篇的卡位落选由复合键完成（覆盖优先
+# + 篇数加权对数率），门槛拦的是三叉全不沾的弱证据。无先例统计
+# 的候选（检索补充/finder 路）走暂定路径，不受此门槛。
+CARD_GATE_MIN_SIMILAR = 3
+CARD_GATE_MIN_QUERIES = 2
+CARD_GATE_MIN_SIMILAR_WITH_QUERIES = 2
+CARD_GATE_TOP_RANK = 3
+
+# ---------------------------------------------------------------- 费用/许可（JS-12）
+
+# APC 结构化费用组（v1.1）：apc 的 verified 值由标量扩为费用组
+# 对象——标价不等于实付，须记全成本结构。旧标量值兼容读取
+# （verify 给迁移警告、约束判定按标价读、卡面标「仅标价」），
+# 新登记应一律结构化（构建单判断 J2）。
+APC_FEE_FIELDS = ["list_price", "currency", "charge_timing",
+                  "extra_fees", "waiver_available",
+                  "agreement_coverage"]
+APC_CHARGE_TIMINGS = ["at_submission", "after_acceptance",
+                      "at_publication"]
+APC_AGREEMENT_COVERAGE = ["covered", "not_covered", "unknown"]
+
+# 许可组（JS-12：OA 不是布尔值，须核到许可层）：经 verify 登记
+# 在候选 oa_license 块，带来源与查询日期（JS-01 三元组口径）。
+OA_MODELS = ["full_oa", "hybrid", "subscription_with_oa_option",
+             "subscription"]
+LICENSE_TYPES = ["CC BY", "CC BY-SA", "CC BY-NC", "CC BY-NC-SA",
+                 "CC BY-ND", "CC BY-NC-ND", "CC0", "other", "none"]
+
+# ---------------------------------------------------------------- scope 核验（JS-06）
+
+# scope 核验三项（v1.1）：Aims 文案只是自述，匹配判定须落到
+# 近期实发——近 2 年实发文章对应 / 最近 3 期目录 / 文章类型与
+# 邀请制官网核读。经 verify 登记在候选 scope_checks 块，逐项
+# 与指标同口径校验（三元组）；三项皆 verified 才算「实发核验」，
+# 只有 scope_fit 指标时为「文案核对」。
+SCOPE_CHECK_ITEMS = ["recent_publications", "recent_issues",
+                     "article_types"]
+
+# ---------------------------------------------------------------- 政策核读（JS-13）
+
+# 政策必查项（v1.1）：定刊/交接环节逐刊核读并点名带回，条目带
+# 来源 URL + 访问日期（JS-01 三元组口径），快照过期须复核；
+# 条目 status=conflict = 本稿情形与该刊政策冲突，是阻断项。
+POLICY_TOPICS = ["ai_use_disclosure", "data_code_availability",
+                 "preprint", "conflict_of_interest", "authorship",
+                 "other"]
+POLICY_REQUIRED_TOPICS = ["ai_use_disclosure",
+                          "data_code_availability"]
+POLICY_CHECK_STATUSES = ["checked", "conflict", "not_applicable"]
+
 # ---------------------------------------------------------------- 先例路（JS-04）
 
 OPENALEX_BASE = "https://api.openalex.org"
@@ -125,3 +183,9 @@ ENTRY_MIN_QUERIES = 2       # 或多式覆盖 ≥2 条检索式
 ENTRY_TOP_RANK = 3          # 或单式名次 ≤3
 MAX_PRECEDENTS_PER_JOURNAL = 5   # 每刊保留先例上限（渲染取 2–3）
 RESEARCH_TYPES = ["article"]     # 剔非研究类（OpenAlex type 口径）
+
+# 来源类型过滤（JS-D03，v1.1）：OpenAlex source 的 type 明确非
+# journal 者（repository 如 Zenodo、conference、book series 等）
+# 不入期刊候选池，逐条附记留痕不静默丢弃；type 缺失（脱水记录
+# 不全）按 journal 处置，不误杀。
+JOURNAL_SOURCE_TYPE = "journal"

@@ -1,0 +1,41 @@
+fig_id: fig-1
+line: data
+core_conclusion: 零调参的预测阈值臂与逐段 oracle 阈值精度相当，且显著高于固定阈值基线。
+results_question: 免逐视频手工调参是否以精度为代价？
+archetype: quantitative_grid
+panel_map:
+- panel_id: a
+  role: primary_quantitative_evidence
+  content: 三臂逐段 MOTA 曲线（6 段视频）
+  evidence_tier: hero
+- panel_id: b
+  role: baseline_or_control
+  content: 三臂段间均值 ± 95% CI，固定阈值为对照基线
+  evidence_tier: controls_robustness
+evidence_requirements:
+  statistics: 段均值（每段 3 种子）+ 臂均值 ± 95% CI（n=6 段）
+  source_data: data/source-data/fig-1.csv
+  image_integrity_notes: none
+density_stance:
+  stance: simplicity_first
+  reason: 单图单主张：预测臂≈oracle 且 >fixed
+export_contract_ref:
+  journal_contract: journal_contract.yaml
+  overrides: []
+reviewer_risk:
+- risk: CI 依据的 n 不明
+  disposition: 图注写明 n=6 段、段值为 3 种子均值
+data_integrity:
+  exclusions: none
+sister_library_refs:
+  method_gallery: null
+  visio_components: []
+  data_gallery:
+    entry_id: DG-DEMO-SEED-001
+    version: '0.1'
+palette_decision:
+  source: journal_contract
+  basis: 沿用期刊合同登记色板 PAL-OI-8（版本 2002.1，Okabe-Ito 色盲友好八色）
+  confirmation:
+    confirmed_by: demo-author
+    confirmed_at: '2026-10-20'

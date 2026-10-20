@@ -18,3 +18,15 @@ concerns:
   pointers:
     claim_pointer: claims_register:C1
     evidence_pointer: conclusions:C1#line_verdicts.R-NEG=untested
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=minor 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial

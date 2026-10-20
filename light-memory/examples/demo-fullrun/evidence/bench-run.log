@@ -1,4 +1,4 @@
-$ light-memory bench run --world light-memory/examples/demo-fullrun/world --set light-memory/examples/demo-fullrun/inputs/bench_set_fullrun.jsonl --out light-memory/examples/demo-fullrun/evidence/bench_report.json
+$ light-memory bench run --world ../../../../light-memory/examples/demo-fullrun/world --set ../../../../light-memory/examples/demo-fullrun/inputs/bench_set_fullrun.jsonl --out ../../../../light-memory/examples/demo-fullrun/evidence/bench_report.json
 [exit 0]
 评测报表（只报数不判线，通过线：None）：
   cross_project：7/8（率 0.875）
@@ -7,4 +7,4 @@ $ light-memory bench run --world light-memory/examples/demo-fullrun/world --set 
   paraphrase：9/12（率 0.75）
   refusal：7/10（率 0.7）
   合计：34/50
-  报表已存：light-memory/examples/demo-fullrun/evidence/bench_report.json
+  报表已存：../../../../light-memory/examples/demo-fullrun/evidence/bench_report.json

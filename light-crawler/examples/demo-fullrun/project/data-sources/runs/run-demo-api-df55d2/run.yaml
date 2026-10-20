@@ -1,0 +1,14 @@
+run_id: run-demo-api-df55d2
+target_id: demo-api
+channel: official_api
+status: finished
+started_at: '2026-10-20T20:18:34+00:00'
+precheck_id: pc-d3a2f07f22
+run_config_hash: 2a1b10e955611b528ed9978d6e4c7ff27fd3c06ab3682713c055d7e9ccc72799
+requested: 1
+stored: 0
+not_modified: 1
+duplicates: 0
+errors: []
+refused: false
+finished_at: '2026-10-20T20:18:34+00:00'

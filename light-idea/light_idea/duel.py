@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from .schema import capability_summary
 from .util import today
 
 ELO_START = 1500.0
@@ -205,6 +206,7 @@ def rank_project(root: Path, cards: list[dict]) -> dict:
     matrix = win_matrix(matches)
     elo = elo_ratings(cards, matches)
     cycles = find_cycles(matches)
+    by_id = {c["idea_id"]: c for c in cards}
     standings = []
     for idea_id, rating in elo.items():
         w = l = d = 0
@@ -218,6 +220,9 @@ def rank_project(root: Path, cards: list[dict]) -> dict:
             "elo": round(rating, 1),
             "win": w, "loss": l, "draw": d, "games": games,
             "win_rate": round(w / games, 4) if games else 0.0,
+            # 能力匹配摘要（IDEA-D03）：只作排序参考的并列展示，
+            # 与 Elo 同纪律——不作淘汰依据
+            "capability": capability_summary(by_id[idea_id]),
         })
     standings.sort(key=lambda s: (-s["elo"], -s["win"], -s["games"],
                                   s["idea_id"]))

@@ -178,9 +178,42 @@ POLICY_REVIEW_CYCLE_DAYS = 180  # 缺省复核周期（与 Write 模板记录同
 # 方法图降级路径（约束 8：编辑否定/刊方从严时切无 AI 参考路径）
 DEGRADATION_PATHS = ["normal", "no_ai_reference"]
 
+# ---------------------------------------------------------------- 方法图后端（v1.1）
+
+# 方法线原生后端（FIG-D02 裁决修订：Visio 主线 + PowerPoint 第二原生
+# 后端）；数据图不归 PPT（演示图表无诚实门登记面）。
+SCHEMATIC_BACKENDS = ["visio", "powerpoint"]
+DEFAULT_SCHEMATIC_BACKEND = "visio"
+
+# powerpoint_verified 口径（与 visio_verified 同构）：文件层构建
+# （python-pptx + OPC 反读）只给 file_layer 证据，恒标 false；
+# true 只许 COM 路线在 Windows + PowerPoint 实机原生导出验证后落。
+PPTX_EVIDENCE_LEVELS = ["file_layer", "com_native"]
+
 # ---------------------------------------------------------------- Visio 重绘（F5）
 
 VISIO_ROUTES = ["com", "file_build"]  # 拍板 D4：COM 主路线 / 文件级第二路线
+
+# ------------------------------------------------- manifest 三件（v1.1，FIG-D04/05/06）
+
+# renderer-effective-fields 字段注册表：构建器（文件级 .vsdx 与
+# python-pptx 两路）真实消费的字段全集。manifest 声明某字段
+# effective=true 但不在本表 = 声明生效而构建器未消费（校验报错）；
+# 形状使用本表外字段 = 写了不生效（校验报错）。字段以点路径登记
+# （style.* 为形状 style 子键）。
+RENDERER_CONSUMED_FIELDS = [
+    "panel_id", "box_local", "text", "connect", "residue_id",
+    "style.fill", "style.fill_role", "style.line", "style.line_role",
+    "style.line_width_pt", "style.font_pt",
+]
+
+# arrow_plan 条目必填（FIG-D06：边事实绑定——每条边登记所绑定的
+# 原图箭头事实，与逐标签核对并列成重绘核对清单）
+ARROW_PLAN_FIELDS = ["arrow_plan_id", "from", "to", "fact"]
+
+# manifest 严格模式分界：version >= 本值或已带 arrow_plan 键 →
+# connect 必绑 arrow_plan；v1.0 存量 manifest 走兼容模式（迁移路径）。
+MANIFEST_STRICT_VERSION = "1.1"
 
 # 位图残留合法类别（约束 12：未登记者不许以位图形态出现在成品中）
 BITMAP_RESIDUE_CLASSES = [
@@ -210,6 +243,41 @@ AUDIT_GATES = [
 
 # Figure 消费三库登记表，不直接翻仓文件（约束 16 / 草案 §四）
 SISTER_LIBRARIES = ["method_gallery", "visio_components", "data_gallery"]
+
+# ------------------------------------------------- 配色决定与参考拆解（v1.1）
+
+# FIG-D08：配色决定来源三选一（期刊合同导出 / gallery 锚 / 用户指定）
+PALETTE_DECISION_SOURCES = [
+    "journal_contract", "gallery_anchor", "user_specified",
+]
+
+# FIG-D09：参考图六维拆解（academic-figure-generator Step 2 分析表
+# 口径）。palette_hex 只供重绘阶段查表，不入提示词正文（正文不落
+# hex 的既有纪律不变）。
+REFERENCE_BREAKDOWN_DIMS = [
+    "palette_hex",          # 配色（精确 hex 列表）
+    "layout_flow",          # 布局流向
+    "module_style",         # 模块样式
+    "annotation_style",     # 标注方式
+    "information_density",  # 信息密度
+    "special_elements",     # 特殊元素
+]
+
+# ------------------------------------------------- Illustrator 精修段（v1.1，FIG-D03）
+
+# 条件路线：宿主（正版 Illustrator，Win/Mac）可用才成立；缺宿主
+# 回落 Visio/SVG 路并如实落字。readback 为 DOM 回读对账记录形态。
+ILLUSTRATOR_REFINE_STATUSES = [
+    "planned", "svg_checked", "in_refinement",
+    "readback_recorded", "done",
+]
+ILLUSTRATOR_PREFLIGHT_ITEMS = [
+    "rgb_mixed",        # RGB 混入 CMYK 工作流
+    "broken_links",     # 断链置入图
+    "low_res_images",   # 低分辨率置入图
+    "white_overprint",  # 白色叠印
+    "pdfx",             # PDF/X 合规
+]
 
 # ---------------------------------------------------------------- 逐图状态行
 

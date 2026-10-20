@@ -1,0 +1,114 @@
+{
+  "A": {
+    "record_id": "TR-2026-2c0d2d",
+    "journal_name": "Computers and Electronics in Agriculture",
+    "issn": "0168-1699",
+    "eissn": null,
+    "publisher": "Elsevier BV",
+    "journal_group": null,
+    "template_version": "elsarticle-2026",
+    "applicable_years": [
+      2026
+    ],
+    "journal_language": "en"
+  },
+  "B": {
+    "format_track": "latex",
+    "latex_class": "elsarticle",
+    "class_version": "3.4",
+    "options_axis": [
+      "preprint",
+      "review"
+    ],
+    "word_template": null,
+    "citation_package": "natbib"
+  },
+  "C": {
+    "section_sequence": [
+      "Abstract",
+      "Introduction",
+      "Methods",
+      "Results",
+      "Discussion",
+      "Conclusions"
+    ],
+    "abstract_form": "unstructured",
+    "keyword_limit": 6,
+    "special_sections": [
+      "CRediT authorship statement"
+    ]
+  },
+  "D": {
+    "word_limit_total": 8000,
+    "word_limit_abstract": 250,
+    "page_limit": null,
+    "figure_limit": null,
+    "table_limit": null,
+    "reference_limit": null,
+    "title_char_limit": 120,
+    "short_title_char_limit": 45
+  },
+  "E": {
+    "style_name": "Elsevier Harvard",
+    "csl_id": "elsevier-harvard",
+    "bst_name": "elsarticle-harv",
+    "citation_style_kind": "author-year"
+  },
+  "F": {
+    "figure_submission_mode": "separate_files",
+    "figure_formats": [
+      "pdf",
+      "eps",
+      "tiff"
+    ],
+    "figure_resolution": "300 dpi",
+    "caption_position": "below"
+  },
+  "G": {
+    "declarations": [
+      {
+        "type": "data_availability",
+        "required": true,
+        "position": "end",
+        "field_name": "data_availability"
+      },
+      {
+        "type": "conflict_of_interest",
+        "required": true,
+        "position": "end",
+        "field_name": "conflict"
+      }
+    ],
+    "ai_policy": {
+      "has_guideline": true,
+      "ai_authorship_banned": true,
+      "disclosure_required": true,
+      "disclosure_content_standard": "tool name and purpose",
+      "disclosure_title": "Declaration of generative AI use",
+      "disclosure_wording_template": null,
+      "disclosure_positions": [
+        "Methods",
+        "Acknowledgments"
+      ],
+      "language_editing_stance": "allowed with disclosure",
+      "publisher_conflict": {
+        "conflict": false,
+        "resolution_note": null
+      },
+      "output_validity_evaluation": null
+    }
+  },
+  "H": {
+    "source_url": "https://www.sciencedirect.com/journal/computers-and-electronics-in-agriculture/publish/guide-for-authors",
+    "official_channel": "journal homepage",
+    "verified_at": "2026-10-20",
+    "review_cycle_days": 180,
+    "verified_by": "demo driver（演示代行：指南来源 URL 取自官网/OpenAlex 源记录实测）",
+    "bundled": "official"
+  },
+  "I": {
+    "redistribution": "channel_only",
+    "terms_pointer": "https://www.elsevier.com/about/policies",
+    "purpose_restriction": "submission use only"
+  }
+}

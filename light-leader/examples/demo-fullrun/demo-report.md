@@ -85,3 +85,14 @@ REVIEW_UNAVAILABLE 硬门，下一步落在推进 light-idea 定版。
   （那是各包 validate 的职责，总控不越界）。
 - experiment 只复制了登记头，run 级产物未拼装；write 只复制登记头与
   主张登记，章节正文未拼装——两者均不影响状态读数，口径已在 §1 落字。
+
+## 6. v1.1 复跑增补（LD-03 / LD-04，2026-10-21）
+
+本演示于 v1.1 第 3 步之十一复跑（run_demo.py 整删重拼）：四处
+REVIEW_UNAVAILABLE 硬门仍逐一点名、下一步仍落推进 light-idea，
+与上文实况一致。新增可见变化：status 逐登记头多一行「规范态」标注
+（LD-03 映射表，如 analysis blocked → 被门拦、delivered → 已达终态），
+route 的下一步理由同步带规范态标注。LD-04 的新门类点名（design
+returned 携缺项清单、blocked_gate 统一字段）由包内测试覆盖
+（tests/test_statusmap_gates.py），本演示登记头未携该类记录，故
+route 输出无新增点名行——缺字段不点名、不猜，属预期行为。

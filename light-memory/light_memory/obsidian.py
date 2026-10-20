@@ -14,6 +14,15 @@
   SELECTED_FACT_TYPES / 入选状态集；两端均入选的关系全量落边，
   折返与否定边不许因精选密度被剪；争议未裁决事实不落笔记、
   只在索引页计数提及。
+- 可查询面与类型边双写（MM2-03a/b）：对象笔记 frontmatter 带
+  memory_id / obj_type / stage / status / source_pkg 与双时间日期
+  属性（valid_from / invalid_at），供 Bases / Dataview 按当前有效
+  过滤、按 as-of 切片；关系出边在人读行之外另以 Dataview 内联
+  字段形（类型键:: 目标）落一份，四方插件同行消费、无插件零降级；
+  入边不写同名字段（防语义反转），逆边由消费方从源笔记派生。
+- 视图层体检（MM2-03e）：view_lint 只报不自动改——投影断链、视图
+  孤儿、投影陈旧、未解关系长期清单四类逐项点名，validate 输出
+  增设体检段呈现（不进错误列表、不改退出码）。
 """
 
 from __future__ import annotations
@@ -160,7 +169,33 @@ def _render_machine_zone(oid: str, slot: dict, relations: list) -> str:
                 else f"被 {rel.get('type')}"
             lines.append(f"- {arrow} [[{_note_slug(other)}]]"
                          f"（来源计数 {rel.get('sources') or 1}）")
+            if outgoing:
+                # 类型边双写（MM2-03a）：出边另以 Dataview 内联
+                # 字段形落一份（类型键:: 目标），Dataview /
+                # Breadcrumbs / ExcaliBrain / Juggl 四方同行消费；
+                # 入边不在此写同名字段（会反转语义），其类型边由
+                # 消费方从源笔记的字段派生逆边。
+                lines.append(f"- {rel.get('type')}:: "
+                             f"[[{_note_slug(other)}]]")
     return "\n".join(lines) + "\n"
+
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _frontmatter_dates(facts: list) -> tuple:
+    """双时间落日期属性（MM2-03b）：valid_from 取入选事实最早
+    valid_at；全部入选事实均已失效时 invalid_at 取最晚 invalid_at，
+    否则省略（笔记仍在有效期内）。非 ISO 日期值不落字段，不造假。"""
+    valids = [f.get("valid_at") for f in facts
+              if _ISO_DATE_RE.match(f.get("valid_at") or "")]
+    valid_from = min(valids) if valids else None
+    invalid_at = None
+    if facts and all(f.get("invalid_at") for f in facts):
+        inv = [f.get("invalid_at") for f in facts
+               if _ISO_DATE_RE.match(f.get("invalid_at") or "")]
+        invalid_at = max(inv) if len(inv) == len(facts) else None
+    return valid_from, invalid_at
 
 
 def _render_note(oid: str, slot: dict, relations: list,
@@ -169,14 +204,23 @@ def _render_note(oid: str, slot: dict, relations: list,
     prov0 = (slot["facts"][0].get("provenance") or [{}])[0]
     stage = STAGE_BY_PACKAGE.get(prov0.get("source_package"),
                                  prov0.get("source_package") or "Memory")
+    valid_from, invalid_at = _frontmatter_dates(slot["facts"])
     fm = ["---",
           f"light_memory_object: {oid}",
+          f"memory_id: {oid}",
           f"object_type: {obj.get('object_type')}",
+          f"obj_type: {obj.get('object_type')}",
+          f"stage: {stage}",
           f"status: {obj.get('status')}",
-          "tags:",
-          f"  - stage/{stage}",
-          f"  - status/{obj.get('status')}",
-          "---", ""]
+          f"source_pkg: {prov0.get('source_package') or 'light-memory'}"]
+    if valid_from:
+        fm.append(f"valid_from: {valid_from}")
+    if invalid_at:
+        fm.append(f"invalid_at: {invalid_at}")
+    fm += ["tags:",
+           f"  - stage/{stage}",
+           f"  - status/{obj.get('status')}",
+           "---", ""]
     body = "\n".join(fm)
     body += MACHINE_START + "\n"
     body += _render_machine_zone(oid, slot, relations)
@@ -350,6 +394,108 @@ def project_obsidian(root, *, full: bool = False) -> dict:
     return {"written": written, "unchanged": unchanged,
             "orphaned": orphaned, "selected": len(selected),
             "vault": str(vault)}
+
+
+# ---------------------------------------------------------------- 视图体检
+
+_MACHINE_RE = re.compile(
+    re.escape(MACHINE_START) + r"\n(.*?)" + re.escape(MACHINE_END),
+    re.DOTALL)
+_LINK_RE = re.compile(r"\[\[([^\]|#]+)")
+
+
+def _supersede_depth(fact: dict, facts_by_id: dict) -> int:
+    """一条事实被连续取代的代数（沿 superseded_by 链数）。"""
+    depth, cur, seen = 0, fact, set()
+    while cur and cur.get("superseded_by") and \
+            cur.get("superseded_by") not in seen:
+        seen.add(cur.get("superseded_by"))
+        depth += 1
+        cur = facts_by_id.get(cur.get("superseded_by"))
+    return depth
+
+
+def view_lint(root) -> list:
+    """视图层体检（MM2-03e）：只报不自动改，返回逐项点名清单。
+
+    四类：broken_link 投影断链（机器区 wikilink 指向不存在的笔记）；
+    view_orphan 视图孤儿（对象已 archived / 已不存在 / 入选事实被
+    取代两代以上且无现行事实，仍占精选位）；projection_stale 投影
+    陈旧（清单源哈希与四账不符，或入选对象尚无投影笔记）；
+    unresolved_relation 未解关系长期清单（与 MM-26 的 unresolved
+    报告合并输出）。无 vault 时返回空清单。
+    """
+    root = Path(root)
+    pkg = project_mod.load_package(root)
+    if pkg.get("memory") is None:
+        raise ObsidianError([f"记忆项目不存在或缺登记头：{root}"])
+    vault = root / VAULT_DIR
+    findings: list = []
+    if not vault.exists():
+        return findings
+    manifest = _load_manifest(root)
+    notes_meta = manifest.get("notes") or {}
+    existing = {p.stem for p in vault.glob("*.md")}
+
+    for path in sorted(vault.glob("*.md")):
+        m = _MACHINE_RE.search(path.read_text(encoding="utf-8"))
+        if not m:
+            continue
+        for target in _LINK_RE.findall(m.group(1)):
+            slug = target.strip()
+            if slug and slug not in existing:
+                findings.append({
+                    "category": "broken_link", "note": path.name,
+                    "detail": f"机器区链接 [[{slug}]] 指向不存在的笔记"})
+
+    selected = select_objects(pkg)
+    grouped = _touching_relations(pkg, selected)
+    objects = {o.get("object_id"): o for o in pkg.get("objects") or []}
+    facts_by_id = {f.get("fact_id"): f for f in pkg.get("facts") or []}
+    for name, meta in sorted(notes_meta.items()):
+        oid = meta.get("object_id")
+        if oid is None:
+            continue
+        obj = objects.get(oid)
+        reasons = []
+        if obj is None:
+            reasons.append("对象已不存在于对象账")
+        elif obj.get("status") == "archived":
+            reasons.append("对象已 archived（撤下精选）")
+        if oid in selected:
+            facts = selected[oid]["facts"]
+            deep = [f for f in facts
+                    if f.get("status") == "superseded"
+                    and _supersede_depth(f, facts_by_id) >= 2]
+            if deep and not any(f.get("status") == "current"
+                                for f in facts):
+                reasons.append(
+                    f"入选事实被取代两代以上且无现行事实"
+                    f"（{len(deep)} 条）仍占精选位")
+            digest = _source_hash(selected[oid], grouped.get(oid) or [])
+            if meta.get("source_hash") != digest:
+                findings.append({
+                    "category": "projection_stale", "note": name,
+                    "detail": "源哈希与四账不符，投影陈旧"
+                              "（重投影可刷新，本体检不自动改）"})
+        if reasons and (vault / name).exists():
+            findings.append({"category": "view_orphan", "note": name,
+                             "detail": "；".join(reasons)})
+    for oid in selected:
+        name = f"{_note_slug(oid)}.md"
+        if name not in notes_meta:
+            findings.append({
+                "category": "projection_stale", "note": name,
+                "detail": "入选对象尚无投影笔记"})
+
+    for rel in pkg.get("relations") or []:
+        if rel.get("status") == "unresolved":
+            findings.append({
+                "category": "unresolved_relation", "note": None,
+                "detail": f"关系 {rel.get('relation_id')}"
+                          f"（{rel.get('type')}）长期未解：目标原文"
+                          f"标识 {rel.get('target_name')}"})
+    return findings
 
 
 # ---------------------------------------------------------------- 回读

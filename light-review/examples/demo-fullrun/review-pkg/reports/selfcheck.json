@@ -2,7 +2,7 @@
   "kind": "light-review/selfcheck",
   "version": 1,
   "ran_at": "2026-10-20",
-  "target_hash": "8cad3daddd13744968a5ae84fdad9364edefc4277627cd29a17474b849ae5b9d",
+  "target_hash": "742157d9eaf4e5f2937cb0132db8912145336e91ebab324b3c2c01d3fed85b91",
   "passed": true,
   "tests": [
     {

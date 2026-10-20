@@ -1,0 +1,5 @@
+kind: light-patent/gaps
+case_id: PT-case_4b3e0c
+gaps:
+- item: 报警联动接口参数
+  location: 说明书实施例三

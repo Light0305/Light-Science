@@ -1,0 +1,41 @@
+kind: light-patent/candidates
+case_id: PT-case_4b3e0c
+candidates:
+- candidate_id: CAND-1
+  title: 时序融合加个体基线偏差检测
+  technical_problem: 单帧分类误报率高、群体统一阈值不适配个体差异
+  technical_means: 时序融合模型提取行为特征向量，按个体基线分布偏差计异常分数
+  technical_effect: 降低误报，异常分数可分级报警
+  evidence:
+  - anchor: P001
+  - anchor: E001
+  claim_category: 方法加装置加介质
+  gaps:
+  - 报警联动接口参数未定
+  risks:
+  - 与团队已发表单帧方案贴近，靠区别特征拉开
+- candidate_id: CAND-2
+  title: 多摄像头拼接跟踪
+  technical_problem: 单摄像头遮挡丢失个体
+  technical_means: 跨摄像头轨迹拼接
+  technical_effect: 减少轨迹断裂
+  evidence:
+  - anchor: P001
+  claim_category: 方法
+  gaps:
+  - 拼接标定流程未定型
+  risks:
+  - 实施细节不足，降为后备案
+- candidate_id: CAND-3
+  title: 报警分级推送策略
+  technical_problem: 报警过多导致值班疲劳
+  technical_means: 按异常分数分级推送
+  technical_effect: 减少无效报警打扰
+  evidence:
+  - anchor: P002
+  claim_category: 方法
+  gaps:
+  - 分级阈值待实验标定
+  risks:
+  - 单独成案创造性弱，并入主案从属特征
+selected: CAND-1

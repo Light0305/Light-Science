@@ -160,14 +160,30 @@ def generate_notes(project_dir: Path, paper_id: str) -> dict:
     status = _evidence_status(pdir, paper, smap)
     s4_rows, s4_count = _s4_inventory(smap)
     today = date.today().isoformat()
+    # 文件头元数据优先读 paper.yaml 的 metadata 回填区 (LIT-D03)：
+    # 有值显示值 + 来源 + 核实状态；无值保持原 待填 行 (不许凭记忆补)。
+    meta = paper.get("metadata") or {}
+
+    def _meta_line(label: str, key: str, fallback: str) -> str:
+        entry = meta.get(key) or {}
+        value = entry.get("value")
+        if value is None:
+            return fallback
+        shown = ", ".join(str(v) for v in value) if isinstance(
+            value, list) else str(value)
+        state = "已核实" if entry.get("verified") else "未核实"
+        return (f"- **{label}**：{shown}"
+                f"（来源：{entry.get('source') or '未知'}，{state}）")
 
     parts = [
         f"# 阅读笔记：{paper.get('title', paper_id)}\n",
         "## 文件头（自动生成）\n",
         f"- **题名**：{paper.get('title') or _TODO}",
-        f"- **作者**：{_TODO}（paper.yaml 无作者字段，禁止凭记忆填写，须从原文首页核对）",
-        f"- **venue**：{_TODO}（同上，须核对）",
-        f"- **年份**：{_TODO}",
+        _meta_line("作者", "authors",
+                   f"- **作者**：{_TODO}（paper.yaml 无作者字段，禁止凭记忆填写，须从原文首页核对）"),
+        _meta_line("venue", "venue",
+                   f"- **venue**：{_TODO}（同上，须核对）"),
+        _meta_line("年份", "year", f"- **年份**：{_TODO}"),
         f"- **DOI**：{paper.get('doi') or _TODO}",
         f"- **版本**：{paper.get('source_version', _TODO)}（source_version）",
         f"- **阅读日期**：{today}",

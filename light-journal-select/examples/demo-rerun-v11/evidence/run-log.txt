@@ -1,0 +1,901 @@
+=== light-journal-select v1 demo-fullrun 运行日志 ===
+[driver] OpenAlex API Key：已注入（只记有无，值不落字）
+
+$ light-journal-select init ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --title Abnormal turkey behaviour detection in intensive farming using computer vision --language en --type research
+{
+  "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
+  "status": "draft",
+  "language": "en"
+}
+
+$ light-journal-select fingerprint ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --file ../../../../light-journal-select/examples/demo-rerun-v11/inputs/fingerprint.json
+{
+  "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
+  "queries": [
+    "turkey behaviour detection",
+    "poultry welfare monitoring computer vision",
+    "livestock behaviour recognition tracking"
+  ],
+  "constraints_confirmed": true,
+  "status": "draft"
+}
+
+$ light-journal-select precedent ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg
+{
+  "queries_ok": 3,
+  "queries_total": 3,
+  "admitted": [
+    "Computers and Electronics in Agriculture",
+    "Pressacademia",
+    "International Journal of Developmental Neuroscience",
+    "Sensors",
+    "Scientific Reports",
+    "Electronics",
+    "Multimedia Tools and Applications",
+    "Nigerian Journal of Physics",
+    "Poultry Science",
+    "Smart Agricultural Technology",
+    "Animals",
+    "Frontiers in Veterinary Science",
+    "Frontiers in Animal Science",
+    "Agriculture",
+    "Gomal Journal of Agriculture and Biology",
+    "AgriEngineering",
+    "Edelweiss Applied Science and Technology",
+    "Biosystems Engineering",
+    "IEEE Access",
+    "International Journal of Advanced Biochemistry Research"
+  ],
+  "near_misses": [
+    "Business And Management Studies An International Journal",
+    "International Journal of Social Sciences and Management Review",
+    "Journal of Animal Ecology",
+    "Natural Hazards",
+    "International Journal of Climatology",
+    "Informatics",
+    "Nutrients",
+    "International Journal of Advanced Research in Science Communication and Technology",
+    "Functional Ecology",
+    "International Journal for Research in Applied Science and Engineering Technology",
+    "Journal of Law & Social Studies",
+    "Journal of Wireless Mobile Networks Ubiquitous Computing and Dependable Applications",
+    "Cognitive Research Principles and Implications",
+    "Balıkesır Health Sciences Journal",
+    "Indonesian Journal of Electrical Engineering and Computer Science",
+    "GigaScience",
+    "Italian Journal of Animal Science",
+    "International Scientific Journal Sui Generis",
+    "International Journal of Nursing Practice",
+    "Information Technology and Computer Engineering",
+    "Uludağ University Journal of The Faculty of Engineering",
+    "Australian Journal of Primary Health",
+    "Geophysical Journal International",
+    "International Journal of Data Science and IoT Management System",
+    "Frontiers in Medicine",
+    "Route Educational and Social Science Journal",
+    "MGIMO Review of International Relations",
+    "International Journal of Global Warming",
+    "Journal of Criminology and Criminal Law",
+    "Karadeniz Teknik Üniversitesi İletişim Araştırmaları Dergisi",
+    "Harran Üniversitesi Tıp Fakültesi Dergisi",
+    "Asthma Allergy Immunology",
+    "Expert Systems with Applications",
+    "Wildlife Society Bulletin",
+    "Primary care diabetes",
+    "Journal of the Knowledge Economy",
+    "Aestimum",
+    "Poultry",
+    "International Journal of Advanced Computer Science and Applications",
+    "Kinetik Game Technology Information System Computer Network Computing Electronics and Control",
+    "Journal of Informatics and Web Engineering",
+    "AI and Ethics",
+    "World s Poultry Science Journal",
+    "Aquaculture Fish and Fisheries",
+    "ESRJ",
+    "International Journal Science and Technology",
+    "Animal Frontiers",
+    "Science Advances",
+    "PLoS ONE",
+    "Revista de Informática Teórica e Aplicada",
+    "National Journal of Animal Health and Sustainable Livestock",
+    "Journal of Dairy Science",
+    "IEEE Sensors Journal",
+    "Devotion Journal of Research and Community Service",
+    "World Journal of Advanced Engineering Technology and Sciences",
+    "Computing and artificial intelligence.",
+    "Applied Sciences",
+    "Tropical Animal Health and Production",
+    "Animal Science Papers and Reports",
+    "Journal of applied science and environmental management",
+    "Journal of Applied Animal Research",
+    "INTERANTIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT",
+    "Heliyon",
+    "電腦學刊",
+    "International Journal of Rural Criminology",
+    "International Journal of Scientific Research in Science and Technology",
+    "Discover Animals",
+    "Wasit Journal of Computer and Mathematics Science",
+    "AI",
+    "International Journal of Computer Vision",
+    "Emerging Science Journal",
+    "Archivos Latinoamericanos de Producción Animal",
+    "Animal Bioscience",
+    "Artificial Intelligence in Agriculture",
+    "International Journal of Distributed Sensor Networks",
+    "SinkrOn",
+    "Czech Journal of Animal Science",
+    "Animal Health Research Reviews",
+    "Meat Research | ISSN (Online Version) 2790-1971",
+    "IEEE Journal of Radio Frequency Identification"
+  ],
+  "source_type_excluded": [
+    "DergiPark (Istanbul University)",
+    "Van Yüzüncü Yıl University Academic Data Management System",
+    "Zenodo (CERN European Organization for Nuclear Research)",
+    "HAL (Le Centre pour la Communication Scientifique Directe)"
+  ],
+  "homepage_backfill": {
+    "Computers and Electronics in Agriculture": "filled",
+    "Pressacademia": "filled",
+    "International Journal of Developmental Neuroscience": "filled",
+    "Sensors": "filled",
+    "Scientific Reports": "filled",
+    "Electronics": "filled",
+    "Multimedia Tools and Applications": "filled",
+    "Nigerian Journal of Physics": "filled",
+    "Poultry Science": "filled",
+    "Smart Agricultural Technology": "filled",
+    "Animals": "filled",
+    "Frontiers in Veterinary Science": "filled",
+    "Frontiers in Animal Science": "filled",
+    "Agriculture": "filled",
+    "Gomal Journal of Agriculture and Biology": "filled",
+    "AgriEngineering": "filled",
+    "Edelweiss Applied Science and Technology": "filled",
+    "Biosystems Engineering": "filled",
+    "IEEE Access": "filled",
+    "International Journal of Advanced Biochemistry Research": "filled"
+  },
+  "status": "candidates_ready"
+}
+[driver] 先例路入池：Computers and Electronics in Agriculture, Pressacademia, International Journal of Developmental Neuroscience, Sensors, Scientific Reports, Electronics, Multimedia Tools and Applications, Nigerian Journal of Physics, Poultry Science, Smart Agricultural Technology, Animals, Frontiers in Veterinary Science, Frontiers in Animal Science, Agriculture, Gomal Journal of Agriculture and Biology, AgriEngineering, Edelweiss Applied Science and Technology, Biosystems Engineering, IEEE Access, International Journal of Advanced Biochemistry Research
+
+$ light-journal-select add-candidate ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --name Journal of Fictional Turkey Studies --source search --detail 演示虚构刊（gate fixture 靶子，非真实期刊）
+{
+  "candidate_id": "J-journal-of-fictional-turkey-studies_5e6fea",
+  "name": "Journal of Fictional Turkey Studies",
+  "source": "search",
+  "status": "candidates_ready"
+}
+
+$ light-journal-select verify ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --file ../../../../light-journal-select/examples/demo-rerun-v11/inputs/verify-records.json
+{
+  "verified_candidates": [
+    "Computers and Electronics in Agriculture",
+    "Pressacademia",
+    "International Journal of Developmental Neuroscience",
+    "Sensors",
+    "Scientific Reports",
+    "Electronics",
+    "Multimedia Tools and Applications",
+    "Nigerian Journal of Physics",
+    "Poultry Science",
+    "Smart Agricultural Technology",
+    "Animals",
+    "Frontiers in Veterinary Science",
+    "Frontiers in Animal Science",
+    "Agriculture",
+    "Gomal Journal of Agriculture and Biology",
+    "AgriEngineering",
+    "Edelweiss Applied Science and Technology",
+    "Biosystems Engineering",
+    "IEEE Access",
+    "International Journal of Advanced Biochemistry Research",
+    "Journal of Fictional Turkey Studies"
+  ],
+  "status": "verified",
+  "warnings": [
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+    "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）"
+  ]
+}
+[driver] 风险名单 fixture 已生成（inputs/name-list.csv）：predatory_list_hit 靶子为虚构刊、volume_surge 为演示注入软警告，来源串均如实标注 demo-fixture
+
+$ light-journal-select gate ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --name-list ../../../../light-journal-select/examples/demo-rerun-v11/inputs/name-list.csv
+{
+  "excluded": [
+    "Journal of Fictional Turkey Studies"
+  ],
+  "remaining": [
+    "Computers and Electronics in Agriculture",
+    "Pressacademia",
+    "International Journal of Developmental Neuroscience",
+    "Sensors",
+    "Scientific Reports",
+    "Electronics",
+    "Multimedia Tools and Applications",
+    "Nigerian Journal of Physics",
+    "Poultry Science",
+    "Smart Agricultural Technology",
+    "Animals",
+    "Frontiers in Veterinary Science",
+    "Frontiers in Animal Science",
+    "Agriculture",
+    "Gomal Journal of Agriculture and Biology",
+    "AgriEngineering",
+    "Edelweiss Applied Science and Technology",
+    "Biosystems Engineering",
+    "IEEE Access",
+    "International Journal of Advanced Biochemistry Research"
+  ],
+  "levels": {
+    "Computers and Electronics in Agriculture": "clear",
+    "Pressacademia": "clear",
+    "International Journal of Developmental Neuroscience": "clear",
+    "Sensors": "clear",
+    "Scientific Reports": "clear",
+    "Electronics": "clear",
+    "Multimedia Tools and Applications": "clear",
+    "Nigerian Journal of Physics": "clear",
+    "Poultry Science": "clear",
+    "Smart Agricultural Technology": "clear",
+    "Animals": "soft_warn",
+    "Frontiers in Veterinary Science": "clear",
+    "Frontiers in Animal Science": "clear",
+    "Agriculture": "clear",
+    "Gomal Journal of Agriculture and Biology": "clear",
+    "AgriEngineering": "clear",
+    "Edelweiss Applied Science and Technology": "clear",
+    "Biosystems Engineering": "clear",
+    "IEEE Access": "clear",
+    "International Journal of Advanced Biochemistry Research": "clear",
+    "Journal of Fictional Turkey Studies": "quasi_hard"
+  },
+  "status": "gated"
+}
+
+$ light-journal-select report ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg
+{
+  "tiers": {
+    "challenge": 0,
+    "target": 5,
+    "safety": 0
+  },
+  "cards_total": 5,
+  "report": "SELECTION_REPORT.md",
+  "export": "selection.json",
+  "status": "gated"
+}
+
+$ light-journal-select decide ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --candidate Computers and Electronics in Agriculture --by demo-author（演示代行） --reason 演示定刊：先例 7 篇（归一化 13.16 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。
+{
+  "decision": {
+    "candidate_id": "J-computers-and-electronics-in-agriculture_36f4fc",
+    "journal": "Computers and Electronics in Agriculture",
+    "decided_at": "2026-10-20",
+    "decided_by": "demo-author（演示代行）",
+    "reason": "演示定刊：先例 7 篇（归一化 13.16 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。",
+    "tier": "target",
+    "risk_level": "clear"
+  },
+  "status": "decided"
+}
+
+$ light-journal-select handoff ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg --fields ../../../../light-journal-select/examples/demo-rerun-v11/inputs/guide-fields.json --files ../../../../light-journal-select/examples/demo-rerun-v11/inputs/download-files.json --write-root ../../../../light-write
+{
+  "journal": "Computers and Electronics in Agriculture",
+  "target_dir": "journal/target",
+  "record_id": "TR-2026-2c0d2d",
+  "record_hash": "facd964b1b505827e3900ac0171b2056c345ebb3de2fa058cd1eb07347ee9564",
+  "entries": 2,
+  "self_check": {
+    "local_structure": "pass",
+    "write_check": "pass",
+    "write_note": null,
+    "write_errors": []
+  },
+  "refresh": false,
+  "status": "handed_off"
+}
+
+$ light-journal-select status ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg
+{
+  "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
+  "status": "handed_off",
+  "candidates": 20,
+  "excluded": 1,
+  "tiers": {
+    "target": 5
+  },
+  "decision": {
+    "candidate_id": "J-computers-and-electronics-in-agriculture_36f4fc",
+    "journal": "Computers and Electronics in Agriculture",
+    "decided_at": "2026-10-20",
+    "decided_by": "demo-author（演示代行）",
+    "reason": "演示定刊：先例 7 篇（归一化 13.16 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。",
+    "tier": "target",
+    "risk_level": "clear"
+  },
+  "status_history": [
+    {
+      "state": "draft",
+      "at": "2026-10-20",
+      "by": "light-journal-select init"
+    },
+    {
+      "state": "candidates_ready",
+      "at": "2026-10-20",
+      "by": "light-journal-select precedent"
+    },
+    {
+      "state": "verified",
+      "at": "2026-10-20",
+      "by": "light-journal-select verify"
+    },
+    {
+      "state": "gated",
+      "at": "2026-10-20",
+      "by": "light-journal-select gate"
+    },
+    {
+      "state": "decided",
+      "at": "2026-10-20",
+      "by": "light-journal-select decide"
+    },
+    {
+      "state": "handed_off",
+      "at": "2026-10-20",
+      "by": "light-journal-select handoff"
+    }
+  ]
+}
+
+$ light-journal-select validate ../../../../light-journal-select/examples/demo-rerun-v11/selection-pkg
+{
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_journals 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_publishers 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_modes 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-computers-and-electronics-in-agriculture_36f4fc.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-pressacademia_ad3e2d.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-international-journal-of-developmental-n_1d50d8.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-sensors_76140e.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-scientific-reports_bef6dc.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-electronics_7ae9c2.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-multimedia-tools-and-applications_3a2fe7.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-nigerian-journal-of-physics_f47d0a.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-poultry-science_33d731.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-smart-agricultural-technology_621fa6.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-animals_85c3f9.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-frontiers-in-veterinary-science_e981ee.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-frontiers-in-animal-science_c5d252.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-agriculture_f0b1b0.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-gomal-journal-of-agriculture-and-biology_579ee1.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-agriengineering_250b2b.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-edelweiss-applied-science-and-technology_7737e5.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-biosystems-engineering_2927c1.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-ieee-access_75d093.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-international-journal-of-advanced-bioche_d44336.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "handoff.policy_gaps",
+      "message": "政策必查项未全覆盖：ai_use_disclosure、data_code_availability（JS-13：定刊交接前应逐刊核读并点名带回，缺项已在 handoff.md 显形，投稿前须补核）",
+      "where": "handoff"
+    }
+  ],
+  "issues": [
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_journals 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_publishers 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "constraints.unset",
+      "message": "约束 excluded_modes 未设（报告将如实渲染「未设」）",
+      "where": "constraints"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-computers-and-electronics-in-agriculture_36f4fc.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-pressacademia_ad3e2d.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-international-journal-of-developmental-n_1d50d8.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-sensors_76140e.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-scientific-reports_bef6dc.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-electronics_7ae9c2.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-multimedia-tools-and-applications_3a2fe7.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-nigerian-journal-of-physics_f47d0a.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-poultry-science_33d731.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-smart-agricultural-technology_621fa6.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-animals_85c3f9.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-frontiers-in-veterinary-science_e981ee.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-frontiers-in-animal-science_c5d252.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-agriculture_f0b1b0.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-gomal-journal-of-agriculture-and-biology_579ee1.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-agriengineering_250b2b.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-edelweiss-applied-science-and-technology_7737e5.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-biosystems-engineering_2927c1.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-ieee-access_75d093.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "metric.indexing_not_primary",
+      "message": "收录状态以聚合源落 verified：声称须在源头核验（MJL / Scopus Sources / DOAJ 登记页），聚合源只作回退与线索（JS-09）",
+      "where": "candidates.J-international-journal-of-advanced-bioche_d44336.verification.metrics.indexing"
+    },
+    {
+      "level": "warning",
+      "code": "handoff.policy_gaps",
+      "message": "政策必查项未全覆盖：ai_use_disclosure、data_code_availability（JS-13：定刊交接前应逐刊核读并点名带回，缺项已在 handoff.md 显形，投稿前须补核）",
+      "where": "handoff"
+    }
+  ]
+}
+
+=== summary ===
+{
+  "today": "2026-10-20",
+  "api_key_present": true,
+  "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
+  "precedent": {
+    "queries_ok": 3,
+    "queries_total": 3,
+    "admitted": [
+      "Computers and Electronics in Agriculture",
+      "Pressacademia",
+      "International Journal of Developmental Neuroscience",
+      "Sensors",
+      "Scientific Reports",
+      "Electronics",
+      "Multimedia Tools and Applications",
+      "Nigerian Journal of Physics",
+      "Poultry Science",
+      "Smart Agricultural Technology",
+      "Animals",
+      "Frontiers in Veterinary Science",
+      "Frontiers in Animal Science",
+      "Agriculture",
+      "Gomal Journal of Agriculture and Biology",
+      "AgriEngineering",
+      "Edelweiss Applied Science and Technology",
+      "Biosystems Engineering",
+      "IEEE Access",
+      "International Journal of Advanced Biochemistry Research"
+    ],
+    "near_misses": [
+      "Business And Management Studies An International Journal",
+      "International Journal of Social Sciences and Management Review",
+      "Journal of Animal Ecology",
+      "Natural Hazards",
+      "International Journal of Climatology",
+      "Informatics",
+      "Nutrients",
+      "International Journal of Advanced Research in Science Communication and Technology",
+      "Functional Ecology",
+      "International Journal for Research in Applied Science and Engineering Technology",
+      "Journal of Law & Social Studies",
+      "Journal of Wireless Mobile Networks Ubiquitous Computing and Dependable Applications",
+      "Cognitive Research Principles and Implications",
+      "Balıkesır Health Sciences Journal",
+      "Indonesian Journal of Electrical Engineering and Computer Science",
+      "GigaScience",
+      "Italian Journal of Animal Science",
+      "International Scientific Journal Sui Generis",
+      "International Journal of Nursing Practice",
+      "Information Technology and Computer Engineering",
+      "Uludağ University Journal of The Faculty of Engineering",
+      "Australian Journal of Primary Health",
+      "Geophysical Journal International",
+      "International Journal of Data Science and IoT Management System",
+      "Frontiers in Medicine",
+      "Route Educational and Social Science Journal",
+      "MGIMO Review of International Relations",
+      "International Journal of Global Warming",
+      "Journal of Criminology and Criminal Law",
+      "Karadeniz Teknik Üniversitesi İletişim Araştırmaları Dergisi",
+      "Harran Üniversitesi Tıp Fakültesi Dergisi",
+      "Asthma Allergy Immunology",
+      "Expert Systems with Applications",
+      "Wildlife Society Bulletin",
+      "Primary care diabetes",
+      "Journal of the Knowledge Economy",
+      "Aestimum",
+      "Poultry",
+      "International Journal of Advanced Computer Science and Applications",
+      "Kinetik Game Technology Information System Computer Network Computing Electronics and Control",
+      "Journal of Informatics and Web Engineering",
+      "AI and Ethics",
+      "World s Poultry Science Journal",
+      "Aquaculture Fish and Fisheries",
+      "ESRJ",
+      "International Journal Science and Technology",
+      "Animal Frontiers",
+      "Science Advances",
+      "PLoS ONE",
+      "Revista de Informática Teórica e Aplicada",
+      "National Journal of Animal Health and Sustainable Livestock",
+      "Journal of Dairy Science",
+      "IEEE Sensors Journal",
+      "Devotion Journal of Research and Community Service",
+      "World Journal of Advanced Engineering Technology and Sciences",
+      "Computing and artificial intelligence.",
+      "Applied Sciences",
+      "Tropical Animal Health and Production",
+      "Animal Science Papers and Reports",
+      "Journal of applied science and environmental management",
+      "Journal of Applied Animal Research",
+      "INTERANTIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT",
+      "Heliyon",
+      "電腦學刊",
+      "International Journal of Rural Criminology",
+      "International Journal of Scientific Research in Science and Technology",
+      "Discover Animals",
+      "Wasit Journal of Computer and Mathematics Science",
+      "AI",
+      "International Journal of Computer Vision",
+      "Emerging Science Journal",
+      "Archivos Latinoamericanos de Producción Animal",
+      "Animal Bioscience",
+      "Artificial Intelligence in Agriculture",
+      "International Journal of Distributed Sensor Networks",
+      "SinkrOn",
+      "Czech Journal of Animal Science",
+      "Animal Health Research Reviews",
+      "Meat Research | ISSN (Online Version) 2790-1971",
+      "IEEE Journal of Radio Frequency Identification"
+    ],
+    "source_type_excluded": [
+      "DergiPark (Istanbul University)",
+      "Van Yüzüncü Yıl University Academic Data Management System",
+      "Zenodo (CERN European Organization for Nuclear Research)",
+      "HAL (Le Centre pour la Communication Scientifique Directe)"
+    ],
+    "homepage_backfill": {
+      "Computers and Electronics in Agriculture": "filled",
+      "Pressacademia": "filled",
+      "International Journal of Developmental Neuroscience": "filled",
+      "Sensors": "filled",
+      "Scientific Reports": "filled",
+      "Electronics": "filled",
+      "Multimedia Tools and Applications": "filled",
+      "Nigerian Journal of Physics": "filled",
+      "Poultry Science": "filled",
+      "Smart Agricultural Technology": "filled",
+      "Animals": "filled",
+      "Frontiers in Veterinary Science": "filled",
+      "Frontiers in Animal Science": "filled",
+      "Agriculture": "filled",
+      "Gomal Journal of Agriculture and Biology": "filled",
+      "AgriEngineering": "filled",
+      "Edelweiss Applied Science and Technology": "filled",
+      "Biosystems Engineering": "filled",
+      "IEEE Access": "filled",
+      "International Journal of Advanced Biochemistry Research": "filled"
+    },
+    "status": "candidates_ready"
+  },
+  "verify_records": [
+    "Computers and Electronics in Agriculture",
+    "Pressacademia",
+    "International Journal of Developmental Neuroscience",
+    "Sensors",
+    "Scientific Reports",
+    "Electronics",
+    "Multimedia Tools and Applications",
+    "Nigerian Journal of Physics",
+    "Poultry Science",
+    "Smart Agricultural Technology",
+    "Animals",
+    "Frontiers in Veterinary Science",
+    "Frontiers in Animal Science",
+    "Agriculture",
+    "Gomal Journal of Agriculture and Biology",
+    "AgriEngineering",
+    "Edelweiss Applied Science and Technology",
+    "Biosystems Engineering",
+    "IEEE Access",
+    "International Journal of Advanced Biochemistry Research",
+    "Journal of Fictional Turkey Studies"
+  ],
+  "gate_levels": {
+    "Computers and Electronics in Agriculture": "clear",
+    "Pressacademia": "clear",
+    "International Journal of Developmental Neuroscience": "clear",
+    "Sensors": "clear",
+    "Scientific Reports": "clear",
+    "Electronics": "clear",
+    "Multimedia Tools and Applications": "clear",
+    "Nigerian Journal of Physics": "clear",
+    "Poultry Science": "clear",
+    "Smart Agricultural Technology": "clear",
+    "Animals": "soft_warn",
+    "Frontiers in Veterinary Science": "clear",
+    "Frontiers in Animal Science": "clear",
+    "Agriculture": "clear",
+    "Gomal Journal of Agriculture and Biology": "clear",
+    "AgriEngineering": "clear",
+    "Edelweiss Applied Science and Technology": "clear",
+    "Biosystems Engineering": "clear",
+    "IEEE Access": "clear",
+    "International Journal of Advanced Biochemistry Research": "clear",
+    "Journal of Fictional Turkey Studies": "quasi_hard"
+  },
+  "gate_excluded": [
+    "Journal of Fictional Turkey Studies"
+  ],
+  "tiers": {
+    "challenge": 0,
+    "target": 5,
+    "safety": 0
+  },
+  "decision": {
+    "candidate_id": "J-computers-and-electronics-in-agriculture_36f4fc",
+    "journal": "Computers and Electronics in Agriculture",
+    "decided_at": "2026-10-20",
+    "decided_by": "demo-author（演示代行）",
+    "reason": "演示定刊：先例 7 篇（归一化 13.16 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。",
+    "tier": "target",
+    "risk_level": "clear"
+  },
+  "handoff": {
+    "journal": "Computers and Electronics in Agriculture",
+    "target_dir": "journal/target",
+    "record_id": "TR-2026-2c0d2d",
+    "record_hash": "facd964b1b505827e3900ac0171b2056c345ebb3de2fa058cd1eb07347ee9564",
+    "entries": 2,
+    "self_check": {
+      "local_structure": "pass",
+      "write_check": "pass",
+      "write_note": null,
+      "write_errors": []
+    },
+    "refresh": false,
+    "status": "handed_off"
+  },
+  "manifest_counts": {
+    "downloaded": 0,
+    "pending_download": 2
+  },
+  "pending_names": [
+    "guide-for-authors.html",
+    "elsarticle-template.zip"
+  ],
+  "final_status": "handed_off",
+  "validate_ok": true
+}
+
+演示报告骨架已落盘：../../../../light-journal-select/examples/demo-rerun-v11/demo-report.md

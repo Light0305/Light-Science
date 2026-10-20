@@ -151,7 +151,7 @@
  "ingest": [
   {
    "package": "literature",
-   "source": "light-literature/examples/demo-cea/Literature",
+   "source": "../../../../light-literature/examples/demo-cea/Literature",
    "exit": 0,
    "objects": 1,
    "events": 0,
@@ -160,7 +160,7 @@
   },
   {
    "package": "design",
-   "source": "light-design/examples/demo-poultry-design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml",
+   "source": "../../../../light-design/examples/demo-poultry-design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml",
    "exit": 0,
    "objects": 1,
    "events": 2,
@@ -169,7 +169,7 @@
   },
   {
    "package": "experiment",
-   "source": "light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2",
+   "source": "../../../../light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2",
    "exit": 0,
    "objects": 9,
    "events": 60,
@@ -178,7 +178,7 @@
   },
   {
    "package": "analysis",
-   "source": "light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json",
+   "source": "../../../../light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json",
    "exit": 0,
    "objects": 3,
    "events": 1,
@@ -187,7 +187,7 @@
   },
   {
    "package": "write",
-   "source": "light-write/examples/demo-fullrun/manuscript-pkg/manuscript.yaml",
+   "source": "../../../../light-write/examples/demo-fullrun/manuscript-pkg/manuscript.yaml",
    "exit": 0,
    "objects": 1,
    "events": 6,
@@ -196,7 +196,7 @@
   },
   {
    "package": "figure",
-   "source": "light-figure/examples/demo-fullrun/figure-pkg/provenance.yaml",
+   "source": "../../../../light-figure/examples/demo-fullrun/figure-pkg/provenance.yaml",
    "exit": 0,
    "objects": 2,
    "events": 7,
@@ -205,7 +205,7 @@
   },
   {
    "package": "journal-select",
-   "source": "light-journal-select/examples/demo-fullrun/selection-pkg/selection.json",
+   "source": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/selection.json",
    "exit": 0,
    "objects": 1,
    "events": 0,
@@ -214,7 +214,7 @@
   },
   {
    "package": "review",
-   "source": "light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json",
+   "source": "../../../../light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json",
    "exit": 0,
    "objects": 8,
    "events": 0,
@@ -223,7 +223,7 @@
   },
   {
    "package": "idea",
-   "source": "light-idea/examples/demo-poultry",
+   "source": "../../../../light-idea/examples/demo-poultry",
    "exit": 1,
    "objects": 0,
    "events": 0,
@@ -232,7 +232,7 @@
    "expected_failure": true,
    "output_tail": [
     "被拦（逐项缺口）：",
-    "  · idea 收编源缺失：light-idea/examples/demo-poultry/memory_export.jsonl"
+    "  · idea 收编源缺失：../../../../light-idea/examples/demo-poultry/memory_export.jsonl"
    ]
   }
  ],

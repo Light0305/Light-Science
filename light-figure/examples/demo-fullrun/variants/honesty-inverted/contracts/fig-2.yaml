@@ -33,6 +33,17 @@ sister_library_refs:
     version: '0.1'
     style_anchor: anchor-pipeline-flow
     prompt_version: '1'
+    reference_breakdown:
+      palette_hex:
+      - '#0072b2'
+      - '#d55e00'
+      - '#009e73'
+      - '#e69f00'
+      layout_flow: 左入右出两段流：左段自上而下（视频→跟踪），右段自上而下四级（统计量→预测→阈值→异常）
+      module_style: 矩形与圆角矩形模块交替，浅蓝描边、无填充
+      annotation_style: 模块内嵌一行英文标签，无面板角标
+      information_density: 中密度：六个模块两面板分置，箭头串联
+      special_elements: 跨面板长箭头连接跟踪与统计量两段
   visio_components:
   - component_id: VC-DEMO-SEED-ARROW
     version: '0.1'
@@ -47,3 +58,9 @@ role_palette_ref:
 palette_confirmation:
   confirmed_by: demo-author
   confirmed_at: '2026-10-20'
+palette_decision:
+  source: gallery_anchor
+  basis: 图库种子条目 MG-DEMO-SEED-001 的六维拆解登记色（reference_breakdown.palette_hex）
+  confirmation:
+    confirmed_by: demo-author
+    confirmed_at: '2026-10-20'

@@ -20,6 +20,15 @@ frozen 是终态：正文一字不回改，一切修订走 amendment 追加（�
 
 amendment 分级批准（拍板 ⑤）：命门字段（判读标准 / 主指标 / 主张 /
 停止规则）的修订必须 user_signed，其余自动追加留痕。
+
+amendment 增量评审与类别分流（v1.1 DES-D02 + C-补04）：每条
+amendment 声明 category（prewritten_branch 定版预写偏离分支 /
+unforeseen 未预见变更，默认 unforeseen 取最严口径）；命门 amendment
+自落盘起 review.status=pending_review，增量评审（review prepare /
+record --amendment）落盘前 export 被拦；预写分支类必须以 branch_ref
+点名 plan.deviation_branches 中的定版分支且变更字段落在分支影响面
+内，否则类别与影响面不符、点名拒绝。评审分流（轻/全两轨）在
+review.py 执行。命门用户签纪律不放松。
 """
 
 from __future__ import annotations
@@ -28,6 +37,7 @@ import copy
 import re
 
 from .schema import (
+    AMD_CATEGORIES,
     INTAKE_ITEMS,
     REVIEW_DECISIONS,
     STAGE1_ITEMS,
@@ -198,9 +208,59 @@ def _set_path(obj, parts: list, value) -> None:
         cur[last] = value
 
 
+_MISSING = object()
+
+
+def _get_path(obj, parts: list):
+    """按路径取值，取不到返回 _MISSING（供 amendment 前后值记录）。"""
+    cur = obj
+    for p in parts:
+        if isinstance(p, int):
+            if not isinstance(cur, list) or p >= len(cur):
+                return _MISSING
+            cur = cur[p]
+        else:
+            if not isinstance(cur, dict) or p not in cur:
+                return _MISSING
+            cur = cur[p]
+    return cur
+
+
+def _path_within(path: str, prefix: str) -> bool:
+    """字段路径是否落在 prefix 影响面内（相等 / 子字段 / 列表下标）。"""
+    p, pre = (path or "").strip(), (prefix or "").strip()
+    return p == pre or p.startswith(pre + ".") or p.startswith(pre + "[")
+
+
+def _prewritten_branch_errors(design: dict, field_path: str,
+                              branch_ref) -> list[str]:
+    """DES-D02/C-补04 分流判据：声称预写分支，证据必须双查过——
+    branch_ref 点名的分支真实存在于定版预写（plan.deviation_branches），
+    且变更字段落在该分支声明的 fields 影响面内。任一不符点名返回。"""
+    if not _nonempty_str(branch_ref):
+        return ["category=prewritten_branch 必须以 branch_ref 点名定版时"
+                "预写的偏离分支（plan.deviation_branches 中的 id）："
+                "拿不出预写证据的变更按未预见变更（unforeseen）登记"]
+    branches = (design.get("plan") or {}).get("deviation_branches") or []
+    branch = next((b for b in branches
+                   if isinstance(b, dict) and b.get("id") == branch_ref), None)
+    if branch is None:
+        return [f"branch_ref={branch_ref!r} 在 plan.deviation_branches 中"
+                "不存在：类别与影响面不符——声称的预写分支未在定版文本中"
+                "预写（DES-D02/C-补04），请改按 unforeseen 登记并走全评审"]
+    fields = branch.get("fields") or []
+    if not any(_path_within(field_path, str(f)) for f in fields):
+        return [f"变更字段 {field_path} 不在预写分支 {branch_ref} 声明的"
+                f"影响面 {fields} 内：类别与影响面不符（DES-D02/C-补04），"
+                "超出预写范围的变更请改按 unforeseen 登记并走全评审"]
+    return []
+
+
 def apply_amendment(design: dict, field_path: str, value, *, reason: str,
                     results_seen: str, user_signed: bool = False,
-                    by: str = "", date: str) -> dict:
+                    by: str = "", date: str,
+                    category: str = "unforeseen",
+                    branch_ref: str | None = None) -> dict:
     """对 frozen 设计书追加一条 amendment 并就地应用修订。
 
     纪律（约束 12 + 拍板 ⑤）：
@@ -208,7 +268,12 @@ def apply_amendment(design: dict, field_path: str, value, *, reason: str,
     - 命门字段（判读标准/主指标/主张/停止规则）必须 user_signed=true；
     - 每条必须写明 reason 与 results_seen（改时是否已见结果）；
     - 修订后重算内容哈希并记进 amendment.new_hash，链式可回溯；
-    - 原文字段不删历史：变更只通过本函数落盘并留痕。
+    - 原文字段不删历史：变更只通过本函数落盘并留痕；
+    - 类别分流（DES-D02/C-补04）：category 必落盘（默认 unforeseen）；
+      prewritten_branch 须过分支证据双查（见 _prewritten_branch_errors）；
+    - 命门 amendment 落盘即带 review.status=pending_review：增量评审
+      落盘（或 REVIEW_UNAVAILABLE 显式落字）前 export 被拦（export.py）；
+      非命门 amendment review.status=not_required，不触发增量评审。
     返回新追加的 amendment 记录。失败抛 GateError / ValueError。
     """
     if design.get("status") != "frozen":
@@ -218,6 +283,9 @@ def apply_amendment(design: dict, field_path: str, value, *, reason: str,
         raise GateError(["amendment 必须写明 reason（为何改）"])
     if not _nonempty_str(results_seen):
         raise GateError(["amendment 必须声明 results_seen（改时是否已见结果、见了什么）"])
+    if category not in AMD_CATEGORIES:
+        raise GateError([f"amendment category 非法：{category!r}"
+                         f"（须为 {AMD_CATEGORIES} 之一，DES-D02 类别分流）"])
     critical = is_critical_field(field_path)
     if critical and not user_signed:
         raise GateError([f"{field_path} 是命门字段（判读标准/主指标/主张/停止规则），"
@@ -225,9 +293,26 @@ def apply_amendment(design: dict, field_path: str, value, *, reason: str,
     parts = _parse_path(field_path)  # ValueError 直接上抛
     if parts and parts[0] in ("freeze", "status_history", "status"):
         raise GateError([f"{field_path} 属冻结留痕区，不许经 amendment 改写"])
+    if category == "prewritten_branch":
+        berrs = _prewritten_branch_errors(design, field_path, branch_ref)
+        if berrs:
+            raise GateError(berrs)
 
+    before = _get_path(design, parts)
     new_design = copy.deepcopy(design)
     _set_path(new_design, parts, value)
+    # DES-D01：amendment 触及 SESOI 登记块时，登记行派生副本在同一条
+    # amendment 内机械刷新（副本与登记块的一致性由 validate 覆盖，
+    # 不另起 amendment、不许行内副本滞留旧值）。
+    if len(parts) >= 2 and parts[0] == "evaluation" and parts[1] == "sesoi":
+        _block = (new_design.get("evaluation") or {}).get("sesoi")
+        _ho = new_design.get("handoff") or {}
+        for _row in _ho.get("expected_registry") or []:
+            if isinstance(_row, dict):
+                if isinstance(_block, dict):
+                    _row["sesoi"] = copy.deepcopy(_block)
+                else:
+                    _row.pop("sesoi", None)
     fr = new_design.setdefault("freeze", {})
     amd = {
         "date": date,
@@ -237,8 +322,22 @@ def apply_amendment(design: dict, field_path: str, value, *, reason: str,
         "user_signed": bool(user_signed),
         "approved_by": by or ("user" if user_signed else "light-design amend（自动留痕）"),
         "critical": critical,
+        # DES-D02：类别分流落盘 + 变更前后值（增量评审包的对账基准）
+        "category": category,
+        "changes": [{
+            "field": field_path,
+            "before": None if before is _MISSING else copy.deepcopy(before),
+            "after": copy.deepcopy(value),
+        }],
+        # DES-D02：增量评审状态——命门待审、非命门不触发
+        "review": ({"status": "pending_review",
+                    "track": "light" if category == "prewritten_branch"
+                             else "full"}
+                   if critical else {"status": "not_required"}),
         "new_hash": None,
     }
+    if category == "prewritten_branch":
+        amd["branch_ref"] = branch_ref
     fr.setdefault("amendments", []).append(amd)
     amd["new_hash"] = compute_content_hash(new_design)
     # 校验修订后仍合法（哈希链 + amendment 签核由 validate 覆盖）

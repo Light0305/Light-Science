@@ -31,7 +31,7 @@
   "variant_honesty_inverted": {
     "overall": "FIX_BEFORE_DELIVERY",
     "artifact": "exports/fig-1.pdf",
-    "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+    "artifact_sha256": "3c5278269cda8d0646fb5244dc651b2461d4f2220be77b057fe4e07aad2e2421",
     "gates": {
       "alignment": "PASS",
       "collisions": "PASS",
@@ -43,11 +43,28 @@
   "variant_native_embed": {
     "overall": "FIX_BEFORE_DELIVERY",
     "artifact": "schematic/redraw/fig-2.vsdx",
-    "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+    "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
     "gates": {
       "contract": "PASS",
       "native": "FIX_BEFORE_DELIVERY",
       "policy_block": "PASS"
     }
+  },
+  "recheck_overall": {
+    "fig-1": "PASS",
+    "fig-2": "PASS"
+  },
+  "variant_round_noop": {
+    "blocked": true,
+    "gate": "round_noop"
+  },
+  "variant_pptx_chain": {
+    "audit_gates": {
+      "contract": "PASS",
+      "native": "PASS",
+      "policy_block": "PASS"
+    },
+    "recheck_overall": "PASS",
+    "embed_native_verdict": "FIX_BEFORE_DELIVERY"
   }
 }

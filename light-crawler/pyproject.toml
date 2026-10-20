@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-crawler"
+version = "1.0.0"
+description = "light-crawler：Light-Science 项目数据采集通道层——目标登记、合规预检（robots 失败关闭）、分级生效、速率公式、轻量留存与 provenance（通道层扩展位）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-crawler = "light_crawler.cli:main"
+
+[tool.setuptools]
+packages = ["light_crawler"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

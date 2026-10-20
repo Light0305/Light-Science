@@ -1,5 +1,5 @@
 来源：project/memory/registry-view.json
-对象注册统一视图（light-memory/registry-view v1.0）：共 26 个对象，生成于 2026-10-20T14:29:25+00:00
+对象注册统一视图（light-memory/registry-view v1.0）：共 26 个对象，生成于 2026-10-20T19:37:43+00:00
 
 [analysis_package] 1 个
   - analysis-pkg | 状态 active | 当前版本 4d14ed3424d7… | 项目 turkey-threshold-prediction | 结论包 analysis-pkg

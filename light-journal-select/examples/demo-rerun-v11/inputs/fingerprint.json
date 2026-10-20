@@ -1,0 +1,41 @@
+{
+  "manuscript": {
+    "abstract": "We present a computer-vision method for detecting abnormal behaviour of turkeys in commercial barns. A multi-object tracker follows individual birds in top-view video; video-level statistics predict per-tracklet decision thresholds without per-video manual tuning, and abnormal events (piling, huddling, prolonged immobility) are flagged for stockperson review. On a multi-barn benchmark the method matches an oracle per-video tuned baseline while requiring no manual threshold setting.",
+    "keywords": [
+      "turkey",
+      "abnormal behaviour detection",
+      "computer vision",
+      "multi-object tracking",
+      "precision livestock farming"
+    ],
+    "source_ref": null
+  },
+  "fingerprint": {
+    "field": "agricultural engineering",
+    "subfield": "precision livestock farming",
+    "study_object": "turkeys",
+    "core_problem": "abnormal behaviour detection from barn video",
+    "contribution_type": "method",
+    "audience": "precision livestock farming and agricultural engineering researchers",
+    "methods_role": "core_method_contribution"
+  },
+  "queries": [
+    "turkey behaviour detection",
+    "poultry welfare monitoring computer vision",
+    "livestock behaviour recognition tracking"
+  ],
+  "constraints": {
+    "tier_expectation": "challenge/target/safety 三档都要",
+    "apc_budget": 3500,
+    "review_cycle_limit": 12,
+    "excluded_journals": null,
+    "excluded_publishers": null,
+    "excluded_modes": null,
+    "journal_language_pref": "en",
+    "recognized_catalogs": [
+      "SCI",
+      "Scopus"
+    ]
+  },
+  "constraints_confirmed": true
+}

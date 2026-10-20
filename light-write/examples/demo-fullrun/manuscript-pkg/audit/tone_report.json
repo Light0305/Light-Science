@@ -1,0 +1,55 @@
+{
+  "kind": "light-write/tone-report",
+  "version": "1.1",
+  "advisory": true,
+  "blocking": false,
+  "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
+  "manuscript_hash": "9544b862a48218c90b2d164ea6464ddc1c7319830f30bc6e42b2361aaaf1181e",
+  "generated_at": "2026-10-20T18:45:55+00:00",
+  "generated_date": "2026-10-20",
+  "language": "en",
+  "rules_applied": [
+    "tone.en.reversal_frame",
+    "tone.en.boilerplate",
+    "tone.en.ordinal_scaffold",
+    "tone.en.adjacent_isostructural"
+  ],
+  "not_change_table": [
+    {
+      "feature": "sentence_length_variance",
+      "scope": "en/zh",
+      "note": "句长参差：长短句交错是人类写作常态，不作 AI 味证据"
+    },
+    {
+      "feature": "passive_voice",
+      "scope": "en/zh",
+      "note": "被动句：方法节被动语态是规范常态，不许以被动率报警"
+    },
+    {
+      "feature": "nominalization",
+      "scope": "en/zh",
+      "note": "名词化：术语名词化是学术语体的构成方式，不许据此改写"
+    },
+    {
+      "feature": "hedging_and_qualifiers",
+      "scope": "en/zh",
+      "note": "限定与对冲词：承载证据强度，信息守恒——核查只报不改，改写不许删限定词"
+    },
+    {
+      "feature": "ordinal_real_sequence",
+      "scope": "en/zh",
+      "note": "真实时序的序数步骤：操作流程的真实先后用序数是合法结构；序数脚手架规则只提示复核是否为空转衔接"
+    },
+    {
+      "feature": "intentional_parallelism",
+      "scope": "en/zh",
+      "note": "有意排比：内容逐项不同的平行结构是修辞选择，与同构空转的区别在内容，不在句式"
+    }
+  ],
+  "findings": [],
+  "counts": {
+    "total": 0,
+    "by_rule": {}
+  },
+  "note": "程式化核查为建议层（advisory）：只报不改、不阻断定版；改写须守信息守恒（不许删限定词）；不改表所列特征永不作报警依据；本报告不含任何 AI 检测器分数（约束 10）"
+}

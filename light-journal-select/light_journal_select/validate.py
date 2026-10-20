@@ -12,7 +12,10 @@ from pathlib import Path
 from . import schema
 from .project import FILES, load_selection
 from .util import load_structured, sha256_file
-from .verify import Report, check_verification_block
+from .verify import (
+    Report, check_oa_license_block, check_policy_checks,
+    check_scope_checks, check_verification_block,
+)
 
 
 def validate_selection(selection: dict) -> Report:
@@ -82,6 +85,18 @@ def validate_selection(selection: dict) -> Report:
                       f"先例查询状态 {run.get('status')!r} 不在词表"
                       "（失败必须如实落 failed）", where="precedent_runs")
 
+    for row in selection.get("source_type_exclusions") or []:
+        for field in ("name", "source_type", "reason", "queried_at"):
+            if row.get(field) in (None, ""):
+                rep.error("source_type_exclusion.field",
+                          f"来源类型排除附记缺字段 {field}（JS-D03 "
+                          "附记必须自足：留痕不静默）",
+                          where="source_type_exclusions")
+        if row.get("source_type") == schema.JOURNAL_SOURCE_TYPE:
+            rep.error("source_type_exclusion.is_journal",
+                      "来源类型排除附记里混入 journal 型来源"
+                      "（过滤口径被破，JS-D03）",
+                      where="source_type_exclusions")
     for cand in selection.get("candidates") or []:
         _check_candidate(cand, rep)
     for row in selection.get("excluded") or []:
@@ -140,6 +155,9 @@ def _check_decision_handoff(selection: dict, rep: Report) -> None:
     if status == "handed_off" and not handoff:
         rep.error("handoff.missing",
                   "状态 handed_off 但交接登记块缺失", where="handoff")
+    if selection.get("policy_checks") is not None:
+        check_policy_checks(selection["policy_checks"], rep,
+                            where="policy_checks")
     if handoff is not None:
         for field in ("journal", "candidate_id", "target_dir",
                       "check_record", "download_manifest", "record_id",
@@ -147,6 +165,13 @@ def _check_decision_handoff(selection: dict, rep: Report) -> None:
             if handoff.get(field) in (None, ""):
                 rep.error("handoff.field",
                           f"交接登记缺字段 {field}", where="handoff")
+        if handoff.get("policy_gaps"):
+            rep.warning("handoff.policy_gaps",
+                        "政策必查项未全覆盖："
+                        + "、".join(handoff["policy_gaps"])
+                        + "（JS-13：定刊交接前应逐刊核读并点名带回，"
+                        "缺项已在 handoff.md 显形，投稿前须补核）",
+                        where="handoff")
 
 
 def _check_candidate(cand: dict, rep: Report) -> None:
@@ -172,8 +197,43 @@ def _check_candidate(cand: dict, rep: Report) -> None:
             rep.error("candidate.rate_without_volume",
                       "有归一化率却无发文量分母（归一化不许无源）",
                       where=where)
+    backfill = cand.get("homepage_backfill")
+    if backfill is not None:
+        if backfill.get("status") not in ("filled", "unconfirmed"):
+            rep.error("candidate.backfill_status",
+                      f"官网回填状态 {backfill.get('status')!r} 不在"
+                      "词表（filled/unconfirmed，JS-D02）", where=where)
+        if backfill.get("status") == "filled":
+            if not backfill.get("value") or \
+                    not backfill.get("evidence_url"):
+                rep.error("candidate.backfill_filled_no_trace",
+                          "回填标 filled 却缺取值或证据 URL"
+                          "（回填必须带源留痕，JS-D02）", where=where)
+            if cand.get("homepage_url") != backfill.get("value"):
+                rep.error("candidate.backfill_mismatch",
+                          "回填取值与 candidate.homepage_url 不一致",
+                          where=where)
     if cand.get("verification") is not None:
         check_verification_block(cand, rep)
+    if cand.get("scope_checks") is not None:
+        check_scope_checks(cand["scope_checks"], rep,
+                           where=f"{where}.scope_checks")
+    if cand.get("oa_license") is not None:
+        check_oa_license_block(cand["oa_license"], rep,
+                               where=f"{where}.oa_license")
+    if cand.get("policy_checks") is not None:
+        check_policy_checks(cand["policy_checks"], rep,
+                            where=f"{where}.policy_checks")
+    apc_entry = ((cand.get("verification") or {}).get("metrics")
+                 or {}).get("apc")
+    if isinstance(apc_entry, dict) and \
+            apc_entry.get("status") == "verified" and \
+            isinstance(apc_entry.get("value"), dict) and \
+            apc_entry["value"].get("charge_timing") is None:
+        rep.warning("candidate.apc_timing_undisclosed",
+                    f"候选 {cand.get('name')} 费用组收费时点未披露："
+                    "费用不透明是资格证据，风险门宜落 apc_opaque "
+                    "核查（JS-12 与 §6.3 软警告口径衔接）", where=where)
     risk = cand.get("risk")
     if risk is not None:
         if risk.get("level") not in schema.RISK_LEVELS:
@@ -187,6 +247,14 @@ def _check_candidate(cand: dict, rep: Report) -> None:
             if check.get("hit") is True and not check.get("source"):
                 rep.error("candidate.risk_hit_no_source",
                           "命中记录缺来源（无源不许落命中）", where=where)
+            if check.get("hit") is True and \
+                    check.get("origin") == "name_list" and \
+                    not check.get("list_version") and \
+                    not check.get("list_year"):
+                rep.error("candidate.risk_hit_no_list_version",
+                          "名单命中缺名单版本与年份：名单逐年更新，"
+                          "命中必须带名单名 + 版本/年份 + 查询日期"
+                          "（JS-08）", where=where)
         if risk.get("level") == "quasi_hard" and cand.get("tier") not in (
                 None, "excluded"):
             from .gate import valid_override

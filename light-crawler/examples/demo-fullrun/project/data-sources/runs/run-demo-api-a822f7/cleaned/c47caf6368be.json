@@ -1,0 +1,13 @@
+{
+ "profile": "html_text_v1",
+ "content_type": "application/json",
+ "kind": "json",
+ "json": {
+  "dataset": "fixture-broiler-weights",
+  "rows": 3,
+  "unit": "kg"
+ },
+ "text": "{\"dataset\": \"fixture-broiler-weights\", \"rows\": 3, \"unit\": \"kg\"}",
+ "text_sha256": "529df3ad38dc2333a33916c7018ebe69dc80e6510a360141c5944372200e3f28",
+ "near_duplicate": null
+}

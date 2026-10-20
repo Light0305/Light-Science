@@ -23,9 +23,10 @@ from . import __version__
 from .audit import audit_status, record_path
 from .produce import script_path, source_data_path
 from .project import (
-    load_package, provenance_row, save_head,
+    load_package, provenance_row, save_head, schematic_artifact_relpath,
+    schematic_backend,
 )
-from .redraw import load_manifest, vsdx_relpath
+from .redraw import load_manifest
 from .reference import reference_relpath
 from .style import bundle_current
 from .util import dump_yaml, load_structured, sha256_file, today
@@ -99,20 +100,21 @@ def verify_provenance_rows(root, pkg) -> list:
                 gaps.append(f"方法图 {fig_id} 账面参考图哈希与包内"
                             "文件不符：交付前复验拒绝")
             redraw = entry.get("redraw_source") or {}
-            vsdx = root / vsdx_relpath(fig_id)
+            contract = pkg["contracts"].get(fig_id) or {}
+            art_rel = schematic_artifact_relpath(contract, fig_id)
+            artifact = root / art_rel
             if not redraw.get("hash"):
                 gaps.append(f"方法图 {fig_id} 账面缺重绘源哈希")
-            elif not vsdx.exists():
-                gaps.append(f"方法图 {fig_id} 成品 .vsdx 不存在："
-                            f"{vsdx_relpath(fig_id)}")
-            elif redraw["hash"] != sha256_file(vsdx):
+            elif not artifact.exists():
+                gaps.append(f"方法图 {fig_id} 成品不存在：{art_rel}")
+            elif redraw["hash"] != sha256_file(artifact):
                 gaps.append(f"方法图 {fig_id} 账面重绘源哈希与成品"
                             "不符：交付前复验拒绝（成品被改后须重跑 "
-                            "redraw build 回填）")
-            if redraw.get("path") and redraw["path"] != vsdx_relpath(fig_id):
+                            "对应后端 build 回填）")
+            if redraw.get("path") and redraw["path"] != art_rel:
                 gaps.append(f"方法图 {fig_id} 账面重绘源路径 "
                             f"{redraw['path']} 与包内成品 "
-                            f"{vsdx_relpath(fig_id)} 不一致")
+                            f"{art_rel} 不一致")
     return gaps
 
 
@@ -172,6 +174,74 @@ def _caption_hashes(head) -> dict:
             for e in snapshot}
 
 
+def _correspondence(root, pkg, row, entry) -> dict:
+    """对应件清单（REV-D09 交叉项）：源资产 → 交付件映射 + 内容级
+    哈希，供 Review 在源资产与交付件异名异格式时做内容级比对
+    （数字↔图边的图哈希项从 not_assessable 升为真检）。缺件落
+    null + note，不冒充齐备。"""
+    from .util import component_hash
+
+    fig_id = row["fig_id"]
+    sources = []
+    content_hashes = {}
+    note = None
+    if row.get("line") == "data":
+        script = script_path(root, fig_id)
+        if script.exists():
+            sources.append({"role": "plotting_script",
+                            "path": f"data/scripts/{fig_id}.py",
+                            "sha256": sha256_file(script)})
+        contract = pkg["contracts"].get(fig_id)
+        data_path = source_data_path(root, contract)
+        if data_path is not None and data_path.exists():
+            sources.append({
+                "role": "source_data",
+                "path": str(data_path.relative_to(root))
+                if data_path.is_relative_to(root) else str(data_path),
+                "sha256": sha256_file(data_path)})
+        bundle_path = root / "data" / "styles" / "bundle.json"
+        if bundle_path.exists():
+            sources.append({"role": "style_bundle",
+                            "path": "data/styles/bundle.json",
+                            "sha256": sha256_file(bundle_path)})
+        align_path = root / "audit" / f"{fig_id}.alignment-input.json"
+        if align_path.exists():
+            align = load_structured(align_path)
+            content_hashes["alignment_panels"] = component_hash(
+                align.get("panels") or [])
+        else:
+            note = "缺量测清单：内容级哈希（alignment_panels）不可用"
+    else:
+        contract = pkg["contracts"].get(fig_id) or {}
+        if schematic_backend(contract) == "powerpoint":
+            from .pptxbuild import (
+                load_pptx_manifest, pptx_manifest_path,
+            )
+            manifest = load_pptx_manifest(root, fig_id) or {}
+            mpath = pptx_manifest_path(root, fig_id)
+            mrel = f"schematic/redraw/{fig_id}.pptx-manifest.json"
+        else:
+            manifest = load_manifest(root, fig_id) or {}
+            mpath = root / "schematic" / "redraw" \
+                / f"{fig_id}.manifest.json"
+            mrel = f"schematic/redraw/{fig_id}.manifest.json"
+        if mpath.exists():
+            sources.append({"role": "redraw_manifest", "path": mrel,
+                            "sha256": sha256_file(mpath)})
+        if entry.get("reference_image_hash"):
+            sources.append({
+                "role": "reference_image",
+                "path": None,  # 参考图本体不进交付集，只给哈希指针
+                "sha256": entry["reference_image_hash"]})
+        if manifest.get("extracted_shapes_hash"):
+            content_hashes["extracted_shapes"] = \
+                manifest["extracted_shapes_hash"]
+        else:
+            note = "成品未反抽：内容级哈希（extracted_shapes）不可用"
+    return {"source_assets": sources, "content_hashes": content_hashes,
+            "note": note}
+
+
 def _delivery_row(root, pkg, row, captions) -> dict:
     fig_id = row["fig_id"]
     entry = provenance_row(pkg["provenance"], fig_id) or {}
@@ -202,16 +272,33 @@ def _delivery_row(root, pkg, row, captions) -> dict:
                 entry.get("palette_registry_version"),
         }
     else:
-        vsdx = root / vsdx_relpath(fig_id)
-        manifest = load_manifest(root, fig_id) or {}
-        build = manifest.get("build") or {}
-        out["files"] = [{"path": vsdx_relpath(fig_id),
-                         "sha256": sha256_file(vsdx),
-                         "role": "visio_source"}]
-        out["visio_verified"] = build.get("visio_verified")
-        if build.get("route") == "file_build":
-            out["visio_note"] = ("文件级路线产物，未过 Visio 实机验证"
-                                 "（拍板 D4：如实标注）")
+        backend = schematic_backend(contract)
+        art_rel = schematic_artifact_relpath(contract, fig_id)
+        artifact = root / art_rel
+        if backend == "powerpoint":
+            from .pptxbuild import load_pptx_manifest
+            manifest = load_pptx_manifest(root, fig_id) or {}
+            build = manifest.get("build") or {}
+            out["files"] = [{"path": art_rel,
+                             "sha256": sha256_file(artifact),
+                             "role": "powerpoint_source"}]
+            out["powerpoint_verified"] = \
+                build.get("powerpoint_verified")
+            out["powerpoint_note"] = (
+                "PPT 文件层产物（python-pptx 构建 + OPC 反读证据），"
+                "未过 PowerPoint 实机验证（FIG-D02：如实标注）")
+            redraw_route = build.get("backend")
+        else:
+            manifest = load_manifest(root, fig_id) or {}
+            build = manifest.get("build") or {}
+            out["files"] = [{"path": art_rel,
+                             "sha256": sha256_file(artifact),
+                             "role": "visio_source"}]
+            out["visio_verified"] = build.get("visio_verified")
+            if build.get("route") == "file_build":
+                out["visio_note"] = ("文件级路线产物，未过 Visio 实机"
+                                     "验证（拍板 D4：如实标注）")
+            redraw_route = build.get("route")
         out["provenance"] = {
             "ledger_ref": f"provenance.yaml#{fig_id}",
             "prompt_version": entry.get("prompt_version"),
@@ -222,19 +309,21 @@ def _delivery_row(root, pkg, row, captions) -> dict:
         out["ai_disclosure"] = {
             "generation_model": entry.get("generation_model"),
             "prompt_version": entry.get("prompt_version"),
-            "redraw_route": build.get("route"),
+            "redraw_route": redraw_route,
             "reference_not_in_delivery": True,
         }
         out["sister_library_refs"] = contract.get("sister_library_refs")
+    out["correspondence"] = _correspondence(root, pkg, row, entry)
     return out
 
 
-def _artifact_hash_now(root, row):
+def _artifact_hash_now(root, pkg, row):
     fig_id = row["fig_id"]
     if row.get("line") == "data":
         path = root / "exports" / f"{fig_id}.pdf"
     else:
-        path = root / vsdx_relpath(fig_id)
+        contract = (pkg or {}).get("contracts", {}).get(fig_id) or {}
+        path = root / schematic_artifact_relpath(contract, fig_id)
     return sha256_file(path) if path.exists() else None
 
 
@@ -277,7 +366,7 @@ def generate_delivery(root, by=None) -> dict:
                       for r in old_doc.get("figures") or []}
         changed = [row["fig_id"] for row in head.get("figures") or []
                    if old_hashes.get(row["fig_id"])
-                   != _artifact_hash_now(root, row)]
+                   != _artifact_hash_now(root, pkg, row)]
         if changed and frozen:
             gaps.append(
                 "编号已冻结且交付物在交付后变更（"
@@ -361,7 +450,7 @@ def delivered_gaps(pkg) -> list:
             gaps.append(f"图 {fig_id} 不在 delivery.yaml 交付行中")
             continue
         files = drow.get("files") or []
-        current = _artifact_hash_now(root, row)
+        current = _artifact_hash_now(root, pkg, row)
         if not files or files[0].get("sha256") != current:
             gaps.append(f"图 {fig_id} 交付行主文件哈希与当前产物不符："
                         "交付后产物已变更——登记解冻后重新交付")

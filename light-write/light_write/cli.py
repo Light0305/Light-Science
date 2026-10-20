@@ -20,7 +20,9 @@ from .figures import (
     set_caption, sync_intext_refs,
 )
 from .gates import GateError, advance, freeze_contract, status_summary
-from .intake import IntakeError, run_intake
+from .intake import (
+    ContributionError, IntakeError, confirm_contribution, run_intake,
+)
 from .project import init_package
 from .review import (
     ReviewError, import_review, prepare_review, record_review,
@@ -55,6 +57,15 @@ def main(argv=None) -> int:
                    help="Literature verified 条目导出（候选池 JSONL / JSON 列表）")
     p.add_argument("--by", default=None)
 
+    p = sub.add_parser("confirm-contribution",
+                       help="用户签认主导贡献陈述，落回执（WRT-D04）")
+    p.add_argument("root")
+    p.add_argument("--by", required=True, help="签认人（用户本人）")
+    p.add_argument("--statement", default=None,
+                   help="签认文本（缺省取承接草案原文）")
+    p.add_argument("--drift-note", default=None,
+                   help="签认文本与草案不一致时必填：点名差异")
+
     p = sub.add_parser("register-template", help="登记目标刊模板核查记录")
     p.add_argument("root")
     p.add_argument("--record", required=True)
@@ -87,6 +98,9 @@ def main(argv=None) -> int:
                         "audit/support_assessments.yaml")
 
     p = sub.add_parser("audit-status", help="审计产物状态（STALE 检出）")
+    p.add_argument("root")
+
+    p = sub.add_parser("tone", help="程式化核查（WRT-D01，advisory 只报不改）")
     p.add_argument("root")
 
     p = sub.add_parser("disclose", help="按刊生成 AI 披露并落锚")
@@ -184,6 +198,10 @@ def main(argv=None) -> int:
         elif args.cmd == "intake":
             _print(run_intake(args.root, args.conclusion_card,
                               args.literature, by=args.by))
+        elif args.cmd == "confirm-contribution":
+            _print(confirm_contribution(
+                args.root, args.by, statement=args.statement,
+                drift_note=args.drift_note))
         elif args.cmd == "register-template":
             _print(register_template(args.root, args.record))
         elif args.cmd == "freeze-contract":
@@ -215,6 +233,17 @@ def main(argv=None) -> int:
             return 0 if report["overall"] == "pass" else 1
         elif args.cmd == "audit-status":
             _print(audit_status(args.root))
+        elif args.cmd == "tone":
+            from .tone import ToneError, run_tone_check
+            try:
+                tone_report = run_tone_check(args.root)
+            except ToneError as e:
+                _print({"ok": False, "gaps": e.gaps})
+                return 1
+            _print({"advisory": True, "blocking": False,
+                    "findings": tone_report["counts"]["total"],
+                    "by_rule": tone_report["counts"]["by_rule"],
+                    "report_file": "audit/tone_report.json"})
         elif args.cmd == "disclose":
             _print(generate_disclosures(args.root))
         elif args.cmd == "disclose-status":
@@ -303,9 +332,9 @@ def main(argv=None) -> int:
                 return 0 if result["ok"] else 1
             elif args.figures_cmd == "freeze":
                 _print(freeze_numbering(args.root, renumber=args.renumber))
-    except (IntakeError, TemplateError, GateError, FileExistsError,
-            AuditError, DiscloseError, ReviewError, RevisionError,
-            FigureError) as e:
+    except (IntakeError, ContributionError, TemplateError, GateError,
+            FileExistsError, AuditError, DiscloseError, ReviewError,
+            RevisionError, FigureError) as e:
         gaps = getattr(e, "gaps", None) or [str(e)]
         _print({"ok": False, "gaps": gaps})
         return 1

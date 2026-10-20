@@ -3,9 +3,9 @@
   "fig_id": "fig-1",
   "line": "data",
   "artifact": "exports/fig-1.pdf",
-  "artifact_sha256": "bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8",
-  "audited_at": "2026-10-20T10:52:57+00:00",
-  "tool_version": "0.2.0",
+  "artifact_sha256": "421ed4c659aa1363c547b120351b24e0a1be30c52d8d0baf79e5e7ba1af9e43b",
+  "audited_at": "2026-10-20T19:26:53+00:00",
+  "tool_version": "1.0.0",
   "tolerances": {
     "alignment_pt": 1.5,
     "collision_inset_pt": 0.6,
@@ -88,7 +88,7 @@
         {
           "level": "info",
           "code": "native.not_applicable",
-          "message": "原生性门只审方法图 .vsdx"
+          "message": "原生性门只审方法图成品（.vsdx / .pptx）"
         }
       ],
       "metrics": {}

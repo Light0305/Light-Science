@@ -1,0 +1,39 @@
+{
+  "kind": "light-journal-select/download-manifest",
+  "usage": "local_use_only",
+  "journal": {
+    "candidate_id": "J-computers-and-electronics-in-agriculture_36f4fc",
+    "name": "Computers and Electronics in Agriculture",
+    "issn": "0168-1699"
+  },
+  "generated_at": "2026-10-20",
+  "entries": [
+    {
+      "entry_id": "DL-001",
+      "kind": "guideline",
+      "filename": "guide-for-authors.html",
+      "source_url": "https://www.sciencedirect.com/journal/computers-and-electronics-in-agriculture/publish/guide-for-authors",
+      "status": "pending_download",
+      "downloaded_at": null,
+      "sha256": null,
+      "stored_path": null,
+      "supersedes": null,
+      "superseded_by": null,
+      "note": "演示环境未真下载官网指南页，待操作员从官网取回后回填登记"
+    },
+    {
+      "entry_id": "DL-002",
+      "kind": "template",
+      "filename": "elsarticle-template.zip",
+      "source_url": "https://ctan.org/pkg/elsarticle",
+      "status": "pending_download",
+      "downloaded_at": null,
+      "sha256": null,
+      "stored_path": null,
+      "supersedes": null,
+      "superseded_by": null,
+      "note": "演示环境未真下载模板包，待从 CTAN 取回后回填登记"
+    }
+  ],
+  "updated_at": "2026-10-20"
+}

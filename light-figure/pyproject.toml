@@ -15,6 +15,9 @@ dependencies = [
     # 数据图生产路径的执行后端（默认 Python 线）与样式编译
     # 的色板/cmap 注册；R 线只产 theme 文本产物，不在此执行。
     "matplotlib>=3.8",
+    # PowerPoint 文件层路线（FIG-D02 v1.1）：pptx manifest 的构建
+    # 与反读对账；COM 增强格不经本依赖（须 Windows + PowerPoint）。
+    "python-pptx>=1.0",
 ]
 
 [project.optional-dependencies]

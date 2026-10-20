@@ -4,9 +4,13 @@
 - MM-03：索引是真相文件的影子——删掉 .index 不丢任何记忆，一条
   命令从真相全量重建；索引里不许有真相的唯一副本。
 - MM-04：块 ID 含嵌入模型名，换模型构造性失效；维度在建索引时
-  校验，不许静默混用两代向量。本期向量由「有效嵌入器」产生，块 ID
-  用有效模型名——登记了 local/api 但本期无真实实现时，有效嵌入器
-  如实回落确定性测试嵌入并在台账标注，绝不冒充已用登记模型。
+  校验，不许静默混用两代向量。向量由「有效嵌入器」产生，块 ID
+  用有效模型名。真实嵌入已接入（MM2-02）：登记 provider=local +
+  模型名 → 本地 ONNX 真实嵌入（fastembed，本机运行零外发）；
+  provider=api + endpoint + 密钥环境变量名（密钥只经环境注入、
+  永不落盘）→ API 真实嵌入。登记不全或真实实现不可用时，有效
+  嵌入如实回落确定性测试嵌入并在台账注明，绝不冒充已用登记模型
+  ——台账标注与实际使用者必须一致（有测试断言钉住）。
 - MM-05：同步走台账——index-state.json 逐真相文件记哈希与状态，
   校验器据此对账；真相变了索引即 stale，明示不静默。
 - 向量存储借嵌入式底层件：sqlite-vec 可用则优先（vec0 表加速），
@@ -74,19 +78,159 @@ class DeterministicEmbedder:
         return [v / norm for v in vec]
 
 
+class LocalOnnxEmbedder:
+    """真实本地嵌入（fastembed / ONNX 运行时）：本机运行、零外发。
+
+    模型按登记名加载（首次从官方模型仓下载到缓存目录，之后离线
+    可用）；缓存目录可用环境变量 LIGHT_MEMORY_EMBED_CACHE 覆盖。
+    实例按模型名在进程内复用，避免反复加载。
+    """
+
+    name = "local-onnx"
+
+    def __init__(self, model: str):
+        self.model = model
+        self._te = None
+        self.dim = self._lookup_dim(model)
+
+    @staticmethod
+    def _lookup_dim(model: str) -> int:
+        from fastembed import TextEmbedding
+        for m in TextEmbedding.list_supported_models():
+            if m.get("model") == model:
+                return int(m["dim"])
+        raise ValueError(f"fastembed 不支持的本地嵌入模型：{model}")
+
+    def _load(self):
+        if self._te is None:
+            import os
+            from fastembed import TextEmbedding
+            cache = os.environ.get("LIGHT_MEMORY_EMBED_CACHE") or None
+            try:
+                self._te = TextEmbedding(model_name=self.model,
+                                         cache_dir=cache)
+            except Exception:
+                # 网络客户端初始化失败（如代理环境变量格式异常）时，
+                # 若模型已在缓存中，以离线模式重试——本地嵌入的
+                # 本分是本机运行，不该被一次性的下载通道故障否决；
+                # 缓存也没有时原样抛错，走 resolve 的诚实回落。
+                os.environ["HF_HUB_OFFLINE"] = "1"
+                self._te = TextEmbedding(model_name=self.model,
+                                         cache_dir=cache)
+        return self._te
+
+    def embed(self, text: str) -> list:
+        vec = next(iter(self._load().embed([text or ""])))
+        return _normalize([float(v) for v in vec])
+
+    def embed_query(self, text: str) -> list:
+        te = self._load()
+        fn = getattr(te, "query_embed", None) or te.embed
+        vec = next(iter(fn([text or ""])))
+        return _normalize([float(v) for v in vec])
+
+
+class ApiEmbedder:
+    """真实 API 嵌入（登记制）：OpenAI 兼容 embeddings 端点。
+
+    密钥只从登记的环境变量名读取、永不落盘、永不进台账；端点与
+    模型名在登记头登记。维度由登记 dim 声明，建索引时校验。
+    """
+
+    name = "api"
+
+    def __init__(self, model: str, endpoint: str, api_key: str,
+                 dim: int):
+        self.model = model
+        self.endpoint = endpoint
+        self._api_key = api_key
+        self.dim = dim
+
+    def embed(self, text: str) -> list:
+        import requests
+        resp = requests.post(
+            self.endpoint,
+            headers={"Authorization": f"Bearer {self._api_key}"},
+            json={"model": self.model, "input": text or ""},
+            timeout=60)
+        resp.raise_for_status()
+        vec = resp.json()["data"][0]["embedding"]
+        return _normalize([float(v) for v in vec])
+
+    embed_query = embed
+
+
+def _normalize(vec: list) -> list:
+    norm = math.sqrt(sum(v * v for v in vec))
+    if norm == 0:
+        return vec
+    return [v / norm for v in vec]
+
+
+_LOCAL_CACHE: dict = {}
+
+
+def _local_embedder(model: str) -> LocalOnnxEmbedder:
+    """进程内复用本地嵌入实例，并以一次真实加载探活。
+
+    只有模型确实加载成功才许声称 effective=local-onnx——登记了
+    却加载不了（无 fastembed、模型不支持、下载失败）时抛错给
+    resolve_embedder 走诚实回落，不冒充。
+    """
+    if model not in _LOCAL_CACHE:
+        emb = LocalOnnxEmbedder(model)
+        emb._load()
+        _LOCAL_CACHE[model] = emb
+    return _LOCAL_CACHE[model]
+
+
 def resolve_embedder(memory: dict) -> dict:
-    """解析有效嵌入器：登记信息照录，有效实现本期为确定性测试嵌入。"""
+    """解析有效嵌入器：登记信息照录，有效实现与台账标注必须一致。
+
+    - provider=local + model：真实本地 ONNX 嵌入；加载失败回落。
+    - provider=api + model + endpoint + api_key_env（且环境变量
+      已设）+ dim：真实 API 嵌入；登记不全回落。
+    - 其余：确定性测试嵌入（未登记者默认）。
+    """
     reg = (memory or {}).get("embedder") or {}
+    provider = reg.get("provider")
+    base = {"registered_provider": provider,
+            "registered_model": reg.get("model")}
+    if provider == "local" and reg.get("model"):
+        try:
+            emb = _local_embedder(reg["model"])
+            return {**base, "effective": emb.name, "model": emb.model,
+                    "dim": emb.dim, "embedder": emb,
+                    "note": "本地真实嵌入（ONNX/fastembed，本机运行"
+                            "零外发），向量由登记模型产生"}
+        except Exception as exc:  # 加载失败：如实回落并注明原因
+            emb = DeterministicEmbedder()
+            return {**base, "effective": emb.name, "model": emb.model,
+                    "dim": emb.dim, "embedder": emb,
+                    "note": f"登记 local 嵌入不可用（{type(exc).__name__}"
+                            f"：{exc}），有效嵌入回落确定性测试嵌入"
+                            "并如实标注"}
+    if provider == "api" and reg.get("model"):
+        import os
+        endpoint = reg.get("endpoint")
+        key_env = reg.get("api_key_env")
+        api_key = os.environ.get(key_env) if key_env else None
+        if endpoint and api_key and reg.get("dim"):
+            emb = ApiEmbedder(reg["model"], endpoint, api_key,
+                              int(reg["dim"]))
+            return {**base, "effective": emb.name, "model": emb.model,
+                    "dim": emb.dim, "embedder": emb,
+                    "note": "API 真实嵌入（登记端点；密钥经环境变量"
+                            "注入、永不落盘），向量由登记模型产生"}
     emb = DeterministicEmbedder()
     return {
-        "registered_provider": reg.get("provider"),
-        "registered_model": reg.get("model"),
+        **base,
         "effective": emb.name,
         "model": emb.model,
         "dim": emb.dim,
         "embedder": emb,
         "note": ("登记的嵌入提供者本期无真实实现，有效嵌入回落确定性"
-                 "测试嵌入并如实标注" if reg.get("provider")
+                 "测试嵌入并如实标注" if provider
                  else "未登记嵌入提供者，使用确定性测试嵌入"),
     }
 
@@ -311,7 +455,7 @@ def search_vector(root, query: str, limit: int = 10) -> list:
     pkg = project_mod.load_package(root)
     resolved = resolve_embedder(pkg.get("memory") or {})
     emb = resolved["embedder"]
-    qv = emb.embed(query)
+    qv = getattr(emb, "embed_query", emb.embed)(query)
     con = _open_db(root)
     try:
         rows = con.execute(

@@ -19,8 +19,12 @@
 - **失败如实记录**：单源限流/不可达只记入该源状态与已知盲区，
   不中断其余源、不假装查全。
 
-HTTP 只用标准库 urllib（本包依赖面保持 pyyaml 一项）。四个源均为
-免 Key 公开 API：Crossref / OpenAlex / Semantic Scholar / Europe PMC。
+HTTP 只用标准库 urllib（本包依赖面保持 pyyaml 一项）。七个源均为
+免 Key 或可选 Key 的公开 API：Crossref / OpenAlex / Semantic Scholar /
+Europe PMC / dblp / CORE / OpenAIRE（v1.1 IDEA-D02 扩源；CORE 支持
+可选 Key，见 _search_core）。记录模型字段与 literature 共享检索
+适配层（LIT-D05）的 Paper.to_record() 对齐；三源适配器先落本包、
+未回写 searchlayer 的契约差异见 20-build/phase3-idea.md。
 测试通过 monkeypatch 本模块的 `_http_get_json` 实现 mock，禁止真联网。
 """
 
@@ -28,6 +32,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import time
 import unicodedata
@@ -37,6 +42,7 @@ import urllib.request
 from difflib import SequenceMatcher
 from pathlib import Path
 
+from . import casebook as casebook_mod
 from .dedup import cosine, tfidf_vectors
 from .schema import FACETS, VERDICTS, _nonempty_str, _ref_ok, model_family
 from .util import today
@@ -44,12 +50,16 @@ from .util import today
 # ---------------------------------------------------------------------------
 # 常量
 
-SOURCES = ("crossref", "openalex", "semanticscholar", "europepmc")
+SOURCES = ("crossref", "openalex", "semanticscholar", "europepmc",
+           "dblp", "core", "openaire")
 SOURCE_LABELS = {
     "crossref": "Crossref",
     "openalex": "OpenAlex",
     "semanticscholar": "Semantic Scholar",
     "europepmc": "Europe PMC",
+    "dblp": "dblp",
+    "core": "CORE",
+    "openaire": "OpenAIRE",
 }
 WHOLE = "whole"  # 整想法召回层的伪 facet 名（只召回、不判定）
 ALL_FACET_TAGS = FACETS + (WHOLE,)
@@ -91,17 +101,24 @@ class NoveltyError(Exception):
 # ---------------------------------------------------------------------------
 # HTTP 层（测试 monkeypatch 本函数实现 mock，禁止测试真联网）
 
-def _http_get_json(url: str, params: dict | None = None) -> object:
+def _http_get_json(url: str, params: dict | None = None,
+                   headers: dict | None = None) -> object:
     """GET 并解析 JSON。失败抛 SourceError（源名由调用方补注时用 url 推断）。
 
     HTTP 错误（含 429）抛 SourceError(status=...)；网络错误 status=None。
+    headers 为可选附加请求头（如 CORE 的 API Key），只在内存中传递，
+    绝不落盘、不进日志与缓存键。
     """
     full = url
     if params:
         full = url + "?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(full, headers=_UA)
+    req_headers = dict(_UA)
+    if headers:
+        req_headers.update(headers)
+    req = urllib.request.Request(full, headers=req_headers)
     try:
         with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT) as resp:
+            status = resp.status
             body = resp.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         raise SourceError("http", f"HTTP {exc.code}：{url}", status=exc.code) from exc
@@ -110,12 +127,25 @@ def _http_get_json(url: str, params: dict | None = None) -> object:
     try:
         return json.loads(body)
     except ValueError as exc:
-        raise SourceError("http", f"响应不是合法 JSON：{url}", status=None) from exc
+        # 2xx 但非 JSON：多为源站的机器人校验/维护 HTML 页（如 dblp 的
+        # Anubis 挑战回 202 + HTML）——如实报状态码供盲区声明定位，
+        # 不许当作「查无此文」
+        raise SourceError(
+            "http",
+            f"响应不是合法 JSON（HTTP {status}，疑为源站校验/维护页）："
+            f"{url}", status=None) from exc
 
 
-def _fetch(source: str, url: str, params: dict) -> object:
-    """带源名的请求封装：把 _http_get_json 的错误补上源名后原样抛出。"""
+def _fetch(source: str, url: str, params: dict,
+           headers: dict | None = None) -> object:
+    """带源名的请求封装：把 _http_get_json 的错误补上源名后原样抛出。
+
+    headers 缺省时只传 (url, params) 两参调用，保持既有测试打桩点
+    的签名不变；带 headers 时才以关键字传入。
+    """
     try:
+        if headers:
+            return _http_get_json(url, params, headers=headers)
         return _http_get_json(url, params)
     except SourceError as exc:
         raise SourceError(source, str(exc), status=exc.status) from exc
@@ -222,8 +252,8 @@ def facet_texts(card: dict) -> dict[str, str]:
 
 
 # ---------------------------------------------------------------------------
-# 2. 四源适配器：统一记录 {source, source_id, title, authors, year, doi,
-#    venue, abstract, url}
+# 2. 七源适配器：统一记录 {source, source_id, title, authors, year, doi,
+#    venue, abstract, url}（与适配层 Paper.to_record() 字段对齐）
 
 def _strip_jats(text) -> str:
     if not text:
@@ -345,11 +375,153 @@ def _search_europepmc(query: str, n: int) -> list[dict]:
     return out
 
 
+def _search_dblp(query: str, n: int) -> list[dict]:
+    """dblp：计算机科学会议/期刊书目（IDEA-D02 新增，补 CS 会议盲区）。
+
+    免 Key 公开 API。dblp 题名惯例以句点结尾，入库时剥掉尾句点；
+    作者节点单篇时是 dict、多篇时是 list，text 字段是作者名。
+    """
+    data = _fetch("dblp", "https://dblp.org/search/publ/api",
+                  {"q": query, "format": "json", "h": n})
+    hits = (((data.get("result") or {}).get("hits") or {}).get("hit")) or []
+    if isinstance(hits, dict):
+        hits = [hits]
+    out = []
+    for hit in hits:
+        info = hit.get("info") or {}
+        authors_node = (info.get("authors") or {}).get("author")
+        if isinstance(authors_node, dict):
+            authors_node = [authors_node]
+        authors = []
+        for a in authors_node or []:
+            if isinstance(a, dict):
+                authors.append(a.get("text") or "")
+            elif a:
+                authors.append(str(a))
+        title = (info.get("title") or "").strip()
+        if title.endswith("."):
+            title = title[:-1].strip()
+        year = info.get("year")
+        out.append(_record(
+            "dblp", info.get("key") or info.get("url") or "",
+            doi=info.get("doi"), title=title, authors=authors,
+            year=int(year) if str(year).isdigit() else None,
+            venue=info.get("venue"),
+            abstract="",
+            url=info.get("ee") or info.get("url"),
+        ))
+    return out
+
+
+def _core_api_key() -> str | None:
+    """CORE 可选 Key：只读环境变量 CORE_API_KEY，绝不落盘/进日志。"""
+    key = os.environ.get("CORE_API_KEY")
+    return key.strip() if key and key.strip() else None
+
+
+def _search_core(query: str, n: int) -> list[dict]:
+    """CORE：开放全文聚合（IDEA-D02 新增，补开放全文覆盖）。
+
+    API v3 需免费 Key（环境变量 CORE_API_KEY）；无 Key 时服务端回
+    401，由失败隔离如实落盲区，不假装查过。
+    """
+    headers = None
+    key = _core_api_key()
+    if key:
+        headers = {"Authorization": f"Bearer {key}"}
+    data = _fetch("core", "https://api.core.ac.uk/v3/search/works",
+                  {"q": query, "limit": n}, headers=headers)
+    out = []
+    for item in data.get("results", []) or []:
+        doi = normalize_doi(item.get("doi"))
+        year = item.get("yearPublished")
+        out.append(_record(
+            "core", item.get("id", ""),
+            doi=doi, title=item.get("title"),
+            authors=[a.get("name") for a in item.get("authors", []) or []
+                     if isinstance(a, dict)],
+            year=int(year) if str(year).isdigit() else None,
+            venue=item.get("journalTitle") or item.get("publisher"),
+            abstract=item.get("abstract"),
+            url=item.get("downloadUrl")
+            or (f"https://doi.org/{doi}" if doi else ""),
+        ))
+    return out
+
+
+def _oaf_values(node) -> list:
+    """OpenAIRE oaf 结构取值：{'$': x} / [{'$': x}, ...] / 裸值 → 值列表。"""
+    if node is None:
+        return []
+    if isinstance(node, dict):
+        return [node["$"]] if "$" in node else []
+    if isinstance(node, list):
+        out = []
+        for item in node:
+            if isinstance(item, dict):
+                if "$" in item:
+                    out.append(item["$"])
+            elif item is not None:
+                out.append(item)
+        return out
+    return [node]
+
+
+def _search_openaire(query: str, n: int) -> list[dict]:
+    """OpenAIRE：欧盟开放仓储聚合（IDEA-D02 新增，补仓储/报告类覆盖）。
+
+    免 Key 公开 API；响应是 oaf 嵌套结构，取值一律经 _oaf_values
+    防御式展开，抽不到的字段留空、不猜。
+    """
+    data = _fetch("openaire", "https://api.openaire.eu/search/publications",
+                  {"keywords": query, "format": "json", "size": n})
+    results = (((data.get("response") or {}).get("results") or {})
+               .get("result")) or []
+    if isinstance(results, dict):
+        results = [results]
+    out = []
+    for entry in results:
+        entity = ((entry.get("metadata") or {}).get("oaf:entity") or {})
+        res = entity.get("oaf:result") or {}
+        if not res:
+            continue
+        titles = _oaf_values(res.get("title"))
+        creators = _oaf_values(res.get("creator"))
+        dates = _oaf_values(res.get("dateofacceptance"))
+        year = None
+        if dates and str(dates[0])[:4].isdigit():
+            year = int(str(dates[0])[:4])
+        doi = None
+        for pid in res.get("pid") or []:
+            if isinstance(pid, dict) and \
+                    (pid.get("@classid") or "").lower() == "doi":
+                doi = normalize_doi(pid.get("$"))
+                if doi:
+                    break
+        abstracts = _oaf_values(res.get("description"))
+        venues = _oaf_values(res.get("journal"))
+        header = entry.get("header") or {}
+        obj_ids = _oaf_values(header.get("dri:objIdentifier")) \
+            or _oaf_values(res.get("originalId"))
+        out.append(_record(
+            "openaire", obj_ids[0] if obj_ids else (doi or ""),
+            doi=doi, title=titles[0] if titles else "",
+            authors=[str(c) for c in creators], year=year,
+            venue=venues[0] if venues else "",
+            abstract=abstracts[0] if abstracts else "",
+            url=f"https://doi.org/{doi}" if doi else "",
+        ))
+    return out
+
+
 _SEARCHERS = {
     "crossref": _search_crossref,
     "openalex": _search_openalex,
     "semanticscholar": _search_semanticscholar,
     "europepmc": _search_europepmc,
+    "dblp": _search_dblp,
+    "core": _search_core,
+    "openaire": _search_openaire,
 }
 
 
@@ -375,6 +547,11 @@ def collect_pool(card: dict, queries: list[dict], *,
     - query_log：每条 (query, source) 的命中数或错误（可审计）；
     - source_status：每源 {ok, hits, errors[]}——单源失败不中断。
     """
+    unknown = [s for s in sources if s not in _SEARCHERS]
+    if unknown:
+        raise NoveltyError([
+            f"未知检索源：{unknown}（可选：{list(_SEARCHERS)}）——"
+            f"源清单可配置，但不许写错源名静默漏查"])
     ftexts = facet_texts(card)
     merged: dict[str, dict] = {}
     query_log: list[dict] = []
@@ -460,15 +637,20 @@ def known_blind_spots(source_status: dict, pool: list[dict],
     spots: list[str] = []
     for source in SOURCES:
         st = source_status.get(source) or {}
+        hint = ""
+        if source == "core" and any(
+                "HTTP 401" in e["error"] or "HTTP 403" in e["error"]
+                for e in st.get("errors", [])):
+            hint = "（CORE 需免费 API Key：配置环境变量 CORE_API_KEY 后可用）"
         if st.get("errors") and not st.get("ok"):
             first = st["errors"][0]["error"]
             spots.append(
                 f"{SOURCE_LABELS[source]} 本次全部查询失败（{first}）："
-                f"该源独有覆盖可能漏检，本次结论须视为覆盖不全")
+                f"该源独有覆盖可能漏检，本次结论须视为覆盖不全{hint}")
         elif st.get("errors"):
             spots.append(
                 f"{SOURCE_LABELS[source]} 部分查询失败（{len(st['errors'])} 条，"
-                f"如：{st['errors'][0]['error']}）：覆盖可能不完整")
+                f"如：{st['errors'][0]['error']}）：覆盖可能不完整{hint}")
     hit_facets = {f for rec in pool for f in rec.get("hit_facets", [])}
     for facet in FACETS:
         if facet not in hit_facets:
@@ -541,8 +723,13 @@ def prepare(root: Path, card: dict, *,
         card, date, queries, result, spots), encoding="utf-8")
 
     nov = card.setdefault("novelty", {})
+    # search_scope.sources 只记实际成功源（IDEA-D02 口径）：请求过但
+    # 全灭的源不许混进「查过」的清单，另列 failed_sources 如实留痕。
+    ok_sources = [s for s in sources if source_status[s]["ok"]]
+    failed_sources = [s for s in sources if not source_status[s]["ok"]]
     nov["search_scope"] = {
-        "sources": list(sources),
+        "sources": ok_sources,
+        "failed_sources": failed_sources,
         "pool_size": len(pool),
         "known_blind_spots": "；".join(spots),
     }
@@ -584,12 +771,13 @@ def _render_pool_report(card: dict, date: str, queries: list[dict],
     L.append("")
     L.append("| 源 | 状态 | 原始命中 | 失败条数 |")
     L.append("|---|---|---|---|")
-    for source in SOURCES:
+    report_sources = [s for s in SOURCES if s in status]
+    for source in report_sources:
         st = status.get(source) or {}
         state = "可用" if st.get("ok") else "不可用"
         L.append(f"| {SOURCE_LABELS[source]} | {state} | {st.get('hits', 0)}"
                  f" | {len(st.get('errors', []))} |")
-    for source in SOURCES:
+    for source in report_sources:
         for e in (status.get(source) or {}).get("errors", []):
             L.append(f"- ⚠️ {SOURCE_LABELS[source]} 失败：查询「{e['query']}」"
                      f"→ {e['error']}")
@@ -817,6 +1005,15 @@ def apply_verdict(root: Path, card: dict, verdict_data: dict, *,
         "review_status": nov["review_status"],
         "pool_size": (nov.get("search_scope") or {}).get("pool_size"),
     }
+    # —— 判例集自动追加（IDEA-D04）：每次判定落卡即沉淀为校准判例。
+    # 判例集是派生账：追加成功与否如实记入收据存根，故障留痕但不
+    # 回滚已落的判定（判定本身的证据纪律不依赖判例集）。
+    try:
+        case, appended = casebook_mod.append_verdict_case(root, card, record)
+        record["casebook"] = {"appended": appended,
+                              "case_id": case["case_id"]}
+    except Exception as exc:  # noqa: BLE001 — 派生账故障只留痕
+        record["casebook"] = {"appended": False, "error": str(exc)}
     (nd / "verdict.json").write_text(
         json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
     return record

@@ -42,6 +42,12 @@ intake_report:
   - R-PRED
   - R-NEG
   - R-LONG
+  execution_plan:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
 brief_runs:
 - run_id: R-FIX
   role: baseline

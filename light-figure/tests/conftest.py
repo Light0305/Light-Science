@@ -94,6 +94,12 @@ def data_contract():
             {"risk": "误差棒定义不清",
              "disposition": "图注写明 95% CI 与 n=6"}],
         "data_integrity": {"exclusions": "none"},
+        "palette_decision": {
+            "source": "journal_contract",
+            "basis": "期刊合同登记的分类/连续色板（Okabe-Ito + batlow）",
+            "confirmation": {"confirmed_by": "author",
+                             "confirmed_at": today()},
+        },
         "sister_library_refs": {
             "method_gallery": None,
             "visio_components": [],
@@ -124,11 +130,25 @@ def schematic_contract():
         },
         "density_stance": {"stance": "density_first",
                            "reason": "方法图须自包含复述全部模块与数据流"},
+        "palette_decision": {
+            "source": "gallery_anchor",
+            "basis": "图库条目 MG-FLOW-014 的风格锚角色色板",
+            "confirmation": {"confirmed_by": "author",
+                             "confirmed_at": today()},
+        },
         "sister_library_refs": {
             "method_gallery": {
                 "entry_id": "MG-FLOW-014", "version": "2.1",
                 "style_anchor": "anchor-compact-flow",
                 "prompt_version": "3",
+                "reference_breakdown": {
+                    "palette_hex": ["#0072b2", "#d55e00", "#009e73"],
+                    "layout_flow": "左入右出两段流：输入面板在左、机制面板在右",
+                    "module_style": "圆角矩形表处理模块、直角矩形表数据块",
+                    "annotation_style": "框内居中短标签，面板角标字母",
+                    "information_density": "每框一概念，箭头带语义标签",
+                    "special_elements": "判定节点用菱形",
+                },
             },
             "visio_components": [
                 {"component_id": "VC-ARROW-FLOW", "version": "1.0"}],

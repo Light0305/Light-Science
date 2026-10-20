@@ -1,0 +1,1 @@
+{"registered_at": "2026-10-20", "amendment_id": "AM-1", "target": "权利要求 1", "before": "时序聚合特征在从属权要 2", "after": "将滑动窗口注意力时序聚合特征并入权利要求 1", "defect_ref": "D-1", "basis_pointer": "原权利要求 2", "basis_quote": "时序聚合模块采用滑动窗口注意力对视频帧序列进行加权聚合", "art33_checked": true}

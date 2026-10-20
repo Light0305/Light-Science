@@ -4,7 +4,11 @@
 - 结构化直通（机器可读导出走确定性字段映射，零模型参与）：Idea /
   Experiment / Analysis / Figure / Journal-Select / Review；
 - 约定转译（结构化文件群 + 明文约定，字段值一律照抄上游）：Design /
-  Literature / Write。
+  Literature / Write；
+- v1.1 集成步（MM2-13）新三包：Patent（案件目录 case.yaml +
+  ledger.yaml 的 memory_export 段）、Software-Copyright（案件目录
+  登记头 + 确认/工具留痕 + 源码快照）、Crawler（data-sources
+  目录工作区头 + 目标登记 + 事件/留存两本流水），均照抄上游。
 字段缺失逐项 ctx.gap 点名并跳过该条，不许编造补齐（MM-02：溯源不全
 的条目只许留缓冲，本期以缺口形式留在收编报告里）。
 
@@ -479,6 +483,275 @@ def adapt_review(source: Path, ctx) -> None:
             "关闭史未收编")
 
 
+# ---------------------------------------------------------------- Patent
+
+def adapt_patent(source: Path, ctx) -> None:
+    """Patent 案件目录：case.yaml + ledger.yaml（memory_export 段）。
+
+    契约（phase5-patent 第 3 节）：案件即对象、状态流转/期限即事件、
+    查新结论与 worth-it 判断即事实。状态当前态以 case.yaml 顶层
+    status 与 status_history 为权威；ledger 的 memory_export 段生成
+    时点可能早于案件头（集成契约偏差 D-INT-1），其 events 只取期限
+    部分，facts 逐条照抄。
+    """
+    case_path = _need_file(source, "case.yaml", "patent")
+    case_dir = case_path.parent
+    case = load_structured(case_path) or {}
+    case_id = case.get("case_id")
+    if not case_id:
+        raise AdapterError(["patent case.yaml 缺 case_id，无法登记案件对象"])
+    oid = ctx.object("patent_case", case_id,
+                     title=(case.get("title") or "")[:60],
+                     current_version=sha256_file(case_path),
+                     artifact="case.yaml")
+    for h in case.get("status_history") or []:
+        if not isinstance(h, dict):
+            continue
+        ctx.event("milestone",
+                  f"专利案件 {case_id} 状态流转：{h.get('state')}",
+                  object_id=oid, artifact="case.yaml",
+                  payload={"state": h.get("state"), "at": h.get("at"),
+                           "by": h.get("by")})
+    blocked = case.get("blocked")
+    if isinstance(blocked, dict) and blocked.get("gate_id"):
+        ctx.event("note",
+                  f"专利案件 {case_id} 被门拦：{blocked['gate_id']}",
+                  object_id=oid, artifact="case.yaml",
+                  payload={"blocked": blocked})
+    ledger_path = case_dir / "ledger.yaml"
+    if not ledger_path.exists():
+        ctx.gap("patent 案件缺 ledger.yaml，期限与 memory_export "
+                "判断事实未收编")
+        return
+    ledger = load_structured(ledger_path) or {}
+    for d in ledger.get("deadlines") or []:
+        if not isinstance(d, dict):
+            continue
+        ctx.event("deadline",
+                  f"专利期限：{d.get('label')}（到期 {d.get('due')}）",
+                  object_id=oid, artifact="ledger.yaml",
+                  payload={"kind": d.get("kind"), "label": d.get("label"),
+                           "due": d.get("due"), "basis": d.get("basis")})
+    export = ledger.get("memory_export") or {}
+    facts = export.get("facts") or []
+    if not facts:
+        ctx.gap("patent ledger.yaml 无 memory_export.facts，"
+                "查新/worth-it 判断事实未收编")
+    for row in facts:
+        if not isinstance(row, dict) or not row.get("fact"):
+            continue
+        ctx.fact(row["fact"], "patent_assessment", oid,
+                 artifact="ledger.yaml",
+                 anchor=row.get("evidence_ref"),
+                 extra={"evidence_ref": row.get("evidence_ref"),
+                        "disclaimers": row.get("disclaimers")})
+
+
+# ---------------------------------------------------------------- Copyright
+
+def adapt_copyright(source: Path, ctx) -> None:
+    """Software-Copyright 案件目录：copyright.yaml 登记头 + 留痕三件。
+
+    形态（phase5-copyright 集成交接）：案件即对象（本包无 case_id，
+    对象上游 ID 由登记事实派生：软件全称@版本）；定版/递交/补正等
+    节点即事件（tool_use.jsonl 过程留痕 + confirmations.jsonl 确认
+    回执 + 登记头状态）；登记事实与源码冻结快照即事实。登记号在 v1
+    由用户递交后回填，有则收、无则不收（缺失非异常，不点名）。
+    """
+    head_path = _need_file(source, "copyright.yaml",
+                            "software-copyright")
+    case_dir = head_path.parent
+    case = load_structured(head_path) or {}
+    facts_data = None
+    facts_path = case_dir / "facts.yaml"
+    if facts_path.exists():
+        facts_data = load_structured(facts_path) or {}
+    else:
+        ctx.gap("软著案件缺 facts.yaml，软件登记事实未收编（案件对象"
+                "以登记头与目录名登记）")
+    software = (facts_data or {}).get("software") or {}
+    full_name = software.get("full_name")
+    version = software.get("version")
+    if full_name and version:
+        upstream_id = f"{full_name}@{version}"
+    elif full_name:
+        upstream_id = full_name
+    else:
+        upstream_id = case_dir.name
+    snapshot_path = case_dir / "snapshot.json"
+    current_version = (sha256_file(snapshot_path)
+                       if snapshot_path.exists()
+                       else sha256_file(head_path))
+    oid = ctx.object("copyright_case", upstream_id,
+                     title=(case.get("title") or "")[:60],
+                     current_version=current_version,
+                     artifact="copyright.yaml")
+    ctx.event("milestone",
+              f"软著案件状态：{case.get('status')}",
+              object_id=oid, artifact="copyright.yaml",
+              payload={"status": case.get("status"),
+                       "correction": case.get("correction")})
+    tool_path = case_dir / "tool_use.jsonl"
+    if tool_path.exists():
+        for row in read_jsonl(tool_path):
+            ctx.event("tool_use",
+                      f"{row.get('action')} {row.get('target')}："
+                      f"{row.get('detail')}",
+                      object_id=oid, artifact="tool_use.jsonl",
+                      payload={"actor": row.get("actor"),
+                               "ts": row.get("ts"),
+                               "action": row.get("action"),
+                               "target": row.get("target")})
+    else:
+        ctx.gap("软著案件缺 tool_use.jsonl，过程留痕事件未收编")
+    conf_path = case_dir / "confirmations.jsonl"
+    if conf_path.exists():
+        for row in read_jsonl(conf_path):
+            ctx.event("confirmation",
+                      f"确认 {row.get('kind')}:{row.get('target')}",
+                      object_id=oid, artifact="confirmations.jsonl",
+                      payload={"actor": row.get("actor"),
+                               "ts": row.get("ts"),
+                               "kind": row.get("kind"),
+                               "target": row.get("target"),
+                               "content_hash":
+                                   (row.get("content_hash") or "")[:12],
+                               "note": row.get("note")})
+    else:
+        ctx.gap("软著案件缺 confirmations.jsonl，确认回执事件未收编")
+    if facts_data:
+        owner = facts_data.get("owner") or {}
+        dev = facts_data.get("development") or {}
+        pub = facts_data.get("publication") or {}
+        rights = facts_data.get("rights") or {}
+        statement = (
+            f"软件著作权登记事实：{full_name} {version}，著作权人 "
+            f"{owner.get('name')}（{owner.get('type')}），开发方式 "
+            f"{dev.get('mode')}，完成日期 {dev.get('completion_date')}，"
+            f"发表状态 {pub.get('status')}，权利取得 {rights.get('acquisition')}")
+        ctx.fact(statement, "copyright_facts", oid,
+                 valid_at=_date(dev.get("completion_date")),
+                 artifact="facts.yaml",
+                 extra={"software": software, "owner": owner,
+                        "development": dev, "publication": pub,
+                        "rights": rights})
+    if snapshot_path.exists():
+        snap = load_structured(snapshot_path) or {}
+        ctx.fact(f"源码冻结快照：{snap.get('file_count')} 个文件、"
+                 f"源程序量 {snap.get('total_lines')} 行",
+                 "source_snapshot", oid,
+                 valid_at=_date(snap.get("frozen_at")),
+                 artifact="snapshot.json",
+                 extra={"file_count": snap.get("file_count"),
+                        "total_lines": snap.get("total_lines"),
+                        "nonempty_lines": snap.get("nonempty_lines"),
+                        "languages": snap.get("languages"),
+                        "files": snap.get("files")})
+    reg_no = case.get("registration_no")
+    if reg_no:
+        ctx.fact(f"软件著作权登记号：{reg_no}",
+                 "copyright_registration", oid,
+                 artifact="copyright.yaml",
+                 extra={"registration_no": reg_no})
+
+
+# ---------------------------------------------------------------- Crawler
+
+def adapt_crawler(source: Path, ctx) -> None:
+    """Crawler data-sources 目录：crawler.yaml + targets/ + 两本流水。
+
+    形态（phase5-crawler 定位：通道层扩展位）：工作区即对象、目标
+    即对象（derived-from 工作区）；抓取批次、预检记录、变更事件是
+    一等事件源（events.jsonl 逐条直通）；留存凭据即事实
+    （provenance.jsonl 逐条，哈希与预检引用照抄）。
+    """
+    source = Path(source)
+    head_path = _need_file(source, "crawler.yaml", "crawler")
+    head = load_structured(head_path) or {}
+    ws_id = head.get("workspace_id") or source.name
+    ws_oid = ctx.object("crawl_workspace", ws_id,
+                        title=f"采集工作区 {head.get('project') or ''}",
+                        current_version=sha256_file(head_path),
+                        artifact="crawler.yaml")
+    target_oids = {}
+    targets_dir = source / "targets"
+    if targets_dir.is_dir():
+        for tdir in sorted(targets_dir.iterdir()):
+            tpath = tdir / "target.yaml"
+            if not tdir.is_dir() or not tpath.exists():
+                continue
+            t = load_structured(tpath) or {}
+            tid = t.get("target_id") or tdir.name
+            t_oid = ctx.object("crawl_target", tid,
+                               title=(t.get("name") or "")[:60],
+                               artifact=f"targets/{tid}/target.yaml")
+            target_oids[tid] = t_oid
+            ctx.relation("derived-from", t_oid, ws_oid,
+                         artifact=f"targets/{tid}/target.yaml")
+            ctx.fact(f"采集目标 {tid}：通道 {t.get('channel')}，"
+                     f"用途 {t.get('purpose_kind')}，供 "
+                     f"{t.get('consumer')}",
+                     "crawl_target_profile", t_oid,
+                     artifact=f"targets/{tid}/target.yaml",
+                     extra={"base_url": t.get("base_url"),
+                            "channel": t.get("channel"),
+                            "purpose_kind": t.get("purpose_kind"),
+                            "consumer": t.get("consumer")})
+            state_path = tdir / "state.yaml"
+            if state_path.exists():
+                st = load_structured(state_path) or {}
+                if st.get("circuit_broken"):
+                    ctx.event("note",
+                              f"采集目标 {tid} 已熔断："
+                              f"{st.get('circuit_reason')}",
+                              object_id=t_oid,
+                              artifact=f"targets/{tid}/state.yaml",
+                              payload={"circuit_broken": True,
+                                       "circuit_reason":
+                                           st.get("circuit_reason"),
+                                       "consecutive_refusals":
+                                           st.get("consecutive_refusals")})
+    else:
+        ctx.gap("crawler data-sources 缺 targets/ 目录，采集目标未收编")
+    events_path = source / "events.jsonl"
+    if events_path.exists():
+        for row in read_jsonl(events_path):
+            ctx.event("stage",
+                      row.get("detail") or row.get("type") or "",
+                      object_id=target_oids.get(row.get("target_id"),
+                                                ws_oid),
+                      artifact="events.jsonl",
+                      payload={"upstream_type": row.get("type"),
+                               "upstream_event_id": row.get("event_id"),
+                               "target_id": row.get("target_id"),
+                               "data": row.get("data")})
+    else:
+        ctx.gap("crawler data-sources 缺 events.jsonl，"
+                "批次/预检/变更事件未收编")
+    prov_path = source / "provenance.jsonl"
+    if prov_path.exists():
+        for row in read_jsonl(prov_path):
+            t_oid = target_oids.get(row.get("target_id"), ws_oid)
+            ctx.fact(f"留存 {row.get('kind')}：{row.get('url')}"
+                     f"（通道 {row.get('channel')}，HTTP "
+                     f"{row.get('http_status')}，{row.get('bytes')} 字节）",
+                     "crawl_provenance", t_oid,
+                     valid_at=_date(row.get("at")),
+                     artifact="provenance.jsonl",
+                     anchor=row.get("prov_id"),
+                     extra={"prov_id": row.get("prov_id"),
+                            "run_id": row.get("run_id"),
+                            "sha256": row.get("sha256"),
+                            "fingerprint": row.get("fingerprint"),
+                            "precheck_ref": row.get("precheck_ref"),
+                            "retention_tier": row.get("retention_tier"),
+                            "raw_path": row.get("raw_path"),
+                            "supersedes": row.get("supersedes")})
+    else:
+        ctx.gap("crawler data-sources 缺 provenance.jsonl，"
+                "留存事实未收编")
+
+
 ADAPTERS = {
     "literature": adapt_literature,
     "idea": adapt_idea,
@@ -489,6 +762,9 @@ ADAPTERS = {
     "figure": adapt_figure,
     "journal-select": adapt_journal_select,
     "review": adapt_review,
+    "patent": adapt_patent,
+    "software-copyright": adapt_copyright,
+    "crawler": adapt_crawler,
 }
 
 #: 适配器版本：上游格式在 v1.1 变更时随登记头登记，旧版保留一代。

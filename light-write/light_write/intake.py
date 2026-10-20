@@ -21,7 +21,7 @@ from .project import FILES, load_package, save_claims, save_lock, save_manuscrip
 from .render import cite_key_for, render_bib
 from .util import (
     claim_text_hash, component_hash, dump_yaml, load_structured, sha256_file,
-    today, utcnow,
+    sha256_text, today, utcnow,
 )
 
 
@@ -29,6 +29,226 @@ class IntakeError(Exception):
     def __init__(self, gaps):
         self.gaps = list(gaps)
         super().__init__("；".join(self.gaps))
+
+
+# ------------------------------------------------------------- 卡内一致性
+
+_COUNT_KEYS = ["positive", "negative", "null", "undetermined", "untested"]
+
+
+def _card_value_decimals(value) -> int:
+    """卡内值的呈现精度（小数位数）：指针目标值按此精度舍入后比对。"""
+    s = repr(value)
+    if "e" in s or "E" in s:
+        return 10
+    return len(s.split(".")[1]) if "." in s else 0
+
+
+def check_card_consistency(card: dict, card_path) -> tuple:
+    """WRT-D05 卡内一致性校验：只验结论卡自洽，不重算 Analysis 模型。
+
+    返回 (gaps, summary)。卡内自查恒执行；卡同目录有 spec_results.jsonl
+    时追加指针目标值比对（effect_size 行按 (登记行, spec_id) 定位，
+    目标值按卡内值呈现精度半上舍入后比对）；无该文件记 not_available，
+    诚实未核、不拦承接。
+    """
+    from decimal import ROUND_HALF_UP, Decimal
+
+    gaps = []
+    # ---- 主张行判定汇总（同行在不同主张下判定冲突 = 卡内不一致）
+    line_verdicts = {}
+    for claim in card.get("claims") or []:
+        for line, verdict in (claim.get("line_verdicts") or {}).items():
+            if line in line_verdicts and line_verdicts[line] != verdict:
+                gaps.append(
+                    f"卡内不一致：登记行 {line} 在不同主张下判定冲突"
+                    f"（{line_verdicts[line]} vs {verdict}）")
+            line_verdicts[line] = verdict
+    # ---- counts 对账（counts 在场才查，缺失由 Analysis 侧口径负责）
+    counts = card.get("counts")
+    if isinstance(counts, dict):
+        tally = {}
+        for v in line_verdicts.values():
+            tally[v] = tally.get(v, 0) + 1
+        for key in _COUNT_KEYS:
+            if key in counts and counts[key] != tally.get(key, 0):
+                gaps.append(
+                    f"卡内不一致：counts.{key} 登记为 {counts[key]}，"
+                    f"但主张 line_verdicts 实计 {tally.get(key, 0)}")
+        if "total_lines" in counts and \
+                counts["total_lines"] != len(line_verdicts):
+            gaps.append(
+                f"卡内不一致：counts.total_lines 登记为 "
+                f"{counts['total_lines']}，但 line_verdicts 登记行数实计 "
+                f"{len(line_verdicts)}")
+    # ---- 溯源行自查
+    rows = card.get("number_provenance") or []
+    seen = {}
+    summary_unclaimed = []
+    for i, row in enumerate(rows):
+        where = f"number_provenance[{i}]"
+        rid = row.get("registry_line_id")
+        vl = row.get("verdict_line")
+        qty = row.get("quantity")
+        value = row.get("value")
+        if rid and line_verdicts and rid not in line_verdicts:
+            # 不拦：Analysis 溯源行可对应无主张映射的登记行（claim_ref
+            # 为空的行也有判定与数字），卡未声称行集封闭——只在摘要
+            # 留痕，真悬空由 spec 指针层与门二溯源解析兜底
+            summary_unclaimed.append(i)
+        if vl and rid and not str(vl).startswith(f"{rid}#"):
+            gaps.append(
+                f"卡内不一致：{where} 判定行指针 {vl!r} 与登记行 {rid} "
+                "不匹配（指针应以 '<登记行>#' 开头）")
+        key = (vl, qty)
+        if key in seen and seen[key] != value:
+            gaps.append(
+                f"卡内不一致：{where} 与先行同为 (判定行 {vl}, 量 {qty}) "
+                f"却值不同（{seen[key]!r} vs {value!r}）：同指针两值")
+        seen[key] = value
+        if qty == "no_numeric_result":
+            if value is not None:
+                gaps.append(
+                    f"卡内不一致：{where} 量为 no_numeric_result 但 value "
+                    f"非空（{value!r}）：无数字行不许带值")
+        elif value is not None:
+            if not row.get("spec_id"):
+                gaps.append(
+                    f"卡内不一致：{where}（{vl}/{qty}）有值却缺 spec_id "
+                    "指针：登记数字须有卡内 spec 指针可核")
+            if not row.get("calc_provenance"):
+                gaps.append(
+                    f"卡内不一致：{where}（{vl}/{qty}）有值却缺 "
+                    "calc_provenance 指针")
+    # ---- 指针目标值比对（spec_results.jsonl 与卡同目录时）
+    summary = {"rows": len(rows), "lines": len(line_verdicts),
+               "spec_results": "not_available", "spec_rows_checked": 0,
+               "unclaimed_provenance_rows": summary_unclaimed,
+               "p_ab_rows": sum(1 for r in rows
+                                if r.get("quantity") == "p_ab")}
+    sibling = Path(card_path).parent / "spec_results.jsonl" \
+        if card_path else None
+    if sibling is not None and sibling.exists():
+        try:
+            spec_index = {}
+            for line in sibling.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                srow = json.loads(line)
+                spec_index[(srow.get("registry_line_id"),
+                            srow.get("spec_id"))] = srow
+        except Exception as e:
+            gaps.append(f"卡内核查未成：spec_results.jsonl 不可读（{e}），"
+                        "指针目标无从核对，不许带病承接")
+            summary["spec_results"] = "unreadable"
+            return gaps, summary
+        summary["spec_results"] = "checked"
+        for i, row in enumerate(rows):
+            if row.get("quantity") != "effect_size" \
+                    or row.get("value") is None:
+                continue
+            target = spec_index.get((row.get("registry_line_id"),
+                                     row.get("spec_id")))
+            if target is None:
+                gaps.append(
+                    f"卡内不一致：number_provenance[{i}] 指针 "
+                    f"({row.get('registry_line_id')}, {row.get('spec_id')}) "
+                    "在 spec_results 中落空：登记数字与所指 spec 结果对不上")
+                continue
+            spec_val = (target.get("effect_size") or {}).get("value")
+            if spec_val is None:
+                gaps.append(
+                    f"卡内不一致：number_provenance[{i}] 所指 spec 结果"
+                    "无 effect_size 值，卡内却登记了值")
+                continue
+            decimals = _card_value_decimals(row["value"])
+            expected = float(Decimal(str(spec_val)).quantize(
+                Decimal("1e-%d" % decimals), rounding=ROUND_HALF_UP))
+            if abs(expected - float(row["value"])) > 1e-9:
+                gaps.append(
+                    f"卡内不一致：number_provenance[{i}] 登记值 "
+                    f"{row['value']} 与所指 spec 结果值 {spec_val} 按呈现"
+                    f"精度（{decimals} 位）舍入后不一致")
+            summary["spec_rows_checked"] += 1
+    return gaps, summary
+
+
+# ------------------------------------------------------------- 贡献草案
+
+def claims_source_hash(claim_rows) -> str:
+    """上游主张集（id + 规范文本）的哈希：贡献回执与漂移检出共用口径。"""
+    return component_hash([
+        {"claim_id": r.get("claim_id"), "claim_text": r.get("claim_text")}
+        for r in claim_rows or []])
+
+
+def build_contribution_draft(claim_rows) -> dict:
+    """由上游主张规范文本组装主导贡献陈述草案（WRT-D04）。
+
+    草案 = 各主张规范文本按登记序拼接；无文本的主张不入草案（已在
+    intake gaps 点名）。草案未经用户签认不具任何效力（status=unsigned）。
+    """
+    texts = [r["claim_text"] for r in claim_rows if r.get("claim_text")]
+    draft = " ".join(texts) if texts else None
+    return {
+        "statement_draft": draft,
+        "draft_hash": sha256_text(draft) if draft else None,
+        "source_claims_hash": claims_source_hash(claim_rows),
+        "derived_claim_ids": [r["claim_id"] for r in claim_rows],
+        "status": "unsigned",
+        "receipt": None,
+    }
+
+
+class ContributionError(Exception):
+    def __init__(self, gaps):
+        self.gaps = list(gaps)
+        super().__init__("；".join(self.gaps))
+
+
+def confirm_contribution(root, by, statement=None, drift_note=None) -> dict:
+    """用户签认主导贡献陈述 → 落回执（WRT-D04）。
+
+    statement 缺省取草案原文；与草案不一致时必须带 drift_note 点名
+    差异（陈述与上游主张不一致时点名，不许静默改写）。回执含陈述哈希
+    与签认时点的主张集哈希，事后改陈述或上游主张漂移由 validate 检出。
+    """
+    root = Path(root)
+    pkg = load_package(root)
+    manuscript = pkg["manuscript"]
+    if manuscript is None:
+        raise ContributionError(["稿件包不存在（先 init）"])
+    contribution = manuscript.get("contribution")
+    if not contribution:
+        raise ContributionError(
+            ["贡献陈述草案不存在：先跑 intake 生成草案再签认"])
+    draft = contribution.get("statement_draft")
+    final = statement if statement is not None else draft
+    if final is None or not str(final).strip():
+        raise ContributionError(
+            ["贡献陈述为空：草案无文本（上游主张未给规范文本）时须由用户"
+             "亲笔给出陈述文本再签认，不许工具代拟"])
+    drift = final != draft
+    if drift and not drift_note:
+        raise ContributionError(
+            ["签认陈述与承接草案不一致：须以 drift_note 点名差异"
+             "（改了哪条主张的口径、为什么），不许静默改写上游主张"])
+    claim_rows = (pkg["claims"] or {}).get("claims") or []
+    receipt = {
+        "statement": final,
+        "statement_hash": sha256_text(final),
+        "draft_hash": contribution.get("draft_hash"),
+        "drift_from_draft": drift,
+        "drift_note": drift_note if drift else None,
+        "confirmed_by": by,
+        "confirmed_at": today(),
+        "source_claims_hash": claims_source_hash(claim_rows),
+    }
+    contribution["status"] = "signed"
+    contribution["receipt"] = receipt
+    manuscript["contribution"] = contribution
+    save_manuscript(root, manuscript)
+    return receipt
 
 
 # ------------------------------------------------------------- 文献集快照
@@ -109,6 +329,12 @@ def run_intake(root, conclusion_card_path, literature_path, by=None) -> dict:
     card = load_structured(card_path)
     if not isinstance(card, dict) or "claims" not in card:
         raise IntakeError(["conclusion_card 形态不可识别（缺 claims）"])
+
+    # ---- 卡内一致性校验（WRT-D05）：卡本身自相矛盾 → 拦 intake 点名，
+    # 不许带病承接（门二三方对账只能查「一致地错」之外的问题）
+    card_gaps, card_consistency = check_card_consistency(card, card_path)
+    if card_gaps:
+        raise IntakeError(card_gaps)
 
     language = manuscript.get("language")
     entries, set_hash = verified_snapshot(lit_path)
@@ -215,6 +441,7 @@ def run_intake(root, conclusion_card_path, literature_path, by=None) -> dict:
             card.get("number_provenance") or []),
         "number_provenance_count": len(card.get("number_provenance") or []),
         "claim_ids": [r["claim_id"] for r in claim_rows],
+        "card_consistency": card_consistency,
         "literature": {
             "source_path": str(lit_path),
             "set_hash": set_hash,
@@ -224,6 +451,10 @@ def run_intake(root, conclusion_card_path, literature_path, by=None) -> dict:
         "intake_by": by or "light-write intake",
         "upstream_flags": upstream_flags,
     }
+    # ---- 贡献确认回执的草案（WRT-D04）：承接 Design 主张后生成主导
+    # 贡献陈述草案，待用户签认（confirm-contribution）；草案由上游主张
+    # 规范文本机械组装，不许临场改写成「更好听」的版本
+    manuscript["contribution"] = build_contribution_draft(claim_rows)
     save_manuscript(root, manuscript)
     save_claims(root, {"claims": claim_rows})
     return {
@@ -231,5 +462,6 @@ def run_intake(root, conclusion_card_path, literature_path, by=None) -> dict:
         "writable_forms": {r["claim_id"]: r["writable_form"] for r in claim_rows},
         "literature_entries_locked": len(lock_entries),
         "upstream_flags": upstream_flags,
+        "card_consistency": card_consistency,
         "gaps": gaps,
     }

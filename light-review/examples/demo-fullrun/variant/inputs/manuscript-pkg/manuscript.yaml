@@ -20,7 +20,7 @@ created_at: '2026-10-20'
 updated_at: '2026-10-20'
 intake:
   conclusion_card:
-    path: light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
+    path: ../../../../../../light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
     sha256: 4d14ed3424d720312529b9a66f421f05fe73b199fb4352c5511b23e51cb11996
     analysis_id: analysis-pkg
     analysis_status: blocked
@@ -33,7 +33,7 @@ intake:
   claim_ids:
   - C1
   literature:
-    source_path: light-literature/examples/demo-find/Literature/候选池.jsonl
+    source_path: ../../../../../../light-literature/examples/demo-find/Literature/候选池.jsonl
     set_hash: 4281319cb286d278306d8caac114fb4def4222403e42c6f64cbc35247cd7cc11
     entry_count: 4
   intake_at: '2026-10-20'
@@ -48,7 +48,7 @@ target_journal:
   record_hash: 6ccabf7a663e1ec5c50c031f96ea334a16d74ea5c763338b9a5cab4162f8947a
   verified_at: '2026-10-15'
   bundled: generic_scaffold
-  source_record_path: light-write/examples/demo-fullrun/fixtures/journal_record.json
+  source_record_path: ../../../../../../light-write/examples/demo-fullrun/fixtures/journal_record.json
 authors:
 - name: Demo Author A
   affiliation: Synthetic Demo Group
@@ -183,3 +183,19 @@ review:
     REVIEW_UNAVAILABLE 同因）
   recorded_at: '2026-10-20'
   via: unavailable
+contribution:
+  statement_draft: null
+  draft_hash: null
+  source_claims_hash: 97bea4fdf40681e26ad0d797cf878121871874e06bb9d43663ff4085d6494770
+  derived_claim_ids:
+  - C1
+  status: signed
+  receipt:
+    statement: 本演示稿的主导贡献：以零调参阈值预测为对象，登记并如实呈现其在合成留出段上未获检验支撑的现状与局限（主张 C1，untested/insufficient，只进局限口径）。
+    statement_hash: 518597711dec6ca3786a071986e008f0f79e8a5132ed865396a7e33bd73085db
+    draft_hash: null
+    drift_from_draft: true
+    drift_note: 草案为空：上游结论卡未给 C1 规范文本（v1.0 演示既有缺口），签认文本由演示作者按结论卡 C1 的判定与局限口径亲笔给出，非工具代拟
+    confirmed_by: demo author (fixture)
+    confirmed_at: '2026-10-20'
+    source_claims_hash: 97bea4fdf40681e26ad0d797cf878121871874e06bb9d43663ff4085d6494770

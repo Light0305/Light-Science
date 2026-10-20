@@ -1,0 +1,45 @@
+{
+  "kind": "light-software-copyright/snapshot",
+  "frozen_at": "2026-10-20",
+  "source_dir": "../../../../light-software-copyright/examples/demo-fullrun/demo-app",
+  "file_count": 4,
+  "total_lines": 139,
+  "nonempty_lines": 110,
+  "languages": [
+    "Python"
+  ],
+  "files": [
+    {
+      "path": "tinystats/__init__.py",
+      "sha256": "06759d24d7c6e455b87a508b4b18fbd85cf2b215176f6c02fd3d0a7a4325aca3",
+      "bytes": 88,
+      "total_lines": 1,
+      "nonempty_lines": 1,
+      "language": "Python"
+    },
+    {
+      "path": "tinystats/cli.py",
+      "sha256": "8610675af99ec22a0111e2e9fc11539b0b2fe263fe859fffac23f355607906fd",
+      "bytes": 975,
+      "total_lines": 34,
+      "nonempty_lines": 25,
+      "language": "Python"
+    },
+    {
+      "path": "tinystats/report.py",
+      "sha256": "597a273c302a97604703170ea5927cdb4b3440630690138db0f1d3e5a0477d41",
+      "bytes": 1091,
+      "total_lines": 35,
+      "nonempty_lines": 29,
+      "language": "Python"
+    },
+    {
+      "path": "tinystats/stats.py",
+      "sha256": "3a674f43c0ef95e581e83e4b757bc3803574b614ed487b3c3d66ec99bd7a3c2c",
+      "bytes": 1855,
+      "total_lines": 69,
+      "nonempty_lines": 55,
+      "language": "Python"
+    }
+  ]
+}

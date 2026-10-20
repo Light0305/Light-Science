@@ -50,12 +50,45 @@ FINDING_LAYERS = ["inconsistency", "conclusion_flip"]
 # 人工裁决位（R2 硬度 a）：confirmed error 未裁决不许 delivered
 ADJUDICATION_OUTCOMES = ["confirmed", "overruled"]
 
+# ---------------------------------------------------------------- 义务账（v1.1，REV-D05）
+
+# 裁决附带条件单独成账跟踪：义务状态三态，open 义务阻断 delivered。
+OBLIGATION_STATUSES = ["open", "fulfilled", "waived"]
+OBLIGATION_ACTIONS = ["register", "fulfill", "waive"]
+
+
+def obligation_row(obligation_id: str, text: str, *, finding_id=None,
+                   by=None, at=None) -> dict:
+    """obligations.jsonl 的义务登记行（本体只增不改，状态走事件行）。"""
+    return {
+        "type": "obligation",
+        "obligation_id": obligation_id,
+        "text": text,
+        "finding_id": finding_id,       # 关联发现（可空：条件未必生于单条发现）
+        "registered_by": by,
+        "at": at or today(),
+    }
+
+
+def obligation_event_row(obligation_id: str, action: str, *, by=None,
+                         reason=None, evidence_pointer=None, at=None) -> dict:
+    """obligations.jsonl 的状态事件追加行：fulfill 须证据指针、waive 须理由。"""
+    return {
+        "type": "obligation_event",
+        "obligation_id": obligation_id,
+        "action": action,               # fulfill | waive
+        "by": by,
+        "reason": reason,               # waive 必填（具名加理由留痕）
+        "evidence_pointer": evidence_pointer,   # fulfill 必填（履行证据指针）
+        "at": at or today(),
+    }
+
 # 承接快照里必须点名的上游（图包与目标刊记录可缺，但缺必须落字）
 SNAPSHOT_PARTS = ["manuscript", "analysis", "figure", "target_journal"]
 
 # ---------------------------------------------------------------- GRIM 词表
 
-GRIM_KINDS = ["mean", "percent", "total"]
+GRIM_KINDS = ["mean", "percent", "total", "grimmer"]
 COMPAT_RESULTS = ["compatible", "incompatible", "not_assessable"]
 # 整数值量表（GRIM 族只对整数粒度数据成立；连续量一律 not assessable）
 INTEGER_SCALE_TYPES = ["likert", "count", "score", "integer"]
@@ -121,6 +154,8 @@ def new_review(review_id: str, title: str = "", round_no: int = 1) -> dict:
         "isolation": None,     # {mode: full|degraded, reason}
         # 冻结账（append-only：每次冻结一条 {seat_id, report_hash, at}）
         "freezes": [],
+        # 范式登记（v1.1，REV-D01 第零层）：{paradigm, basis, registered_at, registered_by}
+        "paradigm": None,
         # 交付区（deliver 落字；degraded 时 degradation_statement 必填）
         "delivery": None,      # {delivered_at, manifest, manifest_hash, degradation_statement}
         # Phase 2 待落地件（本期如实登记，不假装已有）
@@ -236,6 +271,10 @@ def adjudication_row(finding_id: str, outcome: str, adjudicator: str,
 
 
 # ---------------------------------------------------------------- 领域门（Phase 2）
+
+# 范式词表（v1.1，REV-D01 第零层）：范式是定性权重层不是判定层——
+# 只调领域门条目适用性与席位定性权重指引，不动法医层与代码计分。
+PARADIGMS = ["methods", "empirical", "benchmark", "theory", "humanities"]
 
 DOMAIN_LAYERS = ["universal", "journal_fact", "overlay"]
 # 逐条判定：hit = 命中问题；miss = 未命中（通过）；not_applicable = 不适用/未触发
@@ -372,4 +411,7 @@ def concern_row(concern_id: str, statement: str, raised_by: list,
         "status": kw.get("status", "open"),            # open | closed
         "close_reason": kw.get("close_reason"),        # closed 必填（RV-11）
         "pointers": kw.get("pointers"),                # {claim_pointer, evidence_pointer}
+        # 升格三查结果（v1.1，REV-D10）：{pointer_resolution, verbatim_support,
+        # severity_cap, verdict}，由 panel 落盘口逐条计算落账，不许手填。
+        "escalation_checks": kw.get("escalation_checks"),
     }

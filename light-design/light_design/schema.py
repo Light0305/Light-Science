@@ -21,7 +21,20 @@
 - frozen 后正文防回改：正文内容哈希须与冻结哈希（或最后一条 amendment
   的 new_hash）一致（约束 12）；已登记的命门字段 amendment 必须带
   user_signed=true（拍板 ⑤）；
-- aux 辅助区与判定物理分离：分数/判定字段不许混入（约束 13）。
+- aux 辅助区与判定物理分离：分数/判定字段不许混入（约束 13）；
+- SESOI 结构化登记（v1.1 DES-D01，清偿回流 RX-A001）：evaluation.sesoi
+  为全设计单一事实源（数值/单位/方向/边界/推导依据/目标量引用/汇总
+  度量七字段）；确认性主张的设计必须登记；登记行（handoff 与 export
+  的 expected_registry）只许携带与登记块逐字段一致的派生副本，不许
+  单独填；evaluation.sesoi 列入命门字段，冻结后变更走 amendment +
+  用户签，登记行副本在同一 amendment 内机械刷新。
+- intake 跨区实体核查（v1.1 DES-D04）：spec_intake 中标 expanded 的
+  六项逐项按 INTAKE_ENTITY_MAP 到对应区查实体存在性——只改状态字、
+  不落实体的承接造假，校验器点名报错；accepted 不触发本核查。
+- amendment 类别与评审状态（v1.1 DES-D02）：每条 amendment 声明
+  category（prewritten_branch / unforeseen，C-补04 分流）；命门
+  amendment 带 review 子记录（pending_review 待增量评审落盘，
+  export 据此拦截，见 export.py / review.py）。
 """
 
 from __future__ import annotations
@@ -76,6 +89,146 @@ INTAKE_LOCATIONS = {
     "key_details": "plan / handoff.repro_fields",
 }
 
+# intake 跨区实体映射（v1.1 DES-D04，在此成文冻结）：status=expanded 的
+# 承接项必须在对应区查得到展开后的实体；查无实体 = 只改状态字的承接
+# 造假，validate 报错点名。key 为承接项，值为 (落点描述, 判定函数名)。
+INTAKE_ENTITY_MAP = {
+    "datasets": ("evaluation.data_protocol / plan.variables",
+                 "_entity_datasets"),
+    "strongest_baseline": ("contract.controls（status_quo 一等对照）",
+                           "_entity_strongest_baseline"),
+    "metrics": ("evaluation.primary_metric", "_entity_metrics"),
+    "ablations": ("contract.ablations", "_entity_ablations"),
+    "resource_budget": ("resources.budget / resources.power",
+                        "_entity_resource_budget"),
+    "key_details": ("plan.intervention_mechanism / "
+                    "plan.intervention_checkpoints / handoff.repro_fields",
+                    "_entity_key_details"),
+}
+
+
+def _entity_datasets(design: dict) -> bool:
+    ev = design.get("evaluation") or {}
+    if _present(ev.get("data_protocol")):
+        return True
+    plan = design.get("plan") or {}
+    return isinstance(plan.get("variables"), list) and bool(plan["variables"])
+
+
+def _entity_strongest_baseline(design: dict) -> bool:
+    controls = (design.get("contract") or {}).get("controls") or []
+    return any(isinstance(c, dict) and c.get("status_quo") for c in controls)
+
+
+def _entity_metrics(design: dict) -> bool:
+    pm = (design.get("evaluation") or {}).get("primary_metric")
+    return isinstance(pm, dict) and _nonempty_str(pm.get("name"))
+
+
+def _entity_ablations(design: dict) -> bool:
+    abl = (design.get("contract") or {}).get("ablations")
+    return isinstance(abl, list) and bool(abl)
+
+
+def _entity_resource_budget(design: dict) -> bool:
+    res = design.get("resources") or {}
+    budget = res.get("budget")
+    if isinstance(budget, dict) and any(_present(v) for v in budget.values()):
+        return True
+    return isinstance(res.get("power"), dict) and bool(res["power"])
+
+
+def _entity_key_details(design: dict) -> bool:
+    plan = design.get("plan") or {}
+    if isinstance(plan.get("intervention_mechanism"), list) \
+            and plan["intervention_mechanism"]:
+        return True
+    if isinstance(plan.get("intervention_checkpoints"), list) \
+            and plan["intervention_checkpoints"]:
+        return True
+    ho = design.get("handoff") or {}
+    return _present(ho.get("repro_fields"))
+
+
+_INTAKE_ENTITY_CHECKS = {
+    "datasets": _entity_datasets,
+    "strongest_baseline": _entity_strongest_baseline,
+    "metrics": _entity_metrics,
+    "ablations": _entity_ablations,
+    "resource_budget": _entity_resource_budget,
+    "key_details": _entity_key_details,
+}
+
+
+def intake_expanded_entity_errors(design: dict) -> list[str]:
+    """DES-D04 跨区实体核查：spec_intake 中 status=expanded 的项逐项
+    按 INTAKE_ENTITY_MAP 查对应区实体；查无实体逐项点名返回。
+    accepted / returned / pending 不触发本核查。"""
+    errs: list[str] = []
+    intake = design.get("intake") or {}
+    for s in intake.get("spec_intake") or []:
+        if not isinstance(s, dict) or s.get("status") != "expanded":
+            continue
+        item = s.get("item")
+        check = _INTAKE_ENTITY_CHECKS.get(item)
+        if check is None:
+            continue
+        if not check(design):
+            where = INTAKE_ENTITY_MAP[item][0]
+            errs.append(
+                f"intake 承接 {item} 标 expanded 但在落点（{where}）查无"
+                "展开后的实体（DES-D04 跨区实体核查：只改状态字样、"
+                "不落实体不算展开承接，须把实体写进对应区或改回承接状态）")
+    return errs
+
+
+# amendment 类别（v1.1 DES-D02，C-补04 分流：定版预写偏离分支轻评审，
+# 未预见变更全评审；未声明默认 unforeseen，取最严口径）
+AMD_CATEGORIES = ("prewritten_branch", "unforeseen")
+
+# amendment 字段依赖映射（v1.1 DES-D02，在此成文冻结）：增量评审的
+# 影响面按此表生成——(字段前缀, 受影响 Stage 1 条目, 登记行范围,
+# 主张范围)。登记行范围 all = handoff.expected_registry 全部行；
+# 主张范围 all = 全部主主张，named = 字段路径点名的主张。未命中任何
+# 前缀的字段回退为全量五条 + 登记行全行（保守口径）。
+FIELD_DEPENDENCY_MAP = (
+    ("evaluation.sesoi", ("methodological_soundness",
+                          "analysis_predetermined"), "all", "named"),
+    ("evaluation.readout", ("analysis_predetermined",), "all", "none"),
+    ("evaluation.primary_metric", ("methodological_soundness",
+                                   "analysis_predetermined"), "all", "none"),
+    ("evaluation", ("methodological_soundness",
+                    "analysis_predetermined"), "all", "none"),
+    ("claims", ("question_quality", "theoretical_basis"), "all", "named"),
+    ("contract.runs", ("methodological_soundness",
+                        "competing_explanations"), "all", "none"),
+    ("contract", ("competing_explanations",
+                  "methodological_soundness"), "none", "none"),
+    ("plan.variables", ("methodological_soundness",
+                        "analysis_predetermined"), "none", "none"),
+    ("plan", ("methodological_soundness",), "none", "none"),
+    ("validity", ("competing_explanations",), "none", "none"),
+    ("resources.circuit_breakers", ("methodological_soundness",),
+     "none", "none"),
+    ("resources", ("methodological_soundness",), "none", "none"),
+    ("registration", ("analysis_predetermined",), "none", "none"),
+    ("handoff", ("analysis_predetermined",), "none", "none"),
+)
+
+
+def amendment_impact_areas(field_path: str) -> dict:
+    """按 FIELD_DEPENDENCY_MAP 给字段路径算增量评审影响面。
+    返回 {stage1_items: [...], registry_scope, claims_scope}。"""
+    p = (field_path or "").strip()
+    for prefix, items, reg_scope, claim_scope in FIELD_DEPENDENCY_MAP:
+        if p == prefix or p.startswith(prefix + ".") \
+                or p.startswith(prefix + "["):
+            return {"stage1_items": list(items),
+                    "registry_scope": reg_scope,
+                    "claims_scope": claim_scope}
+    return {"stage1_items": list(STAGE1_ITEMS),
+            "registry_scope": "all", "claims_scope": "all"}
+
 # Stage 1 式定版评审五条（Chambers 2013 / Nosek 转述，LEARNING §7）
 STAGE1_ITEMS = (
     "question_quality",          # 问题/假设的质量与重要性
@@ -91,9 +244,17 @@ REVIEW_DECISIONS = ("pass", "reject")
 CRITICAL_FIELD_PREFIXES = (
     "evaluation.readout",            # 判读标准
     "evaluation.primary_metric",     # 主指标
+    "evaluation.sesoi",              # SESOI 登记块（v1.1 DES-D01：判定标准的一部分）
     "claims",                        # 主张
     "resources.circuit_breakers",    # 停止规则/熔断线
 )
+
+# SESOI 结构化登记块（v1.1 DES-D01）：evaluation.sesoi 七字段
+SESOI_DIRECTIONS = ("higher", "lower")
+SESOI_FIELDS = ("value", "unit", "direction", "bounds", "basis",
+                "estimand_ref", "summary_measure")
+SESOI_TEXT_FIELDS = ("unit", "bounds", "basis", "estimand_ref",
+                     "summary_measure")
 
 # aux 区只许这些键（参考信号，一律标「暂定」；判定字段不许混入）
 AUX_KEYS = (
@@ -130,6 +291,64 @@ def is_critical_field(path: str) -> bool:
     p = (path or "").strip()
     return any(p == c or p.startswith(c + ".") or p.startswith(c + "[")
                for c in CRITICAL_FIELD_PREFIXES)
+
+
+# ---------- SESOI 结构化登记块（DES-D01） ----------
+
+def validate_sesoi_block(block, where: str = "evaluation.sesoi") -> list[str]:
+    """校验一个 SESOI 登记块的完整性。返回错误列表（空 = 完整）。
+
+    七字段缺一不可：value 须为正数；direction 须在 (higher, lower)；
+    basis（推导依据引用）为空直接拒——无依据的 SESOI 不许登记；
+    estimand_ref / summary_measure 为 C-补06 要求（SESOI 与估计目标
+    绑定，不许裸数字）。"""
+    errs: list[str] = []
+    if not isinstance(block, dict):
+        return [f"{where} 不是映射（结构化 SESOI 登记块须为映射）"]
+    v = block.get("value")
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or float(v) <= 0:
+        errs.append(f"{where}.value 非法：{v!r}（SESOI 数值须为正数）")
+    for k in SESOI_TEXT_FIELDS:
+        if not _nonempty_str(block.get(k)):
+            if k == "basis":
+                errs.append(f"{where}.basis 为空（推导依据引用必填："
+                            "文献 / 领域惯例 / 上游判读阈值指针，"
+                            "无依据的 SESOI 不许登记）")
+            elif k == "estimand_ref":
+                errs.append(f"{where}.estimand_ref 为空（目标量引用必填："
+                            "SESOI 须绑定其估计目标，不许裸数字）")
+            elif k == "summary_measure":
+                errs.append(f"{where}.summary_measure 为空"
+                            "（汇总度量类型必填，如 mean_diff）")
+            else:
+                errs.append(f"{where}.{k} 为空")
+    d = block.get("direction")
+    if d not in SESOI_DIRECTIONS:
+        errs.append(f"{where}.direction 非法：{d!r}"
+                    f"（须为 {SESOI_DIRECTIONS} 之一）")
+    return errs
+
+
+def sesoi_canonical(block) -> dict | None:
+    """登记块规范形（只取七字段，value 归一为 float）；非映射返回 None。"""
+    if not isinstance(block, dict):
+        return None
+    out: dict = {}
+    for k in SESOI_FIELDS:
+        v = block.get(k)
+        if k == "value" and isinstance(v, (int, float)) \
+                and not isinstance(v, bool):
+            v = float(v)
+        out[k] = v
+    return out
+
+
+def sesoi_diff_fields(a, b) -> list[str]:
+    """两块规范形逐字段比对，返回不一致的字段名列表。"""
+    ca, cb = sesoi_canonical(a), sesoi_canonical(b)
+    if ca is None or cb is None:
+        return ["<登记块不是映射>"]
+    return [k for k in SESOI_FIELDS if ca.get(k) != cb.get(k)]
 
 
 # ---------- 冻结哈希 ----------
@@ -417,6 +636,52 @@ def validate_design(design: dict) -> list[str]:
     if not (isinstance(ev.get("repetitions"), int) and ev["repetitions"] >= 1):
         errs.append("evaluation.repetitions 未声明或 < 1（重复数须与重复层级对账）")
 
+    # ---- SESOI 结构化登记（DES-D01）：evaluation.sesoi 为单一事实源 ----
+    sesoi_block = ev.get("sesoi")
+    if sesoi_block is not None:
+        errs.extend(validate_sesoi_block(sesoi_block))
+        pm_dir = pm.get("direction") if isinstance(pm, dict) else None
+        if isinstance(sesoi_block, dict) and _nonempty_str(pm_dir):
+            head = str(pm_dir).split("_")[0]
+            sd = sesoi_block.get("direction")
+            if head in SESOI_DIRECTIONS and sd in SESOI_DIRECTIONS \
+                    and head != sd:
+                errs.append(
+                    f"evaluation.sesoi.direction={sd!r} 与主指标方向 "
+                    f"{pm_dir!r} 不一致（SESOI 方向须与主指标改善方向同向）")
+    elif full and has_confirmatory:
+        errs.append("evaluation.sesoi 缺失（DES-D01：带确认性主张的完整级"
+                    "设计必须在 evaluation 区登记结构化 SESOI——数值/单位/"
+                    "方向/边界/推导依据/目标量引用/汇总度量，"
+                    "下游判定只认登记块，不认文本叙述）")
+
+    # ---- 登记行 SESOI 派生一致性（DES-D01）：行内只许机械复制 ----
+    _ho = design.get("handoff")
+    _ho_rows = _ho.get("expected_registry") if isinstance(_ho, dict) else None
+    if isinstance(_ho_rows, list):
+        for i, row in enumerate(_ho_rows):
+            if not isinstance(row, dict):
+                continue
+            rid = row.get("run_id") or f"#{i}"
+            row_sesoi = row.get("sesoi")
+            if row_sesoi is not None and sesoi_block is None:
+                errs.append(
+                    f"handoff.expected_registry[{rid}].sesoi 无 evaluation "
+                    "登记来源（登记行 SESOI 只能从 evaluation.sesoi 派生，"
+                    "不许登记行单独填）")
+            elif row_sesoi is not None:
+                diff = sesoi_diff_fields(row_sesoi, sesoi_block)
+                if diff:
+                    errs.append(
+                        f"handoff.expected_registry[{rid}].sesoi 与 "
+                        f"evaluation.sesoi 登记不一致（字段 {diff}）："
+                        "登记行只许携带登记块的派生副本")
+            elif sesoi_block is not None and has_confirmatory:
+                errs.append(
+                    f"handoff.expected_registry[{rid}] 缺 sesoi 派生副本"
+                    "（确认性设计的登记行须携带与 evaluation.sesoi "
+                    "逐字段一致的 sesoi 块）")
+
     # ---- 效度区 validity ----
     val = design.get("validity")
     if not isinstance(val, dict):
@@ -514,6 +779,15 @@ def validate_design(design: dict) -> list[str]:
             errs.append(f"freeze.amendments[{i}] 修订了命门字段 {crit} 但无用户签"
                         "（拍板 ⑤：判读标准/主指标/主张/停止规则的 amendment "
                         "须 user_signed=true）")
+        # DES-D02：类别声明合法性（旧 amendment 无 category 字段不追溯）
+        cat = a.get("category")
+        if cat is not None and cat not in AMD_CATEGORIES:
+            errs.append(f"freeze.amendments[{i}].category 非法：{cat!r}"
+                        f"（须为 {AMD_CATEGORIES} 之一，DES-D02 类别分流）")
+        if cat == "prewritten_branch" and not _nonempty_str(a.get("branch_ref")):
+            errs.append(f"freeze.amendments[{i}] 声明 category="
+                        "prewritten_branch 但缺 branch_ref（预写分支须"
+                        "点名定版预写的分支，DES-D02/C-补04）")
     if design.get("status") == "frozen" or fr.get("content_hash"):
         expected = current_frozen_hash(design)
         if not expected:
@@ -526,6 +800,9 @@ def validate_design(design: dict) -> list[str]:
     ho = design.get("handoff")
     if ho is not None and not isinstance(ho, dict):
         errs.append("handoff（交接区）必须是映射")
+
+    # ---- intake 跨区实体核查（DES-D04）：expanded 必须有实体落点 ----
+    errs.extend(intake_expanded_entity_errors(design))
 
     # ---- 辅助区 aux：与判定物理分离 ----
     aux = design.get("aux", {})
@@ -583,6 +860,7 @@ def empty_design(design_id: str, idea_id: str, title: str, tier: str, today: str
             "blocking_stratification": "",
             "intervention_mechanism": [],   # {variable, how}
             "intervention_checkpoints": [],  # 干预生效核查点
+            "deviation_branches": [],   # 定版预写偏离分支（DES-D02/C-补04）：{id, trigger, fields, fallback}；冻结后执行分支内变更走 amendment category=prewritten_branch + branch_ref 轻评审
             "replication_level": None,       # 独立重复层级声明
             "replication_counts": {},
         },
@@ -596,6 +874,7 @@ def empty_design(design_id: str, idea_id: str, title: str, tier: str, today: str
         },
         "evaluation": {
             "primary_metric": None,   # {name, definition, direction, convention_source}
+            "sesoi": None,            # 结构化 SESOI 登记块（DES-D01）：{value, unit, direction, bounds, basis, estimand_ref, summary_measure}
             "guardrail_metrics": [],  # {name, bound}
             "construct_mapping": [],
             "data_protocol": None,

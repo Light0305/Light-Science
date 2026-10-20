@@ -1,23 +1,23 @@
 === light-review v1 demo-fullrun 运行日志 ===
 上游输入：
-  稿件包：light-write/examples/demo-fullrun/manuscript-pkg（在）
-  结论包：light-analysis/examples/demo-synthetic/analysis-pkg（在）
-  图包 delivery 目录：light-figure/examples/demo-fullrun/figure-pkg/exports（在）
-  目标刊记录：light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（在）
+  稿件包：../../../../light-write/examples/demo-fullrun/manuscript-pkg（在）
+  结论包：../../../../light-analysis/examples/demo-synthetic/analysis-pkg（在）
+  图包 delivery 目录：../../../../light-figure/examples/demo-fullrun/figure-pkg/exports（在）
+  目标刊记录：../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（在）
 
-$ light-review init light-review/examples/demo-fullrun/review-pkg --title Zero-tuning tracker thresholds predicted from video-level statistics（投稿前内部评审演示） --round 1
-已建评审包骨架：light-review/examples/demo-fullrun/review-pkg（状态 intake）
+$ light-review init ../../../../light-review/examples/demo-fullrun/review-pkg --title Zero-tuning tracker thresholds predicted from video-level statistics（投稿前内部评审演示） --round 1
+已建评审包骨架：../../../../light-review/examples/demo-fullrun/review-pkg（状态 intake）
 [rc=0]
 
-$ light-review intake light-review/examples/demo-fullrun/review-pkg --manuscript light-write/examples/demo-fullrun/manuscript-pkg --analysis light-analysis/examples/demo-synthetic/analysis-pkg --figure light-figure/examples/demo-fullrun/figure-pkg/exports --journal Smart Agricultural Technology --target-record light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json --intensity standard --want-decision --isolation degraded --isolation-reason 本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）
+$ light-review intake ../../../../light-review/examples/demo-fullrun/review-pkg --manuscript ../../../../light-write/examples/demo-fullrun/manuscript-pkg --analysis ../../../../light-analysis/examples/demo-synthetic/analysis-pkg --figure ../../../../light-figure/examples/demo-fullrun/figure-pkg/exports --journal Smart Agricultural Technology --target-record ../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json --intensity standard --want-decision --isolation degraded --isolation-reason 本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）
 承接完成：快照冻结（manuscript/analysis/figure），目标刊 Smart Agricultural Technology
 [rc=0]
 
-$ light-review grim light-review/examples/demo-fullrun/review-pkg --register light-review/examples/demo-fullrun/inputs/grim-summaries.yaml
+$ light-review grim ../../../../light-review/examples/demo-fullrun/review-pkg --register ../../../../light-review/examples/demo-fullrun/inputs/grim-summaries.yaml
 GRIM 登记并重跑：4 条 — 相容 2、判败 0、not_assessable 2
 [rc=0]
 
-$ light-review forensic light-review/examples/demo-fullrun/review-pkg
+$ light-review forensic ../../../../light-review/examples/demo-fullrun/review-pkg
 法医层完成：检查 10 项、发现 0 条、GRIM 已跑 4 条
   边 claims_evidence：应检 1、not_assessable 0、error 0、decision_error 0
   边 numbers_numbers：应检 3、not_assessable 0、error 0、decision_error 0
@@ -25,29 +25,29 @@ $ light-review forensic light-review/examples/demo-fullrun/review-pkg
   边 citations_claims：应检 5、not_assessable 0、error 0、decision_error 0
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/review-pkg
 已推进 → forensic_checked
 [rc=0]
 
-$ light-review seat light-review/examples/demo-fullrun/review-pkg --id S1 --role methods --family claude --persona 方法学审稿人：设计与主张的可检验性、对照与消融充分性
+$ light-review seat ../../../../light-review/examples/demo-fullrun/review-pkg --id S1 --role methods --family claude --persona 方法学审稿人：设计与主张的可检验性、对照与消融充分性
 席位已登记：S1（methods / claude）
 [rc=0]
 
-$ light-review seat light-review/examples/demo-fullrun/review-pkg --id S2 --role statistics --family claude --persona 统计审稿人：推断口径、精度与多重性、等价检验
+$ light-review seat ../../../../light-review/examples/demo-fullrun/review-pkg --id S2 --role statistics --family claude --persona 统计审稿人：推断口径、精度与多重性、等价检验
 席位已登记：S2（statistics / claude）
 [rc=0]
 
-$ light-review seat light-review/examples/demo-fullrun/review-pkg --id S3 --role domain --family claude --persona 领域审稿人（精准畜牧/计算机视觉）：领域惯例、基线与部署语境
+$ light-review seat ../../../../light-review/examples/demo-fullrun/review-pkg --id S3 --role domain --family claude --persona 领域审稿人（精准畜牧/计算机视觉）：领域惯例、基线与部署语境
 席位已登记：S3（domain / claude）
 [rc=0]
 
-$ light-review calibration light-review/examples/demo-fullrun/review-pkg
+$ light-review calibration ../../../../light-review/examples/demo-fullrun/review-pkg
 calibration.yaml 已按模板落盘（量表锚/封顶/不对称三件，改即配置漂移）
 校准门四件：scale_anchor=齐、caps=齐、asymmetry=齐、bench_report=缺
   - 缺件：验证台报表缺失：reports/bench_report.json 不在册（先 bench）
 [rc=1]
 
-$ light-review bench light-review/examples/demo-fullrun/review-pkg
+$ light-review bench ../../../../light-review/examples/demo-fullrun/review-pkg
 验证台完成：9 例全过=True，误报率 0.0
   citation_gap：检出 1/1（1.0）
   claim_overreach：检出 1/1（1.0）
@@ -56,50 +56,51 @@ $ light-review bench light-review/examples/demo-fullrun/review-pkg
   number_inconsistency：检出 1/1（1.0）
 [rc=0]
 
-$ light-review calibration light-review/examples/demo-fullrun/review-pkg
+$ light-review calibration ../../../../light-review/examples/demo-fullrun/review-pkg
 calibration.yaml 已在册（不覆盖）
 校准门四件：scale_anchor=齐、caps=齐、asymmetry=齐、bench_report=齐
 [rc=0]
 
-$ light-review domain light-review/examples/demo-fullrun/review-pkg
-领域门完成：条目 11 — 命中 1、未命中 7、不适用 3（有效命中 1）
-  按刊事实：light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（状态 verified）
+$ light-review domain ../../../../light-review/examples/demo-fullrun/review-pkg
+领域门完成：条目 11 — 命中 0、未命中 8、不适用 3（有效命中 0）
+  范式（第零层）：未登记——定性权重层未启用（domain --paradigm 登记；条目带范式适用性时 reported 门将点名阻断）
+  按刊事实：../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（状态 verified）
 [rc=0]
 
-$ light-review panel light-review/examples/demo-fullrun/review-pkg --seat S1 --draft light-review/examples/demo-fullrun/inputs/drafts/S1.md
+$ light-review panel ../../../../light-review/examples/demo-fullrun/review-pkg --seat S1 --draft ../../../../light-review/examples/demo-fullrun/inputs/drafts/S1.md
 草稿已落：reports/drafts/S1.md（席间隔离，冻结前互不可见）
 [rc=0]
 
-$ light-review panel light-review/examples/demo-fullrun/review-pkg --seat S2 --draft light-review/examples/demo-fullrun/inputs/drafts/S2.md
+$ light-review panel ../../../../light-review/examples/demo-fullrun/review-pkg --seat S2 --draft ../../../../light-review/examples/demo-fullrun/inputs/drafts/S2.md
 草稿已落：reports/drafts/S2.md（席间隔离，冻结前互不可见）
 [rc=0]
 
-$ light-review panel light-review/examples/demo-fullrun/review-pkg --seat S3 --draft light-review/examples/demo-fullrun/inputs/drafts/S3.md
+$ light-review panel ../../../../light-review/examples/demo-fullrun/review-pkg --seat S3 --draft ../../../../light-review/examples/demo-fullrun/inputs/drafts/S3.md
 草稿已落：reports/drafts/S3.md（席间隔离，冻结前互不可见）
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/review-pkg
 已推进 → paneled
 [rc=0]
 
-$ light-review freeze light-review/examples/demo-fullrun/review-pkg
+$ light-review freeze ../../../../light-review/examples/demo-fullrun/review-pkg
 已冻结 3 席报告：S1、S2、S3
 [rc=0]
 
-$ light-review consensus light-review/examples/demo-fullrun/review-pkg --file light-review/examples/demo-fullrun/inputs/concerns.yaml
+$ light-review consensus ../../../../light-review/examples/demo-fullrun/review-pkg --file ../../../../light-review/examples/demo-fullrun/inputs/concerns.yaml
 共识账已生成：concern 6 条，其中 consensus 4 条
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/review-pkg
 已推进 → reported
 [rc=0]
 
-$ light-review meta light-review/examples/demo-fullrun/review-pkg
+$ light-review meta ../../../../light-review/examples/demo-fullrun/review-pkg
 meta 合成完成：reports/meta_review.md（形态 full）
   决定建议：reports/decision.md（档位 reject_risk，bounded 非编辑判断）
 [rc=0]
 
-$ light-review selfcheck light-review/examples/demo-fullrun/review-pkg
+$ light-review selfcheck ../../../../light-review/examples/demo-fullrun/review-pkg
   vague_unsupported：pass（合成叙述逐行带库存锚点或数字依据）
   wrong_object：pass（产物引用的对象全在冻结库存内）
   praise_only：pass（无无锚表扬）
@@ -108,41 +109,42 @@ $ light-review selfcheck light-review/examples/demo-fullrun/review-pkg
 自审门：通过（reports/selfcheck.json）
 [rc=0]
 
-$ light-review export light-review/examples/demo-fullrun/review-pkg
+$ light-review export ../../../../light-review/examples/demo-fullrun/review-pkg
 回填清单已导出：handoff_to_write.md/.json（6 条，Review 只出清单不出补丁）
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/review-pkg
 已推进 → adjudicated
 [rc=0]
 
-$ light-review deliver light-review/examples/demo-fullrun/review-pkg --degradation-statement 本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts 物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新 round 重跑本轮评审。
+$ light-review deliver ../../../../light-review/examples/demo-fullrun/review-pkg --degradation-statement 本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts 物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新 round 重跑本轮评审。
 已交付：2026-10-20（REVIEW_DELIVERY.md 已生成）
   降档声明：本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts 物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新 round 重跑本轮评审。
 [rc=0]
 
-$ light-review validate light-review/examples/demo-fullrun/review-pkg
+$ light-review validate ../../../../light-review/examples/demo-fullrun/review-pkg
 校验通过：0 项错误
 [rc=0]
 
-$ light-review status light-review/examples/demo-fullrun/review-pkg
+$ light-review status ../../../../light-review/examples/demo-fullrun/review-pkg
 评审包：review-pkg  状态：delivered（round 1）
   隔离模式：degraded（本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说））
   计数：findings=0、confirmed_error_open=0、not_assessable=0、concerns=6、consensus=4
-  领域门：命中 1/条目 11（ran_at 2026-10-20）
+  领域门：命中 0/条目 11（ran_at 2026-10-20）
+  范式（第零层）：未登记
   决定形态：full（档位 reject_risk）
   回填清单：6 条已导出
 [rc=0]
 
-$ light-review init light-review/examples/demo-fullrun/variant/review-pkg --title 变体演示（注入数字不一致） --round 1
-已建评审包骨架：light-review/examples/demo-fullrun/variant/review-pkg（状态 intake）
+$ light-review init ../../../../light-review/examples/demo-fullrun/variant/review-pkg --title 变体演示（注入数字不一致） --round 1
+已建评审包骨架：../../../../light-review/examples/demo-fullrun/variant/review-pkg（状态 intake）
 [rc=0]
 
-$ light-review intake light-review/examples/demo-fullrun/variant/review-pkg --manuscript light-review/examples/demo-fullrun/variant/inputs/manuscript-pkg --analysis light-analysis/examples/demo-synthetic/analysis-pkg --figure light-figure/examples/demo-fullrun/figure-pkg/exports --journal Smart Agricultural Technology --target-record light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json --intensity standard --isolation degraded --isolation-reason 本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）
+$ light-review intake ../../../../light-review/examples/demo-fullrun/variant/review-pkg --manuscript ../../../../light-review/examples/demo-fullrun/variant/inputs/manuscript-pkg --analysis ../../../../light-analysis/examples/demo-synthetic/analysis-pkg --figure ../../../../light-figure/examples/demo-fullrun/figure-pkg/exports --journal Smart Agricultural Technology --target-record ../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json --intensity standard --isolation degraded --isolation-reason 本环境仅单一模型家族（claude）可用，三席同家族、席间无法跨家族互盲（R1：做不到全规格就明说）
 承接完成：快照冻结（manuscript/analysis/figure），目标刊 Smart Agricultural Technology
 [rc=0]
 
-$ light-review forensic light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review forensic ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 法医层完成：检查 10 项、发现 1 条、GRIM 未登记被检量，未跑
   边 claims_evidence：应检 1、not_assessable 0、error 0、decision_error 0
   边 numbers_numbers：应检 3、not_assessable 0、error 1、decision_error 0
@@ -150,43 +152,43 @@ $ light-review forensic light-review/examples/demo-fullrun/variant/review-pkg
   边 citations_claims：应检 5、not_assessable 0、error 0、decision_error 0
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 已推进 → forensic_checked
 [rc=0]
 
-$ light-review seat light-review/examples/demo-fullrun/variant/review-pkg --id V1 --role methods --family claude --persona 方法学审稿人（变体演示）
+$ light-review seat ../../../../light-review/examples/demo-fullrun/variant/review-pkg --id V1 --role methods --family claude --persona 方法学审稿人（变体演示）
 席位已登记：V1（methods / claude）
 [rc=0]
 
-$ light-review panel light-review/examples/demo-fullrun/variant/review-pkg --seat V1 --draft light-review/examples/demo-fullrun/inputs/variant-draft-V1.md
+$ light-review panel ../../../../light-review/examples/demo-fullrun/variant/review-pkg --seat V1 --draft ../../../../light-review/examples/demo-fullrun/inputs/variant-draft-V1.md
 草稿已落：reports/drafts/V1.md（席间隔离，冻结前互不可见）
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 已推进 → paneled
 [rc=0]
 
-$ light-review freeze light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review freeze ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 已冻结 1 席报告：V1
 [rc=0]
 
-$ light-review consensus light-review/examples/demo-fullrun/variant/review-pkg --file light-review/examples/demo-fullrun/inputs/variant-concerns.yaml
+$ light-review consensus ../../../../light-review/examples/demo-fullrun/variant/review-pkg --file ../../../../light-review/examples/demo-fullrun/inputs/variant-concerns.yaml
 共识账已生成：concern 1 条，其中 consensus 0 条
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 已推进 → reported
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 [stderr] 被拦（逐项缺口）：
   - confirmed error F001 未裁决（人工裁决位逐条解除，R2 硬度 a）
 [rc=1]
 
-$ light-review adjudicate light-review/examples/demo-fullrun/variant/review-pkg --finding F001 --outcome confirmed --by demo-adjudicator（演示裁决） --reason 变体注入的正文数字与 numbers_ledger 登记值不符属实，确认错误成立；本变体不进交付，裁决只为演示裁决位解除阻断的路径。
+$ light-review adjudicate ../../../../light-review/examples/demo-fullrun/variant/review-pkg --finding F001 --outcome confirmed --by demo-adjudicator（演示裁决） --reason 变体注入的正文数字与 numbers_ledger 登记值不符属实，确认错误成立；本变体不进交付，裁决只为演示裁决位解除阻断的路径。
 裁决已落：F001 → confirmed（demo-adjudicator（演示裁决），追加留痕）
 [rc=0]
 
-$ light-review advance light-review/examples/demo-fullrun/variant/review-pkg
+$ light-review advance ../../../../light-review/examples/demo-fullrun/variant/review-pkg
 已推进 → adjudicated
 [rc=0]

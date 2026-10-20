@@ -1,0 +1,9 @@
+kind: light-patent/numerals
+case_id: PT-case_4b3e0c
+numerals:
+- mark: '1'
+  name: 视频采集单元
+  description: 采集舍内视频
+- mark: '2'
+  name: 处理单元
+  description: 运行检测模型

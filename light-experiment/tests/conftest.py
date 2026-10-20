@@ -57,6 +57,14 @@ def make_card(status: str = "frozen") -> dict:
         "idea_id": "zero-tuning-tracker-thresholds-predicted_77cdb7",
         "freeze": {"content_hash": DESIGN_HASH, "frozen_at": "2026-10-20",
                    "amendments": []},
+        # 方案区（与 light_design.export 的 design_card 全量投影同
+        # 形态）：干预核查点在设计级全局声明，EXP-D04 齐备检查认此来源
+        "plan": {
+            "design_type": "判别实验",
+            "intervention_checkpoints": [
+                "theta_source 实际生效：处理臂产物逐 run 留证，声称来源"
+                "与实际生效来源一致才算干预成立"],
+        },
         "contract": {
             "runs": [
                 {"run_id": "R00", "role": "control", "control_run": None,

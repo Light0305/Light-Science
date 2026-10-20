@@ -87,6 +87,7 @@ def run_grade(root, notes_path=None) -> dict:
             "aggregation_note": f"逐行判定机械映射（{detail}），未压平",
         })
         line_grades, shares, type_ms, residuals = [], [], [], []
+        scope = None
         for lid in line_ids:
             row = current.get(lid) or {}
             if row.get("strength_grade"):
@@ -98,11 +99,14 @@ def run_grade(root, notes_path=None) -> dict:
             if tm is not None:
                 type_ms.append(tm)
             residuals += row.get("validity_residual") or []
+            if scope is None and row.get("robustness_scope"):
+                scope = row["robustness_scope"]
         grade, inputs, cap_reason = grading.claim_grade(
             support, line_grades,
             worst_share=min(shares) if shares else None,
             type_sm_worst=max(type_ms) if type_ms else None,
-            validity_residual=residuals)
+            validity_residual=residuals,
+            robustness_scope=scope)
         inputs["line_verdicts"] = line_verdicts
         strength.append({"claim_id": cid, "grade": grade,
                          "inputs": inputs, "cap_reason": cap_reason})

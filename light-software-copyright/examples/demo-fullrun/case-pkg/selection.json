@@ -1,0 +1,28 @@
+{
+  "kind": "light-software-copyright/selection",
+  "snapshot_files": 4,
+  "included": [
+    {
+      "path": "tinystats/__init__.py",
+      "nonempty_lines": 1,
+      "total_lines": 1
+    },
+    {
+      "path": "tinystats/cli.py",
+      "nonempty_lines": 25,
+      "total_lines": 34
+    },
+    {
+      "path": "tinystats/report.py",
+      "nonempty_lines": 29,
+      "total_lines": 35
+    },
+    {
+      "path": "tinystats/stats.py",
+      "nonempty_lines": 55,
+      "total_lines": 69
+    }
+  ],
+  "exclusions": [],
+  "appealed": []
+}

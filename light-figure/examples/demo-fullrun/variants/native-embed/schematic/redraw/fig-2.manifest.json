@@ -1,6 +1,38 @@
 {
   "fig_id": "fig-2",
-  "version": "1.0",
+  "version": "1.1",
+  "arrow_plan": [
+    {
+      "arrow_plan_id": "AP-1",
+      "from": "video-frame",
+      "to": "tracking",
+      "fact": "参考图左段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-2",
+      "from": "tracking",
+      "to": "statistics",
+      "fact": "参考图跨面板长箭头"
+    },
+    {
+      "arrow_plan_id": "AP-3",
+      "from": "statistics",
+      "to": "predictor",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-4",
+      "from": "predictor",
+      "to": "thresholds",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-5",
+      "from": "thresholds",
+      "to": "anomaly",
+      "fact": "参考图右段竖直箭头"
+    }
+  ],
   "status": "built",
   "route": "file_build",
   "reference": {
@@ -92,7 +124,8 @@
         "from": "video-frame",
         "to": "tracking",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-1"
       }
     },
     {
@@ -128,7 +161,8 @@
         "from": "tracking",
         "to": "statistics",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-2"
       }
     },
     {
@@ -164,7 +198,8 @@
         "from": "statistics",
         "to": "predictor",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-3"
       }
     },
     {
@@ -200,7 +235,8 @@
         "from": "predictor",
         "to": "thresholds",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-4"
       }
     },
     {
@@ -236,7 +272,8 @@
         "from": "thresholds",
         "to": "anomaly",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-5"
       }
     },
     {
@@ -283,18 +320,32 @@
     "by": null,
     "at": null
   },
+  "rounds": [
+    {
+      "round": 1,
+      "at": "2026-10-20T19:26:41+00:00",
+      "projection_hash": "2221e9fa6b17c51d9baa1e7f1d33cfb6df73a581756fd05c32ffeb63f5f71535",
+      "artifact_sha256": "b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a"
+    },
+    {
+      "round": 2,
+      "at": "2026-10-20T19:26:47+00:00",
+      "projection_hash": "7c8d48747c7fff14aba26839130f59c8aee7e9c04d08d0b79f4b3858e2385ca5",
+      "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013"
+    }
+  ],
   "build": {
     "builder": "light-figure redraw build (file_build)",
     "route": "file_build",
     "visio_verified": false,
     "artifact": "schematic/redraw/fig-2.vsdx",
-    "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+    "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
     "shapes_built": 13
   },
-  "extracted_shapes_hash": "1360c189e475123df54202fd2bd0f0d6f52f0ccf51e446bf0f4fdf8bcd841ff1",
+  "extracted_shapes_hash": "360c7512a2905534d4d2db630dd9869c447a653d8782e5410601a897c15e1fcd",
   "reconciliation": {
     "ok": true,
     "diffs": [],
-    "at": "2026-10-20T10:52:52+00:00"
+    "at": "2026-10-20T19:26:41+00:00"
   }
 }

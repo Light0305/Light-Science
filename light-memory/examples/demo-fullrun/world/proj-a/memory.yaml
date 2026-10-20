@@ -28,7 +28,7 @@ settle:
   - cross-project
 watermarks:
   literature:
-    source: light-literature/examples/demo-cea/Literature
+    source: ../../../../../light-literature/examples/demo-cea/Literature
     snapshot_hash: 00adccc505d1a311c1638e098e72c1b7ae383855402833d7fb73c82282e45c90
     previous_hash: null
     adapter_version: '1.0'
@@ -40,7 +40,7 @@ watermarks:
       relations: 0
       forward_refs_resolved: 0
   design:
-    source: light-design/examples/demo-poultry-design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml
+    source: ../../../../../light-design/examples/demo-poultry-design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml
     snapshot_hash: 62b9976058d5cb7fd1d53a52425b7e11a42bd4e7e02adc7ac9892aed4085b71b
     previous_hash: null
     adapter_version: '1.0'
@@ -52,7 +52,7 @@ watermarks:
       relations: 0
       forward_refs_resolved: 0
   experiment:
-    source: light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2
+    source: ../../../../../light-experiment/examples/demo-synthetic/proj/executions/video-threshold-predict_synth01-b2
     snapshot_hash: 7cb44650fb4fc39653889b3739d40cbd058f299111615939784277a17801fe6f
     previous_hash: null
     adapter_version: '1.0'
@@ -64,7 +64,7 @@ watermarks:
       relations: 8
       forward_refs_resolved: 0
   analysis:
-    source: light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
+    source: ../../../../../light-analysis/examples/demo-synthetic/analysis-pkg/conclusion_card.json
     snapshot_hash: 4d14ed3424d720312529b9a66f421f05fe73b199fb4352c5511b23e51cb11996
     previous_hash: null
     adapter_version: '1.0'
@@ -76,7 +76,7 @@ watermarks:
       relations: 2
       forward_refs_resolved: 0
   write:
-    source: light-write/examples/demo-fullrun/manuscript-pkg/manuscript.yaml
+    source: ../../../../../light-write/examples/demo-fullrun/manuscript-pkg/manuscript.yaml
     snapshot_hash: 0a7904fe629d9b09a394c2326cec2083bb995925e6e5c2d1fcb68d64f5268be2
     previous_hash: null
     adapter_version: '1.0'
@@ -88,7 +88,7 @@ watermarks:
       relations: 0
       forward_refs_resolved: 0
   figure:
-    source: light-figure/examples/demo-fullrun/figure-pkg/provenance.yaml
+    source: ../../../../../light-figure/examples/demo-fullrun/figure-pkg/provenance.yaml
     snapshot_hash: 94216058b800651c3e2af3313de7696ed205a5265ab6693dff19fd366c435ea3
     previous_hash: null
     adapter_version: '1.0'
@@ -100,7 +100,7 @@ watermarks:
       relations: 0
       forward_refs_resolved: 0
   journal-select:
-    source: light-journal-select/examples/demo-fullrun/selection-pkg/selection.json
+    source: ../../../../../light-journal-select/examples/demo-fullrun/selection-pkg/selection.json
     snapshot_hash: 6b1e050e95402f6d92f2cd715fe3f177e013c4c0adf0f341c7a39c95486fe4ba
     previous_hash: null
     adapter_version: '1.0'
@@ -112,7 +112,7 @@ watermarks:
       relations: 0
       forward_refs_resolved: 0
   review:
-    source: light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json
+    source: ../../../../../light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json
     snapshot_hash: 200570319b67eac14c41aa637228f378f0e97d0798b0965c686e3cd8aabb1d92
     previous_hash: null
     adapter_version: '1.0'

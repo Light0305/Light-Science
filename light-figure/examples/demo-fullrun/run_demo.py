@@ -9,8 +9,12 @@
   的 R-FIX-a1 / R-ORA-a1 / R-PRED-a2 summary）做双面板图；
   方法线 fig-2：火鸡行为检测流水线示意（图库种子条目 → 提示词 →
   程序绘制的参考图替身 → 文件级 .vsdx 重绘）。
-  produced 段分叉两个拦截变体（反转轴 / 整幅残留嵌入），变体不进
-  正式交付；主包走完 intake → … → delivered 并产出 delivery.yaml。
+  produced 段分叉拦截变体（反转轴 / 整幅残留嵌入 / 无变化重复构建
+  round_noop / PPT 文件层全链 + 整页图片嵌入），变体不进正式交付；
+  produced 后主包先过交付前本地复核（recheck），再走完
+  intake → … → delivered 并产出 delivery.yaml（v1.1 增件：
+  合同 palette_decision、图库六维拆解、manifest v1.1 箭头计划、
+  交付 correspondence 对应件清单）。
 
 在本包 .venv（已 pip install -e .）中运行：
     python examples/demo-fullrun/run_demo.py
@@ -169,6 +173,13 @@ def write_contracts_and_backend() -> None:
             "data_gallery": {"entry_id": "DG-DEMO-SEED-001",
                              "version": "0.1"},
         },
+        "palette_decision": {
+            "source": "journal_contract",
+            "basis": "沿用期刊合同登记色板 PAL-OI-8（版本 2002.1，"
+                     "Okabe-Ito 色盲友好八色）",
+            "confirmation": {"confirmed_by": "demo-author",
+                             "confirmed_at": today()},
+        },
     })
     save_contract(PKG, {
         "fig_id": "fig-2", "line": "schematic",
@@ -201,6 +212,21 @@ def write_contracts_and_backend() -> None:
                 "entry_id": "MG-DEMO-SEED-001", "version": "0.1",
                 "style_anchor": "anchor-pipeline-flow",
                 "prompt_version": "1",
+                "reference_breakdown": {
+                    "palette_hex": ["#0072b2", "#d55e00", "#009e73",
+                                    "#e69f00"],
+                    "layout_flow": "左入右出两段流：左段自上而下"
+                                   "（视频→跟踪），右段自上而下四级"
+                                   "（统计量→预测→阈值→异常）",
+                    "module_style": "矩形与圆角矩形模块交替，"
+                                    "浅蓝描边、无填充",
+                    "annotation_style": "模块内嵌一行英文标签，"
+                                        "无面板角标",
+                    "information_density": "中密度：六个模块两面板"
+                                           "分置，箭头串联",
+                    "special_elements": "跨面板长箭头连接跟踪与"
+                                        "统计量两段",
+                },
             },
             "visio_components": [
                 {"component_id": "VC-DEMO-SEED-ARROW", "version": "0.1"}],
@@ -215,6 +241,13 @@ def write_contracts_and_backend() -> None:
                              "version": "1.2"},
         "palette_confirmation": {"confirmed_by": "demo-author",
                                  "confirmed_at": today()},
+        "palette_decision": {
+            "source": "gallery_anchor",
+            "basis": "图库种子条目 MG-DEMO-SEED-001 的六维拆解登记色"
+                     "（reference_breakdown.palette_hex）",
+            "confirmation": {"confirmed_by": "demo-author",
+                             "confirmed_at": today()},
+        },
     })
     save_backend(PKG, {
         "backend": "python", "decided_via": "explicit",
@@ -335,33 +368,50 @@ def method_manifest(reference_sha: str) -> dict:
               "Barn camera video"),
         box("a", "tracking", "rect", [0.075, 0.60, 0.85, 0.20],
             connect={"from": "video-frame", "to": "tracking",
-                     "arrow": True, "semantics": "data flow"}),
+                     "arrow": True, "semantics": "data flow",
+                     "arrow_plan_id": "AP-1"}),
         label("a", "tracking-label", [0.10, 0.68, 0.80, 0.08],
               "Multi-object tracking"),
         box("b", "statistics", "rounded_rect", [0.075, 0.12, 0.85, 0.16],
             connect={"from": "tracking", "to": "statistics",
-                     "arrow": True, "semantics": "data flow"}),
+                     "arrow": True, "semantics": "data flow",
+                     "arrow_plan_id": "AP-2"}),
         label("b", "statistics-label", [0.10, 0.175, 0.80, 0.07],
               "Video-level statistics"),
         box("b", "predictor", "rounded_rect", [0.075, 0.36, 0.85, 0.16],
             connect={"from": "statistics", "to": "predictor",
-                     "arrow": True, "semantics": "data flow"}),
+                     "arrow": True, "semantics": "data flow",
+                     "arrow_plan_id": "AP-3"}),
         label("b", "predictor-label", [0.10, 0.415, 0.80, 0.07],
               "Threshold prediction"),
         box("b", "thresholds", "rect", [0.075, 0.60, 0.85, 0.16],
             connect={"from": "predictor", "to": "thresholds",
-                     "arrow": True, "semantics": "data flow"}),
+                     "arrow": True, "semantics": "data flow",
+                     "arrow_plan_id": "AP-4"}),
         label("b", "thresholds-label", [0.10, 0.655, 0.80, 0.07],
               "Per-tracklet thresholds"),
         box("b", "anomaly", "rounded_rect", [0.075, 0.82, 0.85, 0.14],
             connect={"from": "thresholds", "to": "anomaly",
-                     "arrow": True, "semantics": "data flow"}),
+                     "arrow": True, "semantics": "data flow",
+                     "arrow_plan_id": "AP-5"}),
         label("b", "anomaly-label", [0.10, 0.875, 0.80, 0.07],
               "Anomaly flagging"),
     ]
     return {
         "fig_id": "fig-2",
-        "version": "1.0",
+        "version": "1.1",
+        "arrow_plan": [
+            {"arrow_plan_id": "AP-1", "from": "video-frame",
+             "to": "tracking", "fact": "参考图左段竖直箭头"},
+            {"arrow_plan_id": "AP-2", "from": "tracking",
+             "to": "statistics", "fact": "参考图跨面板长箭头"},
+            {"arrow_plan_id": "AP-3", "from": "statistics",
+             "to": "predictor", "fact": "参考图右段竖直箭头"},
+            {"arrow_plan_id": "AP-4", "from": "predictor",
+             "to": "thresholds", "fact": "参考图右段竖直箭头"},
+            {"arrow_plan_id": "AP-5", "from": "thresholds",
+             "to": "anomaly", "fact": "参考图右段竖直箭头"},
+        ],
         "status": "draft",
         "route": "file_build",
         "reference": {"path": "schematic/reference/fig-2.png",
@@ -437,6 +487,76 @@ def variant_native_embed() -> dict:
     run_cli("redraw", "build", str(dst), "fig-2", cwd=dst)
     outcome = run_cli("audit", "run", str(dst), "--fig", "fig-2", cwd=dst)
     return outcome["figures"]["fig-2"]
+
+
+def variant_round_noop() -> dict:
+    """v1.1 变体：内容零变化的重复构建被 round_noop 门拦下点名
+    （metadata-only 轮次不许冒充新一轮构建）。"""
+    dst = VARIANTS / "round-noop"
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(PKG, dst)
+    driver_note("变体 round-noop：主包成品已 build 一轮且内容未变，"
+                "在副本上原样再 build，期望被 round_noop 门拒绝")
+    run_cli("redraw", "build", str(dst), "fig-2", cwd=dst,
+            expect_fail=True)
+    return {"blocked": True, "gate": "round_noop"}
+
+
+def variant_pptx_chain() -> dict:
+    """v1.1 变体：PPT 文件层全链 + 整页图片拦截。复制主包 → fig-2
+    合同后端切 powerpoint → pptx manifest 由已对账的 vsdx manifest
+    派生 → install/build/extract → 审计三门 + recheck；随后向成品
+    塞入整页参考图图片对象，期望 native 门拦截。"""
+    import json as _json
+
+    from light_figure.project import save_contract
+    from light_figure.util import load_structured
+
+    dst = VARIANTS / "pptx-chain"
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(PKG, dst)
+    contract = load_structured(dst / "contracts" / "fig-2.yaml")
+    contract["schematic_backend"] = "powerpoint"
+    save_contract(dst, contract)
+    manifest = _json.loads(
+        (dst / "schematic" / "redraw" / "fig-2.manifest.json")
+        .read_text(encoding="utf-8"))
+    manifest["backend"] = "powerpoint_file"
+    for key in ("build", "reconciliation", "extracted_shapes",
+                "extracted_shapes_hash", "rounds"):
+        manifest.pop(key, None)
+    mfile = dst / "pptx-manifest-src.json"
+    mfile.write_text(_json.dumps(manifest, ensure_ascii=False,
+                                  indent=2), encoding="utf-8")
+    driver_note("变体 pptx-chain：fig-2 后端切 powerpoint，pptx "
+                "manifest 由已对账的 vsdx manifest 派生"
+                "（同形状、同箭头计划）")
+    run_cli("pptx", "install", str(dst), "fig-2", "--manifest",
+            str(mfile), cwd=dst)
+    run_cli("pptx", "build", str(dst), "fig-2", "--by", "demo-author",
+            cwd=dst)
+    run_cli("pptx", "extract", str(dst), "fig-2", cwd=dst)
+    audit1 = run_cli("audit", "run", str(dst), "--fig", "fig-2",
+                     cwd=dst)["figures"]["fig-2"]
+    recheck1 = run_cli("recheck", str(dst), "--fig", "fig-2",
+                       cwd=dst)["figures"]["fig-2"]
+
+    from pptx import Presentation
+    pptx_path = dst / "schematic" / "redraw" / "fig-2.pptx"
+    prs = Presentation(str(pptx_path))
+    slide = prs.slides[0]
+    slide.shapes.add_picture(str(INPUTS / "reference-fig-2.png"), 0, 0,
+                             prs.slide_width, prs.slide_height)
+    prs.save(str(pptx_path))
+    driver_note("变体 pptx-chain 第二段：向成品塞入整页参考图图片"
+                "对象，期望 native 门拦截")
+    audit2 = run_cli("audit", "run", str(dst), "--fig", "fig-2",
+                     cwd=dst)["figures"]["fig-2"]
+    return {"audit_gates": audit1["gates"],
+            "recheck_overall": recheck1["overall"],
+            "embed_native_verdict": audit2["gates"]["native"]}
 
 
 # ---------------------------------------------------------------- 主链
@@ -534,9 +654,16 @@ def main() -> int:
             "--by", "demo-author")
     run_cli("advance", str(PKG))  # → produced
 
+    recheck_out = run_cli("recheck", str(PKG))
+    driver_note("交付前本地复核（recheck）：双图在最终产物上做文件层"
+                "结构量测（尺寸/字体嵌入/用色对合同/语义 ID），"
+                "结论落 audit/<fig>.recheck.json，不改审计判决")
+
     log("\n=== 拦截变体（不进正式交付） ===")
     honesty_outcome = variant_honesty()
     native_outcome = variant_native_embed()
+    noop_outcome = variant_round_noop()
+    pptx_outcome = variant_pptx_chain()
 
     log("\n=== 主包审计与交付 ===")
     audit_outcome = audit_and_note(PKG)
@@ -562,6 +689,11 @@ def main() -> int:
             audit_outcome["figures"].items()},
         "variant_honesty_inverted": honesty_outcome,
         "variant_native_embed": native_outcome,
+        "recheck_overall": {
+            fid: f["overall"] for fid, f in
+            recheck_out["figures"].items()},
+        "variant_round_noop": noop_outcome,
+        "variant_pptx_chain": pptx_outcome,
     }
     dump_json(EVIDENCE / "summary.json", summary)
     log("\n=== summary ===\n" + json.dumps(summary, ensure_ascii=False,

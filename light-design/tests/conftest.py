@@ -92,6 +92,13 @@ def make_design(tier: str = "full") -> dict:
         "primary_metric": {"name": "MOTA", "definition": "MOTChallenge 口径",
                            "direction": "higher_better",
                            "convention_source": "MOTChallenge 与种子论文口径"},
+        "sesoi": {
+            "value": 2.0, "unit": "MOTA 百分点", "direction": "higher",
+            "bounds": "等价界取 ±value 对称双侧界",
+            "basis": "承卡判别实验预写判读阈值（距神谕 ≤2 点）",
+            "estimand_ref": "claims.primary_claims[C1]",
+            "summary_measure": "mean_diff",
+        },
         "guardrail_metrics": [{"name": "IDF1", "bound": "不低于固定阈值基线"}],
         "readout": {
             "positive": {"meaning": "留出 MOTA 达神谕 98% 内且优于固定阈值：映射成立",
@@ -138,7 +145,16 @@ def make_design(tier: str = "full") -> dict:
             {"metric": "运行失败率", "threshold": ">30%", "action": "停机审查"}],
     })
     d["handoff"].update({
-        "expected_registry": [{"run_id": "R-CTRL", "expected": "复现附录 A 神谕值 ±2%"}],
+        "expected_registry": [{
+            "run_id": "R-CTRL", "expected": "复现附录 A 神谕值 ±2%",
+            "sesoi": {
+                "value": 2.0, "unit": "MOTA 百分点", "direction": "higher",
+                "bounds": "等价界取 ±value 对称双侧界",
+                "basis": "承卡判别实验预写判读阈值（距神谕 ≤2 点）",
+                "estimand_ref": "claims.primary_claims[C1]",
+                "summary_measure": "mean_diff",
+            },
+        }],
         "repro_fields": {"seeds": [1, 2, 3, 4, 5]},
         "checkpoints": [{"node": "主实验前", "human_confirm": True}],
     })

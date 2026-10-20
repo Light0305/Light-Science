@@ -1,0 +1,52 @@
+kind: light-patent/case
+version: '1.0'
+case_id: PT-case_4b3e0c
+title: 一种基于时序融合的家禽异常行为检测方法
+patent_type: invention
+jurisdiction: CN
+ai_related: true
+status: responded
+status_history:
+- state: intake
+  at: '2026-10-20'
+  by: light-patent init
+- state: audited
+  at: '2026-10-20'
+  by: light-patent audit
+- state: mined
+  at: '2026-10-20'
+  by: light-patent mine
+- state: searched
+  at: '2026-10-20'
+  by: light-patent novelty
+- state: drafted
+  at: '2026-10-20'
+  by: light-patent draft
+- state: checked
+  at: '2026-10-20'
+  by: light-patent check
+- state: filed
+  at: '2026-10-20'
+  by: light-patent ledger file
+- state: office_action
+  at: '2026-10-20'
+  by: light-patent oa
+- state: responded
+  at: '2026-10-20'
+  by: light-patent oa amend
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+parties:
+  applicant: 待填写/需确认
+  inventors: []
+  priority: []
+filing:
+  application_no: CN202610000000.X（演示模拟号）
+  filing_date: '2026-10-22'
+  planned_filing_date: null
+blocked: null
+degraded: null
+disclaimers:
+- 草案，需专利代理师复核
+ethics_flags:
+- 数据采集

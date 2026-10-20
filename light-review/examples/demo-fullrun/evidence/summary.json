@@ -24,13 +24,13 @@
     },
     "domain_summary": {
       "checked": 11,
-      "hits": 1,
-      "misses": 7,
+      "hits": 0,
+      "misses": 8,
       "not_applicable": 3,
-      "effective_hits": 1
+      "effective_hits": 0
     },
     "domain_fact": {
-      "record_path": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json",
+      "record_path": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json",
       "verified_at": "2026-10-20",
       "fact_status": "verified"
     },
@@ -131,7 +131,7 @@
         "edge": "numbers_figures",
         "subject_ref": "F001",
         "result": "not_assessable",
-        "detail": "无同名文件或稿件侧未登记 source_hash，哈希对应未检",
+        "detail": "对应件清单未覆盖稿件侧登记源资产（source_hash 不在源资产清单内）：清单未覆盖不等于不符，哈希对应维持未检；内容级哈希由图包在对应件清单声明（稿件侧无对应登记，仅留痕不作比对）",
         "claim_pointer": null,
         "evidence_pointer": "figures_manifest:F001",
         "raw": null
@@ -205,7 +205,9 @@
           "decimals": 1,
           "n": 4,
           "items": null,
-          "scale_type": "count"
+          "scale_type": "count",
+          "sd": null,
+          "sd_decimals": null
         },
         "missing": []
       },
@@ -220,7 +222,9 @@
           "decimals": 14,
           "n": 36,
           "items": null,
-          "scale_type": "count"
+          "scale_type": "count",
+          "sd": null,
+          "sd_decimals": null
         },
         "missing": []
       },
@@ -235,7 +239,9 @@
           "decimals": 3,
           "n": 6,
           "items": 3,
-          "scale_type": "continuous"
+          "scale_type": "continuous",
+          "sd": null,
+          "sd_decimals": null
         },
         "missing": []
       },
@@ -250,7 +256,9 @@
           "decimals": 3,
           "n": 6,
           "items": 3,
-          "scale_type": "continuous"
+          "scale_type": "continuous",
+          "sd": null,
+          "sd_decimals": null
         },
         "missing": []
       }
@@ -347,7 +355,7 @@
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_total",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_total",
         "detail": "全文词数 1000 vs 限额 8000",
         "source_kind": "explicit_object",
         "fact": {
@@ -356,7 +364,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       },
       {
@@ -370,7 +378,7 @@
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_abstract",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.word_limit_abstract",
         "detail": "摘要词数 84 vs 限额 250",
         "source_kind": "explicit_object",
         "fact": {
@@ -379,7 +387,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       },
       {
@@ -393,7 +401,7 @@
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.figure_limit",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.figure_limit",
         "detail": "目标刊记录未登记 D.figure_limit，本条未触发",
         "source_kind": "explicit_object",
         "fact": {
@@ -402,7 +410,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       },
       {
@@ -416,7 +424,7 @@
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.reference_limit",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#D.reference_limit",
         "detail": "目标刊记录未登记 D.reference_limit，本条未触发",
         "source_kind": "explicit_object",
         "fact": {
@@ -425,7 +433,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       },
       {
@@ -435,12 +443,12 @@
         "axis": "Compliance",
         "title": "目标刊要求 AI 披露时稿件带披露声明",
         "severity_if_hit": "major",
-        "result": "hit",
+        "result": "miss",
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#G.ai_policy",
-        "detail": "目标刊要求 AI 披露（disclosure_required），稿件章节中未检出披露声明（机械检索口径）",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#G.ai_policy",
+        "detail": "目标刊要求 AI 披露，稿件章节中检出披露声明（多形检索命中形态：declaration of ai use）",
         "source_kind": "explicit_object",
         "fact": {
           "field": "G.ai_policy",
@@ -465,7 +473,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       },
       {
@@ -479,7 +487,7 @@
         "effective": true,
         "superseded_by": null,
         "overrides": null,
-        "evidence_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#C.keyword_limit",
+        "evidence_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json#C.keyword_limit",
         "detail": "稿件未登记关键词清单，本条无对象",
         "source_kind": "explicit_object",
         "fact": {
@@ -488,7 +496,7 @@
           "verified_at": "2026-10-20",
           "fact_status": "verified",
           "cycle_days": 180,
-          "record_pointer": "light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
+          "record_pointer": "../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json"
         }
       }
     ],
@@ -518,6 +526,21 @@
         "pointers": {
           "claim_pointer": "claims_register:C1",
           "evidence_pointer": "conclusions:C1#line_verdicts.R-NEG=untested；verdicts.jsonl R-NEG note（fundamental 失败 F-0001）"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       },
       {
@@ -545,6 +568,21 @@
         "pointers": {
           "claim_pointer": "claims_register:C1",
           "evidence_pointer": "verdicts.jsonl:R-LONG 与 R-PRED inputs_hash 同为 62ccc7ade1…"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：主张登记行 C1 实位命中；evidence_pointer：verdicts 登记行 ['R-LONG', 'R-PRED'] 实位命中"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       },
       {
@@ -570,6 +608,21 @@
         "pointers": {
           "claim_pointer": "claims_register:C1",
           "evidence_pointer": "conclusions:C1/strength.inputs.type_sm_worst=4.345"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       },
       {
@@ -597,6 +650,21 @@
         "pointers": {
           "claim_pointer": "sections/02-methods.md",
           "evidence_pointer": "analysis inputs/design-sesoi-source.json + reflux/RX-A001"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：章节文件 02-methods.md 实位命中；evidence_pointer：上游文件 inputs/design-sesoi-source.json 实位命中；自由文本指针，机械不可解析（如实登记，不冒充已验）"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=minor 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       },
       {
@@ -622,6 +690,21 @@
         "pointers": {
           "claim_pointer": "figures_manifest:F001",
           "evidence_pointer": "delivery:fig-1（exports/fig-1.pdf、data/previews/fig-1.png）"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：图登记行 F001 实位命中；evidence_pointer：图包交付行 fig-1 实位命中"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=minor 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       },
       {
@@ -649,6 +732,21 @@
         "pointers": {
           "claim_pointer": "claims_register:C1",
           "evidence_pointer": "conclusions:C1/boundaries"
+        },
+        "escalation_checks": {
+          "pointer_resolution": {
+            "result": "resolved",
+            "detail": "claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中"
+          },
+          "verbatim_support": {
+            "result": "not_provided",
+            "detail": "未带逐字支撑片段（如实登记，未验）"
+          },
+          "severity_cap": {
+            "result": "within_cap",
+            "detail": "severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶 major）"
+          },
+          "verdict": "partial"
         }
       }
     ],

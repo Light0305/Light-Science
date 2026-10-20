@@ -256,6 +256,52 @@ def _fig_key(fig_id, display_number=None):
     return int(m.group(1)) if m else None
 
 
+def _correspondence_parts(fig_row) -> dict | None:
+    """提取 delivery 图行的对应件清单（v1.1 REV-D09 消费侧）。
+
+    契约（figure 侧构建单 F9）：correspondence = 源资产清单（路径 +
+    SHA-256）到交付文件的映射 + 内容级哈希（数据图 = 量测面板结构
+    哈希；方法图 = 反抽形状清单哈希），缺件落 null + note。键名按
+    语义多形兼容读取，读不到清单即返回 None（维持 not_assessable，
+    不冒充已检）；确切键名留全套第 6 步跨包总核按实物复核。
+    """
+    corr = (fig_row or {}).get("correspondence")
+    if not isinstance(corr, dict):
+        return None
+    sources = (corr.get("source_assets") or corr.get("sources")
+               or corr.get("assets") or [])
+    deliverables = (corr.get("deliverables")
+                    or corr.get("delivered_files")
+                    or corr.get("mapping") or [])
+    # 内容级哈希：单值 content_hash，或分项字典 content_hashes
+    # （figure 封版实物形态：{面板名: 结构哈希}）——统一收成集合，
+    # 稿件侧登记值命中集合任一即视为内容级一致。
+    content_hashes = set()
+    if isinstance(corr.get("content_hash"), str):
+        content_hashes.add(corr["content_hash"])
+    ch = corr.get("content_hashes")
+    if isinstance(ch, dict):
+        content_hashes |= {v for v in ch.values() if isinstance(v, str)}
+    elif isinstance(ch, list):
+        content_hashes |= {v for v in ch if isinstance(v, str)}
+    if isinstance(deliverables, list):
+        for d in deliverables:
+            if isinstance(d, dict) and isinstance(d.get("content_hash"),
+                                                  str):
+                content_hashes.add(d["content_hash"])
+    source_shas = set()
+    for s in sources if isinstance(sources, list) else []:
+        if isinstance(s, dict):
+            h = s.get("sha256") or s.get("hash")
+            if h:
+                source_shas.add(h)
+    return {"source_shas": source_shas,
+            "deliverables": deliverables if isinstance(deliverables, list)
+            else [],
+            "content_hashes": content_hashes,
+            "note": corr.get("note")}
+
+
 def check_numbers_figures(manifest_figures, delivery, ledger_values
                           ) -> tuple[list, list]:
     """Figure delivery ↔ 稿件引用侧（figures_manifest）。
@@ -301,7 +347,9 @@ def check_numbers_figures(manifest_figures, delivery, ledger_values
         for f in df.get("files") or []:
             if (f.get("path") or "").rsplit("/", 1)[-1] == src_base and src_base:
                 matched = f
+        hash_done = False
         if src_hash and matched:
+            hash_done = True
             if matched.get("sha256") != src_hash:
                 results.append("error")
                 details.append(
@@ -314,9 +362,88 @@ def check_numbers_figures(manifest_figures, delivery, ledger_values
                     raw=f"manifest={src_hash}, delivery={matched.get('sha256')}"))
             else:
                 details.append(f"文件 {src_base} 哈希两侧一致")
-        else:
-            results.append("not_assessable")
-            details.append("无同名文件或稿件侧未登记 source_hash，哈希对应未检")
+        if not hash_done:
+            # 对应件清单消费（REV-D09）：源资产与交付件异名异格式时，
+            # 字节哈希无从比对——改走清单：稿件侧 source_hash 命中
+            # 图包源资产清单 = 源链真检；清单自相矛盾 / 内容级哈希
+            # 与稿件登记不符 = error；清单未覆盖 = 维持未检并落字。
+            parts = _correspondence_parts(df)
+            if parts is None:
+                results.append("not_assessable")
+                details.append("无同名文件或稿件侧未登记 source_hash，"
+                               "哈希对应未检")
+            else:
+                if src_hash and src_hash in parts["source_shas"]:
+                    details.append(
+                        "对应件清单源链真检通过：稿件侧源资产哈希命中"
+                        "图包源资产清单（异名异格式经清单闭合）")
+                    hash_done = True
+                elif src_hash and parts["source_shas"]:
+                    results.append("not_assessable")
+                    details.append(
+                        "对应件清单未覆盖稿件侧登记源资产"
+                        "（source_hash 不在源资产清单内）：清单未覆盖"
+                        "不等于不符，哈希对应维持未检")
+                elif src_hash:
+                    results.append("not_assessable")
+                    details.append(
+                        "对应件清单在册但源资产缺件"
+                        f"（note：{parts['note'] or '图包未登记'}）"
+                        "：哈希对应维持未检")
+                # 清单内部一致性：交付映射哈希须与 files 清单对得上
+                files_by_base = {
+                    (f.get("path") or "").rsplit("/", 1)[-1]: f
+                    for f in df.get("files") or []}
+                for d in parts["deliverables"]:
+                    if not isinstance(d, dict):
+                        continue
+                    base = (d.get("path") or "").rsplit("/", 1)[-1]
+                    f = files_by_base.get(base)
+                    d_hash = d.get("sha256") or d.get("hash")
+                    if f is not None and d_hash \
+                            and f.get("sha256") != d_hash:
+                        results.append("error")
+                        details.append(
+                            f"对应件清单称交付文件 {base} 哈希 "
+                            f"{str(d_hash)[:12]}… 与 delivery files 清单 "
+                            f"{str(f.get('sha256'))[:12]}… 自相矛盾")
+                        findings.append(_finding(
+                                check_id, "numbers_figures",
+                                "provenance_gap", "inconsistency",
+                            f"图 {fid} 的对应件清单与交付文件清单哈希"
+                            "自相矛盾",
+                            evidence_pointer=f"delivery:{df.get('fig_id')}",
+                            raw=f"correspondence={d_hash}, "
+                                f"files={f.get('sha256')}"))
+                # 内容级哈希：稿件侧有登记才许比对，无登记只留痕
+                m_hash = fig.get("content_hash")
+                if parts["content_hashes"] and m_hash:
+                    if m_hash not in parts["content_hashes"]:
+                        results.append("error")
+                        details.append(
+                            "内容级哈希不一致：稿件侧登记 "
+                            f"{str(m_hash)[:12]}… 不在图包对应件清单的"
+                            "内容级哈希集内")
+                        findings.append(_finding(
+                                check_id, "numbers_figures",
+                                "confirmed_error", "inconsistency",
+                            f"图 {fid} 内容级哈希两侧不一致",
+                            evidence_pointer=f"delivery:{df.get('fig_id')}",
+                            raw=f"manifest={m_hash}, "
+                                f"correspondence="
+                                f"{sorted(parts['content_hashes'])}"))
+                    else:
+                        details.append("内容级哈希两侧一致"
+                                       "（量测面板/形状清单结构哈希）")
+                        hash_done = True
+                elif parts["content_hashes"]:
+                    details.append(
+                        "内容级哈希由图包在对应件清单声明（稿件侧无"
+                        "对应登记，仅留痕不作比对）")
+                if not hash_done and "not_assessable" not in results:
+                    results.append("not_assessable")
+                    details.append("对应件清单未提供可比对锚点，"
+                                   "哈希对应维持未检")
         # 图注未登记数字（只查小数形态，整数多为编号/年份不硬判）
         caption = fig.get("caption") or ""
         decimals = re.findall(r"\d+\.\d+", caption)

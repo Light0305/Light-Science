@@ -1,4 +1,4 @@
-$ light-memory facts light-memory/examples/demo-fullrun/world/proj-a
+$ light-memory facts ../../../../light-memory/examples/demo-fullrun/world/proj-a
 [exit 0]
 当前有效事实 29 条（全账 30 条）：
   fact_cc25b1bc3d18 [evidence] 异常检测（YOLOX 检测 + HF²-VAD）在 7 段含异常事件的测试视频上取得 AUROC 92.1%

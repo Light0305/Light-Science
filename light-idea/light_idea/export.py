@@ -177,6 +177,25 @@ def _render_handoff(card: dict, date: str) -> str:
                        ("key_details", "关键实现细节")):
         L.append(f"- **{label}**：{_spec_value(spec.get(key))}")
     L.append("")
+    fit = spec.get("capability_fit")
+    L.append("## 能力匹配（IDEA-D03：Design 的 resources 区输入）")
+    L.append("")
+    if isinstance(fit, dict):
+        L.append(f"- 队伍现状：{fit.get('team_status') or '（未填）'}")
+        for g in fit.get("gaps") or []:
+            if isinstance(g, dict):
+                L.append(f"- {g.get('capability')}：处置 "
+                         f"{g.get('disposition')}（{g.get('note') or ''}）")
+        blocking = [g.get("capability") for g in fit.get("gaps") or []
+                    if isinstance(g, dict)
+                    and g.get("disposition") == "blocking"]
+        if blocking:
+            L.append("- ⚠️ 构成不可行的能力缺口："
+                     + "、".join(str(b) for b in blocking)
+                     + "——Design 排期须先解此项或显式接受风险。")
+    else:
+        L.append("（未评估）")
+    L.append("")
     exp = spec.get("discriminating_experiment")
     L.append("## 最小判别实验与判读标准（minimum convincing evidence）")
     L.append("")

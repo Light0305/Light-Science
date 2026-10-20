@@ -14,7 +14,7 @@ from . import registry as registry_mod
 from . import route as route_mod
 from . import scan as scan_mod
 from . import scaffold
-from .layout import PIPELINE, STAGES
+from .layout import EXTENSIONS, PIPELINE, STAGES
 
 
 def _fail(msg: str) -> int:
@@ -33,7 +33,8 @@ def cmd_init(args) -> int:
     print(f"项目骨架已生成：{root}（登记头 {head.name}，项目名 {name}）")
     print("阶段目录：" + "、".join(
         STAGES[s]["dir"] for s in PIPELINE + ("memory",))
-        + "、journal/target")
+        + "、journal/target"
+        + "；扩展位目录：patent/cases、软件著作权申请资料、data-sources")
     print("下一步：在各阶段目录内用对应技能的命令建包；"
           "随时 `light-leader status .` 看全项目状态。")
     return 0
@@ -67,12 +68,79 @@ def _print_stage(sid: str, ss: dict) -> None:
         st = it["status"] if it["status"] is not None else "（缺失）"
         term = "（终态）" if it["status"] in spec["terminal"] else ""
         print(f"[{label}] {it['path']}：status={st}{term}")
+        if it["status"] is not None:
+            if it.get("canonical"):
+                print(f"    规范态：{it['canonical']}（LD-03 映射表）")
+            else:
+                print("    注：状态值不在 LD-03 映射表内，原样呈现、"
+                      "不 reinterpret")
         if it.get("error"):
             print(f"    注：{it['error']}")
         for g in it.get("gates", []):
             print(f"    硬门标记：{g['field']} = {g['value']}")
+        for b in it.get("gate_blocks", []):
+            if b["family"] == "blocked_gate":
+                print(f"    门记录（blocked_gate）：{b['gate_id']}"
+                      + (f" —— {b['detail']}" if b.get("detail") else ""))
+            elif b.get("kind") == "returned":
+                print(f"    门记录（return_block）：打回未回补缺项 "
+                      f"{len(b['open_items'])} 条（见 return_record）")
+            else:
+                print("    门记录（return_block）：blocked"
+                      + (f"，原因：{b['reason']}" if b.get("reason")
+                         else ""))
+        for note in it.get("gate_notes", []):
+            print(f"    注：{note}")
         if it.get("blocked_reason"):
             print(f"    blocked 原因：{it['blocked_reason']}")
+
+
+def _print_extension(sid: str, ss: dict) -> None:
+    spec = EXTENSIONS[sid]
+    label = f"{sid}（{spec['skill']}，{spec['slot']}）"
+    if not ss["found"]:
+        print(f"[{label}] 未发现登记头（{spec['carrier']}）")
+        return
+    if sid == "crawler":
+        for ws in ss["items"]:
+            st = ws["status"] if ws["status"] is not None else "（缺失）"
+            print(f"[{label}] {ws['path']}：status={st}"
+                  f"（工作区 {ws.get('workspace_id') or '未登记 ID'}，"
+                  f"目标 {len(ws.get('targets', []))} 个）")
+            if ws.get("canonical"):
+                print(f"    规范态：{ws['canonical']}（LD-03 映射表）")
+            if ws.get("error"):
+                print(f"    注：{ws['error']}")
+            for t in ws.get("targets", []):
+                pc = t.get("precheck_status")
+                pc_txt = pc if pc else "未预检"
+                cb = "，已熔断" if t.get("circuit_broken") else ""
+                print(f"    目标 {t['target_id']}：通道 "
+                      f"{t.get('channel') or '未登记'}，预检 {pc_txt}{cb}")
+        return
+    for it in ss["items"]:
+        st = it["status"] if it["status"] is not None else "（缺失）"
+        term = "（终态）" if it["status"] in spec["terminal"] else ""
+        print(f"[{label}] {it['path']}：status={st}{term}")
+        if it.get("canonical"):
+            print(f"    规范态：{it['canonical']}（LD-03 映射表）")
+        elif it["status"] is not None:
+            print("    注：状态值不在 LD-03 映射表内，原样呈现、"
+                  "不 reinterpret")
+        if it.get("error"):
+            print(f"    注：{it['error']}")
+        for b in it.get("gate_blocks", []):
+            print(f"    门记录（blocked_gate）：{b['gate_id']}"
+                  + (f" —— {b['detail']}" if b.get("detail") else ""))
+        for note in it.get("gate_notes", []):
+            print(f"    注：{note}")
+        for d in it.get("deadlines", []):
+            print(f"    期限：{d.get('label') or d.get('kind')}，"
+                  f"到期 {d.get('due')}")
+        corr = it.get("correction")
+        if corr:
+            print(f"    补正：通知日 {corr.get('notice_date')}，期限 "
+                  f"{corr.get('deadline')}，{len(corr.get('items') or [])} 项")
 
 
 def cmd_status(args) -> int:
@@ -87,6 +155,8 @@ def cmd_status(args) -> int:
         print("注：无 project.yaml 登记头，按文件扫描报告（不影响只读扫描）")
     for sid in PIPELINE + ("memory",):
         _print_stage(sid, report["stages"][sid])
+    for sid in ("patent", "software-copyright", "crawler"):
+        _print_extension(sid, report["extensions"][sid])
     return 0
 
 
@@ -96,11 +166,13 @@ def cmd_route(args) -> int:
         return _fail(f"项目目录不存在：{root}")
     result = route_mod.route(scan_mod.scan_project(root))
     if result["gates"]:
-        print("[硬门] 以下阶段被复核硬门拦住：")
+        print("[硬门] 以下阶段被硬门拦住：")
         for g in result["gates"]:
             print(f"- {g['stage']}：{g['gate']}（登记头证据："
                   + "；".join(g["evidence"]) + "）")
             print(f"  {g['fix']}")
+            if g.get("pointer"):
+                print(f"  指针：{g['pointer']}")
     if result["next"]:
         n = result["next"]
         print(f"[下一步] {n['action']} —— {n['reason']}")

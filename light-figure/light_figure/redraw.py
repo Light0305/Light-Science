@@ -15,6 +15,17 @@ manifest 纪律：面板四角标定动手前落字、对象清单足以不读�
 pengjunchi0 的运行期抛错）、位图残留预先声明（未登记者不许以
 位图形态出现）、状态只经本模块命令推进（registered → built →
 verified），不许手写。
+
+v1.1 manifest 三件（FIG-D04/05/06，与 pptx manifest 同口径）：
+- User.* 语义 ID：文件级构建把每形状的稳定语义 ID 写进 ShapeSheet
+  User 段（SemanticId 行；带 connect 的形状另写 ArrowPlan /
+  ConnectFrom / ConnectTo 行），反抽对账按 ID 钉扎；
+- renderer-effective-fields：manifest 可逐字段声明是否真实影响
+  构建，校验器对「声明生效但构建器未消费」「形状用了未声明生效
+  的字段」逐项报错，防清单字段与执行脱节；
+- arrow_plan + round_noop 门：边必须绑定原图箭头事实（严格模式，
+  见 schema.MANIFEST_STRICT_VERSION 分界）；构建落 rounds 轮次账，
+  内容投影与上一轮相同（纯元数据轮次）不许计为进展、build 拒绝。
 """
 
 from __future__ import annotations
@@ -60,6 +71,164 @@ def vsdx_relpath(fig_id) -> str:
 
 
 # ---------------------------------------------------------------- manifest 校验
+
+def strict_manifest(manifest) -> bool:
+    """严格模式分界（构建单 J2）：version >= 1.1 或已带 arrow_plan
+    键 → connect 必绑 arrow_plan；v1.0 存量走兼容模式不报错。"""
+    if "arrow_plan" in (manifest or {}):
+        return True
+    version = str((manifest or {}).get("version") or "")
+    return version >= schema.MANIFEST_STRICT_VERSION
+
+
+def manifest_projection(manifest) -> dict:
+    """轮次内容投影：决定「这一轮有没有实质变化」的字段集（排除
+    状态/构建/对账等易变登记）。round_noop 门以本投影哈希比对。"""
+    return {
+        "fig_id": manifest.get("fig_id"),
+        "route": manifest.get("route"),
+        "reference": manifest.get("reference"),
+        "canvas": manifest.get("canvas"),
+        "role_palette": manifest.get("role_palette"),
+        "panels": manifest.get("panels"),
+        "shapes": manifest.get("shapes"),
+        "bitmap_residue": manifest.get("bitmap_residue"),
+        "arrow_plan": manifest.get("arrow_plan"),
+        "renderer_effective_fields":
+            manifest.get("renderer_effective_fields"),
+    }
+
+
+def default_effective_fields() -> list:
+    """缺省生效字段声明：构建器消费集全生效（与 schema 注册表同源）。"""
+    return [{"field": f, "effective": True}
+            for f in schema.RENDERER_CONSUMED_FIELDS]
+
+
+def check_effective_fields(manifest, fig_id, label="manifest") -> list:
+    """renderer-effective-fields 声明一致性（FIG-D05）。
+
+    - 声明 effective=true 的字段必须在构建器消费集内；
+    - 形状实际使用的字段必须被声明为生效（未声明声明段时按缺省
+      全生效处理，兼容 v1.0）；声明为不生效但形状在用同样报错。
+    """
+    gaps = []
+    declared = manifest.get("renderer_effective_fields")
+    declared_map = None
+    if declared is not None:
+        if not isinstance(declared, list):
+            return [f"图 {fig_id} {label} 的 renderer_effective_fields "
+                    "须为列表（逐字段 {{field, effective}}）"]
+        declared_map = {}
+        for entry in declared:
+            if not isinstance(entry, dict) \
+                    or not entry.get("field") \
+                    or not isinstance(entry.get("effective"), bool):
+                gaps.append(f"图 {fig_id} {label} 的生效字段声明条目"
+                            "须为 {field, effective: bool}")
+                continue
+            field = entry["field"]
+            if field in declared_map:
+                gaps.append(f"图 {fig_id} {label} 的生效字段 {field} "
+                            "重复声明")
+            declared_map[field] = entry["effective"]
+            if entry["effective"] \
+                    and field not in schema.RENDERER_CONSUMED_FIELDS:
+                gaps.append(
+                    f"图 {fig_id} {label} 声明字段 {field} 真实影响构建，"
+                    "但构建器并不消费它（renderer-effective-fields："
+                    "声明与执行脱节，FIG-D05）")
+    used = set()
+    for shape in manifest.get("shapes") or []:
+        for key in ("panel_id", "box_local", "text", "connect",
+                    "residue_id"):
+            if shape.get(key) is not None:
+                used.add(key)
+        for skey in (shape.get("style") or {}):
+            used.add(f"style.{skey}")
+    effective_map = declared_map
+    if effective_map is None:
+        effective_map = {f: True for f in schema.RENDERER_CONSUMED_FIELDS}
+    for field in sorted(used):
+        if field not in schema.RENDERER_CONSUMED_FIELDS:
+            gaps.append(
+                f"图 {fig_id} {label} 形状使用了字段 {field}，但它不在"
+                "构建器消费集内：写了不会生效（FIG-D05）")
+        elif effective_map.get(field) is not True:
+            gaps.append(
+                f"图 {fig_id} {label} 形状使用了字段 {field}，但"
+                "renderer_effective_fields 未把它声明为生效：构建器"
+                "不会消费它（FIG-D05）")
+    return gaps
+
+
+def check_arrow_plan(manifest, fig_id, shape_ids, label="manifest") -> list:
+    """arrow_plan 边事实绑定（FIG-D06）。
+
+    严格模式：计划条目四件齐（id/from/to/fact）、端点指向已登记
+    形状、每条 connect 必带 arrow_plan_id 且端点与计划一致、每条
+    计划必被至少一条边引用。兼容模式（v1.0 存量）不查绑定，但已
+    声明的计划条目本身仍须形态合法。
+    """
+    gaps = []
+    plan = manifest.get("arrow_plan")
+    entries = {}
+    if plan is not None:
+        if not isinstance(plan, list):
+            return [f"图 {fig_id} {label} 的 arrow_plan 须为列表"]
+        for entry in plan:
+            if not isinstance(entry, dict):
+                gaps.append(f"图 {fig_id} {label} 的 arrow_plan 条目须为对象")
+                continue
+            pid = entry.get("arrow_plan_id")
+            for field in schema.ARROW_PLAN_FIELDS:
+                if not entry.get(field):
+                    gaps.append(f"图 {fig_id} {label} 的 arrow_plan 条目"
+                                f"缺 {field}（边事实绑定四件齐，FIG-D06）")
+            if not pid:
+                continue
+            if pid in entries:
+                gaps.append(f"图 {fig_id} {label} 的 arrow_plan_id "
+                            f"重复：{pid}")
+            entries[pid] = entry
+            for endpoint in ("from", "to"):
+                target = entry.get(endpoint)
+                if target and target not in shape_ids:
+                    gaps.append(f"图 {fig_id} {label} 的 arrow_plan "
+                                f"{pid} 的 {endpoint} 指向不存在的形状 "
+                                f"{target}")
+    if not strict_manifest(manifest):
+        return gaps
+    referenced = set()
+    for shape in manifest.get("shapes") or []:
+        connect = shape.get("connect") or {}
+        if not connect:
+            continue
+        pid = connect.get("arrow_plan_id")
+        sid = shape.get("shape_id")
+        if not pid:
+            gaps.append(f"图 {fig_id} 形状 {sid} 有 connect 但未绑定 "
+                        "arrow_plan_id（严格模式：边必须绑定原图箭头"
+                        "事实，FIG-D06）")
+            continue
+        referenced.add(pid)
+        entry = entries.get(pid)
+        if entry is None:
+            gaps.append(f"图 {fig_id} 形状 {sid} 绑定的 arrow_plan "
+                        f"{pid} 不在 arrow_plan 登记中")
+            continue
+        for endpoint in ("from", "to"):
+            if connect.get(endpoint) != entry.get(endpoint):
+                gaps.append(f"图 {fig_id} 形状 {sid} 的 connect."
+                            f"{endpoint}={connect.get(endpoint)!r} 与 "
+                            f"arrow_plan {pid} 登记的 "
+                            f"{entry.get(endpoint)!r} 不一致")
+    for pid in entries:
+        if pid not in referenced:
+            gaps.append(f"图 {fig_id} {label} 的 arrow_plan {pid} "
+                        "无任何边引用（计划与清单脱节）")
+    return gaps
+
 
 def _box_ok(box) -> bool:
     return isinstance(box, (list, tuple)) and len(box) == 4 \
@@ -147,6 +316,8 @@ def validate_manifest(manifest, root=None) -> list:
             if target is not None and target not in seen_ids:
                 gaps.append(f"图 {fig_id} 形状 {shape.get('shape_id')} 的"
                             f"连接 {endpoint} 指向不存在的形状 {target}")
+    gaps.extend(check_effective_fields(manifest, fig_id))
+    gaps.extend(check_arrow_plan(manifest, fig_id, seen_ids))
 
     media_names = set()
     for residue in manifest.get("bitmap_residue") or []:
@@ -221,7 +392,7 @@ def init_manifest(root, fig_id: str) -> dict:
             ref_size = None
     manifest = {
         "fig_id": fig_id,
-        "version": "1.0",
+        "version": schema.MANIFEST_STRICT_VERSION,
         "status": "draft",
         "route": "file_build",
         "reference": {"path": ref_rel,
@@ -236,6 +407,9 @@ def init_manifest(root, fig_id: str) -> dict:
         ],
         "shapes": [],
         "bitmap_residue": [],
+        "arrow_plan": [],
+        "renderer_effective_fields": default_effective_fields(),
+        "rounds": [],
         "trace_layer": {"used": False, "opacity": 0.25,
                         "removed_before_delivery": True},
         "label_check": {"done": False, "by": None, "at": None},
@@ -398,6 +572,21 @@ def _shape_xml(shape, geom, shape_pk_id, media_rel_id=None,
     geometry = (f'<Section N="Geometry" IX="0">'
                 f'<Cell N="NoFill" V="0"/><Cell N="NoLine" V="0"/>'
                 + "".join(rows) + "</Section>")
+    # User.* 语义 ID（FIG-D04）：稳定语义 ID 写进 ShapeSheet User 段，
+    # 把 manifest 行与成品对象钉死；带 connect 的形状另记箭头绑定，
+    # 供反抽按 ID 对账（Visio-Illustrator 的 User.CodexId 法）。
+    user_rows = [("SemanticId", shape["shape_id"])]
+    connect = shape.get("connect") or {}
+    if connect.get("arrow_plan_id"):
+        user_rows.append(("ArrowPlan", connect["arrow_plan_id"]))
+    if connect.get("from"):
+        user_rows.append(("ConnectFrom", connect["from"]))
+    if connect.get("to"):
+        user_rows.append(("ConnectTo", connect["to"]))
+    user_section = '<Section N="User">' + "".join(
+        f'<Row IX="{i}" N="{escape(str(name), _ATTR_ESC)}">'
+        f'<Cell N="Value" V="{escape(str(value), _ATTR_ESC)}"/></Row>'
+        for i, (name, value) in enumerate(user_rows)) + "</Section>"
     character = (f'<Section N="Character"><Row IX="0">'
                  f'<Cell N="Size" V="{font_pt / 72:.6f}"/></Row></Section>')
     text = shape.get("text") or ""
@@ -413,8 +602,8 @@ def _shape_xml(shape, geom, shape_pk_id, media_rel_id=None,
     name_esc = escape(str(shape["shape_id"]), {'"': "&quot;"})
     return (f'<Shape ID="{shape_pk_id}" NameU="{name_esc}" '
             f'Name="{name_esc}" Type="{shape_attr_type}">'
-            + _cells_xml(cells) + character + geometry + foreign
-            + text_xml + "</Shape>")
+            + _cells_xml(cells) + character + geometry + user_section
+            + foreign + text_xml + "</Shape>")
 
 
 def build_vsdx(root, fig_id: str, by: str | None = None) -> dict:
@@ -435,6 +624,16 @@ def build_vsdx(root, fig_id: str, by: str | None = None) -> dict:
     if manifest["status"] == "draft":
         raise RedrawError(["manifest 仍为 draft 骨架（标定未落字）："
                             "补齐后经 redraw install 登记再构建"])
+    # round_noop 门（FIG-D06）：内容投影与上一轮相同 = 纯元数据轮次，
+    # 不许计为进展——先改清单（形状/箭头计划/残留/标定）再 build。
+    projection_hash = component_hash(manifest_projection(manifest))
+    rounds = manifest.get("rounds") or []
+    if rounds and rounds[-1].get("projection_hash") == projection_hash:
+        raise RedrawError([
+            f"round_noop：本轮 manifest 内容投影与上一轮（round "
+            f"{rounds[-1].get('round')}）完全相同，构建产物不会有任何"
+            "实质变化——纯元数据轮次不许计为进展；先实质修改清单再 "
+            "build（FIG-D06 无效轮次门）"])
 
     role_entry = (manifest.get("role_palette") or {}).get("entry_id")
     shapes = list(manifest.get("shapes") or [])
@@ -596,6 +795,13 @@ def build_vsdx(root, fig_id: str, by: str | None = None) -> dict:
     out_path.write_bytes(buffer.getvalue())
     digest = sha256_file(out_path)
 
+    from .util import utcnow as _utcnow
+    manifest.setdefault("rounds", []).append({
+        "round": len(manifest.get("rounds") or []) + 1,
+        "at": _utcnow(),
+        "projection_hash": projection_hash,
+        "artifact_sha256": digest,
+    })
     manifest["status"] = "built"
     manifest["build"] = {
         "builder": "light-figure redraw build (file_build)",
@@ -642,11 +848,21 @@ def extract_shapes(vsdx_path) -> list:
             continue
         cells = {}
         text = ""
+        user = {}
         for child in el:
             if local(child.tag) == "Cell":
                 cells[child.get("N")] = child.get("V")
             elif local(child.tag) == "Text":
                 text = "".join(child.itertext()).strip()
+            elif local(child.tag) == "Section" \
+                    and child.get("N") == "User":
+                for row in child:
+                    if local(row.tag) != "Row":
+                        continue
+                    for cell in row:
+                        if local(cell.tag) == "Cell" \
+                                and cell.get("N") == "Value":
+                            user[row.get("N")] = cell.get("V")
         shapes.append({
             "shape_id": el.get("NameU"),
             "pin_x": float(cells.get("PinX", 0)),
@@ -654,6 +870,10 @@ def extract_shapes(vsdx_path) -> list:
             "width": float(cells.get("Width", 0)),
             "height": float(cells.get("Height", 0)),
             "text": text,
+            "user_semantic_id": user.get("SemanticId"),
+            "user_arrow_plan": user.get("ArrowPlan"),
+            "user_connect_from": user.get("ConnectFrom"),
+            "user_connect_to": user.get("ConnectTo"),
         })
     return sorted(shapes, key=lambda s: str(s["shape_id"]))
 
@@ -671,8 +891,12 @@ def extract_and_reconcile(root, fig_id: str) -> dict:
     expected = {}
     for shape in manifest.get("shapes") or []:
         geom = shape_geometry(manifest, shape)
+        connect = shape.get("connect") or {}
         expected[shape["shape_id"]] = {
-            **geom, "text": str(shape.get("text") or "").strip()}
+            **geom, "text": str(shape.get("text") or "").strip(),
+            "arrow_plan_id": connect.get("arrow_plan_id"),
+            "connect_from": connect.get("from"),
+            "connect_to": connect.get("to")}
     for residue in manifest.get("bitmap_residue") or []:
         bound = [s for s in manifest.get("shapes") or []
                  if s.get("type") == "image_residue"
@@ -697,6 +921,24 @@ def extract_and_reconcile(root, fig_id: str) -> dict:
         if act["text"] != exp["text"]:
             diffs.append(f"形状 {sid} 文本与清单不符："
                          f"成品 {act['text']!r} vs 清单 {exp['text']!r}")
+        # User.* 语义 ID 钉扎（FIG-D04）：本工具构建的成品每形状必带
+        # SemanticId 且与形状名一致；存量外部成品缺 User 段时只记
+        # 「未钉扎」差集——由合同门按构建来源决定硬度，此处如实报。
+        if act.get("user_semantic_id") is not None \
+                and act["user_semantic_id"] != sid:
+            diffs.append(f"形状 {sid} 的 User.SemanticId 为 "
+                         f"{act['user_semantic_id']!r}，与清单语义 ID "
+                         "不一致（ID 钉扎对账，FIG-D04）")
+        if exp.get("arrow_plan_id") is not None:
+            if act.get("user_arrow_plan") != exp["arrow_plan_id"]:
+                diffs.append(f"形状 {sid} 的 User.ArrowPlan 为 "
+                             f"{act.get('user_arrow_plan')!r}，与清单 "
+                             f"arrow_plan {exp['arrow_plan_id']} 不一致"
+                             "（边事实绑定回读，FIG-D06）")
+            if act.get("user_connect_from") != exp["connect_from"] \
+                    or act.get("user_connect_to") != exp["connect_to"]:
+                diffs.append(f"形状 {sid} 的 User 连接端点与清单 "
+                             "connect 不一致（FIG-D06）")
     for sid in got:
         if sid not in expected:
             diffs.append(f"成品含未登记形状 {sid}（清单外形状不许出现）")

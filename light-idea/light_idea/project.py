@@ -24,6 +24,7 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
+from . import casebook as casebook_mod
 from .schema import ALL_STATES, empty_card
 from .util import make_idea_id, read_yaml, slugify, today, write_yaml
 
@@ -57,6 +58,8 @@ def init_project(root: Path, direction: str) -> Path:
     (root / "chains").mkdir(parents=True, exist_ok=True)   # 三期：演进链素材
     (root / "exports").mkdir(parents=True, exist_ok=True)  # 三期：交接三件套
     (p["novelty"] / ".gitkeep").write_text("", encoding="utf-8")
+    # v1.1（IDEA-D04）：判例集冷启动——建项即播种随包种子判例
+    casebook_mod.seed_casebook(root)
     write_yaml(p["project_yaml"], {
         "project": direction,
         "project_id": f"{slugify(direction)}_{__import__('hashlib').sha256(direction.strip().lower().encode()).hexdigest()[:6]}",
@@ -251,7 +254,7 @@ def render_card_md(card: dict) -> str:
     L.append("")
 
     spec = card.get("exec_spec") or {}
-    L.append("## 执行级规格区（可执行定版必填六项 + 判别实验）")
+    L.append("## 执行级规格区（可执行定版必填六项 + 能力匹配 + 判别实验）")
     for key in ("datasets", "strongest_baseline", "metrics", "ablations",
                 "resource_budget", "key_details"):
         v = spec.get(key)
@@ -271,6 +274,25 @@ def render_card_md(card: dict) -> str:
                  f"；零: {exp.get('readout_null')}）")
     else:
         L.append("- **最小判别实验**：（未填）")
+    L.append("")
+
+    # 能力匹配（IDEA-D03）：这个想法该不该由这支队伍现在做
+    fit = spec.get("capability_fit")
+    L.append("## 能力匹配区（这支队伍现在能不能做这个想法）")
+    if isinstance(fit, dict):
+        L.append(f"- **队伍现状**：{fit.get('team_status') or '（未填）'}")
+        for item in fit.get("required") or []:
+            if isinstance(item, dict):
+                L.append(f"- 所需能力：{item.get('capability')}"
+                         f"——{item.get('detail') or ''}")
+        labels = {"have": "已有", "fillable": "可短期补",
+                  "blocking": "构成不可行"}
+        for g in fit.get("gaps") or []:
+            if isinstance(g, dict):
+                L.append(f"- 处置[{labels.get(g.get('disposition'), g.get('disposition'))}]"
+                         f" {g.get('capability')}：{g.get('note') or ''}")
+    else:
+        L.append("（未评估——定版门会拦：能力匹配必填）")
     L.append("")
 
     neg = card.get("negative") or {}

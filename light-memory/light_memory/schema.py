@@ -30,10 +30,11 @@ OBJECT_STATUSES = ("active", "superseded", "archived", "referenced")
 #: 关系状态：unresolved = 前向引用（目标未出现，保留目标原文标识）。
 RELATION_STATUSES = ("resolved", "unresolved", "superseded")
 
-#: 上游包登记名（收编适配器与水位线的键）。
+#: 上游包登记名（收编适配器与水位线的键）。新三包于 v1.1 集成步
+#: （MM2-13）补入：patent / software-copyright / crawler。
 UPSTREAM_PACKAGES = ("literature", "idea", "design", "experiment",
                      "analysis", "write", "figure", "journal-select",
-                     "review")
+                     "review", "patent", "software-copyright", "crawler")
 
 # ---------------------------------------------------------------- 算子表
 
@@ -56,6 +57,14 @@ MERGE_OPERATORS = {
     "figure_provenance": "merge_union",
     "failure_record": "merge_union",
     "review_concern": "merge_union",
+    # v1.1 集成步（MM2-13）新三包事实类型，先登记再落账：
+    # 判断/登记类不许 merge 稀释口径，只许新版取代；留存台账类可合并。
+    "patent_assessment": "supersede_only",
+    "copyright_facts": "supersede_only",
+    "copyright_registration": "immutable",
+    "source_snapshot": "supersede_only",
+    "crawl_provenance": "merge_union",
+    "crawl_target_profile": "merge_union",
     "generic": "free",
 }
 

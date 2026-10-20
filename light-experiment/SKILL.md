@@ -1,16 +1,25 @@
+---
+name: light-experiment
+description: Use when 需要按已冻结的设计书真正执行实验：逐 run 留痕、登记偏离与失败、与预期登记对账，或向分析阶段交付执行包时。
+version: "1.1"
+author: light-experiment contributors
+license: MIT
+---
+
 # light-experiment
 
 按 light-design 的**冻结设计书**执行实验：照单跑、逐 run 留全痕、与预期
 登记逐行对账，把「跑了什么、得到什么、偏了什么、失败在哪」封装成
 Analysis 可直接消费的**执行包**。
+设计依据：`04-experiment/REDESIGN-DRAFT.md` v0.1（含 2026-10-20 用户
+拍板 7 项）与 `04-experiment/LEARNING.md` 十三条硬约束。
 
-**当前版本：v1.0**。能力构成：项目骨架 + 执行包系统（execution.yaml /
-run.yaml 四区 / events.jsonl / 对账）+ 确定性校验器 + 双层状态机 +
-基线复现验收子流程（E1）+ 偏离登记与闭包作废（E4）+ 失败分类与
-回流（E5）+ 对账实质化（E6）+ 预算闸（E2）。端到端演示（合成/预演
-设计、明示身份）已全程实跑至 delivered，结论见文末「演示小结」，
-局限见「已知边界」。设计依据（普查/深读/设计草案）属开发档案，
-不在本仓库内。
+**当前版本：v1.0（封版，2026-10-20）**——一期：项目骨架 + 执行包系统
+（execution.yaml / run.yaml 四区 / events.jsonl / 对账占位）+ 确定性
+校验器 + 双层状态机。二期：基线复现验收子流程（E1）、偏离登记与
+闭包作废（E4）、失败分类与回流（E5）、对账实质化（E6）、预算闸
+（E2 补）。三期：端到端演示（合成/预演设计、明示身份）全程实跑 +
+本文件定版。演示结论见文末「三期演示小结」，局限见「已知边界」。
 
 ## 定位与边界
 
@@ -29,11 +38,11 @@ run.yaml 四区 / events.jsonl / 对账）+ 确定性校验器 + 双层状态机
 
 | 环 | 职责 | 落地 |
 |---|---|---|
-| E0 执行承接与对齐校验 | 消费四件套、冻结哈希与 amendment 链核对、缺项打回 | `intake` + intake_report + 打回门 |
+| E0 执行承接与对齐校验 | 消费四件套、冻结哈希与 amendment 链核对、缺项打回 | `intake` + intake_report + 打回门（v1.1 EXP-D04 补齐草案 §4 全集：零占位符扫描 + 干预核查点齐备检查 + 依赖计划产出 execution_plan.md） |
 | E1 基线复现 | 照复现入口跑基线、rubric 对账、冷启动重跑验收（拍板 ③ 硬要求） | `acceptance init/record`：三层叶子验收表冻结、证据只认冷启动重跑、验收门挂 sanity → executing |
 | E2 编排与预算 | 拓扑序调度、三层预算闸、熔断只许停不许改（拍板 ⑤）、恢复 = 新 run + 血缘（拍板 ②） | attempts 预算账 + budget_ledger 总账 + `budget check`（触发落事件 + killed_budget 候选；无放宽命令）+ run-new --retry-of 血缘 |
 | E3 留痕与轨迹 | run 记录字段下限、事件只增、产物内容寻址登记 | run.yaml 四区 + events.jsonl + Sacred 下限校验 |
-| E4 偏离与异常 | 偏离登记、闭包作废（拍板 ④ 自动算 + 公示 + 显式覆写口）、处置 | `deviation raise/publish/apply/override`：出生证明逐维比对 + 依赖图传递闭包、生效清单公示、作废只追加 |
+| E4 偏离与异常 | 偏离登记、闭包作废（拍板 ④ 自动算 + 公示 + 显式覆写口）、处置 | `deviation raise/publish/apply/override`：出生证明逐维比对 + 依赖图传递闭包、生效清单公示、作废只追加；干预核查点机械核验（v1.1 EXP-D03：run-finish 时三类核验器比对声称 vs 实际生效值，不符自动转 deviated 候选）；`stale` 开工前预检视图（v1.1 EXP-D02：现行哈希链逐维比对出三态清单，只读） |
 | E5 失败诊断与回流 | exit_status 分类学、MAST × IVE 双层分类、自动回流条目（拍板 ⑥）、失败预算制 | `failure classify/review` + `reflux list/update`：分类落定自动生成回流条目、同签名 2 补丁 + 2 重写上限报警 |
 | E6 封装与交接 | 对账表逐行回填、三层事实判定、未清零不交付、向 Analysis 交付 | `reconcile fill/check`（只收分布不收单点）+ delivered 门 + `export-card` 投影 |
 
@@ -53,7 +62,7 @@ light-experiment advance <project> <exec_id> --to <包级状态> [--reason <阻�
 light-experiment advance <project> <exec_id> --run <run_id> --to reconciled
 light-experiment list <project> [<exec_id>]
 light-experiment render <project> <exec_id>
-# 验收 / 偏离 / 失败 / 对账 / 预算
+# 二期
 light-experiment acceptance init <project> <exec_id> [--runs <条目,逗号分隔>] [--threshold F] [--tolerance-pct F]
 light-experiment acceptance record <project> <exec_id> <leaf_id> --verdict pass|fail \
     --evidence-run <冷启动重跑 run_id> [--evidence <文件> ...] [--observed X --expected Y --variance Z]
@@ -76,11 +85,24 @@ light-experiment reconcile fill <project> <exec_id> <row_id> --readout <JSON> \
 light-experiment reconcile check <project> <exec_id>
 light-experiment budget check <project> <exec_id>
 light-experiment export-card <project> <exec_id> [--out <路径>]
+# 三期（v1.1）
+light-experiment stale <project> <exec_id> [--spec <现行状态声明文件>] \
+    [--out-json <路径>] [--out-md <路径>]
 ```
 
 run 规格（`--spec`）在身份下限五项之外可带 `cold_start: true`：声明本
 run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，作 E1 验收
 证据的真伪凭据（事后回填冒充，锚不一致即被校验器检出）。
+
+run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
+`claimed`（声称值）之外应带 `verify`（v1.1 EXP-D03）：`verify.kind`
+三类核验器之一——`equals`（数值/标量相等；声称给列表时按取值集比
+对）、`range`（声称给 `{min, max}` 区间，实际值须全落区间内）、
+`file_hash`（声称给 sha256，实际文件字节哈希须一致）；
+`verify.source` 给实际值来源指针：`{file, key}` 从 JSON/JSONL 文件
+机械取键，`file` 可写 `@metrics` 指代本 run 在 run-finish 登记的
+`--metrics-file`。无 `verify` 的核查点是 v1.0 存档形态，终止时如实
+报 not_verified，不冒充已验。
 
 ## 硬纪律（校验器/状态机写死）
 
@@ -107,7 +129,7 @@ run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，
    （或被偏离作废时先转 deviated），reconciled 无出边；结论区与
    run_finished 事件锚对不上即报错。
 9. **未清零不交付**：delivered 门 = 全部 run 已 reconciled + 对账行与
-   预期登记逐行对齐 + 无 run 停在 deviated；对账清零检查的
+   预期登记逐行对齐 + 无 run 停在 deviated；二期加：对账清零检查的
    硬问题（缺行 / blocked / 作废未替代）恒拦，包一旦进入实质对账
    （reconcile fill 用过）pending 行也拦；偏离登记在场时须全处置、
    失败登记在场时失败 run 须全分类。
@@ -132,6 +154,13 @@ run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，
 14. **对账只收分布**：readout_actual 只收 {mean, spread, n,
     replication_level} 分布摘要，单点/伪分布（n<2）登记时即拒；
     random_sources 逐行落字，只换种子且冻结其余自动标「有偏估计」。
+15. **干预声称必须机械核验**（v1.1 EXP-D03）：带 verify 的干预核查
+    点在 run-finish 时由工具从产物机械读取实际生效值与声称值比对
+    （三类核验器），逐条结论落结论区 + intervention_check 事件锚；
+    不符（fail）或实际值取不到（unverifiable）时 completed 终止
+    自动转 deviated 候选并点名——工具没有手工标 pass 的入口，
+    执行者自述的实际值一律不作数。校验器以事件锚对账核验记录，
+    结论区回改即暴露。
 
 ## 操作规程
 
@@ -194,6 +223,33 @@ run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，
   run 以 run-finish --exit-status killed_budget 正规终止留痕，不许
   工具代杀无痕；要继续烧，先回 Design 走 amendment 上调熔断线。
 
+### 干预核查规程（v1.1 EXP-D03，run-finish 内置）
+
+1. 开跑前在 run 规格里给每条干预核查点登记 verify（核验方式 +
+   来源指针）；来源优先用产物文件（metrics/summary/配置件），
+   metrics 用 `@metrics` 指代，避免路径在 run 间漂移。
+2. run-finish 自动核验，逐条结论只有四态（pass / fail /
+   unverifiable / not_verified）；出现 fail 或 unverifiable 且本
+   run 本要 completed 的，工具自动转 deviated 候选——按 E4 偏离
+   规程处置（登记偏离、开替代 run），不许改核查点登记或换个来源
+   文件重跑 finish 蒙混（身份区已冻结，改登记即哈希不符）。
+3. not_verified 的核查点是存档形态遗留：新设计承接后应在 spec
+   层补齐 verify 再开跑；报告中如实呈现未核验条数，不许把
+   not_verified 写成「已核验」。
+
+### 开工前 stale 预检规程（v1.1 EXP-D02）
+
+1. 每批开跑前（尤其上游刚出新结果、设计刚 amendment、代码/数据
+   刚动过时）跑一次 `stale`：无 --spec 时只比对设计链；要比对
+   代码/数据/参数的现行状态，先把现行状态按条目写成声明文件
+   再以 --spec 传入（声明制：工具不猜现行值）。
+2. 清单里 stale 的 run 不许直接拿来对账消费：按逐条补跑建议
+   新开 attempt；上游 stale 的条目等上游补跑完再跑。voided 是
+   既成事实，不重复处置。
+3. stale 只读：报告（stale_report.json + STALE_REPORT.md）之外
+   不改包内任何状态；发现 stale 不等于作废——作废仍走 E4 偏离
+   闭包流程（raise → publish → apply）。
+
 ## 交付前自检清单
 
 - [ ] 承接缺口清零、四件套哈希与冻结版一致（validate 全绿）
@@ -202,6 +258,8 @@ run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，
       只许外科式改回被篡改字段，整文件回滚会抹掉 voided_by 等
       只追加记，本身即二次篡改
 - [ ] 每条 run 身份下限齐全、哈希与事件锚一致；失败 run 均有抢救登记
+- [ ] 干预核查结论已落字：带 verify 的核查点全 pass（不符已转
+      deviated 并按偏离规程处置），not_verified 条数如实入报告
 - [ ] 基线验收表已冻结且 verdict=passed（有基线条目时），证据全是冷启动 run
 - [ ] 偏离全登记、全公示、全处置；override 均留名留理由
 - [ ] 失败全分类（MAST × IVE），回流条目已生成且状态如实
@@ -218,34 +276,45 @@ run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，
   旁路 `blocked`（原因 + 解阻条件齐全才许转入，只许回到受阻前状态）；
   sanity → executing 另挂 E1 验收门。
 
-## 演示小结（合成/预演设计）
+## 三期演示小结（合成/预演设计，2026-10-20）
 
-开发期的真实演示设计停在 reviewed（上游定版冻结需异家族评审），
-端到端演示按时序声明用**合成四件套**（与上游导出同形态构造、
-哈希自洽、自签冻结，身份在演示报告中明示）实跑，执行包终点
-delivered：
+真实 frozen 设计尚不存在（Design 演示停在 reviewed），三期演示按
+草案 §1 时序声明用**合成四件套**（按 light_design.export 同形态
+构造、哈希自洽、自签冻结，身份在演示目录 README 与报告中明示）
+端到端实跑（examples/demo-synthetic/，报告 demo-report.md）：
 
-- 承接：缺项变体打回 2 项（缺 reproducibility + 一行判读缺
-  null 向）→ 合格件承接；基线验收三叶全过（冷启动重跑为唯一
-  证据，偏差 0.50% < 容差 2%）。
-- 执行：三臂判别实验真跑（固定阈值 / 神谕扫描 / 统计量预测，
-  逐段分布回填）；人为注入 params 篡改被校验器重算检出 →
+- 承接：缺项变体打回 2 项（缺 reproducibility + 一行判读缺 null
+  向）→ 合格件承接；sanity 内基线验收三叶全过（冷启动重跑为
+  唯一证据，偏差 0.50% < 容差 2%）。
+- 执行：三臂真跑（固定 72.638 / 神谕 77.887 / 预测 77.835，
+  MOTA 逐段分布）；人为注入 params 篡改被校验器重算检出 →
   偏离闭包 {被篡改 run + 下游 2 条 planned} → 作废 + 替代 run
-  重跑；人为注入数据版本缺段 → failed_data → fundamental
-  分类 → 上游回流条目自动生成。
-- 恢复：长 run 中途杀进程 → 心跳静默超阈判 DEAD 留痕 →
-  killed_external 正规终止 + 抢救 → --retry-of 新 run 凭段
-  输入内容哈希复用未变段、重跑其余完成；对账逐行清零。
-- 两处如实打折：冷启动「干净环境」以新进程 + 空目录 + 仅
-  提交物近似（未做容器隔离；模拟为确定性种子，读数逐字一致
-  是构造性质）；预算账为登记制，熔断触发由测试集覆盖。
+  重跑；人为注入数据版本缺段 → failed_data → fundamental 分类
+  → design_inbox 回流条目自动生成。
+- 恢复：长 run 中途杀进程 → 心跳静默 8.4s 判 DEAD 留痕 →
+  killed_external 正规终止 + 抢救 → --retry-of 新 run 凭段输入
+  内容哈希复用 2 段、重跑 4 段完成；对账 5 行清零 → delivered。
+- 两处如实打折：冷启动「干净环境」以新进程 + 空目录 + 仅提交物
+  近似（未做容器隔离；模拟为确定性种子，读数逐字一致是构造
+  性质）；预算账为登记制，熔断触发实测在二期测试集。
+
+v1.1 复跑（2026-10-21）：同一演示增补三项实测，终点仍 delivered
+——承接三件（EXP-D04：设计级干预核查点声明承接零缺口、依赖计划
+落盘、占位符扫描无命中；缺项变体仍恰打回 2 项）；干预机械核验
+（EXP-D03：R-PRED 核查点 equals/@metrics 真核验，a1 与替代 run
+a2 均 passed，a2 的核查点经 --retry-of 继承）；stale 预检
+（EXP-D02：current 7 · stale 0 · voided 1，未比对维度如实列明）。
+核验不符的反例链在单元测试集覆盖（见包 README v1.1 增补记录）。
 
 ## 已知边界（v1.0 封版口径，如实标注）
 
 1. 对账只做事实层：readout 三向正式判定（positive/negative/null）
    由 Analysis 回写，本包 status=filled 只表示事实材料齐备可判。
-2. 干预核查点（intervention_checks）仍只随 spec 落身份区存档，
-   声称值 vs 实际生效值的机械核验未做。
+2. 干预核查点机械核验已落地（v1.1 EXP-D03）：带 verify 的核查点
+   在 run-finish 时机械比对声称 vs 实际生效值。残留边界：实际值
+   只认文件来源（JSON/JSONL 取键、文件哈希）；非文件型证据
+   （人工观察读数、外部系统界面值）无从机械读取，只能登记为无
+   verify 的存档式核查点、如实报 not_verified。
 3. 产物池仍为登记制：salvage/metrics/证据以外部路径 + sha256 登记，
    内容寻址拷贝入 artifacts/ 池未做；登记文件事后被改，哈希可复核
    但工具不主动巡检。
@@ -268,18 +337,21 @@ delivered：
    登记，工具不实测；无进展检测（StuckDetector 式）未做，
    killed_no_progress 靠执行者按规程落终止分类。心跳/DEAD 判据
    同理是规程 + 事件留痕，工具不内置守护进程巡检。
-8. 篡改修复纪律（演示实测）：被篡改的 run 记录只许外科式
+8. 篡改修复纪律（三期演示实测）：被篡改的 run 记录只许外科式
    改回锚定字段；整文件回滚会把 voided_by 等只追加记一并抹掉，
    终局校验以「作废标记未落字」检出——修复本身必须留痕
    （事件 + 偏离登记），且作废处置不因修复撤销。
-9. 替代 run 的顺序约束（演示实测）：--retry-of 只接
+9. 替代 run 的顺序约束（三期演示实测）：--retry-of 只接
    completed/failed/deviated 的尝试，reconciled 终态不可作恢复
    源——作废 run 的替代必须在其对账前建好。
 10. 有偏估计自动警告按「只换种子 + 冻结其余」机械触发，在无
-    调参成分的锚臂行上可能过度触发(（演示中基线/神谕锚臂两行
+    调参成分的锚臂行上可能过度触发（三期演示 R-FIX/R-ORA 两行
     实测）：警告只作标记，逐行裁定靠人并记入报告，不改登记事实。
-11. 承接校验仍为设计规格子集：零占位符扫描、干预核查点齐备
-    检查、依赖计划产出未补。
+11. 承接校验已补齐草案 §4 全集（v1.1 EXP-D04）。残留边界：零
+    占位符扫描的模式清单是冻结清单（schema.PLACEHOLDER_PATTERNS），
+    清单外的新占位写法扫不出，靠修订清单补入；干预核查点齐备
+    检查只验「声明在场」，声明内容是否对题归 Design 侧评审与
+    EXP-D03 的执行期机械核验。
 12. 演示输入为合成设计：真实链路（Design 定版冻结 → 真实
     四件套 → 本技能承接）待多模型环境补完 Design 侧异家族
     评审后才能走通，本技能的承接校验不为演示降低口径。

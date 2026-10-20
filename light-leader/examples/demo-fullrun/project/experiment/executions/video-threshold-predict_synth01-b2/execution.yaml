@@ -20,7 +20,7 @@ budget_ledger:
     gpu_hours: null
     api_cost: null
   spent:
-    wall_clock_s: 16.830000000000002
+    wall_clock_s: 16.880000000000003
     gpu_hours: 0
     api_cost: 0
   design_budget:
@@ -39,6 +39,12 @@ intake_report:
   source_dir: light-experiment/examples/demo-synthetic/inputs/export-good
   gaps: []
   registry_run_ids:
+  - R-FIX
+  - R-ORA
+  - R-PRED
+  - R-NEG
+  - R-LONG
+  execution_plan:
   - R-FIX
   - R-ORA
   - R-PRED

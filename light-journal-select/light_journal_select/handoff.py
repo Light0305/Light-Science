@@ -32,6 +32,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from . import schema
 from .checkrecord import (
     build_check_record, check_record_structure, record_hash,
     resolve_write_root, run_write_selfcheck,
@@ -39,6 +40,7 @@ from .checkrecord import (
 from .gates import GateError, advance_to, require_selection
 from .project import FILES, find_candidate, save_selection
 from .util import dump_json, load_structured, sha256_file, today
+from .verify import Report, check_policy_checks
 
 ENTRY_KINDS = ["guideline", "template"]
 
@@ -108,6 +110,35 @@ def _process_files(root: Path, target: Path, file_specs: list[dict],
     return entries
 
 
+def _policy_section_lines(selection: dict) -> list[str]:
+    """政策核读段（JS-13）：必查项点名带回 + 缺项显形。"""
+    items = selection.get("policy_checks") or []
+    gaps = (selection.get("handoff") or {}).get("policy_gaps")
+    if gaps is None:
+        covered = {i.get("topic") for i in items if isinstance(i, dict)}
+        gaps = [t for t in schema.POLICY_REQUIRED_TOPICS
+                if t not in covered]
+    lines = ["", "## 政策核读（JS-13：定刊时点逐刊现行页面）", ""]
+    if items:
+        for item in items:
+            mark = "冲突（阻断项）" if item.get("status") == "conflict" \
+                else item.get("status")
+            lines.append(
+                f"- {item.get('topic')}：{mark}——"
+                f"{item.get('finding') or item.get('note') or ''}"
+                f"（{item.get('source_url') or '无出处'}，访问于 "
+                f"{item.get('accessed_at') or '未标'}；政策是活文本，"
+                "投稿间隔过长或页面更新须复核）")
+    else:
+        lines.append("- 本轮交接未带回逐刊政策核读条目（见下方缺项）。")
+    if gaps:
+        lines.append("- **政策必查项未覆盖**："
+                     + "、".join(gaps)
+                     + "——投稿前必须逐刊核读补齐，不许以通行惯例"
+                     "代替该刊现行政策（JS-13）。")
+    return lines
+
+
 def _render_handoff_md(selection: dict, candidate: dict, record: dict,
                        manifest: dict, self_check: dict,
                        root: Path, today_str: str) -> str:
@@ -135,6 +166,9 @@ def _render_handoff_md(selection: dict, candidate: dict, record: dict,
         f"- 下载清单：{FILES['manifest']}（已下载 "
         f"{counts['downloaded']} 件 / 待下载 {counts['pending_download']} 件"
         + (f"：{', '.join(pending_names)}" if pending_names else "") + "）",
+    ]
+    lines += _policy_section_lines(selection)
+    lines += [
         "", "## Write 开工提示", "",
         "在 Write 稿件包目录执行（--record 指向本清单同目录的 "
         "check-record.json）：", "",
@@ -185,6 +219,31 @@ def run_handoff(root, fields: dict | None = None,
         raise GateError(["缺指南字段文件（--fields）：B–I 组指南派生"
                          "字段须由执行者读官网作者指南后提供，"
                          "工具不许凭空编造"])
+
+    # ---- 政策必查项（JS-13）：字段文件 policies 逐刊核读条目
+    # 先校验后落字；条目报 conflict = 政策冲突阻断项，不许
+    # 静默交接（须回报告处置或改定刊）。未覆盖的必查项落
+    # policy_gaps 显形（构建单判断 J3：缺项显形 + 冲突硬阻断）。
+    policy_items = (fields or {}).get("policies")
+    if policy_items is not None:
+        rep_p = Report()
+        check_policy_checks(policy_items, rep_p, where="policies")
+        if rep_p.errors:
+            raise GateError([f"{i['code']}: {i['message']}"
+                             for i in rep_p.errors])
+        conflicts = [i.get("topic") for i in policy_items
+                     if isinstance(i, dict)
+                     and i.get("status") == "conflict"]
+        if conflicts:
+            raise GateError([
+                f"政策核读报冲突（{', '.join(conflicts)}）：本稿情形"
+                "与目标刊现行政策冲突，是阻断项不是提示项（JS-13）"
+                "——请回报告处置（改定刊或调整稿件情形）后再交接"])
+        selection["policy_checks"] = policy_items
+    covered = {i.get("topic") for i in selection.get("policy_checks") or []
+               if isinstance(i, dict)}
+    policy_gaps = [t for t in schema.POLICY_REQUIRED_TOPICS
+                   if t not in covered]
 
     # ---- 先组装并自检 check-record，有 error 整批拒绝（不落盘）
     record, gaps = build_check_record(selection, candidate, fields,
@@ -262,6 +321,7 @@ def run_handoff(root, fields: dict | None = None,
         "record_id": record["A"].get("record_id"),
         "record_hash": record_hash(record),
         "self_check": self_check,
+        "policy_gaps": policy_gaps,
         "at": today_str,
     }
     selection.setdefault("handoff_history", []).append({

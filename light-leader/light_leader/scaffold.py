@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from . import __version__
-from .layout import PIPELINE, SCAFFOLD_DIRS, STAGES
+from .layout import EXTENSIONS, PIPELINE, SCAFFOLD_DIRS, STAGES
 from .util import dump_yaml, today
 
 PROJECT_FILE = "project.yaml"
@@ -26,6 +26,9 @@ Light-Science 科研项目（总控 light-leader 登记）。
 {rows}
 | journal/target/ | 选刊交接落点 | light-journal-select 定刊 handoff 的模板与作者指南（仅本地使用） |
 | memory/ | light-memory | 跨阶段沉淀（四账 + Obsidian 投影），由 light-memory 在此建包 |
+| patent/cases/ | light-patent（出口层扩展位） | 专利案件目录（一案一目录），不入主流水线 |
+| 软件著作权申请资料/ | light-software-copyright（出口层扩展位） | 软著案件目录，软件定版后启动 |
+| data-sources/ | light-crawler（通道层扩展位） | 数据源登记、预检记录与留存，供 literature / experiment 数据入口 |
 
 ## 用法
 
@@ -53,6 +56,15 @@ def init_project(root, name: str, title: str = "", goal: str = "") -> Path:
             "dir": spec["dir"],
             "carrier": spec["carrier"],
         })
+    extensions = []
+    for sid, spec in EXTENSIONS.items():
+        extensions.append({
+            "extension": sid,
+            "skill": spec["skill"],
+            "slot": spec["slot"],
+            "dir": spec["dir"],
+            "carrier": spec["carrier"],
+        })
     data = {
         "kind": "light-leader/project",
         "version": "1.0",
@@ -62,6 +74,7 @@ def init_project(root, name: str, title: str = "", goal: str = "") -> Path:
         "goal": goal,
         "created_at": today(),
         "stages": stages,
+        "extensions": extensions,
     }
     dump_yaml(head, data)
     rows = "\n".join(

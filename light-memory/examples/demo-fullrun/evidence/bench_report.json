@@ -2,8 +2,8 @@
   "kind": "light-memory/bench-report",
   "version": "1.0",
   "generated_at": "2026-10-20T14:08:22+00:00",
-  "world": "light-memory/examples/demo-fullrun/world",
-  "set": "light-memory/examples/demo-fullrun/inputs/bench_set_fullrun.jsonl",
+  "world": "../../../../light-memory/examples/demo-fullrun/world",
+  "set": "../../../../light-memory/examples/demo-fullrun/inputs/bench_set_fullrun.jsonl",
   "config": {
     "recipes": {
       "default": {

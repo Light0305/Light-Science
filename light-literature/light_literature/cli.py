@@ -3,7 +3,9 @@
 命令：init / ingest / triage / parse（产品解析，Doc2X 轨，收费，
 先估算页数并确认额度）/ verify / export-content-list /
 translate-scaffold / notes / evidence add|correct / glossary add /
-find / verify-identity / screen（screen check 做校验）/ matrix
+find / verify-identity / screen（screen check 做校验）/ matrix /
+metadata-backfill（元数据回填）/ claim-locate / claim-check（主张核查）/
+ask（问语料）
 （参数见各子命令 --help）。
 
 产品解析只有双轨：Doc2X 轨（parse）与模型直读轨（无代码，由执行
@@ -18,10 +20,13 @@ import json
 import sys
 from pathlib import Path
 
+from . import ask as ask_mod
+from . import claimcheck as claimcheck_mod
 from . import contentlist as contentlist_mod
 from . import evidence as evidence_mod
 from . import find as find_mod
 from . import glossary as glossary_mod
+from . import metadata as metadata_mod
 from . import notes as notes_mod
 from . import parse as parse_mod
 from . import project as project_mod
@@ -62,6 +67,52 @@ def main(argv: list[str] | None = None) -> int:
     p_ing.add_argument("--source-version", default="preprint",
                        choices=["version_of_record", "preprint", "abstract_only"])
     p_ing.add_argument("--source", default=None, help="来源说明（如 arXiv:1706.03762）")
+    p_ing.add_argument("--backfill-online", action="store_true",
+                       help="入库回填时联网查 Crossref（默认只跑本地源）")
+
+    p_meta = sub.add_parser(
+        "metadata-backfill",
+        help="元数据回填（LIT-D03）：逐字段标来源/核实状态写入 paper.yaml")
+    p_meta.add_argument("paper_dir", help="单篇论文目录（含 paper.yaml）")
+    p_meta.add_argument("--online", action="store_true",
+                        help="联网查 Crossref 按 DOI 回填（默认只跑本地源）")
+    p_meta.add_argument("--confirm", action="store_true",
+                        help="用户已逐字核对原文首页：已填字段标 verified")
+
+    p_cloc = sub.add_parser(
+        "claim-locate",
+        help="主张证据定位（LIT-D04）：在已入库语料块级定位候选锚点，"
+             "无命中如实回 not_mentioned")
+    p_cloc.add_argument("project_dir")
+    p_cloc.add_argument("--claim", required=True)
+    p_cloc.add_argument("--paper", default=None,
+                        help="只在指定论文内定位（默认全语料）")
+    p_cloc.add_argument("--top", type=int, default=10)
+
+    p_cchk = sub.add_parser(
+        "claim-check",
+        help="主张支持核查（LIT-D04）：三值判定经机械校验后追加 "
+             "claim_support.jsonl（只增）")
+    p_cchk.add_argument("project_dir")
+    p_cchk.add_argument("--paper", required=True)
+    p_cchk.add_argument("--claim", required=True)
+    p_cchk.add_argument("--verdict", required=True,
+                        choices=list(claimcheck_mod.VERDICTS))
+    p_cchk.add_argument("--anchors", default=None,
+                        help="逗号分隔的证据锚点（如 S001,S002）")
+    p_cchk.add_argument("--note", default=None)
+
+    p_ask = sub.add_parser(
+        "ask", help="问语料（LIT-D01）：块级检索 + 引用白名单 + "
+                    "证据不足固定拒答，产物落 问答记录/")
+    p_ask.add_argument("project_dir")
+    p_ask.add_argument("--question", required=True)
+    p_ask.add_argument("--answer", default=None,
+                       help="依据命中块写出的答案（须同时给 --cite）")
+    p_ask.add_argument("--cite", action="append", default=None,
+                       help="引用锚点：paper_id#S001 或裸锚点，可多次")
+    p_ask.add_argument("--max-citations", type=int,
+                       default=ask_mod.DEFAULT_MAX_CITATIONS)
 
     for name, helptext in (("triage", "逐页分诊"),
                            ("verify", "锚点校验 + 图注配对 + 译文对齐校验"),
@@ -153,6 +204,7 @@ def main(argv: list[str] | None = None) -> int:
                          help="解析后端（产品路径只有 doc2x；local 是研究/对照"
                               "工具，不在产品发布中）")
 
+
     # `screen check <project_dir>` 语法糖：argparse 无法在同一命令下同时
     # 容纳位置参数与子命令，这里把 check 改写为独立命令 screen-check。
     if argv and argv[0] == "screen" and len(argv) > 1 and argv[1] == "check":
@@ -169,8 +221,31 @@ def main(argv: list[str] | None = None) -> int:
             info = project_mod.ingest(
                 Path(args.project_dir), Path(args.pdf), doi=args.doi,
                 title=args.title, source_version=args.source_version,
-                source=args.source)
+                source=args.source, backfill_online=args.backfill_online)
             _print(info)
+            return 0
+        if args.cmd == "metadata-backfill":
+            project_dir, paper_id = _resolve_paper(args.paper_dir)
+            _print(metadata_mod.backfill_metadata(
+                project_dir, paper_id, online=args.online,
+                confirm=args.confirm))
+            return 0
+        if args.cmd == "claim-locate":
+            _print(claimcheck_mod.locate_claim(
+                Path(args.project_dir), args.claim, paper_id=args.paper,
+                top=args.top))
+            return 0
+        if args.cmd == "claim-check":
+            anchors = ([a.strip() for a in args.anchors.split(",")
+                        if a.strip()] if args.anchors else [])
+            _print(claimcheck_mod.record_claim_check(
+                Path(args.project_dir), args.paper, args.claim,
+                args.verdict, anchors=anchors, note=args.note))
+            return 0
+        if args.cmd == "ask":
+            _print(ask_mod.ask(
+                Path(args.project_dir), args.question, answer=args.answer,
+                citations=args.cite, max_citations=args.max_citations))
             return 0
         if args.cmd == "triage":
             _print(triage_mod.triage(Path(args.project_dir), args.paper_id))

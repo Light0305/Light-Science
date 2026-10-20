@@ -70,7 +70,7 @@ def _infer_title(pdf_path: Path, doc: pymupdf.Document) -> str:
 
 def ingest(project_dir: Path, pdf: Path, doi: str | None = None,
            title: str | None = None, source_version: str = "preprint",
-           source: str | None = None) -> dict:
+           source: str | None = None, backfill_online: bool = False) -> dict:
     """把一篇 PDF 入库：建单篇目录、复制 原文.pdf、算 SHA-256、写 paper.yaml。
 
     论文目录名 = 题名 slug + '_' + 内容 SHA-256 前 6 位（稳定 ID 的雏形）。
@@ -132,5 +132,15 @@ def ingest(project_dir: Path, pdf: Path, doi: str | None = None,
                 paper_id, final_title, doi or "", source_version,
                 sha256, pages, "ingested", today,
             ])
+    # LIT-D03：入库自动回填元数据（默认只跑本地源、不联网；失败留痕
+    # 不阻断入库）。联网 (Crossref) 回填须 backfill_online=True 显式开启。
+    try:
+        from . import metadata as _metadata_mod
+        summary = _metadata_mod.backfill_metadata(
+            project_dir, paper_id, online=backfill_online)
+        paper_yaml["metadata"] = summary["metadata"]
+    except Exception as exc:  # 回填尽力而为，失败不许拖垮已完成的入库
+        paper_yaml["metadata_backfill_error"] = str(exc)
+
     paper_yaml["paper_dir"] = str(pdir)
     return paper_yaml

@@ -273,16 +273,27 @@ def build_verify_record(cand: dict, today_str: str) -> dict:
         try:
             doaj = fetch_json_plain(f"https://doaj.org/api/journals/{issn}")
             apc = ((doaj.get("bibjson") or {}).get("apc") or {})
+            # v1.1（JS-12）：APC 落结构化费用组——DOAJ 只给标价
+            # 与有无，收费时点/附加费/减免 DOAJ 不登记，如实
+            # None/未知，不臆造；协议覆盖状态未知写 unknown。
             if apc.get("has_apc") is False:
                 metrics["apc"] = _verified(
-                    0, f"https://doaj.org/toc/{issn}", str(year),
+                    {"list_price": 0, "currency": None,
+                     "charge_timing": None, "extra_fees": [],
+                     "waiver_available": None,
+                     "agreement_coverage": "unknown"},
+                    f"https://doaj.org/toc/{issn}", str(year),
                     today_str, "doaj")
             elif apc.get("has_apc") and apc.get("max"):
                 top = apc["max"][0]
                 metrics["apc"] = _verified(
-                    top.get("price"), f"https://doaj.org/toc/{issn}",
-                    str(year), today_str, "doaj",
-                    currency=top.get("currency"))
+                    {"list_price": top.get("price"),
+                     "currency": top.get("currency"),
+                     "charge_timing": None, "extra_fees": [],
+                     "waiver_available": None,
+                     "agreement_coverage": "unknown"},
+                    f"https://doaj.org/toc/{issn}",
+                    str(year), today_str, "doaj")
         except Exception:
             pass  # 落到下方 unconfirmed
     if "apc" not in metrics:
@@ -338,6 +349,7 @@ def write_name_list(pool_names: list[str]) -> Path:
         "source": "demo-fixture 名单（stop-predatory 风格，演示注入；"
                   "靶子为虚构刊，非真实名单命中）",
         "version": "demo-0.1",
+        "year": "",
     }]
     if "Animals" in pool_names:
         rows.append({
@@ -346,11 +358,12 @@ def write_name_list(pool_names: list[str]) -> Path:
             "source": "demo-fixture（演示注入的软警告，"
                       "非真实核查结论）",
             "version": "demo-0.1",
+            "year": "",
         })
     with path.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(
             fh, fieldnames=["name", "issn", "condition", "source",
-                            "version"])
+                            "version", "year"])
         writer.writeheader()
         writer.writerows(rows)
     driver_note("风险名单 fixture 已生成（inputs/name-list.csv）："
@@ -541,7 +554,7 @@ def main() -> int:
                     -(s.get("rate_per_10k") or 0))
         pool = [c for c in cards if c["tier"] == "target"] or cards
         target = sorted(pool, key=_evidence)[0]
-        driver_note(f"CEA 未入证据卡（分档按归一化率排序取卡，"
+        driver_note(f"CEA 未入证据卡（分档按 JS-D01 复合排序取卡，"
                     f"CEA 未进前 {len(cards)}），改按先例证据量"
                     f"（篇数→覆盖式数→归一化率）在 target 档选定："
                     f"{target['name']}（档位 {target['tier']}）")

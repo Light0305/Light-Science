@@ -1,5 +1,13 @@
 """领域门三层（R3/RV-16/RV-17）：通用轴地板 + 按刊事实层 + 蒸馏覆盖层。
 
+第零层范式判定（v1.1，REV-D01）：intake 后、领域判定前在登记头落
+paradigm 登记（词表 methods/empirical/benchmark/theory/humanities +
+判定依据）。范式是定性权重层不是判定层——只调两处：覆盖层条目的
+适用性（paradigms 字段）与席位定性权重的规程指引（SKILL 5B 第零
+层）；不动法医层、不动代码计分与封顶（回归测试钉死跨范式法医
+产物逐字一致）。检索式多形（REV-D08）：DG-J05 条目卡登记多形
+列表，匹配走归一化文本，命中口径不变。
+
 纪律：
 - 通用轴恒加载（地板）：条目带条目卡五元数据（稳定 ID / 出处 /
   严重度 / 范围 / 执行层），来源四分标 generic_quality，不许伪装
@@ -72,7 +80,44 @@ JOURNAL_ITEMS = [
      "severity_if_hit": "minor"},
     {"item_id": "DG-J05", "field": ("G", "ai_policy"),
      "axis": "Compliance", "title": "目标刊要求 AI 披露时稿件带披露声明",
-     "severity_if_hit": "major"},
+     "severity_if_hit": "major",
+     # 检索多形列表（v1.1 REV-D08）：单条正则对措辞形态敏感（演示
+     # DG-J05 实测：披露标题 Declaration of AI Use 不在检索式内而
+     # 误判 hit）。形态登记在条目卡上：标题同义形 + 大小写/标点变体
+     # （匹配前归一化）+ 双语标题词表 + 正文披露句式。命中口径不变：
+     # hit = 要求披露而多形检索仍未检出，须人工复核的旗标。
+     "match_forms": [
+         # —— 标题同义形（英）
+         r"declaration of ai use",
+         r"declaration on the use of ai",
+         r"ai use declaration",
+         r"statement on ai use",
+         r"ai disclosure",
+         r"disclosure of ai use",
+         r"disclosure statement",
+         r"declaration of generative ai",
+         r"generative ai disclosure",
+         r"artificial intelligence disclosure",
+         r"declaration of artificial intelligence use",
+         # —— 双语标题词表（中）
+         r"人工智能使用声明",
+         r"人工智能披露声明",
+         r"生成式人工智能声明",
+         r"生成式人工智能使用声明",
+         r"ai 使用声明",
+         r"ai使用声明",
+         # —— 正文披露句式
+         r"ai assisted",
+         r"ai generated content",
+         r"generated with the assistance of",
+         r"prepared with the assistance of ai",
+         r"was written with the assistance of",
+         r"large language model",
+         r"生成式 ai",
+         r"生成式ai",
+         r"生成式人工智能",
+         r"大语言模型",
+     ]},
     {"item_id": "DG-J06", "field": ("C", "keyword_limit"),
      "axis": "Compliance", "title": "关键词数不超目标刊限额",
      "severity_if_hit": "minor"},
@@ -80,9 +125,25 @@ JOURNAL_ITEMS = [
 
 _WORD = re.compile(r"\w+", re.UNICODE)
 _TABLE_SEP = re.compile(r"^\|[-: |]+\|$")
-_DISCLOSURE = re.compile(
-    r"(?i)(ai\s+disclosure|disclosure\s+statement|人工智能披露|"
-    r"生成式\s*AI|AI-assisted)")
+_NON_WORD = re.compile(r"[^\w]+", re.UNICODE)
+
+
+def normalize_text(text: str) -> str:
+    """检索归一化（REV-D08）：小写 + 标点/空白折叠为单空格。
+
+    大小写与标点变体（AI-Assisted / ai assisted / AI assisted:）
+    归一后同形，形态覆盖靠条目卡的 match_forms 列表而非正则技巧。
+    """
+    return _NON_WORD.sub(" ", (text or "").lower()).strip()
+
+
+def match_disclosure(text: str, forms) -> str | None:
+    """多形检索：任一形态在归一化文本中命中即返回该形态（否则 None）。"""
+    normalized = normalize_text(text)
+    for form in forms or []:
+        if re.search(form, normalized):
+            return form
+    return None
 
 
 class DomainError(Exception):
@@ -269,11 +330,16 @@ def _j_ai_policy(up, record):
     policy = _journal_value(record, "G", "ai_policy") or {}
     if not policy.get("disclosure_required"):
         return "not_applicable", "目标刊 AI 政策未要求披露，本条未触发"
+    item = next(i for i in JOURNAL_ITEMS if i["item_id"] == "DG-J05")
+    forms = item.get("match_forms") or []
     joined = "\n".join(up["sections"].values())
-    if _DISCLOSURE.search(joined):
-        return "miss", "目标刊要求 AI 披露，稿件章节中检出披露声明"
+    hit_form = match_disclosure(joined, forms)
+    if hit_form:
+        return "miss", "目标刊要求 AI 披露，稿件章节中检出披露声明" \
+                       f"（多形检索命中形态：{hit_form}）"
     return "hit", "目标刊要求 AI 披露（disclosure_required），" \
-                  "稿件章节中未检出披露声明（机械检索口径）"
+                  f"稿件章节经多形检索（条目卡登记 {len(forms)} 形）" \
+                  "仍未检出披露声明：命中为须人工复核的旗标，非定罪"
 
 
 def _j_keyword_limit(up, record):
@@ -388,6 +454,16 @@ def load_overlay(path) -> dict:
             gaps.append(f"覆盖层条目 {iid} 的 confidence 须为 0–1 数值")
         if item.get("severity_if_hit") not in schema.SEVERITIES:
             gaps.append(f"覆盖层条目 {iid} 的 severity_if_hit 不在严重度词表")
+        paradigms = item.get("paradigms")
+        if paradigms is not None:
+            if not isinstance(paradigms, list) or not paradigms:
+                gaps.append(f"覆盖层条目 {iid} 的 paradigms 须为非空列表"
+                            "（范式适用性字段，REV-D01/D12 预留位）")
+            else:
+                bad = [p for p in paradigms if p not in schema.PARADIGMS]
+                if bad:
+                    gaps.append(f"覆盖层条目 {iid} 的 paradigms 含词表外"
+                                f"范式 {bad}（词表 {schema.PARADIGMS}）")
         chk = item.get("check") or {}
         if chk.get("kind") not in schema.OVERLAY_CHECK_KINDS:
             gaps.append(f"覆盖层条目 {iid} 的 check.kind {chk.get('kind')!r} "
@@ -424,10 +500,22 @@ def _overlay_check(up, chk) -> tuple[str, str]:
     return "not_applicable", f"未知检查种类 {kind!r}"
 
 
-def run_overlay(up, overlay) -> list:
+def run_overlay(up, overlay, paradigm=None) -> list:
     rows = []
     for item in overlay.get("items") or []:
-        result, detail = _overlay_check(up, item.get("check") or {})
+        applicable = item.get("paradigms")
+        if applicable and paradigm is not None \
+                and paradigm not in applicable:
+            # 范式适用性（REV-D01 第零层唯一调节点之一）：登记范式
+            # 不在条目适用集内 → 不适用，依据落字到判定行。
+            result, detail = "not_applicable", \
+                f"范式 {paradigm} 不在条目适用范式 {applicable} 内" \
+                "（范式依据见登记头 paradigm 登记，本条按范式不适用）"
+        else:
+            result, detail = _overlay_check(up, item.get("check") or {})
+            if applicable and paradigm is None:
+                detail += "；注：条目带范式适用性而本包范式未登记，" \
+                          "适用性未按范式过滤（reported 门将点名）"
         rows.append(schema.domain_check_row(
             item["item_id"], "overlay", result,
             axis=item.get("axis"), title=item.get("title"),
@@ -483,11 +571,42 @@ def summarize(rows) -> dict:
 
 # ---------------------------------------------------------------- 编排
 
-def run_domain(root, overlay_path=None, today_str=None) -> dict:
+def register_paradigm(review: dict, paradigm, basis, *, by=None,
+                      today_str=None) -> dict:
+    """范式登记（REV-D01 第零层）：词表 + 依据落字 + 不许静默改写。
+
+    同值重复登记保留原登记（幂等）；异值拒绝——换范式等于换评审
+    定性权重基线，必须开新 round，不许在同一轮里悄悄换。
+    """
+    gaps = []
+    if paradigm not in schema.PARADIGMS:
+        gaps.append(f"范式 {paradigm!r} 不在词表 {schema.PARADIGMS}")
+    if not (basis or "").strip():
+        gaps.append("范式登记须带判定依据（basis 落字：凭什么判为此范式）")
+    existing = review.get("paradigm")
+    if existing and existing.get("paradigm") != paradigm:
+        gaps.append(f"范式已登记为 {existing.get('paradigm')}，不许静默"
+                    f"改写为 {paradigm}（换范式开新 round）")
+    if gaps:
+        raise DomainError(gaps)
+    if existing:
+        return existing
+    record = {"paradigm": paradigm, "basis": basis.strip(),
+              "registered_at": today_str or today(),
+              "registered_by": by or "light-review domain"}
+    review["paradigm"] = record
+    return record
+
+
+def run_domain(root, overlay_path=None, today_str=None, paradigm=None,
+               paradigm_basis=None, paradigm_by=None) -> dict:
     """跑领域门三层并落 domain_gate.jsonl + 登记头登记。
 
     落点（状态机不新增状态）：本命令可在 intake 后任意时点重跑；
     结果由 reported 门消费（SKILL §6/§8.1 写明落点与理由）。
+    范式（第零层）：以 --paradigm/--paradigm-basis 随本命令登记
+    （intake 后、领域判定前落字）；未登记时如实记 paradigm=None，
+    条目带范式适用性时另记 paradigm_required（reported 门点名）。
     """
     root = Path(root)
     pkg = load_package(root)
@@ -500,6 +619,10 @@ def run_domain(root, overlay_path=None, today_str=None) -> dict:
     if drift:
         raise DomainError([f"承接快照漂移（STALE），拒绝在旧快照上跑领域门：{d}"
                            for d in drift])
+    if paradigm is not None:
+        register_paradigm(review, paradigm, paradigm_basis,
+                          by=paradigm_by, today_str=today_str)
+    paradigm_value = (review.get("paradigm") or {}).get("paradigm")
     up = _upstream(root, review)
 
     rows = run_universal(up)
@@ -521,9 +644,13 @@ def run_domain(root, overlay_path=None, today_str=None) -> dict:
 
     overlay_info = None
     precedence = None
+    paradigm_required = bool((review.get("domain") or {})
+                             .get("paradigm_required"))
     if overlay_path:
         overlay = load_overlay(overlay_path)
-        rows += run_overlay(up, overlay)
+        if any((it.get("paradigms") for it in overlay.get("items") or [])):
+            paradigm_required = True
+        rows += run_overlay(up, overlay, paradigm=paradigm_value)
         precedence = overlay["precedence"]["on_conflict"]
         rows = resolve_overrides(rows, precedence)
         overlay_info = {
@@ -541,6 +668,8 @@ def run_domain(root, overlay_path=None, today_str=None) -> dict:
 
     review["domain"] = {
         "ran_at": today_str or today(),
+        "paradigm": paradigm_value,
+        "paradigm_required": paradigm_required,
         "overlay": overlay_info,
         "fact_source": ({"record_path": record_pointer,
                          "verified_at": freshness["verified_at"],

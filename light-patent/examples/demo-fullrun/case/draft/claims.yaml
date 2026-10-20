@@ -1,0 +1,102 @@
+kind: light-patent/claims
+case_id: PT-case_4b3e0c
+claims:
+- claim_no: 1
+  type: method
+  depends_on: []
+  preamble: 一种家禽异常行为检测方法，包括：
+  features:
+  - feature_ref: CF-01
+    box: necessary
+    text: 获取舍内监控视频流并按固定帧间隔抽取视频帧序列
+    support:
+      state: explicit
+      anchors:
+      - P001
+      spec_section: 发明内容
+  - feature_ref: CF-02
+    box: necessary
+    text: 将视频帧序列输入时序融合检测模型得到每只家禽个体的行为特征向量，其中时序融合检测模型包含空间特征提取模块与时序聚合模块
+    support:
+      state: explicit
+      anchors:
+      - P001
+      - E001
+      spec_section: 发明内容
+  - feature_ref: CF-03
+    box: necessary
+    text: 根据行为特征向量与个体基线行为分布之间的偏差量计算异常分数
+    support:
+      state: explicit
+      anchors:
+      - E001
+      spec_section: 发明内容
+  - feature_ref: CF-04
+    box: necessary
+    text: 当异常分数超过自适应阈值时输出异常行为报警信息，其中自适应阈值由个体基线行为分布的统计量确定
+    support:
+      state: inherent
+      anchors:
+      - P001
+      spec_section: 发明内容
+- claim_no: 2
+  type: method
+  depends_on:
+  - 1
+  preamble: 根据权利要求1所述的家禽异常行为检测方法，其特征在于：
+  features:
+  - feature_ref: CF-05
+    box: embodiment_choice
+    text: 时序融合检测模型中的时序聚合模块采用滑动窗口注意力对视频帧序列进行加权聚合
+    support:
+      state: explicit
+      anchors:
+      - C001
+      spec_section: 具体实施方式
+- claim_no: 3
+  type: apparatus
+  depends_on: []
+  preamble: 一种家禽异常行为检测装置，包括：
+  features:
+  - feature_ref: CF-06
+    box: necessary
+    text: 视频采集单元，用于获取舍内监控视频流并按固定帧间隔抽取视频帧序列
+    support:
+      state: explicit
+      anchors:
+      - F001
+      spec_section: 附图说明
+  - feature_ref: CF-07
+    box: necessary
+    text: 处理单元，用于运行权利要求1所述方法中的时序融合检测模型并输出异常行为报警信息
+    support:
+      state: explicit
+      anchors:
+      - F001
+      spec_section: 附图说明
+- claim_no: 4
+  type: medium
+  depends_on: []
+  preamble: 一种计算机可读存储介质，其上存储有计算机程序，
+  features:
+  - feature_ref: CF-08
+    box: necessary
+    text: 该程序被处理器执行时实现权利要求1所述的方法步骤
+    support:
+      state: explicit
+      anchors:
+      - C001
+      spec_section: 具体实施方式
+claim_count: 4
+extra_fee_claims: 0
+distinguishing_refs:
+- CF-02
+- CF-03
+ai_sufficiency:
+  items:
+  - model_modules
+  - model_levels_links
+  - training_steps_params
+  - input_output_setting
+  - scenario_binding
+registered_at: '2026-10-20'

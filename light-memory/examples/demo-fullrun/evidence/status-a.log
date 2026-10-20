@@ -1,4 +1,4 @@
-$ light-memory status light-memory/examples/demo-fullrun/world/proj-a
+$ light-memory status ../../../../light-memory/examples/demo-fullrun/world/proj-a
 [exit 0]
 记忆项目 proj-a（项目 turkey-threshold-prediction，范围 project）
   计数：{'objects': 26, 'events': 76, 'facts': 27, 'relations': 15, 'disputes_open': 0}

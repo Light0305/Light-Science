@@ -19,6 +19,8 @@
 - finalized_executable：执行级规格六项齐全 + pre-mortem 已过 + verdict 合法
                     （CAUTION 须附薄点说明）+ 跨模型判定收据合法（异家族）
                     + 最接近工作全部已核实（verified）+ 试点状态已显式登记
+                    + 能力匹配齐备且无 blocking 缺口（v1.1 IDEA-D03；
+                    概念级同样要求齐备，但 blocking 允许）
 - finalized_conceptual：同上的查新/收据/核实门 + 卡面显式标概念级；
                     执行级规格允许未齐，但缺项会被记录进定版备注
 - killed          ：kill 记录齐全——reason/source/失败二分类必填；
@@ -40,6 +42,7 @@ from .schema import (
     VERDICTS,
     _nonempty_str,
     _ref_ok,
+    capability_fit_errors,
     model_family,
     validate_card,
 )
@@ -238,11 +241,16 @@ def _gate_finalized_executable(card: dict) -> list[str]:
     missing = _exec_missing(card)
     if missing:
         errs.append("定版门（可执行）：执行级规格缺项：" + "、".join(missing))
+    # 能力匹配（IDEA-D03）：子区齐备 + 覆盖完整 + 无 blocking 缺口
+    errs += capability_fit_errors(card, for_executable=True)
     return errs
 
 
 def _gate_finalized_conceptual(card: dict) -> list[str]:
     errs = _gate_finalized_common(card)
+    # 能力匹配（IDEA-D03）：子区须齐备，blocking 缺口允许（概念定版
+    # 的题中之义），但不许以「未评估」冒充概念级
+    errs += capability_fit_errors(card, for_executable=False)
     if card.get("finalization_level") != "conceptual":
         errs.append(
             "定版门（概念）：须先在卡上显式标注 finalization_level=conceptual"

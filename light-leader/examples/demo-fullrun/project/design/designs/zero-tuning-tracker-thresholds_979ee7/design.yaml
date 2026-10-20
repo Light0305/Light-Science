@@ -298,6 +298,14 @@ evaluation:
     direction: higher_is_better
     convention_source: MOTChallenge 与种子论文（CEA 2025, DOI 10.1016/j.compag.2025.110856）正文口径（承卡
       metrics）
+  sesoi:
+    value: 2.0
+    unit: MOTA 百分点
+    direction: higher
+    bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+    basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+    estimand_ref: claims.primary_claims[C1]
+    summary_measure: mean_diff
   guardrail_metrics:
   - name: IDF1
     bound: 段均值不得低于 R-FIXED 对照 1 点以上（不许靠牺牲身份保持换 MOTA）
@@ -466,24 +474,104 @@ handoff:
   expected_registry:
   - run_id: R-S0-MOT17
     expected: MOT17 留一序列下回归预测优于常数预测（映射存在性门）；不过 → 回炉 facet，不进 S1
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ORACLE
     expected: 6 段逐段神谕三阈值与神谕 MOTA 落盘（含同等时长段间 θ 差异清单）
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-FIXED
     expected: 6 段固定阈值 MOTA/IDF1/HOTA 落盘（下限锚）
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-PRED
     expected: 按 evaluation.readout 三向判读：距神谕 ≤2 点且全面优于固定 = 正向；任一段低于固定阈值基线 = 负向信号，汇总判读不许挑段
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-01
     expected: 去轨迹长度特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-02
     expected: 去置信分布特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-03
     expected: 去密度特征后段均值 MOTA 变化量（组件重要则 ≥1 点下降）
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-04
     expected: 常数预测段均值 MOTA：回归优势 ≥2 点则映射存在；否则主张 C1 不成立
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-05
     expected: 全程统计量变体与主通道段级差：<1 点则主张 C2 成立
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   - run_id: R-ABL-06
     expected: 去时长代理特征后判读不变则 AC1 被排除；优势消失则 AC1 成立、C1 回炉
+    sesoi:
+      value: 2.0
+      unit: MOTA 百分点
+      direction: higher
+      bounds: 等价界取 ±2 个百分点对称双侧界（段级均值差落入 [-2, +2] 点内为等价）
+      basis: SESOI 优先序第一档：取卡上判别实验预写判读阈值（达神谕 98% / 差 ≤2 点）为最小有意义效应，原文见 resources.power.sesoi 与 resources.power.basis
+      estimand_ref: claims.primary_claims[C1]
+      summary_measure: mean_diff
   repro_fields:
     seeds:
     - 20261020

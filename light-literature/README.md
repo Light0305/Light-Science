@@ -3,10 +3,12 @@
 Light-Science 的文献子技能：把外部论文变成项目内可核查、可复用的研究材料。
 技能规范见 [SKILL.md](SKILL.md)。
 
-当前版本：**v1.0**。light-literature 把一篇外部论文加工成「四件套」——
+当前版本：**v1.1**。light-literature 把一篇外部论文加工成「四件套」——
 原文 PDF、带 S/C/F/T/E 锚点的原文 MD、块级对齐的中文翻译 MD、图文并茂的
 精读笔记——并配套证据行、术语账本与 Find 线（多源检索 → 身份核实与撤稿
-检查 → 粗筛 → 研究证据矩阵）。
+检查 → 粗筛 → 研究证据矩阵）。v1.1 增补四件：共享检索适配层
+（Find 线与下游查新/选刊共用同一检索底座）、ingest 元数据自动回填、
+claim-support 主张核查命令面、ask 问语料模式（块级证据 + 固定拒答）。
 
 **解析双轨制**是 v1.0 的产品形态：
 
@@ -94,6 +96,17 @@ python -m light_literature screen check <project_dir>   # 校验：撤稿条目�
 
 # 13. Find 线：研究证据矩阵（成稿层硬规则：仅 verified 且未撤稿进主体，其余进排除清单）
 python -m light_literature matrix <project_dir>
+
+# 14. 元数据回填（v1.1）：逐字段 value+source+verified 写回 paper.yaml 的 metadata 区
+#     （默认只跑本地源；--online 联网查 Crossref；--confirm 为用户逐字核对原文首页后标已核实）
+python -m light_literature metadata-backfill <paper_dir> [--online] [--confirm]
+
+# 15. 主张核查（v1.1）：块级定位候选锚点（无命中如实回 not_mentioned）→ 三值判定经机械校验落账
+python -m light_literature claim-locate <project_dir> --claim "..." [--paper <paper_id>]
+python -m light_literature claim-check <project_dir> --paper <paper_id> --claim "..." --verdict supports|contradicts|not_mentioned [--anchors S001,S002]
+
+# 16. 问语料（v1.1）：对已入库语料块级检索作答，引用只能取自命中块；证据不足固定拒答
+python -m light_literature ask <project_dir> --question "..." [--answer "..." --cite <paper_id>#S001]
 ```
 
 `paper_id` = 单篇目录名（题名 slug + `_` + SHA-256 前 6 位），ingest 输出中给出。
@@ -105,7 +118,8 @@ python -m light_literature matrix <project_dir>
 ├── 00-文献总览.md、文献索引.csv、证据表.jsonl
 ├── 研究证据矩阵.md（matrix 命令生成）、参考文献.bib、术语账本.md
 ├── 候选池.jsonl、检索报告.md（find 生成）、粗筛表.csv、粗筛说明.md（screen 生成）
-├── .find-cache/（各源原始响应，按 源+查询式 哈希命名，供复现）
+├── claim_support.jsonl（claim-check 判定账，只增；v1.1）、问答记录/（ask 产物；v1.1）
+├── .find-cache/（各源原始响应，按 源+查询式 哈希命名，供复现；Find 线与共享检索适配层共用）
 └── <slug>_<hash6>/
     ├── paper.yaml          # 标识/版本/状态/分诊审计数值；parse 段记解析后端/状态
     │                       # （done / awaiting_model_direct）/参数/uid/费用估算
@@ -125,7 +139,7 @@ python -m light_literature matrix <project_dir>
 ## 测试
 
 ```bash
-python -m pytest -q   # 发布版保留 61 个产品测试（全 mock / 合成数据，不联网、不用真实 Key）：
+python -m pytest -q   # 发布版保留 88 个产品测试（全 mock / 合成数据，不联网、不用真实 Key）：
 #   test_find 18（Find 线：解析器/三层去重/核实状态机/撤稿检查/粗筛校验/矩阵硬规则/CLI 冒烟，
 #     fixture 为开发期捕获的真实 API 响应样本）
 #   test_scaffold_notes_evidence 12（翻译脚手架/译文校验/精读卡/证据行/术语账本）
@@ -134,6 +148,10 @@ python -m pytest -q   # 发布版保留 61 个产品测试（全 mock / 合成�
 #   test_checks 6（表格网格与公式可编译检查）
 #   test_figure_groups 6（图组规则纯函数 + verify 组级口径）
 #   test_parse_caption_fragments 2（图注碎片合并回归）
+#   test_searchlayer 6（共享检索适配层：统一模型/缓存/失败隔离；v1.1）
+#   test_metadata_backfill 7（元数据回填：逐字段来源与核实状态；v1.1）
+#   test_claimcheck 7（主张定位与三值判定机械校验；v1.1）
+#   test_ask 7（问语料：引用白名单/证据强度门/固定拒答；v1.1）
 ```
 
 ## 开发记录（节略）
@@ -158,6 +176,13 @@ v1.0 由八个增量逐步建成。各增量的完整验收记录（实测数据
    改为双轨制——Doc2X 轨（用户自配 Key）+ 模型直读轨，本地管线退出
    产品路径。SKILL.md 同步定版（§8 交付自检清单、§9 失败模式附录、
    双轨对称对照表）。
+9. **v1.1 增补（第二轮）**：LIT-D05 共享检索适配层（统一 Paper
+   模型 + 五源适配器 + 缓存与失败隔离，find/verify 全改走，消费
+   契约入 SKILL §6）；LIT-D03 元数据自动回填（逐字段来源 + 核实
+   状态，自动回填恒未核实）；LIT-D04 claim-support（数字逐字对
+   锚点机械校验，三值判定只增落账）；LIT-D01 ask 问语料（引用
+   白名单 + 证据强度门 + 证据不足固定拒答）。开发树测试
+   93 → 120 passed，发布版保留 88 个。
 
 ## v1.0 封版记录（2026-10-20）
 
@@ -206,4 +231,4 @@ v1.0 由八个增量逐步建成。各增量的完整验收记录（实测数据
 | 13 | verify 只查结构不查语义：译文锚点对但内容串行/译错查不出来 | 全局 | 靠 SKILL §8 抽读自检（回指抽查、数字逐字核） |
 | 14 | 引文「一句」判定是启发式，英文缩写句点（如 et al.）可能误拒 | 证据行 | 口径宁严勿松；误判改用 statistic 字段或人工写入并注明 |
 | 15 | `evidence correct` 未给字段继承原行，程序不做交叉校验 | 证据行 | 纠错人须自查继承的 quote/statistic 是否仍与新 finding 成立 |
-| 16 | ingest 未自动回填作者/venue/年份，notes 文件头需人工从原文首页核对 | Read | 已列待办（元数据自动回填）；禁止凭记忆填写 |
+| 16 | ingest 未自动回填作者/venue/年份，notes 文件头需人工从原文首页核对 | Read | **v1.1 已关闭**：metadata-backfill + ingest 自动本地回填（逐字段带来源，自动回填恒标未核实，核实仍须人工逐字核对原文首页） |

@@ -3,7 +3,7 @@
 Light-Science 的研究设计子技能：把定版想法卡变成**可直接开工且
 可被证伪的研究设计书**。技能规范见 [SKILL.md](SKILL.md)。
 
-**当前版本：v1.0（封版）**。能力环 D0–D7 全落地：D0 入口承接与
+**当前版本：v1.1（封版）**。能力环 D0–D7 全落地：D0 入口承接与
 打回（交接六项逐项承接、缺项打回不许临场发明）→ D1 变量与方案
 → D2 对照与消融（对照先行）→ D3 评估协议（判读三向见结果前
 写死）→ D4 效度四分法登记 → D5 功效替代口径与双货币预算 →
@@ -64,6 +64,7 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
 | | `readout` | 判读三向 {positive, negative, null} × {meaning, action}，见结果前写死 |
 | | `tuning_parity` | 调参对等条款 {statement, details}，必填 |
 | | `seeds` / `repetitions` | 种子数与重复数预先定明 |
+| | `sesoi` | 结构化 SESOI 登记块（v1.1 DES-D01）{value, unit, direction, bounds, basis, estimand_ref, summary_measure}：全设计单一事实源，确认性设计必登记；登记行只许携带逐字段一致的派生副本；命门字段（amendment 须用户签） |
 | 效度 `validity` | `threats[]` | 四分法（conclusion / internal / construct / external）逐项三态 {status: na/mitigated/residual, note} |
 | | `structural_checks[]` | 结构错误清单逐项自查 |
 | 资源 `resources` | `power` | {sesoi, sensitivity_range, derived{seeds/repetitions/eval_set_size}, sufficient}；不足则须下调声称 |
@@ -116,8 +117,13 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
   定版门如实拦下——终点为 reviewed + 评审包就绪，多模型环境
   补完路径明确；缺项变体走通 returned 打回与回补全流程；极简级
   小设计走通底线六件与标注渲染。测试仍 119 passed。
+- v1.1（第二轮）：DES-D01 结构化 SESOI 登记块（七字段单一
+  事实源、列入命门字段族，Analysis 直读消费）；DES-D02
+  amendment 增量评审命令化（类别分流、待审拦导出）；
+  DES-D04 intake 跨区实体核查。测试 119 → 161 passed，
+  演示复跑 validate 0 错误、终点仍 reviewed（如实）。
 
-## 已知局限总表（v1.0 封版口径）
+## 已知局限总表（v1.1 封版口径）
 
 1. 真实定版（frozen + 交接四件套导出）尚未在多模型环境走通：
    演示终点止于 reviewed + REVIEW_UNAVAILABLE——与上游卡的跨
@@ -125,14 +131,17 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
    定版门口，最后一步（异家族评审回填）只能等环境具备。
 2. 演示承接的是未定版卡：Design 的产品口径只消费定版卡；
    未定版承接仅限演示/预演且必须明示，不构成正式交接路径。
-3. amendment 的增量评审（只审变更项及其影响面）尚未命令化：
-   命门 amendment 现靠用户签把关，未自动生成增量评审包。
+3. amendment 的增量评审已命令化（v1.1 DES-D02）：类别分流
+   （预写分支轻评审 / 未预见变更全评审）、增量评审包生成
+   与落盘、待审拦导出、REVIEW_UNAVAILABLE 显式落字均已落代码；
+   残余边界与第 7 条同：判定内容质量靠评审者规程。
 4. 打回单（return_record）须由执行者先行写入 design.yaml 才
    能 advance --to returned：CLI 尚无把 intake 打回清单一键
    组装为打回单的命令（开发期演示中为手工落字后推进）。
-5. intake 的 expanded（展开承接）只验状态字样与六项在场：
-   「展开后的实体在对应区真实存在」靠定版评审核对，校验器
-   不做跨区实体核查。
+5. intake 的 expanded 跨区实体核查已命令化（v1.1 DES-D04）：
+   校验器按 schema 冻结映射表逐项到对应区查实体存在性，只改
+   状态字不落实体的承接会被点名；残余边界：核查只验实体
+   在场，内容口径一致性仍靠定版评审。
 6. original_question 的逐字性依赖上游交接件：交接件无该字段
    时工具以卡题名落盘（开发期演示即此情形），逐字保留只对交接
    件自带原文时成立。

@@ -37,6 +37,14 @@ def _validate_review_head(errors, pkg):
                           "（R1 硬纪律：做不到全规格就明说）")
         if iso.get("mode") not in schema.ISOLATION_MODES:
             errors.append(f"隔离模式 {iso.get('mode')!r} 不在词表")
+    # 范式登记（v1.1 REV-D01）：词表 + 判定依据落字
+    paradigm = review.get("paradigm")
+    if paradigm is not None:
+        if paradigm.get("paradigm") not in schema.PARADIGMS:
+            errors.append(f"范式登记 {paradigm.get('paradigm')!r} "
+                          f"不在范式词表 {schema.PARADIGMS}")
+        if not (paradigm.get("basis") or "").strip():
+            errors.append("范式登记缺判定依据（basis 落字，REV-D01）")
 
 
 def _validate_forensic(errors, pkg):
@@ -165,6 +173,20 @@ def _validate_seats_consensus(errors, pkg):
         if c.get("status") == "closed" and \
                 not (c.get("close_reason") or "").strip():
             errors.append(f"concern {cid} 已关闭但缺理由（RV-11）")
+        # 升格三查落账一致性（v1.1 REV-D10）：结果在册的 concern，
+        # 总判定不许为 fail（三查不过在落盘口已拒，入账即手改）
+        esc = c.get("escalation_checks")
+        if esc is not None:
+            if esc.get("verdict") == "fail":
+                errors.append(
+                    f"concern {cid} 的升格三查总判定为 fail 却在共识账中："
+                    "三查不过不许入账（REV-D10），须经 consensus 正道重落")
+            for key in ("pointer_resolution", "verbatim_support",
+                        "severity_cap"):
+                sub = esc.get(key) or {}
+                if not sub.get("result"):
+                    errors.append(f"concern {cid} 的升格三查缺 {key} 结果"
+                                  "（三查结果逐条落账，REV-D10）")
 
 
 def _validate_delivery(errors, pkg):
@@ -391,6 +413,50 @@ def _validate_handoff(errors, pkg):
                               f"{computed}（RV-05）")
 
 
+def _validate_obligations(errors, pkg):
+    """义务账纪律（v1.1 REV-D05）：关闭留痕齐备 + 状态与事件行对账。"""
+    rows = pkg["obligations"]
+    if rows is None:
+        return
+    from .obligations import fold_obligations
+    known = set()
+    for r in rows:
+        if r.get("type") == "obligation":
+            oid = r.get("obligation_id")
+            if oid in known:
+                errors.append(f"义务 {oid} 重复登记（stable ID 不许复用）")
+            known.add(oid)
+            if not (r.get("text") or "").strip():
+                errors.append(f"义务 {oid} 文本为空")
+            if not (r.get("registered_by") or "").strip():
+                errors.append(f"义务 {oid} 缺登记人（具名纪律）")
+        elif r.get("type") == "obligation_event":
+            oid = r.get("obligation_id")
+            if oid not in known:
+                errors.append(f"义务事件指向不存在的义务 {oid}")
+            if r.get("action") not in ("fulfill", "waive"):
+                errors.append(f"义务 {oid} 的事件动作 {r.get('action')!r} "
+                              "不在词表")
+            if not (r.get("by") or "").strip():
+                errors.append(f"义务 {oid} 的关闭事件缺执行人（具名纪律）")
+            if r.get("action") == "fulfill" \
+                    and not (r.get("evidence_pointer") or "").strip():
+                errors.append(f"义务 {oid} 的 fulfill 事件缺履行证据指针")
+            if r.get("action") == "waive" \
+                    and not (r.get("reason") or "").strip():
+                errors.append(f"义务 {oid} 的 waive 事件缺理由"
+                              "（豁免须具名加理由留痕）")
+        else:
+            errors.append(f"义务账出现未知行型 {r.get('type')!r}")
+    folded = fold_obligations(rows)
+    delivered = (pkg["review"] or {}).get("status") == "delivered"
+    if delivered:
+        for o in folded:
+            if o.get("status") == "open":
+                errors.append(f"delivered 时义务 {o['obligation_id']} "
+                              "仍为 open（义务账阻断纪律，REV-D05）")
+
+
 def validate_package(root) -> list:
     """全量校验，返回错误清单（空 = 通过）。只拦不赦。"""
     root = Path(root)
@@ -401,6 +467,7 @@ def validate_package(root) -> list:
     _validate_review_head(errors, pkg)
     _validate_forensic(errors, pkg)
     _validate_seats_consensus(errors, pkg)
+    _validate_obligations(errors, pkg)
     _validate_domain(errors, pkg)
     _validate_calibration(errors, pkg)
     _validate_decision(errors, pkg)

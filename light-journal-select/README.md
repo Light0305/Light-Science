@@ -6,19 +6,23 @@ Light-Science 子技能（Write 前置扩展位）：帮用户选刊 → 用户�
 
 ## 状态
 
-**v1.0 已封版（2026-10-20）**。全链实现：指纹与约束 → 先例路
-引擎（OpenAlex 实时统计 + 按刊发文量归一化）→ 逐刊核验纪律
-→ 风险门（E3 分级硬度）→ 分档证据卡 → decide 定刊（定刊门：
-被排除/未放行刊不许定刊）→ handoff（`journal/target/` 单刊
-目录 + download-manifest 逐文件哈希与 pending 诚实登记 +
-check-record 按 Write 九组字段现场生成、本地结构校验 + 可选
-Write 校验器子进程自检、语言与指纹一致、handoff.md 交接
-清单、指南修订新子目录并存）。端到端真实联网演示已跑通
-（`examples/demo-fullrun/`，注入自备 OpenAlex Key）：先例路
-3/3 式成功、21 刊入池、风险门排除虚构靶子、分档 target 5 刊、
-定刊 Smart Agricultural Technology、check-record 双自检
-pass、终点 handed_off、validate ok。演示结论与实测问题见
-demo-report.md 第四节。
+**v1.0 已封版（2026-10-20）；v1.1 增补已落地（2026-10-21，
+第二轮拍板 JS-D01/D02/D03/D06 + 六条重做约束锚定）**。全链
+实现：指纹与约束 → 先例路引擎（OpenAlex 实时统计 + 按刊
+发文量归一化 + 来源类型过滤 + 官网回填）→ 逐刊核验纪律
+→ 风险门（E3 分级硬度）→ 分档证据卡（证据量门槛 + 复合
+排序 + 证据构成段）→ decide 定刊（定刊门：被排除/未放行
+刊不许定刊）→ handoff（`journal/target/` 单刊目录 +
+download-manifest 逐文件哈希与 pending 诚实登记 +
+check-record 按 Write 九组字段现场生成、本地结构校验 +
+可选 Write 校验器子进程自检、语言与指纹一致、handoff.md
+交接清单含政策核读段、指南修订新子目录并存）。端到端真实
+联网演示已跑通（`examples/demo-fullrun/`，注入自备
+OpenAlex Key）：先例路 3/3 式成功、21 刊入池、风险门排除
+虚构靶子、定刊 Smart Agricultural Technology、check-record
+双自检 pass、终点 handed_off、validate ok。演示结论与
+实测问题见 demo-report.md 第四节；v1.1 的排序修复以该演示
+存档数据离线回放验证（旗舰刊居首、微型刊落选）。
 
 ## 纪律速览
 
@@ -36,35 +40,29 @@ demo-report.md 第四节。
 
 ## 已知局限
 
-- **学习文档 6 条约束原文佚失**：学习文档曾于落盘时截断，
-  2026-10-20 已补全对齐：LEARNING 的 JS-05 末句、JS-07 /
-  JS-11 / JS-14 与 REDESIGN-DRAFT §五–§七已回填并逐段标注
-  来源类别；JS-06 / JS-08 / JS-09 / JS-10 / JS-12 / JS-13
-  原文佚失、全域无从考据，只留占位，待学习期重做（本实现
-  未锚定这 6 条，未凭空补写；对应表见 SKILL §11）。
 - **OpenAlex 匿名 429 与 Key 路线**：匿名调用走共享免费日
   预算，出口 IP 预算耗尽时返回 429（先例路如实落 `failed`、
   不编造）；可用自备免费 Key 经环境变量 `OPENALEX_API_KEY`
   注入，Key 永不落盘（evidence 与日志中的 `api_key` 参数
   脱敏为 `REDACTED`）。
-- **分档排序的小分母效应（演示实测）**：证据卡按
-  rate_per_10k 单键排序取前 5，微型刊 1 篇先例即可率值
-  冲高（实测 270/万篇居首），领域旗舰刊（7 篇先例、3 式
-  全覆盖）反被挤出卡外。读卡须连同先例篇数与覆盖式数；
-  复合排序列入 v1.1 评估。
-- **候选官网 URL 恒缺（演示实测）**：OpenAlex works 的源
-  记录为脱水形态、不含 homepage_url，候选 homepage_url /
-  guide_url 恒为 None——官网 scope 核对无从触发（落
-  unconfirmed）、check-record 的 H.source_url 须由执行者
-  经 `--fields` 注入。v1.1 拟补 `/sources/{id}` 回填。
-- **仓库型来源入池（演示实测）**：OpenAlex 中 type 为
-  repository 的来源（如 Zenodo）会以候选身份入池；未做
-  类型过滤，靠分档与人工读卡兜底，v1.1 评估过滤或标注。
+- **官网回填的覆盖边界（v1.1）**：回填只走 OpenAlex 源记录
+  详情与 DOAJ 登记两条通道；两路皆无官网的候选（不在 DOAJ
+  的混合刊居多）homepage 仍落 unconfirmed、scope 核对随之
+  未确认，不以聚合站或搜索结果冒充官网。
+- **费用组迁移期（v1.1）**：APC 结构化费用组为新登记口径，
+  旧标量值兼容读取并带迁移警告与卡面标示；费用组中收费
+  时点/减免/协议覆盖多需官网逐刊核读，开放源常只给标价，
+  其余项如实 None/unknown。
+- **政策必查项的硬度边界（v1.1）**：必查项以缺项显形 +
+  冲突硬阻断落地，未做成 handoff 前置硬门；未覆盖项在
+  交接清单与校验警告中持续点名，投稿前必须补核。
 - **verify 联网抓取的覆盖边界**：出版商官网页面抓取受限，
   专有指标（IF / 分区 / 自引率）无开放渠道，审稿周期无
   官方可抓统计——这些指标在本类环境下多为 unconfirmed
   （如实落痕）；当前开放数据条件下分档实际由先例证据 +
-  收录/发文量驱动，challenge 档常为空（不凑数）。
-- 先例路每刊多一次发文量查询（归一化分母）；OpenAlex 限流时
-  分母取不到则 rate 留空（volume_status=attempted），不猜数。
+  收录/发文量驱动，challenge 档常为空（不凑数，证据构成
+  段逐档落字说明）。
+- 先例路每刊多一次发文量查询（归一化分母），回填再多
+  至多两次登记源查询；OpenAlex 限流时分母取不到则 rate
+  留空（volume_status=attempted），不猜数。
 - 中文刊在 OpenAlex 覆盖薄，主要靠检索补充路与目录核验（设计内口径）。

@@ -27,6 +27,7 @@ from .audit import audit_status, record_path
 from .produce import precheck_script, script_path, source_data_path
 from .project import (
     effective_backend, load_package, provenance_row, save_head,
+    schematic_backend,
 )
 from .prompt import prompt_path
 from .redraw import load_manifest, validate_manifest, vsdx_relpath
@@ -72,6 +73,18 @@ def _contracted_gaps(pkg) -> list:
         if effective is None:
             gaps.append(f"数据图 {row['fig_id']} 的后端无解析结果"
                         "（包级默认与逐图覆写均未登记）")
+
+    for row in figures:
+        contract = pkg["contracts"].get(row["fig_id"]) or {}
+        decision = contract.get("palette_decision") or {}
+        conf = decision.get("confirmation") or {}
+        if decision.get("source") not in schema.PALETTE_DECISION_SOURCES \
+                or not decision.get("basis") \
+                or not conf.get("confirmed_by") \
+                or not conf.get("confirmed_at"):
+            gaps.append(f"图 {row['fig_id']} 配色决定未落字或不完整："
+                        "palette_decision 须含来源三选一 + 依据 + 确认"
+                        "记录（FIG-D08：配色决定入合同一等项）")
 
     schematic_ids = [r["fig_id"] for r in figures
                      if r.get("line") == "schematic"]
@@ -168,26 +181,55 @@ def _produced_gaps(pkg) -> list:
             if acceptance.get("done") is not True:
                 gaps.append(f"方法图 {fig_id} 参考图验收未落字"
                             "（约束 9：三项清单经 reference accept 落字）")
-            manifest = load_manifest(root, fig_id)
-            if manifest is None:
-                gaps.append(f"方法图 {fig_id} 缺重绘 manifest"
-                            "（redraw install 登记，单一真相源）")
+            contract = pkg["contracts"].get(fig_id) or {}
+            backend = schematic_backend(contract)
+            if backend == "powerpoint":
+                from .pptxbuild import (
+                    load_pptx_manifest, pptx_relpath,
+                    validate_pptx_manifest,
+                )
+                manifest = load_pptx_manifest(root, fig_id)
+                if manifest is None:
+                    gaps.append(f"方法图 {fig_id} 缺 pptx manifest"
+                                "（pptx install 登记，单一真相源）")
+                else:
+                    gaps.extend(validate_pptx_manifest(manifest,
+                                                       root=root))
+                    if manifest.get("status") not in ("built",
+                                                      "verified"):
+                        gaps.append(f"方法图 {fig_id} pptx manifest "
+                                    f"状态为 {manifest.get('status')}："
+                                    "须先 pptx build 构建成品")
+                    reconciliation = manifest.get("reconciliation") \
+                        or {}
+                    if reconciliation.get("ok") is not True:
+                        gaps.append(f"方法图 {fig_id} PPTX 反读对账未过"
+                                    "（pptx extract 须无未登记差集）")
+                artifact = root / pptx_relpath(fig_id)
+                artifact_label = "成品 .pptx（pptx build 构建）"
             else:
-                gaps.extend(validate_manifest(manifest, root=root))
-                if manifest.get("status") not in ("built", "verified"):
-                    gaps.append(f"方法图 {fig_id} 重绘 manifest 状态为 "
-                                f"{manifest.get('status')}：须先 redraw "
-                                "build 构建成品")
-                reconciliation = manifest.get("reconciliation") or {}
-                if reconciliation.get("ok") is not True:
-                    gaps.append(f"方法图 {fig_id} 重绘反抽对账未过"
-                                "（redraw extract 须无未登记差集）")
-            vsdx = root / vsdx_relpath(fig_id)
+                manifest = load_manifest(root, fig_id)
+                if manifest is None:
+                    gaps.append(f"方法图 {fig_id} 缺重绘 manifest"
+                                "（redraw install 登记，单一真相源）")
+                else:
+                    gaps.extend(validate_manifest(manifest, root=root))
+                    if manifest.get("status") not in ("built",
+                                                      "verified"):
+                        gaps.append(f"方法图 {fig_id} 重绘 manifest "
+                                    f"状态为 {manifest.get('status')}："
+                                    "须先 redraw build 构建成品")
+                    reconciliation = manifest.get("reconciliation") \
+                        or {}
+                    if reconciliation.get("ok") is not True:
+                        gaps.append(f"方法图 {fig_id} 重绘反抽对账未过"
+                                    "（redraw extract 须无未登记差集）")
+                artifact = root / vsdx_relpath(fig_id)
+                artifact_label = "成品 .vsdx（redraw build 构建）"
             redraw_source = entry.get("redraw_source") or {}
-            if not vsdx.exists():
-                gaps.append(f"方法图 {fig_id} 成品 .vsdx 不存在"
-                            "（redraw build 构建）")
-            elif redraw_source.get("hash") != sha256_file(vsdx):
+            if not artifact.exists():
+                gaps.append(f"方法图 {fig_id} {artifact_label} 不存在")
+            elif redraw_source.get("hash") != sha256_file(artifact):
                 gaps.append(f"方法图 {fig_id} 账面重绘源哈希与成品"
                             "不符（账实相符）")
             if not entry.get("prompt_version"):

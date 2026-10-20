@@ -214,6 +214,24 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
              f"@{role_ref.get('version')}（已过配色确认门："
              f"{palette_conf.get('confirmed_by')} @ "
              f"{palette_conf.get('confirmed_at')}）")
+    breakdown = gallery.get("reference_breakdown") or {}
+    if breakdown:
+        # FIG-D09：参考图六维拆解入风格段——五维以文本入段；配色
+        # 精确 hex 不入正文（正文不落 hex 纪律），只落指针供重绘
+        # 阶段查图库条目登记表。
+        dim_labels = {
+            "layout_flow": "布局流向",
+            "module_style": "模块样式",
+            "annotation_style": "标注方式",
+            "information_density": "信息密度",
+            "special_elements": "特殊元素",
+        }
+        L.append("- 参考图六维拆解（图库条目登记，FIG-D09）：")
+        for dim, label in dim_labels.items():
+            if breakdown.get(dim):
+                L.append(f"  - {label}：{breakdown[dim]}")
+        L.append("  - 配色：精确色值已登记于图库条目六维拆解的 "
+                 "palette_hex（只供重绘阶段查表，不入提示词正文）")
     L.append("- 角色清单（正文只引角色名，色值由重绘阶段查登记表）：")
     for row_ in role_reg["roles"]:
         L.append(f"  - {row_['role']}：{row_['usage']}")

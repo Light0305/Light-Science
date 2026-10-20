@@ -148,3 +148,66 @@ def test_intake_log_records_roundtrip(project: Path, tmp_path: Path):
     log = (project / "experiment-stage" / "intake_log.md").read_text(encoding="utf-8")
     assert "打回 1 项" in log
     assert "承接齐全" in log
+
+
+# ---------- v1.1 承接补三件（EXP-D04） ----------
+
+def test_intake_placeholder_scan_gap(project: Path, tmp_path: Path):
+    brief = (f"# 实验运行清单\n\n> 🔒 冻结哈希 `{DESIGN_HASH}`\n\n"
+             "R01 的 theta 取值 TODO 待填\n")
+    out = write_export(tmp_path, brief=brief)
+    _, gaps = intake(project, out)
+    assert any("占位符" in g and "experiment_brief.md" in g for g in gaps)
+
+
+def test_intake_placeholder_scan_clean_docs_pass(project: Path, export_dir: Path):
+    """干净交接件零误报：夹具四件套含判读文本（差 <1 点之类）不许中招。"""
+    _, gaps = intake(project, export_dir)
+    assert not any("占位符" in g for g in gaps)
+
+
+def test_intake_treatment_without_checkpoints_gap(project: Path, tmp_path: Path):
+    card = make_card()
+    del card["plan"]
+    out = write_export(tmp_path, card=card)
+    _, gaps = intake(project, out)
+    assert any("干预核查点" in g and "R01" in g for g in gaps)
+
+
+def test_intake_per_run_checkpoints_suffice(project: Path, tmp_path: Path):
+    """设计级未声明时，条目级（登记行）声明核查点亦算齐备。"""
+    card = make_card()
+    del card["plan"]
+    line = registry_line("R01", "treatment", control_run="R00")
+    line["intervention_checks"] = [{"point": "theta_source 实际生效",
+                                    "claimed": "predicted"}]
+    out = write_export(tmp_path, card=card,
+                       lines=[registry_line("R00", "control"), line])
+    _, gaps = intake(project, out)
+    assert gaps == []
+
+
+def test_intake_dependency_plan_written(project: Path, export_dir: Path):
+    execution, gaps = intake(project, export_dir)
+    assert gaps == []
+    assert execution["intake_report"]["execution_plan"] == ["R00", "R01"]
+    plan = (project / "executions" / execution["exec_id"]
+            / "execution_plan.md").read_text(encoding="utf-8")
+    assert plan.index("R00") < plan.index("R01")
+    assert "依赖计划" in plan
+
+
+def test_intake_dependency_cycle_is_gap(project: Path, tmp_path: Path):
+    card = make_card()
+    card["contract"]["runs"][0]["depends_on"] = ["R01"]
+    out = write_export(tmp_path, card=card)
+    _, gaps = intake(project, out)
+    assert any("成环" in g for g in gaps)
+
+
+def test_intake_unknown_dependency_is_gap(project: Path, tmp_path: Path):
+    card = make_card()
+    card["contract"]["runs"][1]["depends_on"] = ["R00", "R99"]
+    out = write_export(tmp_path, card=card)
+    _, gaps = intake(project, out)
+    assert any("不在 brief 运行清单内" in g and "R99" in g for g in gaps)

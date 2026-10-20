@@ -1,0 +1,9 @@
+{"ts": "2026-10-20", "actor": "user", "kind": "facts", "target": "facts", "content_hash": "a114691015c21cf7e942770f89afe2cb21cf88eea0e796e1c8b6eb880c6434ce", "note": "演示确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "selection", "target": "selection", "content_hash": "b398a3f00588cd7ecd7ffa4b8853b3aab03ccb26725049c6305a646eba713fd3", "note": ""}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-01", "content_hash": "9d2ad9f92e8fc0dcc058fa9e3bfc5f3b1c028d586980a5a3bac334b67d02d12d", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-02", "content_hash": "9026966a503cd27d3435055914271af778541028969751089e41fb836394bea0", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-03", "content_hash": "23945182cbbb46c1de0fcc5f3ca8ddc0e6266ae8b6afd56250ee7810e47d67c8", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-04", "content_hash": "cd9710506c6f3edc1c4365acd5d73a9c6a509ff41b731bb34328af202a15e8a8", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-05", "content_hash": "173f2a79721b55079fbe7d252696ffe4c5d4e2bdd6087938cf7095ad44eefc6a", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "segment", "target": "SEG-06", "content_hash": "4c4e0023f9a8ad69ac8aca3cf7536dbd0bc969d66e4e8fae681794584914aae6", "note": "演示逐段确认"}
+{"ts": "2026-10-20", "actor": "user", "kind": "declaration", "target": "current_text", "content_hash": "521056e1a5ed73c43de902470b65bab376c644cc273999bd1935feb7437fd031", "note": "演示回执：已逐字读过所登记文本（演示占位）"}

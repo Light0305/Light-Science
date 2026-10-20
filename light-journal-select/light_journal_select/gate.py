@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 from pathlib import Path
 
 from . import schema
@@ -52,22 +53,40 @@ def valid_override(override) -> tuple[bool, list[str]]:
     return (not gaps), gaps
 
 
+_YEAR_RE = re.compile(r"(?:19|20)\d{2}")
+
+
+def _list_year(version: str, year_col: str) -> int | None:
+    """名单年份（JS-08）：显式 year 列优先，否则从 version 串
+    解析首个四位年份；皆无落 None，不臆造。"""
+    year_col = (year_col or "").strip()
+    if year_col.isdigit():
+        return int(year_col)
+    match = _YEAR_RE.search(version or "")
+    return int(match.group(0)) if match else None
+
+
 def load_name_list(path) -> list[dict]:
     """读本地可注入名单文件（stop-predatory 风格 CSV）。
 
-    形态：name,issn,condition,source,version —— condition 须在
-    风险条件词表内（一级/准硬名单皆可）；返回归一化条目列表。
+    形态：name,issn,condition,source,version[,year] —— condition
+    须在风险条件词表内（一级/准硬名单皆可）；version 与 year
+    是名单版本/年份的落字来源（JS-08：命中记录强制带名单版本
+    与年份，名单逐年更新、无年份的命中不许当现行名单用）。
+    返回归一化条目列表。
     """
     text = Path(path).read_text(encoding="utf-8")
     rows = []
     for row in csv.DictReader(io.StringIO(text)):
+        version = (row.get("version") or "").strip()
         rows.append({
             "name": (row.get("name") or "").strip(),
             "name_key": normalize_name(row.get("name") or ""),
             "issn": (row.get("issn") or "").strip() or None,
             "condition": (row.get("condition") or "").strip(),
             "source": (row.get("source") or "").strip(),
-            "version": (row.get("version") or "").strip(),
+            "version": version,
+            "year": _list_year(version, row.get("year") or ""),
         })
     return rows
 
@@ -92,6 +111,12 @@ def checks_from_name_list(candidates: list[dict], name_list: list[dict],
                 "hit": bool(hit),
                 "source": item["source"] or "local_name_list",
                 "source_ref": f"name_list v{item['version'] or '未标版本'}",
+                # 名单版本/年份结构化落字（JS-08）：命中是信号，
+                # 须带名单名 + 版本/年份 + 查询日期才许落命中
+                "origin": "name_list",
+                "list_name": item["source"] or "local_name_list",
+                "list_version": item["version"] or None,
+                "list_year": item.get("year"),
                 "checked_at": checked_at,
                 "note": "名单命中" if hit else None,
             })

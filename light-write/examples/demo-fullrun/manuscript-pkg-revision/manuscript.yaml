@@ -48,7 +48,7 @@ target_journal:
   record_hash: 6ccabf7a663e1ec5c50c031f96ea334a16d74ea5c763338b9a5cab4162f8947a
   verified_at: '2026-10-15'
   bundled: generic_scaffold
-  source_record_path: ../fixtures/journal_record.json
+  source_record_path: ../../../../light-write/examples/demo-fullrun/fixtures/journal_record.json
 authors:
 - name: Demo Author A
   affiliation: Synthetic Demo Group

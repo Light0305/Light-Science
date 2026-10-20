@@ -1,0 +1,10 @@
+target_id: demo-private
+name: 演示目标 demo-private
+base_url: http://127.0.0.1:44309
+project: demo-poultry-research
+purpose_kind: dataset_batch
+consumer: light-experiment 数据入口
+channel: official_api
+terms_basis: 夹具站点条款页（本地演示用）
+url_patterns:
+- http://127.0.0.1:44309/private/secret.json

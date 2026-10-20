@@ -1,0 +1,12 @@
+{
+ "profile": "html_text_v1",
+ "content_type": "text/html",
+ "kind": "html",
+ "title": "Fixture Dataset Page",
+ "metadata": {
+  "author": "Fixture Team"
+ },
+ "text": "Fixture dataset\nPublic fixture data for demo.",
+ "text_sha256": "c69f7e956e667c627e1f6a67763aeeb9df39dd36e45a94bf97a66fcd28d1f0fb",
+ "near_duplicate": null
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "light-figure/recheck",
+  "fig_id": "fig-2",
+  "line": "schematic",
+  "checked_at": "2026-10-20T19:26:50+00:00",
+  "measurement_basis": "file_layer（文件层结构量测，非渲染量测）",
+  "scope": {
+    "figures": [
+      "fig-2"
+    ],
+    "panels": null,
+    "whole_file_checks": [
+      "page_size",
+      "fonts_embedded",
+      "min_font_size"
+    ],
+    "note": "全图复检"
+  },
+  "artifact": "schematic/redraw/fig-2.pptx",
+  "findings": [
+    {
+      "check": "slide_size",
+      "level": "pass",
+      "message": "幻灯片尺寸 [10.0, 6.25] 与标定一致（= 图尺寸）"
+    },
+    {
+      "check": "semantic_ids",
+      "level": "pass",
+      "message": "17 个对象的 User 语义 ID 齐备"
+    },
+    {
+      "check": "media_vs_residue",
+      "level": "pass",
+      "message": "图片对象 0 个均有残留登记"
+    }
+  ],
+  "overall": "PASS"
+}

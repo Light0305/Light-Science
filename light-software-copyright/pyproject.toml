@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-software-copyright"
+version = "1.0.0"
+description = "light-software-copyright：Light-Science 出口层扩展位——中国软件著作权登记材料（事实单源、冻结快照、逐段确认、声明原文核对门、材料包与逐字段递交清单）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "python-docx>=1.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-copyright = "light_copyright.cli:main"
+
+[tool.setuptools]
+packages = ["light_copyright"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

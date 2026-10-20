@@ -67,6 +67,12 @@ def new_selection(title: str, language: str, manuscript_type: str) -> dict:
         "precedent_runs": [],
         # 低于入门门槛的近失刊（候选全集含未入围者，供报告附录）
         "precedent_near_misses": [],
+        # 来源类型排除附记（JS-D03）：type 非 journal 的来源逐条
+        # 留痕（刊名/类型/先例篇数/理由），不入候选池、不静默丢弃
+        "source_type_exclusions": [],
+        # 政策逐刊核读（JS-13）：定刊交接时由字段文件 policies
+        # 落入（候选级条目在各候选 policy_checks 块）
+        "policy_checks": None,
         "candidates": [],
         # 被排除刊与理由（只增不改，永不删除条目）
         "excluded": [],
@@ -91,7 +97,25 @@ def new_candidate(name: str, source: str) -> dict:
         "source": source,            # precedent | search | finder_manual
         "source_detail": None,       # 如 finder 名 / 检索补充出处
         "precedent": None,           # 先例统计块（precedent.py 落）
+        # 官网回填留痕（JS-D02）：{status, value, channel,
+        # evidence_url, queried_at, attempts}，失败落 unconfirmed
+        "homepage_backfill": None,
+        # OpenAlex 源事实快照（JS-09）：{type, is_in_doaj, is_oa,
+        # listed_in, queried_at}，白名单在册证据（可注入）
+        "source_facts": None,
         "verification": None,        # 核验块（verify.py 落）
+        # scope 核验三项（JS-06）：{recent_publications,
+        # recent_issues, article_types}，verify.py 登记
+        "scope_checks": None,
+        # 许可组（JS-12）：{oa_model, license_type,
+        # author_rights_retained, self_archiving, source_url,
+        # queried_at}，verify.py 登记
+        "oa_license": None,
+        # 政策逐刊核读条目（JS-13，候选级）：verify.py 登记，
+        # conflict 条目计入约束标记并在卡面显形
+        "policy_checks": None,
+        # 排序分解（JS-D01）：report.py 分档时落，逐项可溯
+        "ranking": None,
         "risk": None,                # 风险门块（gate.py 落）
         "tier": None,                # challenge|target|safety|excluded
         "provisional": False,        # 仅刊名/指标支撑 → 至多「暂定」（JS-04）

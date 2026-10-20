@@ -60,8 +60,9 @@ light-analysis intake <pkg_dir> --execution-card <execution_card.json> \
     --registry <expected_registry.jsonl> [--design-card <design_card.json>]
 light-analysis validate <pkg_dir>
 light-analysis advance <pkg_dir>          # → checked（账本冻结后）
+light-analysis register-sesoi <pkg_dir> --from-registry   # 主路：直读登记行结构化块
 light-analysis register-sesoi <pkg_dir> --from <design 文件> \
-    --pointer <点分路径> [--line <id> …]   # SESOI 快照进分析规格 spec 区
+    --pointer <点分路径> [--line <id> …]   # 指针路径（整块快照 / 裸数值兼容路）
 light-analysis judge <pkg_dir> --data <judge-data.json>
 light-analysis advance <pkg_dir>          # → judged
 light-analysis grade <pkg_dir> [--notes <notes.json>]
@@ -108,34 +109,52 @@ skip，其余全过。）
 
 ## 已知局限（v1.0，如实）
 
-1. **决策点只有 estimator 改计算口径**：outlier_handling 等其余决策
-   点 v1 只留痕不改计算——这类规格与主规格数值成对相同（演示
-   S001/S002 即此形态），方向份额只反映 estimator 维度的稳健性，
-   不许解读为全部决策点都验过。
+1. **决策点只有 estimator 改计算口径（v1.1 起落字 + 封顶）**：
+   outlier_handling 等其余决策点仍只留痕不改计算——这类规格与
+   主规格数值成对相同（演示 S001/S002 即此形态），方向份额只
+   反映 estimator 维度的稳健性。v1.1 短期处置（ANA-D04）已落地：
+   每条判定行落 robustness_scope 机械列明真算/留痕决策点及占比，
+   留痕占比过半时方向性行强度自动封顶 suggestive 并点名，
+   conclusions 强度 inputs 同步落字——误读面从本条文档升级为
+   数据落字。未关闭的部分：outlier_handling 的真实计算（中期
+   事项）仍未做，方向份额仍不许解读为全部决策点都验过。
 2. **摘要材料下秩类规格退化**：只有分布四件套、无原始值时，
    median_diff 规格退化为 Welch 均值口径（结果行 note 落字），
    不做真实秩检验。
 3. **贝叶斯采样走外部**：工具只对贝叶斯行做诊断字段门（R̂/ESS/
    MCSE）与落字，后验本身须外部计算后登记；工具不复算后验，
    复算抽验只覆盖判定计算集（闭式量）的范围。
-4. **SESOI 需人工从 design 登记**：register-sesoi 按指针取快照；
-   Design 只有文本判读标准时工具按 F1 拒绝临场取数，须先有结构化
-   来源（演示中以转写件 + standard_gap 回流处置，非长久之计）。
+4. **SESOI 登记（v1.1 已关闭原缺口）**：Design 登记行自 v1.1 起
+   携带结构化 SESOI 块（DES-D01），register-sesoi 主路
+   （--from-registry）直读登记行块整块快照，承接与开判双重比对、
+   不一致整包拒绝；指针路径保留为旧登记表的兼容路（取到裸数值
+   标 via=pointer_compat）。Design 只有文本判读标准时工具仍按
+   F1 拒绝临场取数。v1.0 演示中的转写件 + standard_gap 回流
+   （RX-A001）即本条缺口的实测来源，已由 DES-D01 + ANA-D02 清偿。
 5. **跨模型复核依赖外部模型**：单模型家族环境只能落
    REVIEW_UNAVAILABLE 停 blocked，delivered 须异家族复核者（或
    人类专家）经 review import/record 回填后才能续推。
-6. **配对/区组结构未建模**：两臂按独立样本口径（Welch、经验
-   P(A>B)）计算；同批段配对设计的标准误偏大、判定偏保守
-   （演示 R-FIX 两臂逐段同值仍挣不到 TOST 等价，即此局限）。
+6. **配对/区组结构（v1.1 已关闭原缺口）**：自 v1.1 起（ANA-D03）
+   判定层显式建模结构：登记行或 judge-data 条目声明 pairing
+   （paired 按对齐键作差、blocked 先算区组内对照）后，效应/TOST/
+   方向概率全走差值序列口径，判定行落 structure 区（mode/键/
+   来源/单位数）。演示 R-FIX 形态（两臂逐段同值）在声明配对时
+   可挣得 TOST 等价（包内回归用例）；未声明时仍按独立样本口径
+   判并落结构假设。声明与数据不符（缺对侧、区组缺臂等）逐行落
+   undetermined 点名，不静默降级。
 7. **校正方法为闭式子集**：BH / Holm / Bonferroni / BY 四种；
    绑定 alpha 的两阶段法与自适应校正未实现。族口径在 intake
    一次声明，分析期改族只许走自由度账本登记，不自动重算历史判定。
 8. **Type S/M 与 TOST 为正态近似闭式**：小样本、重尾分布下的近似
    误差未做模拟校准；功效极低的行以 undetermined + 三元组数值
    落字呈现，未单设「方向未定」的判定词表值。
-9. **对照臂同源性不识别**：judge 只核处理臂臂长与对账有效 n；
-   对照臂与处理臂取自同一批段（配对）时工具不识别、不警告
-   （与局限 6 同源，材料登记时须由分析者在 reference_label 落字）。
+9. **对照臂同源性（v1.1 已关闭原缺口）**：自 v1.1 起（ANA-D03）
+   judge 机械识别两路同源信号——材料分臂登记的 run 引用
+   （treatment_run_refs / reference_run_refs）交叠、两臂原始值
+   逐元素完全相同——命中即在判定行 structure.warnings 与 note
+   点名警告（仍按独立口径判并落结构假设，警告不改判）。演示
+   R-FIX 行在 phase3 复跑中已被机械点名，不再只靠分析者在
+   reference_label 写散文。
 10. **强度合成规则写死在代码**：汇总与封顶规则（grading.py）按
     「规则先于判定冻结」的口径实现，不提供项目级配置；改规则须
     发新版并对已判包重新 grade。

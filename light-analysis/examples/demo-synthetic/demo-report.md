@@ -158,3 +158,9 @@ grade 首次运行时 notes 的 boundaries 用了自由字符串条目（规范�
 - `analysis-pkg/reflux/RX-A001.json`：standard_gap 回流（SESOI 结构
   化字段缺失 → Design）。
 - 探索区为空：本演示无探索条目，未为演示而虚构。
+
+## v1.1 附记（2026-10-21，ANA-D02 落地 + 演示链复跑）
+
+- 本演示链已在 20-build/phase2-demo/ 以新代码复跑（日志 RERUN-LOG.md）：登记表逐行带结构化 SESOI 块（与本报告第 2 节转写件同源），SESOI 登记走主路 register-sesoi --from-registry，spec 条目 via=registry_row；终点与本报告一致（graded 达成、delivered 被 REVIEW_UNAVAILABLE 拦下停 blocked、validate 0 错误），四条已判行数字与本报告逐项完全相同。
+- 回流 RX-A001 至此清偿：转写件路径降为旧登记表兼容路（via=pointer_compat），新登记表一律直读登记行块；承接与开判双重比对、两处不一致整包拒绝。
+- 本目录 v1.0 产物未改动，原地再生归 v1.1 第 6 步演示总复跑。

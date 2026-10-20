@@ -369,6 +369,87 @@ def check_contract(contract, rep: Report):
                           f"图 {fig_id} 的图库条目三元组缺 {key}"
                           "（D5：风格锚/参考图/绑定提示词版本缺一不许登记为可用）",
                           where=where)
+        # FIG-D09：参考图六维拆解必填（提示词风格段与重绘查表的输入）
+        breakdown = gallery.get("reference_breakdown")
+        if breakdown is not None or line == "schematic":
+            if not isinstance(breakdown, dict):
+                rep.error("library.breakdown_missing",
+                          f"方法图 {fig_id} 的图库条目缺参考图六维拆解 "
+                          "reference_breakdown（FIG-D09：配色/布局流向/"
+                          "模块样式/标注方式/信息密度/特殊元素，缺维不许"
+                          "登记为可用）",
+                          where=where)
+            else:
+                for dim in schema.REFERENCE_BREAKDOWN_DIMS:
+                    value = breakdown.get(dim)
+                    if not _nonempty(value):
+                        rep.error("library.breakdown_incomplete",
+                                  f"图 {fig_id} 的六维拆解缺维度 {dim}"
+                                  "（FIG-D09 六维必填）",
+                                  where=where)
+                    elif dim == "palette_hex":
+                        hexes = value if isinstance(value, list) \
+                            else [value]
+                        for hx in hexes:
+                            if not re.match(r"^#[0-9a-fA-F]{6}$",
+                                            str(hx)):
+                                rep.error(
+                                    "library.breakdown_palette_hex",
+                                    f"图 {fig_id} 的 palette_hex 条目 "
+                                    f"{hx!r} 不是 #RRGGBB 色值",
+                                    where=where)
+
+    # FIG-D08：配色决定入合同（双线；缺失 warning，contracted 门清零）
+    decision = contract.get("palette_decision")
+    if decision is None:
+        rep.warning("contract.palette_decision_missing",
+                    f"图 {fig_id} 缺配色决定 palette_decision（FIG-D08："
+                    "方案来源三选一 + 依据 + 确认记录，contracted 门要求"
+                    "已落字）",
+                    where=where)
+    elif not isinstance(decision, dict):
+        rep.error("contract.palette_decision_malformed",
+                  f"图 {fig_id} 的 palette_decision 须为对象",
+                  where=where)
+    else:
+        if decision.get("source") not in schema.PALETTE_DECISION_SOURCES:
+            rep.error("contract.palette_decision_source",
+                      f"图 {fig_id} 的配色决定来源 "
+                      f"{decision.get('source')!r} 不在三选一 "
+                      f"{schema.PALETTE_DECISION_SOURCES}（FIG-D08）",
+                      where=where)
+        if not _nonempty(decision.get("basis")):
+            rep.error("contract.palette_decision_no_basis",
+                      f"图 {fig_id} 的配色决定缺依据 basis（FIG-D08："
+                      "决定须带依据，不许只有结论）",
+                      where=where)
+        conf = decision.get("confirmation") or {}
+        if not _nonempty(conf.get("confirmed_by")) \
+                or not _nonempty(conf.get("confirmed_at")):
+            rep.warning("contract.palette_decision_unconfirmed",
+                        f"图 {fig_id} 的配色决定确认记录未落字"
+                        "（confirmation.confirmed_by/at，contracted "
+                        "门清零）",
+                        where=where)
+
+    if line == "schematic":
+        backend = contract.get("schematic_backend")
+        if backend is not None \
+                and backend not in schema.SCHEMATIC_BACKENDS:
+            rep.error("contract.schematic_backend_vocab",
+                      f"方法图 {fig_id} 的 schematic_backend "
+                      f"{backend!r} 不在 {schema.SCHEMATIC_BACKENDS}"
+                      "（FIG-D02：方法线原生后端只有 Visio 主线与 "
+                      "PowerPoint 第二后端）",
+                      where=where)
+        refine = contract.get("illustrator_refinement")
+        if refine is not None:
+            check_illustrator_refinement(fig_id, refine, rep, where)
+    elif contract.get("schematic_backend") is not None:
+        rep.error("contract.schematic_backend_on_data",
+                  f"数据图 {fig_id} 不许登记 schematic_backend（数据图"
+                  "不归 PPT/Visio 方法线后端，FIG-D02 定位）",
+                  where=where)
 
     if line == "schematic":
         policy = contract.get("policy_check")
@@ -404,6 +485,56 @@ def check_contract(contract, rep: Report):
                         f"方法图 {fig_id} 未过配色确认门（约束 7："
                         "角色色板未定不许出提示词，contracted 门清零）",
                         where=where)
+
+
+def check_illustrator_refinement(fig_id, refine, rep: Report, where):
+    """Illustrator 精修段（FIG-D03，条件路线）：合同可选段形态校验。
+
+    只验登记形态——真机回读在有 Illustrator 的环境执行，记录形态
+    （对象计数 / 文本逐字对账 / 锚点包围盒 / 印前检查项）在此定版。
+    """
+    if not isinstance(refine, dict):
+        rep.error("contract.illustrator_malformed",
+                  f"方法图 {fig_id} 的 illustrator_refinement 须为对象",
+                  where=where)
+        return
+    if refine.get("planned") is True:
+        if not _nonempty(refine.get("entry_svg_ref")):
+            rep.error("contract.illustrator_no_entry",
+                      f"方法图 {fig_id} 计划 Illustrator 精修但缺入口 "
+                      "entry_svg_ref（SVG 桥入口，FIG-D03）",
+                      where=where)
+        status = refine.get("status") or "planned"
+        if status not in schema.ILLUSTRATOR_REFINE_STATUSES:
+            rep.error("contract.illustrator_status_vocab",
+                      f"方法图 {fig_id} 的精修状态 {status!r} 不在 "
+                      f"{schema.ILLUSTRATOR_REFINE_STATUSES}",
+                      where=where)
+        if status in ("readback_recorded", "done"):
+            readback = refine.get("readback") or {}
+            for key in ("object_count", "texts_verbatim_checked",
+                        "anchor_bbox_checked"):
+                if readback.get(key) is None:
+                    rep.error("contract.illustrator_readback_incomplete",
+                              f"方法图 {fig_id} 精修状态为 {status} 但 "
+                              f"DOM 回读记录缺 {key}（FIG-D03 回读对账门"
+                              "记录形态）",
+                              where=where)
+            preflight = readback.get("preflight") or {}
+            for item in schema.ILLUSTRATOR_PREFLIGHT_ITEMS:
+                if preflight.get(item) is None:
+                    rep.error("contract.illustrator_preflight_incomplete",
+                              f"方法图 {fig_id} 的印前检查项 {item} "
+                              "未落记录（true=检出问题，须处置后才许 "
+                              "done）",
+                              where=where)
+            if status == "done" and any(
+                    preflight.get(item) is True
+                    for item in schema.ILLUSTRATOR_PREFLIGHT_ITEMS):
+                rep.error("contract.illustrator_preflight_open",
+                          f"方法图 {fig_id} 印前检查仍有未处置项，"
+                          "不许标 done（FIG-D03）",
+                          where=where)
 
 
 # ------------------------------------------------------------ 后端登记

@@ -1,4 +1,4 @@
-package_id: turkey-behaviour-figures-light-figure-de_1b4072
+package_id: turkey-behaviour-figures-light-figure-de_4da766
 title: Turkey Behaviour Figures (light-figure demo)
 status: delivered
 status_history:
@@ -21,7 +21,7 @@ created_at: '2026-10-20'
 updated_at: '2026-10-20'
 intake:
   source_kind: write_manifest
-  source_ref: ../inputs/figures_manifest.yaml
+  source_ref: ../../../../light-figure/examples/demo-fullrun/inputs/figures_manifest.yaml
   source_hash: 149813eb3d18eae4bed1decf2c5360d3d50b49f4c167844d59549324c9524ecd
   intake_at: '2026-10-20'
   by: demo-author

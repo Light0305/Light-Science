@@ -437,7 +437,12 @@ def _num_normalize(token: str, unit: str):
 
 
 def _load_provenance(pkg):
-    """从承接快照读 Analysis 数字溯源表；不可得 → (None, 原因)。"""
+    """从承接快照读 Analysis 数字溯源表行全集；不可得 → (None, 原因)。
+
+    WRT-D13：返回行列表而非预建字典——溯源键为（判定行，登记行，量名）
+    三元组，建表与解析在 _resolve_trace 处按三元组做，不许再以二元组
+    共键先到先占（v1.0 局限 6 的缺陷形态）。
+    """
     manuscript = pkg["manuscript"]
     intake = manuscript.get("intake") or {}
     card_info = intake.get("conclusion_card") or {}
@@ -447,21 +452,58 @@ def _load_provenance(pkg):
     if sha256_file(path) != card_info.get("sha256"):
         return None, "conclusion_card 哈希与承接快照不符：承接已失效，须重新 intake"
     card = load_structured(path)
-    rows = {}
-    for row in card.get("number_provenance") or []:
-        for key in (row.get("verdict_line"), row.get("registry_line_id")):
-            if key:
-                rows.setdefault(key, row)
-    return rows, None
+    return list(card.get("number_provenance") or []), None
+
+
+def parse_trace_ref(trace_ref):
+    """溯源键解析：'<判定行>' 或 '<判定行>:<量名>' → (判定行, 量名|None)。"""
+    s = str(trace_ref or "").strip()
+    if ":" in s:
+        base, _, qty = s.rpartition(":")
+        return base.strip(), (qty.strip() or None)
+    return s, None
+
+
+def _resolve_trace(prov_rows, ledger_row):
+    """按三元组解析账行指向的溯源行。
+
+    返回 (trace_row|None, problem|None)：problem ∈ unresolved / ambiguous /
+    quantity_conflict。裸键（无量名后缀、账行无 quantity 字段）只在该判定行
+    只有一个数值量时兼容解析；多量时落 ambiguous 点名须补后缀——显式迁移
+    报错，不静默先到先占（WRT-D13）。
+    """
+    base, suffix_qty = parse_trace_ref(ledger_row.get("trace_ref"))
+    field_qty = ledger_row.get("quantity")
+    if suffix_qty and field_qty and suffix_qty != field_qty:
+        return None, "quantity_conflict"
+    qty = suffix_qty or field_qty
+    candidates = [r for r in prov_rows if r.get("verdict_line") == base]
+    if not candidates:
+        candidates = [r for r in prov_rows
+                      if r.get("registry_line_id") == base]
+    if qty:
+        for r in candidates:
+            if r.get("quantity") == qty:
+                return r, None
+        return None, "unresolved"
+    numeric = [r for r in candidates if r.get("value") is not None]
+    if len(numeric) == 1:
+        return numeric[0], None
+    if len(numeric) > 1:
+        return None, "ambiguous"
+    if candidates:
+        return candidates[0], None
+    return None, "unresolved"
 
 
 def gate_numbers(pkg) -> GateResult:
     g = GateResult("numbers")
     ledger = {(n.get("num_id")): n
               for n in (pkg["numbers"] or {}).get("numbers") or []}
-    provenance, prov_err = _load_provenance(pkg)
+    prov_rows, prov_err = _load_provenance(pkg)
     if prov_err:
         g.error("numbers.provenance_unavailable", prov_err)
+    provenance = prov_rows if prov_rows is not None else []
     occurrences = {}  # num_id -> [(file, printed_token, unit)]
     for fname, text in section_files(pkg["root"]).items():
         stripped = CITE_RE.sub(" ", text)
@@ -500,11 +542,22 @@ def gate_numbers(pkg) -> GateResult:
                     "不以数值开头，无从逐串比对", nid)
             continue
         ledger_val, _, _ = _num_normalize(mval.group(1), mval.group(2))
-        trace_row = (provenance or {}).get(row.get("trace_ref"))
-        if provenance is not None and trace_row is None:
-            g.error("numbers.trace_ref_unresolved",
-                    f"数字 {nid} trace_ref {row.get('trace_ref')!r} 在 "
-                    "Analysis 溯源表中无对应行", nid)
+        trace_row = None
+        if prov_rows is not None:
+            trace_row, problem = _resolve_trace(provenance, row)
+            if problem == "quantity_conflict":
+                g.error("numbers.trace_quantity_conflict",
+                        f"数字 {nid} trace_ref 量名后缀与账行 quantity 字段"
+                        "不一致：三元组两处登记须同值", nid)
+            elif problem == "ambiguous":
+                g.error("numbers.trace_ambiguous",
+                        f"数字 {nid} trace_ref {row.get('trace_ref')!r} 指向的"
+                        "判定行有多个量：裸键无法定量，须补量名后缀"
+                        "（如 R-PRED#v1:effect_size）显式迁移（WRT-D13）", nid)
+            elif problem == "unresolved":
+                g.error("numbers.trace_ref_unresolved",
+                        f"数字 {nid} trace_ref {row.get('trace_ref')!r} 在 "
+                        "Analysis 溯源表中无对应三元组行", nid)
         trace_val = trace_row.get("value") if trace_row else None
         for fname, token, unit in occs:
             printed, decimals, _ = _num_normalize(token, unit)
@@ -528,11 +581,14 @@ def gate_numbers(pkg) -> GateResult:
         if nid not in occurrences:
             g.error("numbers.ledger_not_in_text",
                     f"数字 {nid} 已登记但正文无 [num:{nid}] 出现：账实不符", nid)
-    # 一致性清扫（D-W03，consistency sweep 的机械面）：只报警告不自动改
+    # 一致性清扫（D-W03，consistency sweep 的机械面）：只报警告不自动改；
+    # 分组键 = 三元组（判定行 + 量名），同行不同量不并组（WRT-D13）
     by_trace: dict[str, list] = {}
     for row in ledger.values():
         if row.get("trace_ref"):
-            by_trace.setdefault(row["trace_ref"], []).append(row)
+            _base, _qty = parse_trace_ref(row["trace_ref"])
+            _group = _base + ":" + (_qty or row.get("quantity") or "")
+            by_trace.setdefault(_group, []).append(row)
     for tref, rows in sorted(by_trace.items()):
         decimals_seen, units_seen = set(), set()
         for row in rows:
@@ -610,9 +666,22 @@ def gate_wording(pkg) -> GateResult:
                 grade = row.get("strength_grade")
                 rank = schema.GRADE_RANK.get(grade, 0)
                 suggestions = ceiling.get("allowed_terms") or []
+                carveouts = (schema.BANNED_MATCH_CARVEOUTS
+                             .get(language) or {})
                 for banned in ceiling.get("banned_terms") or []:
-                    hit = banned.lower() in plain.lower() \
-                        if language == "en" else banned in plain
+                    # 匹配面切分（WRT-D02 实测）：先剥离该词条的合法
+                    # 形态再判，禁令不变（切分表见 schema，须有实测证据）
+                    hay = plain
+                    for cut in carveouts.get(banned, []):
+                        hay = hay.replace(cut, "")
+                    if language == "en":
+                        # 英文禁用词按词界匹配（WRT-D02 实测证伪：
+                        # 子串口径下 proves/proved 在已发表语料的 23 处
+                        # 命中全为 improves/improved 误报，词界命中为 0）
+                        hit = re.search(r"\b" + re.escape(banned.lower())
+                                        + r"\b", hay.lower()) is not None
+                    else:
+                        hit = banned in hay
                     if hit:
                         g.error("wording.banned_term",
                                 f"{fname} 主张 {cid} 句中出现全档禁用词 "
@@ -720,6 +789,17 @@ def run_audit(root, online_records=None, relevance=None,
         "online_mode": "injected" if online_records is not None else "offline",
         "overall": "pass" if all(g.status == "pass" for g in gates) else "fail",
         "gates": [g.to_dict() for g in gates],
+    }
+    # 程式化核查层（WRT-D01，advisory）：随审计生成独立产物并在此记账，
+    # 与四门分开——不进 overall、不改任何一门的判定、不拦 advance
+    from .tone import run_tone_check
+
+    tone_report = run_tone_check(root)
+    report["tone_advisory"] = {
+        "findings": tone_report["counts"]["total"],
+        "by_rule": tone_report["counts"]["by_rule"],
+        "report_file": "audit/tone_report.json",
+        "blocking": False,
     }
     audit_dir = root / AUDIT_DIR
     audit_dir.mkdir(exist_ok=True)

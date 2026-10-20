@@ -37,6 +37,7 @@ FILES = {
     "findings": "forensic/findings.jsonl",
     "compatibility": "forensic/compatibility.jsonl",
     "summaries": "forensic/summaries.yaml",
+    "obligations": "forensic/obligations.jsonl",
     "delivery_md": "REVIEW_DELIVERY.md",
     # Phase 2 件（领域门 / 校准 / 验证台 / meta / 自审 / 回填清单）
     "domain_gate": "domain_gate.jsonl",
@@ -116,6 +117,10 @@ def append_finding_rows(root, rows) -> None:
 
 def save_compatibility(root, rows) -> None:
     dump_jsonl(Path(root) / FILES["compatibility"], rows)
+
+
+def save_obligations(root, rows) -> None:
+    dump_jsonl(Path(root) / FILES["obligations"], rows)
 
 
 def save_summaries_registration(root, registration: dict) -> None:

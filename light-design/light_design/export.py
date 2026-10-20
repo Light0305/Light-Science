@@ -9,7 +9,9 @@ export：仅 frozen 设计可导出（冻结 = 评审通过 + 内容哈希落盘
     │                          取值域/判读标准/预期登记，照单执行
     ├── design_card.json       设计书结构化全量（design.yaml 的 JSON 投影）
     ├── expected_registry.jsonl 预期登记表：每 run 一行，含 readout 三向
-    │                          与主指标，供 Analysis 事后逐条对账
+    │                          与主指标与结构化 SESOI 派生副本（DES-D01，
+    │                          自 evaluation.sesoi 机械复制），供 Analysis
+    │                          事后逐条对账
     └── reproducibility.md     复现字段清单：种子/环境/数据版本/调参对等
 
 report：刷新 design-stage/DESIGN_REPORT.md（设计总数/状态分布/冻结数/
@@ -18,12 +20,16 @@ amendment 计数/打回记录摘要）。文件末尾的手工区（标记之间
 
 from __future__ import annotations
 
+import copy
 import json
 from collections import Counter
 from pathlib import Path
 
 from .project import list_designs, project_paths
-from .schema import ALL_STATES, _nonempty_str, current_frozen_hash
+from .schema import (
+    ALL_STATES, _nonempty_str, current_frozen_hash, sesoi_diff_fields,
+    validate_sesoi_block,
+)
 from .util import today
 
 MANUAL_START = "<!-- MANUAL:START -->"
@@ -71,11 +77,53 @@ def topo_order(runs: list[dict]) -> list[dict]:
 
 # ---------- 导出 ----------
 
+def pending_amendment_reviews(design: dict) -> list[tuple[int, dict]]:
+    """DES-D02：增量评审未过关的命门 amendment（序号 1 起，条目）。
+    pending_review（待审）与 rejected（评审驳回）都拦导出；旧
+    amendment 无 review 子记录的不追溯。"""
+    out: list[tuple[int, dict]] = []
+    amds = (design.get("freeze") or {}).get("amendments") or []
+    for i, a in enumerate(amds, 1):
+        if not isinstance(a, dict):
+            continue
+        st = (a.get("review") or {}).get("status")
+        if st in ("pending_review", "rejected"):
+            out.append((i, a))
+    return out
+
+
+def unavailable_amendment_reviews(design: dict) -> list[tuple[int, dict]]:
+    """DES-D02：增量评审以 REVIEW_UNAVAILABLE 显式落字的 amendment
+    （导出放行，但导出件必须注明增量评审未完成）。"""
+    out: list[tuple[int, dict]] = []
+    amds = (design.get("freeze") or {}).get("amendments") or []
+    for i, a in enumerate(amds, 1):
+        if isinstance(a, dict) \
+                and (a.get("review") or {}).get("status") == "unavailable_noted":
+            out.append((i, a))
+    return out
+
+
 def export_blockers(design: dict) -> list[str]:
     """非 frozen 时逐条列出还差什么（导出拒绝的理由）。"""
     status = design.get("status")
     if status == "frozen":
-        return []
+        # DES-D02：命门 amendment 增量评审落盘 pass 前不许导出；
+        # 决议 reject 的变更须先以补偿 amendment 回退。
+        gaps = []
+        for i, a in pending_amendment_reviews(design):
+            st = (a.get("review") or {}).get("status")
+            if st == "rejected":
+                gaps.append(f"amendment #{i}（{a.get('fields')}）增量评审"
+                            "决议为 reject：该变更不许沿用，须先以补偿 "
+                            "amendment 回退后再导出（DES-D02）")
+            else:
+                gaps.append(f"amendment #{i}（{a.get('fields')}）为命门"
+                            "修订，增量评审尚未落盘（pending_review）："
+                            "先走 review prepare/record --amendment "
+                            f"{i}（或 --review-unavailable 显式落字）再导出"
+                            "（DES-D02）")
+        return gaps
     gaps = [f"设计未定版冻结（status={status}）：只有 frozen 设计有权威版本可交接"]
     fr = design.get("freeze") or {}
     rev = fr.get("review")
@@ -98,6 +146,29 @@ def export_design(root: Path, design: dict, *, date: str | None = None) -> dict:
     gaps = export_blockers(design)
     if gaps:
         raise ExportError(gaps)
+    # DES-D01：登记行 SESOI 只能从 evaluation 登记块机械派生——导出前
+    # 校验登记块完整 + 行内副本一致，任一不符拒绝导出（不许导出时现编）。
+    _ev = design.get("evaluation") or {}
+    _sesoi_block = _ev.get("sesoi")
+    _claims = design.get("claims") or {}
+    _has_conf = any(isinstance(c, dict) and c.get("confirmatory")
+                    for c in _claims.get("primary_claims") or [])
+    if _has_conf and _sesoi_block is None:
+        raise ExportError(["确认性设计缺 evaluation.sesoi 结构化登记"
+                           "（DES-D01）：登记行 SESOI 只能从 evaluation "
+                           "登记派生，无登记不许导出"])
+    if _sesoi_block is not None:
+        _berrs = validate_sesoi_block(_sesoi_block)
+        if _berrs:
+            raise ExportError(_berrs)
+        for _row in (design.get("handoff") or {}).get("expected_registry") or []:
+            if isinstance(_row, dict) and _row.get("sesoi") is not None:
+                _diff = sesoi_diff_fields(_row["sesoi"], _sesoi_block)
+                if _diff:
+                    raise ExportError([
+                        f"登记行 {_row.get('run_id')} 的 sesoi 副本与 "
+                        f"evaluation.sesoi 不一致（字段 {_diff}）："
+                        "导出只许机械复制，不许行内单独填"])
     out_dir = project_paths(root)["exports"] / design["design_id"]
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -147,6 +218,8 @@ def _registry_line(design: dict, run: dict) -> dict:
         "stage": run.get("stage"),
         "primary_metric": {"name": pm.get("name"),
                            "direction": pm.get("direction")},
+        "sesoi": copy.deepcopy(ev.get("sesoi"))
+        if isinstance(ev.get("sesoi"), dict) else None,
         "readout": {side: readout.get(side) for side in ("positive", "negative", "null")},
         "expected": _expected_for(design, run.get("run_id")),
         "seeds": (ev.get("seeds") or {}).get("count"),
@@ -175,6 +248,10 @@ def _render_brief(design: dict, runs: list[dict], date: str) -> str:
              f"｜结果可见性声明：**{reg.get('visibility')}**"
              "｜本清单按依赖拓扑序排列（对照先行），Experiment 照单执行、"
              "逐 run 回填；偏离设计走偏离登记回 Design，不许执行端私自改设计。")
+    for i, a in unavailable_amendment_reviews(design):
+        L.append(f"> ⚠️ amendment #{i}（{a.get('fields')}）的增量评审为 "
+                 "REVIEW_UNAVAILABLE 显式落字（DES-D02）：增量评审未完成，"
+                 "引用本清单时须按 amendment 链核对该变更，评审恢复后补审。")
     L.append("")
     L.append("## 主张与判读（对账基准）")
     L.append("")
@@ -184,6 +261,13 @@ def _render_brief(design: dict, runs: list[dict], date: str) -> str:
                  f"｜最低可信证据：{c.get('minimum_convincing_evidence')}")
     L.append(f"- 主指标：**{pm.get('name')}**（方向 {pm.get('direction')}，"
              f"惯例出处 {pm.get('convention_source')}）")
+    _sb = ev.get("sesoi")
+    if isinstance(_sb, dict):
+        L.append(f"- SESOI（结构化登记，DES-D01）：**{_sb.get('value')} "
+                 f"{_sb.get('unit')}**（方向 {_sb.get('direction')}，"
+                 f"汇总度量 {_sb.get('summary_measure')}，"
+                 f"目标量 {_sb.get('estimand_ref')}；"
+                 f"边界 {_sb.get('bounds')}；推导依据：{_sb.get('basis')}）")
     for side, label in (("positive", "正"), ("negative", "负"), ("null", "零")):
         s = readout.get(side) or {}
         L.append(f"- 判读·{label}：{s.get('meaning')}"
@@ -267,6 +351,13 @@ def _render_repro(design: dict, date: str) -> str:
     L.append(f"- 内容哈希：`{current_frozen_hash(design)}`（冻结于 {fr.get('frozen_at')}，"
              f"原始冻结哈希 `{fr.get('content_hash')}`，"
              f"amendment {len(fr.get('amendments') or [])} 条）")
+    for i, a in unavailable_amendment_reviews(design):
+        L.append(f"- ⚠️ 增量评审注记（DES-D02）：amendment #{i}"
+                 f"（{a.get('fields')}）的增量评审以 REVIEW_UNAVAILABLE "
+                 "显式落字解除待审，评审本身未完成；待审口径：content_hash "
+                 "取现行哈希，对账时须连同该 amendment 的类别 "
+                 f"{a.get('category')} 与落字日期 "
+                 f"{(a.get('review') or {}).get('date')} 一并核对。")
     L.append(f"- 结果可见性声明：{reg.get('visibility')}")
     L.append("")
     L.append("## 随机性")
@@ -362,6 +453,10 @@ def build_report(root: Path, *, date: str | None = None) -> dict:
             L.append(f"- {s}：{counts[s]}")
     L.append(f"- 已冻结（frozen）：{len(frozen)}")
     L.append(f"- amendment 总数：{total_amds}")
+    pending_total = sum(len(pending_amendment_reviews(d)) for d in designs)
+    if pending_total:
+        L.append(f"- ⚠️ 增量评审未过关的命门 amendment：{pending_total}"
+                 "（DES-D02：待审/被驳回，相关设计导出被拦）")
     L.append(f"- 打回条目总数：{len(returned_rows)}"
              f"（状态机打回往返 {return_trips} 次）")
     L.append("")

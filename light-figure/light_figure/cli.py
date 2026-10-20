@@ -1,6 +1,7 @@
 """light-figure CLI：init / intake / validate / advance / report /
 style build / produce / prompt build / reference add|accept /
-redraw init|install|build|extract / audit run|audit-status|audit note /
+redraw init|install|build|extract / pptx init|install|build|extract /
+recheck / svg-check / audit run|audit-status|audit note /
 provenance set|show / deliver。
 
 所有命令输出 JSON；纪律错误逐项点名（gaps），不给整体式含糊失败。
@@ -23,17 +24,22 @@ from .project import init_package, load_package, provenance_row
 from .prompt import PromptError, build_prompt
 from .provenance import ProvenanceError, provenance_history, \
     update_provenance_row
+from .pptxbuild import PptxError, build_pptx, \
+    extract_and_reconcile_pptx, init_pptx_manifest, install_pptx_manifest
+from .recheck import RecheckError, run_recheck
 from .redraw import RedrawError, build_vsdx, extract_and_reconcile, \
     init_manifest, install_manifest
 from .reference import ReferenceError, ACCEPTANCE_CHECKS, \
     accept_reference, register_reference
+from .svgbridge import SvgBridgeError, validate_svg_subset
 from .report import build_report
 from .style import StyleError, build_style
 from .validate import validate_package
 
 _ERRORS = (IntakeError, GateError, FileExistsError, StyleError,
            ProduceError, PromptError, ReferenceError, RedrawError,
-           AuditError, ProvenanceError, DeliveryError)
+           AuditError, ProvenanceError, DeliveryError, PptxError,
+           RecheckError, SvgBridgeError)
 
 
 def _print(obj):
@@ -133,6 +139,35 @@ def main(argv=None) -> int:
     sp = redraw_sub.add_parser("extract", help="成品反抽清单并与 manifest 对账")
     sp.add_argument("root")
     sp.add_argument("fig_id")
+
+    p = sub.add_parser("pptx", help="PowerPoint 文件层路线（FIG-D02）")
+    pptx_sub = p.add_subparsers(dest="pptx_cmd", required=True)
+    sp = pptx_sub.add_parser("init", help="生成 pptx manifest 骨架")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp = pptx_sub.add_parser("install", help="登记 pptx manifest"
+                                             "（全量契约校验）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--manifest", required=True)
+    sp = pptx_sub.add_parser("build", help="python-pptx 文件层构建 .pptx")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--by", default=None)
+    sp = pptx_sub.add_parser("extract", help="成品反读并与 manifest 对账")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+
+    p = sub.add_parser("recheck", help="本地复核环（FIG-D11：文件层"
+                                       "结构量测，不依赖外部服务）")
+    p.add_argument("root")
+    p.add_argument("--fig", default=None)
+    p.add_argument("--panels", default=None,
+                   help="局部复检面板集（逗号分隔）：范围落复检记录")
+
+    p = sub.add_parser("svg-check", help="Illustrator 精修 SVG 桥入口"
+                                         "受限子集校验（FIG-D03）")
+    p.add_argument("path")
 
     p = sub.add_parser("audit", help="审计引擎（七门）")
     audit_sub = p.add_subparsers(dest="audit_cmd", required=True)
@@ -236,6 +271,33 @@ def main(argv=None) -> int:
                 _print(build_vsdx(args.root, args.fig_id, by=args.by))
             else:
                 _print(extract_and_reconcile(args.root, args.fig_id))
+        elif args.cmd == "pptx":
+            if args.pptx_cmd == "init":
+                manifest = init_pptx_manifest(args.root, args.fig_id)
+                _print({"fig_id": args.fig_id,
+                        "manifest": f"schematic/redraw/{args.fig_id}"
+                                    ".pptx-manifest.json",
+                        "status": manifest["status"]})
+            elif args.pptx_cmd == "install":
+                manifest = install_pptx_manifest(args.root, args.fig_id,
+                                                 args.manifest)
+                _print({"fig_id": args.fig_id,
+                        "status": manifest["status"],
+                        "shapes": len(manifest.get("shapes") or [])})
+            elif args.pptx_cmd == "build":
+                _print(build_pptx(args.root, args.fig_id, by=args.by))
+            else:
+                _print(extract_and_reconcile_pptx(args.root,
+                                                  args.fig_id))
+        elif args.cmd == "recheck":
+            panels = [s.strip() for s in args.panels.split(",")
+                      if s.strip()] if args.panels else None
+            _print(run_recheck(args.root, fig_id=args.fig,
+                               panels=panels))
+        elif args.cmd == "svg-check":
+            result = validate_svg_subset(args.path)
+            _print(result)
+            return 0 if result["ok"] else 1
         elif args.cmd == "audit":
             if args.audit_cmd == "run":
                 _print(run_audit(args.root, fig_id=args.fig))

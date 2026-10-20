@@ -171,6 +171,7 @@ def new_contract_stub(fig_id: str, line: str) -> dict:
         },
         "reviewer_risk": [],
         "data_integrity": {"exclusions": None},
+        "palette_decision": None,  # FIG-D08：配色决定（来源+依据+确认）
         "sister_library_refs": {
             "method_gallery": None,
             "visio_components": [],
@@ -187,6 +188,10 @@ def new_contract_stub(fig_id: str, line: str) -> dict:
         contract["palette_confirmation"] = {
             "confirmed_by": None, "confirmed_at": None,
         }
+        # FIG-D02：方法线原生后端（visio 主线 / powerpoint 第二后端）
+        contract["schematic_backend"] = schema.DEFAULT_SCHEMATIC_BACKEND
+        # FIG-D03：Illustrator 精修段（条件路线，可选，缺省不启用）
+        contract["illustrator_refinement"] = None
     return contract
 
 
@@ -289,6 +294,20 @@ def provenance_row(provenance: dict, fig_id: str):
         if row.get("fig_id") == fig_id:
             return row
     return None
+
+
+def schematic_backend(contract) -> str:
+    """方法图原生后端：合同 schematic_backend，缺省 visio（存量兼容）。"""
+    return (contract or {}).get("schematic_backend") \
+        or schema.DEFAULT_SCHEMATIC_BACKEND
+
+
+def schematic_artifact_relpath(contract, fig_id: str) -> str:
+    """方法图最终产物相对路径（审计/交付/账面复验共用同一口径）：
+    visio 线 = schematic/redraw/<fig>.vsdx；powerpoint 线 = .pptx。"""
+    if schematic_backend(contract) == "powerpoint":
+        return f"schematic/redraw/{fig_id}.pptx"
+    return f"schematic/redraw/{fig_id}.vsdx"
 
 
 def effective_backend(backend_reg: dict, fig_id: str):

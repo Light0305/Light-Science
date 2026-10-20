@@ -223,6 +223,8 @@ def build_consensus(root, concerns_data) -> dict:
         raise PanelError(["评审包不存在（先 init）"])
     known = {s.get("seat_id")
              for s in (pkg["seats"] or {}).get("seats") or []}
+    from .escalation import check_concern, load_context
+    esc_ctx = load_context(root, pkg)
     concerns, gaps = [], []
     seen_ids = set()
     for i, raw in enumerate(concerns_data or []):
@@ -268,6 +270,13 @@ def build_consensus(root, concerns_data) -> dict:
             gaps.append(f"concern {cid} 关闭缺理由：条目离开活跃集必须"
                         "落带理由终态（RV-11）")
             continue
+        # 升格三查（v1.1 REV-D10）：落盘前逐条机械验，结果逐条落账；
+        # 任一查 fail 即拒入账（指针虚设/逐字对不上/强度越档）。
+        esc_checks, esc_fails = check_concern(raw, computed, esc_ctx)
+        if esc_fails:
+            gaps.extend(f"concern {cid} 升格三查不过：{f}"
+                        for f in esc_fails)
+            continue
         concerns.append(schema.concern_row(
             cid, raw.get("statement") or "", raised,
             proposals,
@@ -277,7 +286,8 @@ def build_consensus(root, concerns_data) -> dict:
             close_criterion=raw.get("close_criterion"),
             status=raw.get("status", "open"),
             close_reason=raw.get("close_reason"),
-            pointers=raw.get("pointers")))
+            pointers=raw.get("pointers"),
+            escalation_checks=esc_checks))
     if gaps:
         raise PanelError(gaps)
     consensus = {"concerns": concerns}

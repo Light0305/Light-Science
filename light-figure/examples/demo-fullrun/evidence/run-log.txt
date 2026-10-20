@@ -1,15 +1,15 @@
 === light-figure v1 demo-fullrun 运行日志 ===
 [driver] inputs 已生成：arms_segments.csv（三臂逐段 MOTA，转写自 light-experiment 合成演示三份 summary.json）、figures_manifest.yaml、journal_contract.yaml、ai_policy.yaml（演示 fixture）
 
-$ light_figure init examples/demo-fullrun/figure-pkg --title Turkey Behaviour Figures (light-figure demo)   (cwd=examples/demo-fullrun)
+$ light_figure init ../../../../light-figure/examples/demo-fullrun/figure-pkg --title Turkey Behaviour Figures (light-figure demo)   (cwd=../../../../light-figure/examples/demo-fullrun)
 {
-  "package_id": "turkey-behaviour-figures-light-figure-de_1b4072",
+  "package_id": "turkey-behaviour-figures-light-figure-de_4da766",
   "status": "intake"
 }
 
-$ light_figure intake examples/demo-fullrun/figure-pkg --manifest examples/demo-fullrun/inputs/figures_manifest.yaml --journal-contract examples/demo-fullrun/inputs/journal_contract.yaml --template-record-id TPL-DEMO-001 --ai-policy examples/demo-fullrun/inputs/ai_policy.yaml --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure intake ../../../../light-figure/examples/demo-fullrun/figure-pkg --manifest ../../../../light-figure/examples/demo-fullrun/inputs/figures_manifest.yaml --journal-contract ../../../../light-figure/examples/demo-fullrun/inputs/journal_contract.yaml --template-record-id TPL-DEMO-001 --ai-policy ../../../../light-figure/examples/demo-fullrun/inputs/ai_policy.yaml --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
-  "package_id": "turkey-behaviour-figures-light-figure-de_1b4072",
+  "package_id": "turkey-behaviour-figures-light-figure-de_4da766",
   "source_kind": "write_manifest",
   "source_hash": "149813eb3d18eae4bed1decf2c5360d3d50b49f4c167844d59549324c9524ecd",
   "figures": [
@@ -21,7 +21,7 @@ $ light_figure intake examples/demo-fullrun/figure-pkg --manifest examples/demo-
 }
 [driver] contracts/fig-1.yaml、contracts/fig-2.yaml 五点合同与 backend.json（python，explicit）已落盘；图库/组件引用为演示种子条目（MG-DEMO-SEED-001 / VC-DEMO-SEED-ARROW / DG-DEMO-SEED-001，均在报告中披露）
 
-$ light_figure validate examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure validate ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "ok": true,
   "errors": [],
@@ -30,7 +30,7 @@ $ light_figure validate examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fu
   "warning_count": 0
 }
 
-$ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure advance ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "advanced": true,
   "from": "intake",
@@ -38,7 +38,7 @@ $ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-ful
   "gaps": []
 }
 
-$ light_figure style build examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure style build ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "style_build_hash": "f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f",
   "journal": "Demo Journal (Nature Figure Guide anchors)",
@@ -50,11 +50,11 @@ $ light_figure style build examples/demo-fullrun/figure-pkg   (cwd=examples/demo
 }
 [driver] fig-1 源数据与绘图脚本已落盘（脚本头登记正常轴口径：y 递增、limits [60, 82] 覆盖数据全程、未截断）
 
-$ light_figure produce examples/demo-fullrun/figure-pkg fig-1 --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure produce ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-1 --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-1",
   "artifact": "exports/fig-1.pdf",
-  "artifact_sha256": "bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8",
+  "artifact_sha256": "421ed4c659aa1363c547b120351b24e0a1be30c52d8d0baf79e5e7ba1af9e43b",
   "preview": "data/previews/fig-1.png",
   "size": {
     "figsize_in": [
@@ -74,11 +74,18 @@ $ light_figure produce examples/demo-fullrun/figure-pkg fig-1 --by demo-author  
   "font_substituted": {
     "requested": "Arial",
     "used": "DejaVu Sans"
+  },
+  "palette_decision_record": {
+    "source": "journal_contract",
+    "basis": "沿用期刊合同登记色板 PAL-OI-8（版本 2002.1，Okabe-Ito 色盲友好八色）",
+    "categorical": "PAL-OI-8@2002.1",
+    "continuous": "PAL-BATLOW@8.0",
+    "style_build_hash": "f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f"
   }
 }
 [driver] fig-1 produce 完成：font_substituted={'requested': 'Arial', 'used': 'DejaVu Sans'}（期刊合同 Arial 在本机不可用，按规程以 DejaVu Sans 替换并落字）
 
-$ light_figure prompt build examples/demo-fullrun/figure-pkg fig-2 --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure prompt build ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "prompt": "schematic/prompts/fig-2.md",
@@ -87,7 +94,7 @@ $ light_figure prompt build examples/demo-fullrun/figure-pkg fig-2 --by demo-aut
 }
 [driver] 参考图替身已由本地 PIL 程序绘制（800×500，六个模块框 + 标签逐字与 manifest 一致）；来源如实披露于 demo-report——它不是 GPT Image 产物
 
-$ light_figure reference add examples/demo-fullrun/figure-pkg fig-2 --image examples/demo-fullrun/inputs/reference-fig-2.png --model-name local PIL script (demo stand-in) --model-version run_demo.py --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure reference add ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --image ../../../../light-figure/examples/demo-fullrun/inputs/reference-fig-2.png --model-name local PIL script (demo stand-in) --model-version run_demo.py --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "reference": "schematic/reference/fig-2.png",
@@ -98,7 +105,7 @@ $ light_figure reference add examples/demo-fullrun/figure-pkg fig-2 --image exam
   }
 }
 
-$ light_figure reference accept examples/demo-fullrun/figure-pkg fig-2 --by demo-author --labels-verbatim --structures-factual --formulas-values-checked   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure reference accept ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --by demo-author --labels-verbatim --structures-factual --formulas-values-checked   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "accepted_by": "demo-author",
@@ -109,39 +116,39 @@ $ light_figure reference accept examples/demo-fullrun/figure-pkg fig-2 --by demo
   ]
 }
 
-$ light_figure redraw init examples/demo-fullrun/figure-pkg fig-2   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure redraw init ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "manifest": "schematic/redraw/fig-2.manifest.json",
   "status": "draft"
 }
 
-$ light_figure redraw install examples/demo-fullrun/figure-pkg fig-2 --manifest examples/demo-fullrun/inputs/manifest-fig-2.json   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure redraw install ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --manifest ../../../../light-figure/examples/demo-fullrun/inputs/manifest-fig-2.json   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "status": "registered",
   "shapes": 12
 }
 
-$ light_figure redraw build examples/demo-fullrun/figure-pkg fig-2 --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure redraw build ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "artifact": "schematic/redraw/fig-2.vsdx",
-  "artifact_sha256": "34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0",
+  "artifact_sha256": "b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a",
   "shapes_built": 12,
   "visio_verified": false
 }
 
-$ light_figure redraw extract examples/demo-fullrun/figure-pkg fig-2   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure redraw extract ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "ok": true,
   "diffs": [],
-  "extracted_shapes_hash": "1360c189e475123df54202fd2bd0f0d6f52f0ccf51e446bf0f4fdf8bcd841ff1",
+  "extracted_shapes_hash": "360c7512a2905534d4d2db630dd9869c447a653d8782e5410601a897c15e1fcd",
   "shapes_extracted": 12
 }
 
-$ light_figure provenance set examples/demo-fullrun/figure-pkg fig-2 --set label_check={"done": true, "by": "demo-author", "at": "2026-10-20"} --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure provenance set ../../../../light-figure/examples/demo-fullrun/figure-pkg fig-2 --set label_check={"done": true, "by": "demo-author", "at": "2026-10-20"} --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "fig_id": "fig-2",
   "line": "schematic",
@@ -164,7 +171,7 @@ $ light_figure provenance set examples/demo-fullrun/figure-pkg fig-2 --set label
   },
   "redraw_source": {
     "path": "schematic/redraw/fig-2.vsdx",
-    "hash": "34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0"
+    "hash": "b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a"
   },
   "label_check": {
     "done": true,
@@ -175,7 +182,7 @@ $ light_figure provenance set examples/demo-fullrun/figure-pkg fig-2 --set label
   "manual_corrections_log": null
 }
 
-$ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure advance ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "advanced": true,
   "from": "contracted",
@@ -183,14 +190,78 @@ $ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-ful
   "gaps": []
 }
 
+$ light_figure recheck ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
+{
+  "figures": {
+    "fig-1": {
+      "overall": "PASS",
+      "record": "audit/fig-1.recheck.json",
+      "findings": [
+        {
+          "check": "page_size",
+          "level": "pass",
+          "message": "页尺寸 183.0 × 47.6 mm 与期刊栏宽相符"
+        },
+        {
+          "check": "fonts_embedded",
+          "level": "pass",
+          "message": "2 个字体全部嵌入"
+        },
+        {
+          "check": "min_font_size",
+          "level": "pass",
+          "message": "实测最小字号 6.00 pt ≥ 地板 5.0 pt"
+        },
+        {
+          "check": "colors_vs_palette",
+          "level": "pass",
+          "message": "采样用色 5 个均在合同色板或中性色内"
+        },
+        {
+          "check": "raster_resolution",
+          "level": "pass",
+          "message": "无嵌入位图（纯矢量）"
+        }
+      ]
+    },
+    "fig-2": {
+      "overall": "PASS",
+      "record": "audit/fig-2.recheck.json",
+      "findings": [
+        {
+          "check": "page_size",
+          "level": "pass",
+          "message": "成品页尺寸 10.0 × 6.25 in 与标定一致"
+        },
+        {
+          "check": "semantic_ids",
+          "level": "pass",
+          "message": "12 个形状的 User.SemanticId 齐备"
+        },
+        {
+          "check": "media_vs_residue",
+          "level": "pass",
+          "message": "包内 media 0 个均有残留登记"
+        },
+        {
+          "check": "colors_vs_palette",
+          "level": "pass",
+          "message": "采样用色 2 个均在角色色板或中性色内"
+        }
+      ]
+    }
+  }
+}
+[driver] 交付前本地复核（recheck）：双图在最终产物上做文件层结构量测（尺寸/字体嵌入/用色对合同/语义 ID），结论落 audit/<fig>.recheck.json，不改审计判决
+
 === 拦截变体（不进正式交付） ===
 [driver] 变体 honesty-inverted：脚本头 y 轴登记改为 decreasing 且绘图真反转 y 轴（变体不进正式交付）
 
-$ light_figure produce examples/demo-fullrun/variants/honesty-inverted fig-1   (cwd=examples/demo-fullrun/variants/honesty-inverted)
+$ light_figure produce ../../../../light-figure/examples/demo-fullrun/variants/honesty-inverted fig-1   (cwd=../../../../light-figure/examples/demo-fullrun/variants/honesty-inverted)
 {
   "fig_id": "fig-1",
   "artifact": "exports/fig-1.pdf",
-  "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+  "artifact_sha256": "3c5278269cda8d0646fb5244dc651b2461d4f2220be77b057fe4e07aad2e2421",
   "preview": "data/previews/fig-1.png",
   "size": {
     "figsize_in": [
@@ -210,16 +281,23 @@ $ light_figure produce examples/demo-fullrun/variants/honesty-inverted fig-1   (
   "font_substituted": {
     "requested": "Arial",
     "used": "DejaVu Sans"
+  },
+  "palette_decision_record": {
+    "source": "journal_contract",
+    "basis": "沿用期刊合同登记色板 PAL-OI-8（版本 2002.1，Okabe-Ito 色盲友好八色）",
+    "categorical": "PAL-OI-8@2002.1",
+    "continuous": "PAL-BATLOW@8.0",
+    "style_build_hash": "f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f"
   }
 }
 
-$ light_figure audit run examples/demo-fullrun/variants/honesty-inverted --fig fig-1   (cwd=examples/demo-fullrun/variants/honesty-inverted)
+$ light_figure audit run ../../../../light-figure/examples/demo-fullrun/variants/honesty-inverted --fig fig-1   (cwd=../../../../light-figure/examples/demo-fullrun/variants/honesty-inverted)
 {
   "figures": {
     "fig-1": {
       "overall": "FIX_BEFORE_DELIVERY",
       "artifact": "exports/fig-1.pdf",
-      "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+      "artifact_sha256": "3c5278269cda8d0646fb5244dc651b2461d4f2220be77b057fe4e07aad2e2421",
       "gates": {
         "alignment": "PASS",
         "collisions": "PASS",
@@ -232,22 +310,118 @@ $ light_figure audit run examples/demo-fullrun/variants/honesty-inverted --fig f
 }
 [driver] 变体 native-embed：manifest 新增整幅参考图残留登记（class=photo、box 占满面板 a），重建后 audit
 
-$ light_figure redraw build examples/demo-fullrun/variants/native-embed fig-2   (cwd=examples/demo-fullrun/variants/native-embed)
+$ light_figure redraw build ../../../../light-figure/examples/demo-fullrun/variants/native-embed fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/native-embed)
 {
   "fig_id": "fig-2",
   "artifact": "schematic/redraw/fig-2.vsdx",
-  "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+  "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
   "shapes_built": 13,
   "visio_verified": false
 }
 
-$ light_figure audit run examples/demo-fullrun/variants/native-embed --fig fig-2   (cwd=examples/demo-fullrun/variants/native-embed)
+$ light_figure audit run ../../../../light-figure/examples/demo-fullrun/variants/native-embed --fig fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/native-embed)
 {
   "figures": {
     "fig-2": {
       "overall": "FIX_BEFORE_DELIVERY",
       "artifact": "schematic/redraw/fig-2.vsdx",
-      "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+      "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
+      "gates": {
+        "contract": "PASS",
+        "native": "FIX_BEFORE_DELIVERY",
+        "policy_block": "PASS"
+      }
+    }
+  }
+}
+[driver] 变体 round-noop：主包成品已 build 一轮且内容未变，在副本上原样再 build，期望被 round_noop 门拒绝
+
+$ light_figure redraw build ../../../../light-figure/examples/demo-fullrun/variants/round-noop fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/round-noop)
+{
+  "ok": false,
+  "gaps": [
+    "round_noop：本轮 manifest 内容投影与上一轮（round 1）完全相同，构建产物不会有任何实质变化——纯元数据轮次不许计为进展；先实质修改清单再 build（FIG-D06 无效轮次门）"
+  ]
+}
+[driver] 变体 pptx-chain：fig-2 后端切 powerpoint，pptx manifest 由已对账的 vsdx manifest 派生（同形状、同箭头计划）
+
+$ light_figure pptx install ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain fig-2 --manifest ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain/pptx-manifest-src.json   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "fig_id": "fig-2",
+  "status": "registered",
+  "shapes": 12
+}
+
+$ light_figure pptx build ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain fig-2 --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "fig_id": "fig-2",
+  "artifact": "schematic/redraw/fig-2.pptx",
+  "artifact_sha256": "6fa4cc146d961dbf862b9b136e1df90a5be4b6a4e007c96e9345f3a7d2baa262",
+  "shapes_built": 17,
+  "powerpoint_verified": false,
+  "evidence_level": "file_layer"
+}
+
+$ light_figure pptx extract ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "fig_id": "fig-2",
+  "ok": true,
+  "diffs": [],
+  "extracted_shapes_hash": "07fe80351d61e08059f010208befb21aaf5237cb7a556593c5e8e30bbed10abc",
+  "shapes_extracted": 17
+}
+
+$ light_figure audit run ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain --fig fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "figures": {
+    "fig-2": {
+      "overall": "PASS",
+      "artifact": "schematic/redraw/fig-2.pptx",
+      "artifact_sha256": "6fa4cc146d961dbf862b9b136e1df90a5be4b6a4e007c96e9345f3a7d2baa262",
+      "gates": {
+        "contract": "PASS",
+        "native": "PASS",
+        "policy_block": "PASS"
+      }
+    }
+  }
+}
+
+$ light_figure recheck ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain --fig fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "figures": {
+    "fig-2": {
+      "overall": "PASS",
+      "record": "audit/fig-2.recheck.json",
+      "findings": [
+        {
+          "check": "slide_size",
+          "level": "pass",
+          "message": "幻灯片尺寸 [10.0, 6.25] 与标定一致（= 图尺寸）"
+        },
+        {
+          "check": "semantic_ids",
+          "level": "pass",
+          "message": "17 个对象的 User 语义 ID 齐备"
+        },
+        {
+          "check": "media_vs_residue",
+          "level": "pass",
+          "message": "图片对象 0 个均有残留登记"
+        }
+      ]
+    }
+  }
+}
+[driver] 变体 pptx-chain 第二段：向成品塞入整页参考图图片对象，期望 native 门拦截
+
+$ light_figure audit run ../../../../light-figure/examples/demo-fullrun/variants/pptx-chain --fig fig-2   (cwd=../../../../light-figure/examples/demo-fullrun/variants/pptx-chain)
+{
+  "figures": {
+    "fig-2": {
+      "overall": "FIX_BEFORE_DELIVERY",
+      "artifact": "schematic/redraw/fig-2.pptx",
+      "artifact_sha256": "6ae02556f63829ea4edde6b3a73855efe4bb3427d565dfc72655bfd6c495c874",
       "gates": {
         "contract": "PASS",
         "native": "FIX_BEFORE_DELIVERY",
@@ -259,13 +433,13 @@ $ light_figure audit run examples/demo-fullrun/variants/native-embed --fig fig-2
 
 === 主包审计与交付 ===
 
-$ light_figure audit run examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure audit run ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "figures": {
     "fig-1": {
       "overall": "PASS",
       "artifact": "exports/fig-1.pdf",
-      "artifact_sha256": "bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8",
+      "artifact_sha256": "421ed4c659aa1363c547b120351b24e0a1be30c52d8d0baf79e5e7ba1af9e43b",
       "gates": {
         "alignment": "PASS",
         "collisions": "PASS",
@@ -277,7 +451,7 @@ $ light_figure audit run examples/demo-fullrun/figure-pkg   (cwd=examples/demo-f
     "fig-2": {
       "overall": "PASS",
       "artifact": "schematic/redraw/fig-2.vsdx",
-      "artifact_sha256": "34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0",
+      "artifact_sha256": "b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a",
       "gates": {
         "contract": "PASS",
         "native": "PASS",
@@ -287,7 +461,7 @@ $ light_figure audit run examples/demo-fullrun/figure-pkg   (cwd=examples/demo-f
   }
 }
 
-$ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure advance ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "advanced": true,
   "from": "produced",
@@ -295,7 +469,7 @@ $ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-ful
   "gaps": []
 }
 
-$ light_figure deliver examples/demo-fullrun/figure-pkg --by demo-author   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure deliver ../../../../light-figure/examples/demo-fullrun/figure-pkg --by demo-author   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "delivery": "exports/delivery.yaml",
   "version": 1,
@@ -306,7 +480,7 @@ $ light_figure deliver examples/demo-fullrun/figure-pkg --by demo-author   (cwd=
   "numbering_frozen": true
 }
 
-$ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure advance ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
   "advanced": true,
   "from": "audited",
@@ -314,9 +488,9 @@ $ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-ful
   "gaps": []
 }
 
-$ light_figure status examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure status ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
-  "package_id": "turkey-behaviour-figures-light-figure-de_1b4072",
+  "package_id": "turkey-behaviour-figures-light-figure-de_4da766",
   "title": "Turkey Behaviour Figures (light-figure demo)",
   "status": "delivered",
   "figures": [
@@ -344,9 +518,9 @@ $ light_figure status examples/demo-fullrun/figure-pkg   (cwd=examples/demo-full
   }
 }
 
-$ light_figure report examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
+$ light_figure report ../../../../light-figure/examples/demo-fullrun/figure-pkg   (cwd=../../../../light-figure/examples/demo-fullrun/figure-pkg)
 {
-  "report_path": "examples/demo-fullrun/figure-pkg/FIGURE_REPORT.md",
+  "report_path": "../../../../light-figure/examples/demo-fullrun/figure-pkg/FIGURE_REPORT.md",
   "date": "2026-10-20",
   "status": "delivered",
   "figures": 2,
@@ -359,8 +533,8 @@ $ light_figure report examples/demo-fullrun/figure-pkg   (cwd=examples/demo-full
 kind: light-figure/delivery
 version: 1
 status: current
-tool_version: 0.2.0
-package_id: turkey-behaviour-figures-light-figure-de_1b4072
+tool_version: 1.0.0
+package_id: turkey-behaviour-figures-light-figure-de_4da766
 package_status: audited
 generated_at: '2026-10-20'
 generated_by: demo-author
@@ -375,7 +549,7 @@ figures:
   caption_hash: a245711a459b070db1297dfe3822f338d3c7e0a4b2a489b5442be3480eeaa427
   files:
   - path: exports/fig-1.pdf
-    sha256: bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8
+    sha256: 421ed4c659aa1363c547b120351b24e0a1be30c52d8d0baf79e5e7ba1af9e43b
     role: main_pdf
   - path: data/previews/fig-1.png
     sha256: 9c686724311c8238b48c4669b2140d11a1c8e32317be553fc48c83275bc34622
@@ -387,13 +561,27 @@ figures:
     source_data_hash: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
     style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
     palette_registry_version: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+  correspondence:
+    source_assets:
+    - role: plotting_script
+      path: data/scripts/fig-1.py
+      sha256: 78f0a48f885d19192a8b8164e62a6fb2f3c5fee7774c9d6670a24e19832cc77f
+    - role: source_data
+      path: data/source-data/fig-1.csv
+      sha256: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
+    - role: style_bundle
+      path: data/styles/bundle.json
+      sha256: 00d811615487ffc73fdb5c65da8bd3027d1ad265ab303c923e369f8eefcf47b0
+    content_hashes:
+      alignment_panels: 05443f6a38c8b4a39260f8734bd51488d069771f733b466596c94d41e3053455
+    note: null
 - fig_id: fig-2
   kind: schematic
   line: schematic
   caption_hash: a3d95f89b2ffb95e272326d0d15397eac32f34389d81a31b2125ec91eb767f38
   files:
   - path: schematic/redraw/fig-2.vsdx
-    sha256: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+    sha256: b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a
     role: visio_source
   visio_verified: false
   visio_note: 文件级路线产物，未过 Visio 实机验证（拍板 D4：如实标注）
@@ -406,7 +594,7 @@ figures:
     reference_image_hash: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
     redraw_source:
       path: schematic/redraw/fig-2.vsdx
-      hash: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+      hash: b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a
   ai_disclosure:
     generation_model: *id001
     prompt_version: '1'
@@ -418,10 +606,32 @@ figures:
       version: '0.1'
       style_anchor: anchor-pipeline-flow
       prompt_version: '1'
+      reference_breakdown:
+        palette_hex:
+        - '#0072b2'
+        - '#d55e00'
+        - '#009e73'
+        - '#e69f00'
+        layout_flow: 左入右出两段流：左段自上而下（视频→跟踪），右段自上而下四级（统计量→预测→阈值→异常）
+        module_style: 矩形与圆角矩形模块交替，浅蓝描边、无填充
+        annotation_style: 模块内嵌一行英文标签，无面板角标
+        information_density: 中密度：六个模块两面板分置，箭头串联
+        special_elements: 跨面板长箭头连接跟踪与统计量两段
     visio_components:
     - component_id: VC-DEMO-SEED-ARROW
       version: '0.1'
     data_gallery: null
+  correspondence:
+    source_assets:
+    - role: redraw_manifest
+      path: schematic/redraw/fig-2.manifest.json
+      sha256: 21be5c9d194f1aa36203c757a63a77646c96e01c2ed3095217d2eeea8b5f2fbc
+    - role: reference_image
+      path: null
+      sha256: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
+    content_hashes:
+      extracted_shapes: 360c7512a2905534d4d2db630dd9869c447a653d8782e5410601a897c15e1fcd
+    note: null
 
 
 === summary ===
@@ -458,7 +668,7 @@ figures:
   "variant_honesty_inverted": {
     "overall": "FIX_BEFORE_DELIVERY",
     "artifact": "exports/fig-1.pdf",
-    "artifact_sha256": "b77ff3924cfb96fddcc93c87f54bd89bc63c40b2864bc9d3e8a60a96bbebfcfb",
+    "artifact_sha256": "3c5278269cda8d0646fb5244dc651b2461d4f2220be77b057fe4e07aad2e2421",
     "gates": {
       "alignment": "PASS",
       "collisions": "PASS",
@@ -470,11 +680,28 @@ figures:
   "variant_native_embed": {
     "overall": "FIX_BEFORE_DELIVERY",
     "artifact": "schematic/redraw/fig-2.vsdx",
-    "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
+    "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
     "gates": {
       "contract": "PASS",
       "native": "FIX_BEFORE_DELIVERY",
       "policy_block": "PASS"
     }
+  },
+  "recheck_overall": {
+    "fig-1": "PASS",
+    "fig-2": "PASS"
+  },
+  "variant_round_noop": {
+    "blocked": true,
+    "gate": "round_noop"
+  },
+  "variant_pptx_chain": {
+    "audit_gates": {
+      "contract": "PASS",
+      "native": "PASS",
+      "policy_block": "PASS"
+    },
+    "recheck_overall": "PASS",
+    "embed_native_verdict": "FIX_BEFORE_DELIVERY"
   }
 }

@@ -1,0 +1,8 @@
+target_id: openalex-live
+name: OpenAlex（真实试跑）
+base_url: https://api.openalex.org
+project: demo-poultry-research
+purpose_kind: literature_leads_batch
+consumer: light-literature 线索批
+channel: official_api
+terms_basis: OpenAlex 官方文档与使用条款（api.openalex.org）

@@ -1,0 +1,14 @@
+run_id: run-demo-web-3282ca
+target_id: demo-web
+channel: web_page
+status: finished
+started_at: '2026-10-20T20:18:34+00:00'
+precheck_id: pc-7abbc157a4
+run_config_hash: cc77146cd31fbc332947cfe979a97dc1d907b0dedbbd59100f06f1795146aedd
+requested: 1
+stored: 1
+not_modified: 0
+duplicates: 0
+errors: []
+refused: false
+finished_at: '2026-10-20T20:18:34+00:00'

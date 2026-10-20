@@ -4,7 +4,7 @@
 
 ## 总览
 
-- 包 ID：`turkey-behaviour-figures-light-figure-de_1b4072`
+- 包 ID：`turkey-behaviour-figures-light-figure-de_4da766`
 - 包状态：delivered
 - 承接：write_manifest @ 2026-10-20（源哈希 `149813eb3d18…`）
 - 目标期刊：模板记录 TPL-DEMO-001｜AI 政策快照 verified_at=2026-10-20

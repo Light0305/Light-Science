@@ -58,6 +58,7 @@ def new_manuscript(title: str, language: str) -> dict:
         "created_at": today(),
         "updated_at": today(),
         "intake": None,
+        "contribution": None,
         "target_journal": None,
         "authors": [],
         "guarantor": None,

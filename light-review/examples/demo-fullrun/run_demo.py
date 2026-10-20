@@ -302,8 +302,11 @@ def write_report(f: dict, v: dict) -> None:
     lines.append("- 数字↔图：F001 在 delivery 中有对应图（fig-1）；哈希"
                  "对应 not_assessable——稿件侧源资产为 SVG"
                  "（assets/fig1_threshold_arms.svg），交付文件为 "
-                 "fig-1.pdf / fig-1.png，无同名文件可比；图注无小数数字，"
-                 "图注未登记数字一项无触发。")
+                 "fig-1.pdf / fig-1.png，无同名文件可比；v1.1 起消费图包"
+                 "对应件清单（correspondence）：清单源资产为绘图脚本/源"
+                 "数据/样式 bundle，未覆盖稿件侧登记的 SVG 源资产，按"
+                 "「未覆盖不等于不符」维持未检（RV-C005 仍开）；图注无"
+                 "小数数字，图注未登记数字一项无触发。")
     lines.append("- 引用↔主张：正文引用键 3 个（bai2021-enet、dong2025-is、"
                  "wang2022-attention）均在 references.lock 中有条目且带 "
                  "entry_hash；C1 的 evidence_refs 五行在结论包登记行中"

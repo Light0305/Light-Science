@@ -96,6 +96,17 @@ def _gate_reported(pkg):
         elif not any(r.get("type") == "summary"
                      for r in pkg["domain_gate"]):
             gaps.append("domain_gate.jsonl 缺 summary 覆盖自报行")
+        # 范式点名（v1.1 REV-D01，登记键触发口径）：条目带范式适用性
+        # （范式已成领域判定承重件）而本包未登记范式 → 点名阻断，
+        # 须先 domain --paradigm 登记并重跑领域门再冻结报告。
+        domain_reg = pkg["review"]["domain"]
+        if domain_reg.get("paradigm_required") \
+                and not (pkg["review"].get("paradigm") or {}) \
+                .get("paradigm"):
+            gaps.append("范式登记缺失：覆盖层条目带范式适用性"
+                        "（paradigms），范式已成领域判定承重件，"
+                        "本包 paradigm 未登记（先 domain --paradigm "
+                        "登记并重跑，REV-D01 第零层）")
     gaps += [f"校验未过：{e}" for e in validate_package(pkg["root"])]
     return gaps
 
@@ -151,9 +162,19 @@ def _gate_adjudicated(pkg):
     return gaps
 
 
+def _obligation_gaps(pkg):
+    """义务账门（v1.1 REV-D05）：open 义务逐项点名并阻断交付。"""
+    from .obligations import fold_obligations, open_obligations
+    folded = fold_obligations(pkg["obligations"] or [])
+    return [f"义务 {o['obligation_id']} 未履行（open）：{o.get('text')}"
+            "（履行落证据或具名豁免后才许交付，REV-D05）"
+            for o in open_obligations(folded)]
+
+
 def _gate_delivered(pkg):
     gaps = _drift_gaps(pkg)
     gaps += _unadjudicated_gaps(pkg)
+    gaps += _obligation_gaps(pkg)
     review = pkg["review"]
     iso = review.get("isolation") or {}
     if iso.get("mode") == "degraded" and \
@@ -264,6 +285,24 @@ def _render_delivery(pkg) -> str:
         lines += ["", "## 回填清单", "",
                   f"- handoff_to_write（{handoff.get('items', 0)} 条）"
                   "已导出：采纳与执行由 Write 侧决定"]
+    from .obligations import fold_obligations
+    obligations = fold_obligations(pkg["obligations"] or [])
+    if obligations:
+        lines += ["", "## 义务账（裁决附带条件）", ""]
+        for o in obligations:
+            closure = o.get("closure") or {}
+            if o["status"] == "fulfilled":
+                tail = (f"履行（{closure.get('by')}，证据 "
+                        f"{closure.get('evidence_pointer')}）")
+            elif o["status"] == "waived":
+                tail = (f"豁免（{closure.get('by')}，理由："
+                        f"{closure.get('reason')}）")
+            else:
+                tail = "未履行"
+            link = (f"，关联 {o['finding_id']}" if o.get("finding_id")
+                    else "")
+            lines.append(f"- {o['obligation_id']} [{o['status']}] "
+                         f"{o.get('text')}{link} — {tail}")
     lines += ["", "## 未尽件（Phase 2）", ""]
     pending = review.get("phase2_pending") or []
     if pending:

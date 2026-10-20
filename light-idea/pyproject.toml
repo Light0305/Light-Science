@@ -20,5 +20,8 @@ light-idea = "light_idea.cli:main"
 [tool.setuptools]
 packages = ["light_idea"]
 
+[tool.setuptools.package-data]
+light_idea = ["casebook_seeds.jsonl"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

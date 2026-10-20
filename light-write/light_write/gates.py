@@ -110,6 +110,11 @@ def _intake_gate_gaps(pkg) -> list:
     contract = pkg["contract"] or {}
     if not contract.get("frozen"):
         gaps.append("验收合同未冻结：先补断言并 freeze-contract（拍板⑥硬门）")
+    contribution = manuscript.get("contribution") or {}
+    if contribution.get("status") != "signed" \
+            or not (contribution.get("receipt") or {}).get("statement_hash"):
+        gaps.append("贡献确认回执未签认：先 confirm-contribution 由用户签认"
+                    "主导贡献陈述（WRT-D04，未签认拦 outlined）")
     return gaps
 
 
@@ -350,6 +355,8 @@ def status_summary(root) -> dict:
         "numbers": len((pkg["numbers"] or {}).get("numbers") or []),
         "figures": len((pkg["figures"] or {}).get("figures") or []),
         "target_journal": (manuscript.get("target_journal") or {}).get("journal_name"),
+        "contribution_signed": (
+            (manuscript.get("contribution") or {}).get("status") == "signed"),
         "contract_status": (pkg["contract"] or {}).get("status"),
         "contract_contested": manuscript.get("contract_contested", False),
         "submission_blocked_reason": manuscript.get("submission_blocked_reason"),

@@ -2,8 +2,8 @@
   "kind": "light-write/audit-report",
   "version": "1.0",
   "manuscript_id": "zero-tuning-tracker-thresholds-predicted_c8d0fc",
-  "manuscript_hash": "447ab38f6890f42dd3f973dee8dada7f99c6a365115f8aba4d30fe06c63e2794",
-  "audited_at": "2026-10-20T09:02:53+00:00",
+  "manuscript_hash": "9544b862a48218c90b2d164ea6464ddc1c7319830f30bc6e42b2361aaaf1181e",
+  "audited_at": "2026-10-20T18:45:55+00:00",
   "audited_date": "2026-10-20",
   "online_mode": "injected",
   "overall": "pass",
@@ -116,5 +116,11 @@
         "baseline_missing": []
       }
     }
-  ]
+  ],
+  "tone_advisory": {
+    "findings": 0,
+    "by_rule": {},
+    "report_file": "audit/tone_report.json",
+    "blocking": false
+  }
 }

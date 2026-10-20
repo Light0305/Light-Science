@@ -7,7 +7,9 @@
   validate        校验分析包（结构 + 全部纪律，逐条点名）
   advance         包级状态机推进一段（逐段过门，缺口逐项列出）
   status          看状态、判定计数与下一段门的缺口预演
-  register-sesoi  从 Design 来源文件按指针登记 SESOI 快照进分析规格（spec 区）
+  register-sesoi  登记 SESOI 快照进分析规格（spec 区）：--from-registry
+                  直读登记行结构化块（ANA-D02 主路）；--from + --pointer
+                  为指针路径（取到登记块整块快照 / 裸数值兼容路）
   judge           判定子流程：逐可判行计算量组 → 联合推断 → 四象限落字 →
                   按族校正 → verdicts 落盘 + spec_results 账平
   review          判定复核子流程：prepare 备自包含复核包 / record 落收据 /
@@ -26,7 +28,10 @@ from pathlib import Path
 from .conclude import ConcludeError, export_conclusion, run_grade
 from .gates import NEXT, GateError, advance_package, gate_gaps_for
 from .intake import IntakeError, run_intake
-from .judge import JudgeError, register_sesoi, request_reflux, run_judge
+from .judge import (
+    JudgeError, register_sesoi, register_sesoi_from_registry,
+    request_reflux, run_judge,
+)
 from .project import init_package, load_package
 from .review import (
     ReviewError, import_review, prepare_review, record_review,
@@ -129,6 +134,25 @@ def _gaps_fail(exc) -> int:
 
 
 def cmd_register_sesoi(args) -> int:
+    if args.from_registry:
+        try:
+            res = register_sesoi_from_registry(Path(args.path),
+                                               line_ids=args.line)
+        except JudgeError as e:
+            return _gaps_fail(e)
+        entry = res["entry"]
+        print(f"SESOI 已登记（登记行直读）：行 {'、'.join(res['registered'])}"
+              f" → 快照值 {entry['sesoi_value']}"
+              f"（登记表哈希 {(entry.get('registry_hash') or '')[:12]}…）")
+        if res["skipped"]:
+            print("  无登记块已跳过：" + "、".join(res["skipped"])
+                  + "（这些行请走指针兼容路径或回 Design 补登记）")
+        return 0
+    if not args.from_file or not args.pointer:
+        print("被拦：指针路径须同时给 --from 与 --pointer；"
+              "登记行带结构化块时请用 --from-registry 主路",
+              file=sys.stderr)
+        return 1
     try:
         entry = register_sesoi(Path(args.path), args.from_file, args.pointer,
                                line_ids=args.line)
@@ -250,9 +274,12 @@ def main(argv=None) -> int:
 
     p = sub.add_parser("register-sesoi", help="登记 SESOI 快照进分析规格")
     p.add_argument("path")
-    p.add_argument("--from", dest="from_file", required=True,
-                   help="Design 来源文件（design.yaml / design_card.json）")
-    p.add_argument("--pointer", required=True,
+    p.add_argument("--from-registry", action="store_true",
+                   help="主路（ANA-D02）：直读承接登记行的结构化 SESOI 块")
+    p.add_argument("--from", dest="from_file", default=None,
+                   help="指针路径的 Design 来源文件（design.yaml / "
+                        "design_card.json）；取到登记块整块快照，取到裸数值为兼容路")
+    p.add_argument("--pointer", default=None,
                    help="来源文件内的点分路径，如 evaluation.sesoi")
     p.add_argument("--line", action="append", default=None,
                    help="登记到哪条登记行（可重复；缺省=全部可判行）")

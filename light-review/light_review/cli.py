@@ -39,6 +39,7 @@ from .bench import BenchError, run_bench
 from .calibration import CalibrationError, assess_calibration, init_calibration
 from .domain import DomainError, run_domain
 from .forensic import ForensicError, adjudicate_finding, register_summaries, run_forensic
+from .obligations import ObligationError
 from .gates import NEXT, GateError, advance_package, deliver_package, gate_gaps_for
 from .handoff import HandoffError, run_export
 from .intake import IntakeError, run_intake
@@ -163,26 +164,83 @@ def cmd_consensus(args) -> int:
 
 
 def cmd_adjudicate(args) -> int:
+    obligations = []
+    for i, text in enumerate(args.obligation or []):
+        finding = None
+        if args.obligation_finding and i < len(args.obligation_finding):
+            finding = args.obligation_finding[i]
+        obligations.append({"text": text, "finding_id": finding})
     try:
         row = adjudicate_finding(Path(args.path), args.finding, args.outcome,
-                                 args.by, args.reason)
-    except ForensicError as e:
+                                 args.by, args.reason,
+                                 obligations=obligations or None)
+    except (ForensicError, ObligationError) as e:
         return _gaps_fail(e)
     print(f"裁决已落：{row['finding_id']} → {row['outcome']}"
           f"（{row['adjudicator']}，追加留痕）")
+    for o in obligations:
+        print(f"  附带义务已入义务账：{o['text']}"
+              f"（关联 {o['finding_id'] or args.finding}，open）")
     return 0
+
+
+def cmd_obligation(args) -> int:
+    from .obligations import (
+        ObligationError, apply_obligation_event, fold_obligations,
+        register_obligation,
+    )
+    root = Path(args.path)
+    try:
+        if args.add:
+            row = register_obligation(root, args.add,
+                                      finding_id=args.finding, by=args.by)
+            print(f"义务已登记：{row['obligation_id']}（open）"
+                  f"——{row['text']}")
+            return 0
+        if args.list:
+            folded = fold_obligations(load_package(root)["obligations"]
+                                      or [])
+            if not folded:
+                print("义务账为空（无裁决附带条件登记）")
+            for o in folded:
+                closure = o.get("closure") or {}
+                tail = ""
+                if o["status"] == "fulfilled":
+                    tail = f"，证据 {closure.get('evidence_pointer')}"
+                elif o["status"] == "waived":
+                    tail = f"，理由：{closure.get('reason')}"
+                print(f"  {o['obligation_id']} [{o['status']}] "
+                      f"{o.get('text')}{tail}")
+            return 0
+        action = "fulfill" if args.fulfill else "waive"
+        row = apply_obligation_event(
+            root, args.id, action, by=args.by, reason=args.reason,
+            evidence_pointer=args.evidence)
+        print(f"义务 {row['obligation_id']} 已关闭：{action}"
+              f"（{row['by']}，追加留痕）")
+        return 0
+    except ObligationError as e:
+        return _gaps_fail(e)
 
 
 def cmd_domain(args) -> int:
     try:
         info = run_domain(Path(args.path), overlay_path=args.overlay,
-                          today_str=args.today)
+                          today_str=args.today, paradigm=args.paradigm,
+                          paradigm_basis=args.paradigm_basis,
+                          paradigm_by=args.paradigm_by)
     except DomainError as e:
         return _gaps_fail(e)
     s = info["summary"]
     print(f"领域门完成：条目 {s['checked']} — 命中 {s['hits']}、"
           f"未命中 {s['misses']}、不适用 {s['not_applicable']}"
           f"（有效命中 {s['effective_hits']}）")
+    if info.get("paradigm"):
+        print(f"  范式（第零层）：{info['paradigm']}")
+    else:
+        print("  范式（第零层）：未登记——定性权重层未启用"
+              "（domain --paradigm 登记；条目带范式适用性时 "
+              "reported 门将点名阻断）")
     if info.get("fact_source"):
         print(f"  按刊事实：{info['fact_source']['record_path']}"
               f"（状态 {info['fact_source']['fact_status']}）")
@@ -315,6 +373,14 @@ def cmd_status(args) -> int:
         s = review["domain"].get("summary") or {}
         print(f"  领域门：命中 {s.get('hits', 0)}/条目 {s.get('checked', 0)}"
               f"（ran_at {review['domain'].get('ran_at')}）")
+    paradigm = review.get("paradigm") or {}
+    print(f"  范式（第零层）：{paradigm.get('paradigm') or '未登记'}")
+    from .obligations import fold_obligations, open_obligations
+    folded_ob = fold_obligations(pkg["obligations"] or [])
+    if folded_ob:
+        print(f"  义务账：{len(folded_ob)} 条，open "
+              f"{len(open_obligations(folded_ob))} 条"
+              "（open 义务阻断交付，REV-D05）")
     if review.get("decision"):
         d = review["decision"]
         print(f"  决定形态：{d.get('mode')}"
@@ -401,13 +467,34 @@ def main(argv=None) -> int:
                    help="逐席关切输入（YAML/JSON：{concerns: [...]} 或列表）")
     p.set_defaults(fn=cmd_consensus)
 
-    p = sub.add_parser("domain", help="领域门三层（通用轴/按刊事实/蒸馏覆盖层）")
+    p = sub.add_parser("domain", help="领域门三层（通用轴/按刊事实/蒸馏覆盖层）+ 第零层范式登记")
     p.add_argument("path")
     p.add_argument("--overlay", default=None,
                    help="蒸馏覆盖层文件（YAML，格式见 domain.load_overlay）")
     p.add_argument("--today", default=None,
                    help="事实时效判定日（YYYY-MM-DD，缺省取当日）")
+    p.add_argument("--paradigm", default=None,
+                   choices=["methods", "empirical", "benchmark", "theory",
+                            "humanities"],
+                   help="范式登记（第零层）：随本次领域门运行落字")
+    p.add_argument("--paradigm-basis", default=None,
+                   help="范式判定依据（落字，--paradigm 时必填）")
+    p.add_argument("--paradigm-by", default=None, help="范式登记人")
     p.set_defaults(fn=cmd_domain)
+
+    p = sub.add_parser("obligation", help="裁决义务账（REV-D05）：登记/履行/豁免/列账")
+    p.add_argument("path")
+    p.add_argument("--add", default=None, help="登记一条义务（文本）")
+    p.add_argument("--finding", default=None, help="关联发现 ID")
+    p.add_argument("--id", default=None, help="义务 ID（fulfill/waive 用）")
+    p.add_argument("--fulfill", action="store_true", help="标记履行")
+    p.add_argument("--waive", action="store_true", help="标记豁免")
+    p.add_argument("--by", default=None, help="执行人（具名）")
+    p.add_argument("--reason", default=None, help="豁免理由（waive 必填）")
+    p.add_argument("--evidence", default=None,
+                   help="履行证据指针（fulfill 必填）")
+    p.add_argument("--list", action="store_true", help="列出义务账")
+    p.set_defaults(fn=cmd_obligation)
 
     p = sub.add_parser("calibration", help="校准门登记（模板落盘 + 四件齐备性）")
     p.add_argument("path")
@@ -431,13 +518,17 @@ def main(argv=None) -> int:
     p.add_argument("path")
     p.set_defaults(fn=cmd_export)
 
-    p = sub.add_parser("adjudicate", help="人工裁决位：给发现落裁决")
+    p = sub.add_parser("adjudicate", help="人工裁决位：给发现落裁决（可附带义务）")
     p.add_argument("path")
     p.add_argument("--finding", required=True)
     p.add_argument("--outcome", required=True,
                    choices=["confirmed", "overruled"])
     p.add_argument("--by", required=True, help="裁决人（具名）")
     p.add_argument("--reason", required=True)
+    p.add_argument("--obligation", action="append", default=None,
+                   help="裁决附带义务（可重复）：条件文本，随裁决入义务账")
+    p.add_argument("--obligation-finding", action="append", default=None,
+                   help="与 --obligation 按序配对的关联发现（缺省挂本条发现）")
     p.set_defaults(fn=cmd_adjudicate)
 
     p = sub.add_parser("advance", help="状态机推进一段")

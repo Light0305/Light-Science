@@ -180,6 +180,47 @@ def run_intake(root, execution_card_path, registry_path,
         gaps.append("expected_registry 存在重复 run_id")
     registry_hash = registry_hash_of(registry_rows)
 
+    # ---- SESOI 登记块捕获（ANA-D02）：行带块 → 验完整 + 全表一致
+    # Design 登记行 sesoi 只能是 evaluation 登记块的派生副本（DES-D01）：
+    # 同一设计只许一份登记；块缺字段或多行不一致都在承接期点名拦截，
+    # 不许把半成品带进判定期再猜。
+    sesoi_blocks: dict = {}
+    for row in registry_rows:
+        blk = row.get("sesoi")
+        if blk is None:
+            continue
+        berrs = schema.validate_sesoi_block(blk)
+        if berrs:
+            gaps.append(f"登记行 {row.get('run_id')} 的 sesoi 登记块不完整："
+                        + "；".join(berrs))
+        else:
+            sesoi_blocks[row.get("run_id")] = schema.sesoi_canonical(blk)
+    _distinct = {json.dumps(b, ensure_ascii=False, sort_keys=True)
+                 for b in sesoi_blocks.values()}
+    if len(_distinct) > 1:
+        gaps.append("登记行 sesoi 登记块不一致（同一设计只许一份登记，"
+                    "行内只许派生副本）：涉及行 "
+                    + "、".join(sorted(sesoi_blocks)))
+
+    # ---- 配对/区组结构声明形状点名（ANA-D03）：登记行可声明 pairing，
+    # 承接只验形状（mode 词表 + 对应键名字段齐全），声明随快照透传，
+    # 判定期的结构与数据对齐由 judge 机械核（缺对侧等逐行点名）。
+    for row in registry_rows:
+        decl = row.get("pairing")
+        if decl is None:
+            continue
+        rid = row.get("run_id")
+        if not isinstance(decl, dict) \
+                or decl.get("mode") not in ("paired", "blocked"):
+            gaps.append(f"登记行 {rid} 的 pairing 声明形状不对：mode 须为 "
+                        "paired 或 blocked（ANA-D03 结构声明词表）")
+            continue
+        key_field = "paired_by" if decl["mode"] == "paired" else "blocked_by"
+        if not (isinstance(decl.get(key_field), str)
+                and decl[key_field].strip()):
+            gaps.append(f"登记行 {rid} 的 pairing 声明缺 {key_field} 键名："
+                        "结构声明须点名两臂按什么键对齐")
+
     # ---- 逐行可判性
     runs_by_id = {r["run_id"]: r for r in card.get("runs") or []}
     failures_by_run: dict[str, list] = {}
@@ -195,6 +236,12 @@ def run_intake(root, execution_card_path, registry_path,
         material_fail = line.pop("_material_fail", None)
         if material_fail:
             gaps.append(material_fail)
+        # 登记行 SESOI 块随快照行落盘（ANA-D02：judge 与登记时的比对源）
+        line["sesoi"] = reg_row.get("sesoi") \
+            if isinstance(reg_row.get("sesoi"), dict) else None
+        # 配对/区组结构声明随快照行透传（ANA-D03：judge 的登记侧声明源）
+        line["pairing"] = reg_row.get("pairing") \
+            if isinstance(reg_row.get("pairing"), dict) else None
         lines.append(line)
 
     if gaps:

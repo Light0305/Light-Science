@@ -1,6 +1,9 @@
 ---
 name: light-analysis
-description: 按 Design 冻结登记行逐行回写 readout 正式判定，产出可审计的分析结论包。用于：消费 light-experiment 已交付执行包做承接与可判性校验（A0）、逐行判定回写、规格集稳健性复判、结论强度分级与结论包交接 Write。判定口径只认冻结登记行；判不了落 undetermined/untested，不许硬判。
+description: Use when 需要对已交付的实验执行包下正式判定：逐登记行回写判定、做稳健性复判与结论强度分级，或向写作阶段交付结论包时。
+version: "1.1"
+author: light-analysis contributors
+license: MIT
 ---
 
 # light-analysis 操作规程
@@ -31,7 +34,7 @@ light-design 冻结登记行（方向/阈值/SESOI/重复层级）。分析期�
 | 文件 | 内容 |
 |---|---|
 | `analysis.yaml` | 登记头：承接区（execution_card 哈希 + design content_hash + 登记行集哈希，intake 时冻结）、分析规格版本、校正族声明、状态与状态历史、复核记录、counts（**只许工具从 verdicts 机械汇总，不许手填**） |
-| `verdicts.jsonl` | 逐登记行一行、只增。字段五组：判定组（verdict/象限/basis_spec_id/criteria_ref/direction）、量组（effect_size/interval/p_ab/双 n）、校准组（type_sm 三元组）、等价组（tost）、诊断组（diagnostics）、校正组（family/p_raw/p_adj）、强度组（grade + cap_reason）。改判走新行 + `supersedes` 链 + `row_ref`（`<line>#v<n>`），不许回改旧行 |
+| `verdicts.jsonl` | 逐登记行一行、只增。字段组：判定组（verdict/象限/basis_spec_id/criteria_ref/direction）、量组（effect_size/interval/p_ab/双 n）、校准组（type_sm 三元组）、等价组（tost）、诊断组（diagnostics）、校正组（family/p_raw/p_adj）、结构组（structure：mode/assumption/key/source/n_units/warnings，ANA-D03）、稳健性覆盖组（robustness_scope：computed/trace_only/trace_only_fraction，ANA-D04）、强度组（grade + cap_reason）。改判走新行 + `supersedes` 链 + `row_ref`（`<line>#v<n>`），不许回改旧行 |
 | `spec_ledger.yaml` | 规格集账本：决策点（逐点落字理论正当理由）× 选项、约束、可达组合展开、逐规格三门（理论/统计/非冗余）、冻结哈希、自由度账本 expansions（只增） |
 | `spec_results.jsonl` | 规格 × 登记行结果矩阵（judged 门要求账平：每格有结果或显式失败行） |
 | `exploratory/exploratory.yaml` | 探索区登记：条目带 `exploratory: true`，只许叙述性 finding |
@@ -145,15 +148,24 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 
 ### 7.0 前置：SESOI 登记与最小判定计算集
 
-- **SESOI 只认登记快照**：登记行无结构化 SESOI 字段（只在 Design
-  文本里）——开判前必须 `register-sesoi <pkg> --from <design 文件>
-  --pointer <点分路径> [--line <id> …]`，把 `sesoi_pointer`（指向
-  Design 字段路径）+ `sesoi_value` 快照 + 来源文件哈希落进
-  analysis.yaml 的 spec 区（`spec.sesoi`）。judge 只读快照值；
-  未登记的行直接落 undetermined 并在 note 点名，不许临场从文本猜。
-  判定参数同在 spec 区：`spec.judge_params = {gamma: 0.75,
-  type_m_max: 2.0}`（γ 承 Design/Experiment 既有口径；Type M 阈值
-  可在开判前登记调整，判后不许改）。
+- **SESOI 只认登记快照**：judge 只读 analysis.yaml 的 spec 区快照
+  （`spec.sesoi`），不许临场从 Design 文本猜。登记三路（v1.1
+  ANA-D02，Design 侧结构化登记见 light-design 的 DES-D01）：
+  (1) **主路** `register-sesoi <pkg> --from-registry`：直读 A0 承接
+  时从登记行捕获的结构化 SESOI 块（七字段：value / unit /
+  direction / bounds / basis / estimand_ref / summary_measure），
+  整块快照并带登记表哈希与 design content_hash；(2) **结构化指针
+  路** `--from <design 文件> --pointer evaluation.sesoi`：指针取到
+  登记块时整块快照（块不完整直接拒）；(3) **兼容路**：指针取到裸
+  数值时按 v1.0 形态快照并标 via=pointer_compat，只用于 DES-D01
+  之前的旧登记表，新项目不许走。A0 承接时登记行块不完整或多行
+  不一致即整包点名拦截；任一路登记前与开判前，快照都与登记行块
+  比对，**两处不一致整包拒绝**（先对齐登记，不许带病开判）。
+  未登记的行、以及快照在案但结构不完整（值非正数 / 块缺字段 /
+  块值与快照值不符）的行，直接落 undetermined 并在 note 点名，
+  绝不用分析时临时值。判定参数同在 spec 区：`spec.judge_params =
+  {gamma: 0.75, type_m_max: 2.0}`（γ 承 Design/Experiment 既有
+  口径；Type M 阈值可在开判前登记调整，判后不许改）。
 - **计算集**（`light_analysis/calc.py`，纯标准库，全部带 provenance
   = method + 输入哈希 + 参数，落行后可机械复算）：
   `p_superiority`（经验 P(A>B)，并列 0.5，与 Mann-Whitney U/(n1·n2)
@@ -216,6 +228,24 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
      并引预警。
    - 其余一律 undetermined，note 逐项写明未过哪门（p/γ/联合/Type M/
      TOST 逐项数值），不许只写「证据不足」。
+6. **结构口径**（ANA-D03，贯穿第 1/2/4 步）：配对/区组结构靠声明
+   驱动，不靠猜——声明两处对表：登记行 `pairing` 字段（Design/
+   Experiment 侧声明配对来源，intake 验形状后透传进快照行）与
+   judge-data 条目的 `pairing` 字段，形态 `{mode: paired|blocked,
+   paired_by|blocked_by: 键名, source: 来源说明}`；两处不一致该行
+   落 undetermined 点名。声明在案时两臂须逐元素给对齐键
+   （`treatment_keys`/`reference_keys`）：paired 按键作差走差值序列
+   口径（单样本 t 效应与 TOST、配对符号 P、median_diff 走差值
+   中位数 + 符号检验）；blocked 先算区组内对照（区组内两臂均值差）
+   再走同一口径，判定单位 = 区组。声明与数据不符（无对齐键、键长
+   不符、键重复、配对缺对侧、区组缺臂、只有分布摘要）逐行落
+   undetermined 并点名，**不许静默按独立样本判**。未声明结构时走
+   独立样本口径，判定行 `structure` 区落
+   `assumption = undeclared_independent_default`；两臂同源信号
+   （`treatment_run_refs` 与 `reference_run_refs` 交叠、或两臂原始
+   值逐元素完全相同）机械点名警告落 `structure.warnings` 与 note，
+   警告不改判。差值序列零方差的退化情形 SE = 0 如实落字（CI 退化
+   为点、TOST 按点落界判定、Type S/M 取极限值），不许编造 SE。
 
 ### 7.3 A5 按族校正与自由度对账
 
@@ -242,6 +272,18 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
   `strength[].inputs`，封顶来源写进 cap_reason。
 - 边界与局限随 grade 落盘（`--notes` JSON 补入或预置 conclusions）：
   结果期效度威胁只记局限、不许倒填 Design 登记（约束 6 的分析侧）。
+- **稳健性覆盖落字与封顶**（ANA-D04 短期）：真改计算的决策点只有
+  `estimator`（代码以 `COMPUTED_DECISION_POINTS` 声明，与逐规格
+  计算实现同源），冻结账本的其余决策点（如 outlier_handling）只
+  留痕不改计算、其规格与主规格数值成对相同。每条判定行落
+  `robustness_scope`（computed / trace_only /
+  trace_only_fraction），把「方向份额到底覆盖了哪几个维度的
+  稳健性」从文档局限升级为数据落字；留痕型决策点占比过半时，
+  方向性行强度封顶 `suggestive` 且 cap_reason 点名留痕点与占比
+  （null 行不读此封顶）。主张级只把 robustness_scope 落进
+  `strength[].inputs` 供判读——行级封顶已由行级最低档合成传导，
+  不叠加第二重封顶。outlier_handling 等决策点的真实计算属中期
+  事项，未做前不许把方向份额解读为全维稳健性。
 
 ### 7.5 复核子流程（与 Idea/Design 同构、分工收窄）
 
@@ -295,12 +337,14 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 12. 探索区条目未使用判定/强度词表；结论包文本无冻结词表禁用词（校验器已扫，人工再读一遍）。
 13. 回流条目只生成未代决策；补充消融未超 1 轮。
 14. `validate` 全量 0 错误；`ANALYSIS_REPORT.md` 计数与 verdicts 机械汇总一致。
+15. 结构落字逐行核：判定行 `structure` 区在案（声明行 mode/key/source/n_units 与材料对得上，未声明行 assumption 已落字）；声明与数据不符的行已落 undetermined 并点名，未被静默按独立口径判；同源警告在 warnings 与 note 双落。
+16. 稳健性覆盖逐行核：`robustness_scope` 与冻结账本决策点对得上；留痕过半时方向性行已封顶 suggestive 且 cap_reason 点名；conclusions 的 strength inputs 已带 robustness_scope。
 
 ## 9. 失败模式附录（v1.0 已知失效形态与处置）
 
 | # | 失效形态 | 处置（写死） |
 |---|---|---|
-| F1 | SESOI 只在 Design 文本里、分析规格未登记 | judge 对该行落 undetermined 并点名；不许临场取数（先 register-sesoi） |
+| F1 | SESOI 未登记进分析规格（或快照结构不完整） | judge 对该行落 undetermined 并点名；不许临场取数（先 register-sesoi：登记行带结构化块走 --from-registry 主路，旧登记表才走指针兼容路） |
 | F2 | judge-data 出现登记外行 id / 未知字段（BLADE 式幻觉列名） | 整包拒，逐项点名；改材料后重跑 |
 | F3 | 材料臂长与对账有效 n 不一致 | 该行 undetermined 点名；查执行包对账，不许就地改数 |
 | F4 | Type M 超阈值的 positive 候选 | 落 undetermined 并点名数值与阈值；不许下调阈值事后放行（阈值只许开判前在 spec 区登记） |
@@ -313,6 +357,8 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 | F11 | judge 重跑覆盖已判行 | 工具拒；改判走新行 + supersedes 链，旧行不许回改 |
 | F12 | 摘要材料下秩类规格无原始值 | 该规格退化为 Welch 口径并在 spec_results note 落字，不许假装算过秩检验 |
 | F13 | grade --notes 补入的 conclusions 条目形态不对（自由字符串冒充 boundaries 等结构化条目） | validate 落结构化错误逐项点名（条目类型守卫，不许校验器自身崩溃）；notes 须按 schema 结构（boundaries 为 {claim_id, conditions, not_extrapolatable, would_change_if}）重给后重跑 grade |
+| F14 | 声明了配对/区组结构但材料给不出对齐（无对齐键、配对缺对侧、区组缺臂、只有分布摘要），或登记行与材料的两处结构声明互相矛盾 | 该行落 undetermined 并逐项点名缺陷；补齐材料或对齐两处声明后重判，不许静默按独立样本口径凑判（ANA-D03） |
+| F15 | 两臂同源（同批段/同一基线臂重跑）却未声明配对结构 | 工具按 run 引用交叠与两臂逐元素相同两路信号机械点名警告（structure.warnings + note），仍按独立口径判并落结构假设；要走配对口径须由登记侧或材料侧补结构声明后重判，不许分析者只在 reference_label 写散文了事（ANA-D03） |
 
 ## 附录：与 LEARNING.md 13 条硬约束的对应
 

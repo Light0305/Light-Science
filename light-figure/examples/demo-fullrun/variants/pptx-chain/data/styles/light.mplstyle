@@ -1,0 +1,16 @@
+# light-figure compiled style（bundle f39c196b0510…，期刊 Demo Journal (Nature Figure Guide anchors) 2026）
+axes.labelsize: 7.0
+axes.prop_cycle: cycler('color', ['#e69f00', '#56b4e9', '#009e73', '#f0e442', '#0072b2', '#d55e00', '#cc79a7', '#000000'])
+axes.spines.right: False
+axes.spines.top: False
+axes.titlesize: 7.0
+font.family: Arial
+font.size: 7.0
+image.cmap: light_seq
+legend.fontsize: 6.0
+pdf.fonttype: 42
+ps.fonttype: 42
+savefig.dpi: 300
+svg.fonttype: none
+xtick.labelsize: 6.0
+ytick.labelsize: 6.0

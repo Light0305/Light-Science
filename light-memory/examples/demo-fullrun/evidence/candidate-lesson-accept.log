@@ -1,3 +1,3 @@
-$ light-memory candidate light-memory/examples/demo-fullrun/world/proj-a accept --id cand_b96241dafbe9 --by demo-user
+$ light-memory candidate ../../../../light-memory/examples/demo-fullrun/world/proj-a accept --id cand_b96241dafbe9 --by demo-user
 [exit 0]
 候选 cand_b96241dafbe9 已生效（result_ref：fact_d0e2be643aa3）

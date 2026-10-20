@@ -1,14 +1,14 @@
 === light-journal-select v1 demo-fullrun 运行日志 ===
 [driver] OpenAlex API Key：已注入（只记有无，值不落字）
 
-$ light-journal-select init examples/demo-fullrun/selection-pkg --title Abnormal turkey behaviour detection in intensive farming using computer vision --language en --type research
+$ light-journal-select init ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --title Abnormal turkey behaviour detection in intensive farming using computer vision --language en --type research
 {
   "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
   "status": "draft",
   "language": "en"
 }
 
-$ light-journal-select fingerprint examples/demo-fullrun/selection-pkg --file examples/demo-fullrun/inputs/fingerprint.json
+$ light-journal-select fingerprint ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --file ../../../../light-journal-select/examples/demo-fullrun/inputs/fingerprint.json
 {
   "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
   "queries": [
@@ -20,7 +20,7 @@ $ light-journal-select fingerprint examples/demo-fullrun/selection-pkg --file ex
   "status": "draft"
 }
 
-$ light-journal-select precedent examples/demo-fullrun/selection-pkg
+$ light-journal-select precedent ../../../../light-journal-select/examples/demo-fullrun/selection-pkg
 {
   "queries_ok": 3,
   "queries_total": 3,
@@ -136,7 +136,7 @@ $ light-journal-select precedent examples/demo-fullrun/selection-pkg
 }
 [driver] 先例路入池：Computers and Electronics in Agriculture, Pressacademia, International Journal of Developmental Neuroscience, Sensors, Scientific Reports, Electronics, Multimedia Tools and Applications, Nigerian Journal of Physics, Zenodo (CERN European Organization for Nuclear Research), Poultry Science, Smart Agricultural Technology, Animals, Frontiers in Veterinary Science, Frontiers in Animal Science, Agriculture, Gomal Journal of Agriculture and Biology, AgriEngineering, Edelweiss Applied Science and Technology, Biosystems Engineering, IEEE Access, International Journal of Advanced Biochemistry Research
 
-$ light-journal-select add-candidate examples/demo-fullrun/selection-pkg --name Journal of Fictional Turkey Studies --source search --detail 演示虚构刊（gate fixture 靶子，非真实期刊）
+$ light-journal-select add-candidate ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --name Journal of Fictional Turkey Studies --source search --detail 演示虚构刊（gate fixture 靶子，非真实期刊）
 {
   "candidate_id": "J-journal-of-fictional-turkey-studies_5e6fea",
   "name": "Journal of Fictional Turkey Studies",
@@ -144,7 +144,7 @@ $ light-journal-select add-candidate examples/demo-fullrun/selection-pkg --name 
   "status": "candidates_ready"
 }
 
-$ light-journal-select verify examples/demo-fullrun/selection-pkg --file examples/demo-fullrun/inputs/verify-records.json
+$ light-journal-select verify ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --file ../../../../light-journal-select/examples/demo-fullrun/inputs/verify-records.json
 {
   "verified_candidates": [
     "Computers and Electronics in Agriculture",
@@ -175,7 +175,7 @@ $ light-journal-select verify examples/demo-fullrun/selection-pkg --file example
 }
 [driver] 风险名单 fixture 已生成（inputs/name-list.csv）：predatory_list_hit 靶子为虚构刊、volume_surge 为演示注入软警告，来源串均如实标注 demo-fixture
 
-$ light-journal-select gate examples/demo-fullrun/selection-pkg --name-list examples/demo-fullrun/inputs/name-list.csv
+$ light-journal-select gate ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --name-list ../../../../light-journal-select/examples/demo-fullrun/inputs/name-list.csv
 {
   "excluded": [
     "Journal of Fictional Turkey Studies"
@@ -230,7 +230,7 @@ $ light-journal-select gate examples/demo-fullrun/selection-pkg --name-list exam
   "status": "gated"
 }
 
-$ light-journal-select report examples/demo-fullrun/selection-pkg
+$ light-journal-select report ../../../../light-journal-select/examples/demo-fullrun/selection-pkg
 {
   "tiers": {
     "challenge": 0,
@@ -244,7 +244,7 @@ $ light-journal-select report examples/demo-fullrun/selection-pkg
 }
 [driver] CEA 未入证据卡（分档按归一化率排序取卡，CEA 未进前 5），改按先例证据量（篇数→覆盖式数→归一化率）在 target 档选定：Smart Agricultural Technology（档位 target）
 
-$ light-journal-select decide examples/demo-fullrun/selection-pkg --candidate Smart Agricultural Technology --by demo-author（演示代行） --reason 演示定刊：先例 6 篇（归一化 23.34 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。
+$ light-journal-select decide ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --candidate Smart Agricultural Technology --by demo-author（演示代行） --reason 演示定刊：先例 6 篇（归一化 23.34 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。
 {
   "decision": {
     "candidate_id": "J-smart-agricultural-technology_621fa6",
@@ -258,7 +258,7 @@ $ light-journal-select decide examples/demo-fullrun/selection-pkg --candidate Sm
   "status": "decided"
 }
 
-$ light-journal-select handoff examples/demo-fullrun/selection-pkg --fields examples/demo-fullrun/inputs/guide-fields.json --files examples/demo-fullrun/inputs/download-files.json --write-root ../light-write
+$ light-journal-select handoff ../../../../light-journal-select/examples/demo-fullrun/selection-pkg --fields ../../../../light-journal-select/examples/demo-fullrun/inputs/guide-fields.json --files ../../../../light-journal-select/examples/demo-fullrun/inputs/download-files.json --write-root ../../../../light-write
 {
   "journal": "Smart Agricultural Technology",
   "target_dir": "journal/target",
@@ -275,7 +275,7 @@ $ light-journal-select handoff examples/demo-fullrun/selection-pkg --fields exam
   "status": "handed_off"
 }
 
-$ light-journal-select status examples/demo-fullrun/selection-pkg
+$ light-journal-select status ../../../../light-journal-select/examples/demo-fullrun/selection-pkg
 {
   "selection_id": "abnormal-turkey-behaviour-detection-in-i_c771be",
   "status": "handed_off",
@@ -327,7 +327,7 @@ $ light-journal-select status examples/demo-fullrun/selection-pkg
   ]
 }
 
-$ light-journal-select validate examples/demo-fullrun/selection-pkg
+$ light-journal-select validate ../../../../light-journal-select/examples/demo-fullrun/selection-pkg
 {
   "ok": true,
   "errors": [],
@@ -582,4 +582,4 @@ $ light-journal-select validate examples/demo-fullrun/selection-pkg
   "validate_ok": true
 }
 
-演示报告骨架已落盘：examples/demo-fullrun/demo-report.md
+演示报告骨架已落盘：../../../../light-journal-select/examples/demo-fullrun/demo-report.md

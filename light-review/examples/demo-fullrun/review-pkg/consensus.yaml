@@ -23,6 +23,18 @@ concerns:
     claim_pointer: claims_register:C1
     evidence_pointer: conclusions:C1#line_verdicts.R-NEG=untested；verdicts.jsonl R-NEG
       note（fundamental 失败 F-0001）
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial
 - concern_id: RV-C002
   statement: R-LONG 与 R-PRED 处理臂段级分布逐值相同、判定 inputs_hash 一致， 两行不构成独立证据；稿件并列陈述五行时须披露同源或合并陈述。
   raised_by:
@@ -44,6 +56,19 @@ concerns:
   pointers:
     claim_pointer: claims_register:C1
     evidence_pointer: verdicts.jsonl:R-LONG 与 R-PRED inputs_hash 同为 62ccc7ade1…
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：主张登记行 C1 实位命中；evidence_pointer：verdicts 登记行 ['R-LONG',
+        'R-PRED'] 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial
 - concern_id: RV-C003
   statement: 精度缺口须以数字呈现：校正后 p=0.1378、Type M 最差 4.35、TOST 90% CI 半宽 6.55 对等价界 ±2；结果叙述只写
     undetermined 而不带 区间宽度会让读者低估不确定性。
@@ -64,6 +89,18 @@ concerns:
   pointers:
     claim_pointer: claims_register:C1
     evidence_pointer: conclusions:C1/strength.inputs.type_sm_worst=4.345
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial
 - concern_id: RV-C004
   statement: 判读标准 SESOI 只有文本形态，经演示转写件进入结论包（Design 登 记行无结构化 SESOI，RX-A001 未闭环）；方法节须声明其来源与冻结
     时点。
@@ -86,6 +123,19 @@ concerns:
   pointers:
     claim_pointer: sections/02-methods.md
     evidence_pointer: analysis inputs/design-sesoi-source.json + reflux/RX-A001
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：章节文件 02-methods.md 实位命中；evidence_pointer：上游文件 inputs/design-sesoi-source.json
+        实位命中；自由文本指针，机械不可解析（如实登记，不冒充已验）
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=minor 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial
 - concern_id: RV-C005
   statement: 图 F001 引用侧溯源断裂：稿件侧源资产为 SVG，图包交付为 PDF/PNG， 无同名文件、哈希对应未检（法医边 not_assessable）；投稿包组装前
     图源链应闭合。
@@ -106,6 +156,18 @@ concerns:
   pointers:
     claim_pointer: figures_manifest:F001
     evidence_pointer: delivery:fig-1（exports/fig-1.pdf、data/previews/fig-1.png）
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：图登记行 F001 实位命中；evidence_pointer：图包交付行 fig-1 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=minor 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial
 - concern_id: RV-C006
   statement: 外部效度边界须逐条对齐：单一合成数据集、6 段留出、无跨场/跨季/ 跨机位变异；结论包 boundaries 已登记，稿件讨论不得外推且合成
     数据性质须在摘要层可见。
@@ -128,3 +190,15 @@ concerns:
   pointers:
     claim_pointer: claims_register:C1
     evidence_pointer: conclusions:C1/boundaries
+  escalation_checks:
+    pointer_resolution:
+      result: resolved
+      detail: claim_pointer：主张登记行 C1 实位命中；evidence_pointer：结论行 C1 实位命中
+    verbatim_support:
+      result: not_provided
+      detail: 未带逐字支撑片段（如实登记，未验）
+    severity_cap:
+      result: within_cap
+      detail: severity=major 非 critical，封顶不触发（critical 只许 confirmed_error 级证据托底，其余封顶
+        major）
+    verdict: partial

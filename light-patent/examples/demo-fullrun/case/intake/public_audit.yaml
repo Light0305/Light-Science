@@ -1,0 +1,15 @@
+kind: light-patent/public-audit
+case_id: PT-case_4b3e0c
+audited_at: '2026-10-20'
+examiner: 演示登记人（项目成员）
+confirmed_complete: true
+disclosures: []
+planned_filing_date: null
+grace_window: null
+conclusion: clear
+detail: 已具名确认无任何在先公开登记：先申请后公开；论文、预印本、代码公开一律排在申请日之后
+ethics_review:
+  conclusion: 通过自查
+  basis: 舍内动物行为视频，不含个人信息与推荐决策
+disclaimers:
+- 草案，需专利代理师复核

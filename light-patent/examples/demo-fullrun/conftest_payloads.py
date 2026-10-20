@@ -1,0 +1,102 @@
+"""演示与测试共用的标准载荷（自造脱敏）。"""
+
+from __future__ import annotations
+
+TITLE = "一种基于时序融合的家禽异常行为检测方法"
+
+SPEC_TEXT = """# 说明书
+
+## 技术领域
+本发明涉及家禽养殖监测领域，具体涉及一种基于时序融合的家禽异常行为检测方法。
+
+## 背景技术
+现有舍内监控多采用单帧图像分类，难以刻画行为的时序变化。
+
+## 发明内容
+本发明获取舍内监控视频流并按固定帧间隔抽取视频帧序列，将视频帧序列输入时序融合检测模型得到每只家禽个体的行为特征向量，其中时序融合检测模型包含空间特征提取模块与时序聚合模块；根据行为特征向量与个体基线行为分布之间的偏差量计算异常分数；当异常分数超过自适应阈值时输出异常行为报警信息，其中自适应阈值由个体基线行为分布的统计量确定。时序聚合模块采用滑动窗口注意力对视频帧序列进行加权聚合。
+
+## 附图说明
+图1为系统结构示意图，其中1为视频采集单元，2为处理单元。
+
+## 具体实施方式
+实施例一：视频采集单元1采集舍内视频，处理单元2运行检测模型。模型的空间特征提取模块为卷积主干网络，时序聚合模块与空间特征提取模块串联连接；训练步骤包括以标注行为片段为样本、按交叉熵损失迭代更新参数，训练参数含学习率与窗口长度；模型输入为视频帧序列，输出为行为特征向量与异常分数，输入输出的对应关系由个体编号绑定。
+实施例三：报警联动接口参数待补充：报警联动接口参数。
+
+## 撰写说明
+本段为过程记录，申报副本中应被剥离。支持状态与查新过程只记于此。
+
+<!-- 过程批注：源锚点 P001 对应内部记录 -->
+"""
+
+ABSTRACT_TEXT = """# 说明书摘要
+
+本发明公开一种基于时序融合的家禽异常行为检测方法，获取舍内监控视频帧序列，输入包含空间特征提取与时序聚合的检测模型得到行为特征向量，按与个体基线分布的偏差计算异常分数，超过自适应阈值时输出报警信息，可降低单帧误报。
+"""
+
+
+def claims_payload():
+    return {
+        "ai_sufficiency": {"items": [
+            "model_modules", "model_levels_links", "training_steps_params",
+            "input_output_setting", "scenario_binding"]},
+        "claims": [
+            {"claim_no": 1, "type": "method", "depends_on": [],
+             "preamble": "一种家禽异常行为检测方法，包括：",
+             "features": [
+                 {"feature_ref": "CF-01", "box": "necessary",
+                  "text": "获取舍内监控视频流并按固定帧间隔抽取视频帧序列",
+                  "support": {"state": "explicit", "anchors": ["P001"],
+                              "spec_section": "发明内容"}},
+                 {"feature_ref": "CF-02", "box": "necessary",
+                  "text": "将视频帧序列输入时序融合检测模型得到每只家禽个体的行为特征向量，其中时序融合检测模型包含空间特征提取模块与时序聚合模块",
+                  "support": {"state": "explicit", "anchors": ["P001", "E001"],
+                              "spec_section": "发明内容"}},
+                 {"feature_ref": "CF-03", "box": "necessary",
+                  "text": "根据行为特征向量与个体基线行为分布之间的偏差量计算异常分数",
+                  "support": {"state": "explicit", "anchors": ["E001"],
+                              "spec_section": "发明内容"}},
+                 {"feature_ref": "CF-04", "box": "necessary",
+                  "text": "当异常分数超过自适应阈值时输出异常行为报警信息，其中自适应阈值由个体基线行为分布的统计量确定",
+                  "support": {"state": "inherent", "anchors": ["P001"],
+                              "spec_section": "发明内容"}},
+             ]},
+            {"claim_no": 2, "type": "method", "depends_on": [1],
+             "preamble": "根据权利要求1所述的家禽异常行为检测方法，其特征在于：",
+             "features": [
+                 {"feature_ref": "CF-05", "box": "embodiment_choice",
+                  "text": "时序融合检测模型中的时序聚合模块采用滑动窗口注意力对视频帧序列进行加权聚合",
+                  "support": {"state": "explicit", "anchors": ["C001"],
+                              "spec_section": "具体实施方式"}},
+             ]},
+            {"claim_no": 3, "type": "apparatus", "depends_on": [],
+             "preamble": "一种家禽异常行为检测装置，包括：",
+             "features": [
+                 {"feature_ref": "CF-06", "box": "necessary",
+                  "text": "视频采集单元，用于获取舍内监控视频流并按固定帧间隔抽取视频帧序列",
+                  "support": {"state": "explicit", "anchors": ["F001"],
+                              "spec_section": "附图说明"}},
+                 {"feature_ref": "CF-07", "box": "necessary",
+                  "text": "处理单元，用于运行权利要求1所述方法中的时序融合检测模型并输出异常行为报警信息",
+                  "support": {"state": "explicit", "anchors": ["F001"],
+                              "spec_section": "附图说明"}},
+             ]},
+            {"claim_no": 4, "type": "medium", "depends_on": [],
+             "preamble": "一种计算机可读存储介质，其上存储有计算机程序，",
+             "features": [
+                 {"feature_ref": "CF-08", "box": "necessary",
+                  "text": "该程序被处理器执行时实现权利要求1所述的方法步骤",
+                  "support": {"state": "explicit", "anchors": ["C001"],
+                              "spec_section": "具体实施方式"}},
+             ]},
+        ],
+    }
+
+
+
+
+def spec_text():
+    return SPEC_TEXT
+
+
+def abstract_text():
+    return ABSTRACT_TEXT

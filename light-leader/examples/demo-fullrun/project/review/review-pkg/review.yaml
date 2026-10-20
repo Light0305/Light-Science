@@ -27,9 +27,9 @@ intake:
   manuscript:
     package_path: light-write/examples/demo-fullrun/manuscript-pkg
     files:
-      manuscript.yaml: 0a7904fe629d9b09a394c2326cec2083bb995925e6e5c2d1fcb68d64f5268be2
+      manuscript.yaml: 347e0ffcf67f18dd8cb08285cfd75186dfc0428b5970ab799748c2954d4b28bd
       claims_register.yaml: 6bacd16c87c23077a2896f732f5a1c731c4dcf33848141797fd4a2ed483ba4c3
-      numbers_ledger.yaml: 6defcf0c7f6aee347892130ff3853cc032e83d928e024f46cda11d9c6075dd80
+      numbers_ledger.yaml: 043960f8045f34c3a06d637d0d931aee1efc31bfd0faf691c61240fa32f97e0f
       references.lock.json: 3aa64febf8516c0621ab56987a5f72fe571e73ea747b0b24004b0bb2910543eb
       figures_manifest.yaml: 93626673d42c13ad1762e91a104481bcf5f7b5f2b4669b26b459ff05d112c617
       sections/00-abstract.md: 1026eac5a2f45ae10bb652457a78e2a422313cab9188e0579b49cbbad7caa2c9
@@ -38,7 +38,7 @@ intake:
       sections/03-results.md: c210ad01ef6dce27f19ffdf295de5472c7bbc16201858ad1fee4cd3e7e634c28
       sections/04-discussion.md: 7b549b8f5eb973f9dabbee016d810e307732967755628b31a1ba6ac59f48f88b
       sections/05-declarations.md: 4ba5ded470ead99d72f4f7a406ecbccd34c13981f14b1d1307a21dca8ac38596
-    package_hash: e346ed3ca4296833bf6cb65ea64b45bf78761ee106cacd4be430edb4cba49957
+    package_hash: b75d3ab37d9ee9e601f7d149a7749bcc492cdba9adc3080393309fa889700d1a
     manuscript_id: zero-tuning-tracker-thresholds-predicted_c8d0fc
     manuscript_status: audited
     sections: &id001
@@ -58,8 +58,8 @@ intake:
   figure:
     package_path: light-figure/examples/demo-fullrun/figure-pkg/exports
     files:
-      delivery.yaml: 78a6a8252bb90f9c85c9fad355b70cc061ff8bb0fe0506500a634e1f0621ac3e
-    package_hash: 0de5817028512cee35f9586bbaae0eabdd11a0a59ffe0bc6bae32d736e34febb
+      delivery.yaml: 9f0c76e347ef44fa9977985c51db84d0250e71f43964185d33ce81d46c7fceec
+    package_hash: 59462bb8390dd5a37206ac6345b6b92aa12defc1b877118e752e028b5bbca4ab
   figure_note: null
   target_journal:
     name: Smart Agricultural Technology
@@ -96,6 +96,7 @@ freezes:
   report_hash: 70b1ce76d345a7ab89b103267e2c1e07d77bbe65d363183f4aaf47cdc4a8c26b
   at: '2026-10-20'
   by: light-review freeze
+paradigm: null
 delivery:
   delivered_at: '2026-10-20'
   degradation_statement: 本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts
@@ -128,6 +129,8 @@ bench:
   passed_all: true
 domain:
   ran_at: '2026-10-20'
+  paradigm: null
+  paradigm_required: false
   overlay: null
   fact_source:
     record_path: light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json
@@ -135,10 +138,10 @@ domain:
     fact_status: verified
   summary:
     checked: 11
-    hits: 1
-    misses: 7
+    hits: 0
+    misses: 8
     not_applicable: 3
-    effective_hits: 1
+    effective_hits: 0
 decision:
   at: '2026-10-20'
   meta_review: reports/meta_review.md

@@ -8,7 +8,9 @@
   advance  按状态机验门推进（draft → reviewed → frozen；旁路 returned/blocked）
   amend    frozen 后唯一修订通道：amendment 追加（命门字段须 --user-signed）
   review   定版评审子流程（二期）：prepare 生成自包含评审包 /
-           record 落盘评审记录（同族拒收、REVIEW_UNAVAILABLE 降级通道）
+           record 落盘评审记录（同族拒收、REVIEW_UNAVAILABLE 降级通道）；
+           带 --amendment <n> 时走 amendment 增量评审（DES-D02，只审
+           命门 amendment 的变更项及其影响面，类别分流轻/全两轨）
   export   交接四件套导出（二期，仅 frozen；非 frozen 拒绝并列缺口）
   report   刷新 design-stage/DESIGN_REPORT.md（二期，手工区保留）
   list     列出项目内全部设计书与状态
@@ -34,13 +36,17 @@ from .project import (
 )
 from .review import (
     ReviewError,
+    amendment_review_dir,
     load_checklist_items,
+    prepare_amendment_review,
     prepare_review,
+    record_amendment_review,
+    record_amendment_review_unavailable,
     record_review,
     record_review_unavailable,
     review_dir,
 )
-from .schema import ALL_STATES, TIERS, validate_design
+from .schema import ALL_STATES, AMD_CATEGORIES, TIERS, validate_design
 from .util import today
 
 
@@ -134,7 +140,8 @@ def cmd_amend(args) -> int:
         amd = apply_amendment(
             design, args.field, value,
             reason=args.reason, results_seen=args.results_seen,
-            user_signed=args.user_signed, by=args.by, date=today())
+            user_signed=args.user_signed, by=args.by, date=today(),
+            category=args.category, branch_ref=args.branch_ref)
     except (GateError, ValueError, KeyError, IndexError) as e:
         if isinstance(e, GateError):
             for err in e.errors:
@@ -144,7 +151,14 @@ def cmd_amend(args) -> int:
     save_design(root, design)
     refresh_index(root)
     kind = "命门字段（用户签）" if amd.get("critical") else "普通字段（自动留痕）"
-    print(f"amendment 已追加：{args.field}（{kind}），新哈希 {amd['new_hash'][:12]}…")
+    idx = len((design.get("freeze") or {}).get("amendments") or [])
+    print(f"amendment 已追加：#{idx} {args.field}（{kind}，类别 "
+          f"{amd.get('category')}），新哈希 {amd['new_hash'][:12]}…")
+    if (amd.get("review") or {}).get("status") == "pending_review":
+        print(f"该 amendment 为命门修订，已标 pending_review：导出前须走 "
+              f"review prepare --amendment {idx} → 异家族增量评审 → "
+              f"review record --amendment {idx}（或 --review-unavailable "
+              "显式落字）。")
     return 0
 
 
@@ -155,6 +169,19 @@ def cmd_review_prepare(args) -> int:
     except FileNotFoundError as e:
         return _fail(str(e))
     try:
+        if args.amendment:
+            out = prepare_amendment_review(root, design, args.amendment,
+                                           date=today())
+            save_design(root, design)
+            print(f"增量评审包已生成：{out['dir']}")
+            print(f"  - amendment_review_packet.md（自包含：变更前后值 + "
+                  "影响面 + 原冻结收据指针）")
+            print(f"  - amendment_review_checklist.yaml（评审者逐项填写版）")
+            print(f"  - 轨道：{out['track']}；须核条目："
+                  f"{'、'.join(out['items_required'])}")
+            print(f"判定回来后：review record --amendment {args.amendment} "
+                  "--from-json <判定.json> 落盘。")
+            return 0
         out = prepare_review(root, design, date=today())
     except ReviewError as e:
         for err in e.errors:
@@ -174,6 +201,8 @@ def cmd_review_record(args) -> int:
     except FileNotFoundError as e:
         return _fail(str(e))
     try:
+        if args.amendment:
+            return _record_amendment(args, root, design)
         if args.review_unavailable:
             record = record_review_unavailable(
                 root, design, date=today(), note=args.note or "")
@@ -217,6 +246,64 @@ def cmd_review_record(args) -> int:
     print(f"评审记录已落盘：{args.design_id} → decision={record['decision']}"
           f"（评审者 {record['reviewer']} / {record['family']}）")
     print(f"收据：{record['review_id']}；存根 review/{args.design_id}/review_record.json")
+    return 0
+
+
+def _record_amendment(args, root: Path, design: dict) -> int:
+    """review record --amendment <n>：增量评审落盘（DES-D02）。
+    与定版评审同构：--review-unavailable 走显式落字通道；判定来自
+    --from-json 或增量评审清单；同族拒收在 record 层执行。"""
+    idx = args.amendment
+    try:
+        if args.review_unavailable:
+            record = record_amendment_review_unavailable(
+                root, design, idx, date=today(), note=args.note or "")
+            save_design(root, design)
+            refresh_index(root)
+            print(f"已落字降级记录：{args.design_id} amendment #{idx} "
+                  "增量评审 REVIEW_UNAVAILABLE（待审解除；导出件将注明"
+                  "增量评审未完成，恢复后补评审）")
+            print(f"收据：{record['review_id']}")
+            return 0
+        if args.from_json:
+            jp = Path(args.from_json)
+            if not jp.exists():
+                return _fail(f"判定 JSON 不存在：{jp}")
+            data = json.loads(jp.read_text(encoding="utf-8"))
+            source = "external_json"
+        else:
+            cp = Path(args.checklist) if args.checklist else \
+                amendment_review_dir(root, args.design_id, idx) / \
+                "amendment_review_checklist.yaml"
+            if not cp.exists():
+                return _fail(f"增量评审清单不存在：{cp}（先跑 review "
+                             f"prepare --amendment {idx}，或用 --from-json "
+                             "回填外部判定）")
+            data = load_checklist_items(cp)
+            source = "checklist"
+        if args.reviewer_model:
+            data["reviewer_model"] = args.reviewer_model
+        if args.reviewer_family:
+            data["reviewer_family"] = args.reviewer_family
+        if args.decision:
+            data["decision"] = args.decision
+        record = record_amendment_review(root, design, idx, data,
+                                         date=today(), source=source)
+    except ReviewError as e:
+        print(f"增量评审记录被拒：{args.design_id} amendment #{idx}"
+              f"（{len(e.errors)} 条）：")
+        for err in e.errors:
+            print(f"  - {err}")
+        return 1
+    except (json.JSONDecodeError, ValueError) as e:
+        return _fail(f"判定文件解析失败：{e}")
+    save_design(root, design)
+    refresh_index(root)
+    print(f"增量评审记录已落盘：{args.design_id} amendment #{idx} → "
+          f"status={record['status']}（轨道 {record['track']}，评审者 "
+          f"{record['reviewer']} / {record['family']}）")
+    print(f"收据：{record['review_id']}；存根 review/{args.design_id}/"
+          f"amendments/amd-{idx}/amendment_review_record.json")
     return 0
 
 
@@ -319,19 +406,34 @@ def build_parser() -> argparse.ArgumentParser:
                    help="改时是否已见结果（声明，如 '未跑任何运行' / '已见判别实验结果'）")
     p.add_argument("--user-signed", action="store_true",
                    help="命门字段修订的用户签（判读/主指标/主张/熔断线必填）")
+    p.add_argument("--category", choices=AMD_CATEGORIES, default="unforeseen",
+                   help="修订类别（DES-D02/C-补04 分流）：prewritten_branch="
+                        "执行定版预写的偏离分支（须 --branch-ref 点名）；"
+                        "unforeseen=未预见变更（默认，最严口径）")
+    p.add_argument("--branch-ref", default=None,
+                   help="prewritten_branch 类别时点名 plan.deviation_branches "
+                        "中的分支 id")
     p.add_argument("--by", default="")
     p.set_defaults(func=cmd_amend)
 
     p = sub.add_parser("review", help="定版评审子流程（prepare / record）")
     rsub = p.add_subparsers(dest="review_command", required=True)
-    rp = rsub.add_parser("prepare", help="生成自包含评审包 review/<design_id>/")
+    rp = rsub.add_parser("prepare", help="生成自包含评审包 review/<design_id>/"
+                                        "（--amendment 走增量评审包）")
     rp.add_argument("project")
     rp.add_argument("design_id")
+    rp.add_argument("--amendment", type=int, default=None,
+                    help="amendment 序号（1 起）：生成该命门 amendment 的"
+                         "增量评审包（DES-D02）")
     rp.set_defaults(func=cmd_review_prepare)
     rr = rsub.add_parser("record", help="落盘评审记录（同族拒收；"
-                                       "--review-unavailable 走降级通道）")
+                                       "--review-unavailable 走降级通道；"
+                                       "--amendment 落盘增量评审记录）")
     rr.add_argument("project")
     rr.add_argument("design_id")
+    rr.add_argument("--amendment", type=int, default=None,
+                    help="amendment 序号（1 起）：落盘该 amendment 的"
+                         "增量评审记录（DES-D02）")
     rr.add_argument("--from-json", default=None,
                     help="外部判定 JSON 路径（reviewer_model/family、decision、items）")
     rr.add_argument("--checklist", default=None,

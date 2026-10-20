@@ -1,4 +1,4 @@
-$ light-memory ingest light-memory/examples/demo-fullrun/world/proj-a --package review --source light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json
+$ light-memory ingest ../../../../light-memory/examples/demo-fullrun/world/proj-a --package review --source ../../../../light-review/examples/demo-fullrun/review-pkg/handoff_to_write.json
 [exit 0]
 [review] 收编完成：对象登记 12、新事件 0、新事实 6、新关系 5、前向引用补解 0
   · 缺口：concern 关闭状态不在 handoff 源内（以 Write 回填为准），关闭史未收编

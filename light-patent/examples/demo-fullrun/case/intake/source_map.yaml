@@ -1,0 +1,33 @@
+kind: light-patent/source-map
+case_id: PT-case_4b3e0c
+anchors:
+- anchor: C001
+  kind: code
+  route: code
+  ref: tracker/baseline.py
+  note: 子系统 tracker；18 行
+- anchor: C002
+  kind: code
+  route: code
+  ref: tracker/fusion.py
+  note: 子系统 tracker；18 行
+- anchor: P001
+  kind: text
+  route: paper
+  ref: 内部技术记录 TN-07 第 2-4 节
+  note: 未公开改进方案记录
+- anchor: E001
+  kind: equation
+  route: experiment
+  ref: 实验日志 R-31
+  note: 个体基线偏差公式与消融结果
+- anchor: F001
+  kind: figure
+  route: paper
+  ref: 系统框图 v3
+  note: 装置实施例结构图
+- anchor: P002
+  kind: text
+  route: oral
+  ref: 交底访谈纪要 2026-10-18
+  note: 口头交底补充，仅作补充输入

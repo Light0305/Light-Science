@@ -199,12 +199,14 @@ def register_summaries(root, register_file) -> list:
     return rows
 
 
-def adjudicate_finding(root, finding_id, outcome, adjudicator, reason
-                       ) -> dict:
+def adjudicate_finding(root, finding_id, outcome, adjudicator, reason,
+                       obligations=None) -> dict:
     """人工裁决位：给一条发现落裁决（追加行留痕，本体不改）。
 
     confirmed error 未裁决阻断 delivered（R2 硬度 a）；裁决须具名 +
     理由，匿名或无理由不许落（裁决是责任动作，不是橡皮图章）。
+    obligations（v1.1 REV-D05）：裁决附带条件 [{text, finding_id}]
+    随裁决同批落义务账，登记人沿用裁决人；finding_id 缺省挂本条发现。
     """
     root = Path(root)
     gaps = []
@@ -224,6 +226,12 @@ def adjudicate_finding(root, finding_id, outcome, adjudicator, reason
         raise ForensicError(gaps)
     row = schema.adjudication_row(finding_id, outcome, adjudicator, reason)
     append_finding_rows(root, [row])
+    if obligations:
+        from .obligations import register_from_adjudication
+        specs = [{"text": o.get("text"),
+                  "finding_id": o.get("finding_id") or finding_id}
+                 for o in obligations]
+        register_from_adjudication(root, specs, by=adjudicator)
     pkg = load_package(root)
     folded = fold_findings(pkg["findings"] or [])
     review = pkg["review"]

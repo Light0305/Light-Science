@@ -1,6 +1,38 @@
 {
   "fig_id": "fig-2",
-  "version": "1.0",
+  "version": "1.1",
+  "arrow_plan": [
+    {
+      "arrow_plan_id": "AP-1",
+      "from": "video-frame",
+      "to": "tracking",
+      "fact": "参考图左段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-2",
+      "from": "tracking",
+      "to": "statistics",
+      "fact": "参考图跨面板长箭头"
+    },
+    {
+      "arrow_plan_id": "AP-3",
+      "from": "statistics",
+      "to": "predictor",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-4",
+      "from": "predictor",
+      "to": "thresholds",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-5",
+      "from": "thresholds",
+      "to": "anomaly",
+      "fact": "参考图右段竖直箭头"
+    }
+  ],
   "status": "draft",
   "route": "file_build",
   "reference": {
@@ -92,7 +124,8 @@
         "from": "video-frame",
         "to": "tracking",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-1"
       }
     },
     {
@@ -128,7 +161,8 @@
         "from": "tracking",
         "to": "statistics",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-2"
       }
     },
     {
@@ -164,7 +198,8 @@
         "from": "statistics",
         "to": "predictor",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-3"
       }
     },
     {
@@ -200,7 +235,8 @@
         "from": "predictor",
         "to": "thresholds",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-4"
       }
     },
     {
@@ -236,7 +272,8 @@
         "from": "thresholds",
         "to": "anomaly",
         "arrow": true,
-        "semantics": "data flow"
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-5"
       }
     },
     {

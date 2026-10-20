@@ -1,0 +1,39 @@
+software:
+  full_name: 微统计算工具
+  short_name: 微统
+  version: V1.0
+  kind: headless
+  category: 应用软件
+owner:
+  name: 演示著作权人（脱敏虚构）
+  type: 自然人
+development:
+  mode: independent
+  completion_date: "2026-09-15"
+  original: true
+publication:
+  status: unpublished
+rights:
+  acquisition: 原始取得
+  scope: 全部权利
+functions:
+  main_function: >-
+    微统计算工具是一款面向日常数据整理场景的无界面命令行软件。用户通过
+    命令行参数传入一组数值后，软件自动完成描述统计计算，包括算术平均
+    值、中位数、样本方差与总体方差、任意分位数以及基于四分位距规则的
+    异常值下标标记，并将结果汇总为结构化字典。在此基础上，软件提供定
+    宽文本表与 Markdown 表格两种报表渲染形态，便于直接粘贴到实验记录
+    或数据处理文档中。软件全部计算在本地完成，不联网、不读取用户文件
+    系统中的其他数据，输入仅来自命令行参数，输出仅写往标准输出，运行
+    过程不产生持久化文件。参数解析支持逗号与空白混合分隔，空输入与格
+    式错误会给出用法提示并以非零状态码退出。软件由四个模块组成：入口
+    模块负责参数处理与流程编排，统计模块负责全部数值计算，报表模块负
+    责结果格式化，包说明模块记录软件用途。各模块职责单一、接口以纯函
+    数为主，便于单独测试与替换实现。
+environment:
+  dev_hardware: 通用 x86-64 个人计算机
+  dev_os: Ubuntu 24.04
+  dev_tools: Python 3.12 + VS Code
+  runtime_hardware: 通用 x86-64 个人计算机
+  runtime_os: Linux / Windows / macOS 任一可运行 Python 3 者
+  runtime_platform: Python 3.10 及以上标准库，无第三方依赖

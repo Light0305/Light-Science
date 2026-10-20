@@ -186,8 +186,11 @@ def add_assertions(root, n=10, contested_ids=()):
 
 
 def full_pkg(pkg, record_path, contested_ids=()):
-    """intake + 模板登记 + 合同冻结齐备的包（outlined 门前一步）。"""
+    """intake + 模板登记 + 贡献签认 + 合同冻结齐备的包（outlined 门前一步）。"""
+    from light_write.intake import confirm_contribution
+
     register_template(pkg["root"], record_path)
+    confirm_contribution(pkg["root"], by="demo author")
     add_assertions(pkg["root"], contested_ids=contested_ids)
     freeze_contract(pkg["root"])
     return pkg

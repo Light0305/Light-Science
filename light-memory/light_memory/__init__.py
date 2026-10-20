@@ -7,6 +7,8 @@ Phase 2：候选通道（判断性提炼 + Review 蒸馏双向接口）+ 检索�
 与渐进披露 + Obsidian 单向投影与标注回读 + 画像视图与立场视图
 + 自建评测集运行器 + 跨项目晋升通道。见 SKILL.md §8。
 Phase 3：真实演示（examples/demo-fullrun）+ 评测首测 + 封版 v1.0。
+v1.1 集成步（MM2-13）：M0 承接面补新三包适配器（patent /
+software-copyright / crawler），见 adapters.py 与 SKILL.md §2。
 """
 
 __version__ = "1.0.0"

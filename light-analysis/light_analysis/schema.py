@@ -45,6 +45,56 @@ POWER_BASIS_BANNED = ["observed", "posthoc", "post_hoc", "post-hoc",
 # TOST bounds 来源：只许 Design 冻结 SESOI
 TOST_BOUNDS_SOURCES_OK = ["design_sesoi"]
 
+# SESOI 结构化登记块（v1.1 ANA-D02 / DES-D01）：Design 登记行 sesoi 七字段。
+# 登记块是判定侧消费的唯一结构化形态；块完整性在本包独立校验（各包
+# 自包含，不跨包 import），口径与 light-design 的登记块逐字段对齐。
+SESOI_BLOCK_FIELDS = ("value", "unit", "direction", "bounds", "basis",
+                      "estimand_ref", "summary_measure")
+SESOI_DIRECTIONS = ("higher", "lower")
+_SESOI_TEXT_FIELDS = ("unit", "bounds", "basis", "estimand_ref",
+                      "summary_measure")
+
+
+def validate_sesoi_block(block) -> list:
+    """校验 SESOI 登记块完整性，返回错误列表（空 = 完整）。"""
+    errs: list = []
+    if not isinstance(block, dict):
+        return ["SESOI 登记块不是映射"]
+    v = block.get("value")
+    if isinstance(v, bool) or not isinstance(v, (int, float)) \
+            or float(v) <= 0:
+        errs.append(f"SESOI 登记块 value 非法：{v!r}（须为正数）")
+    for k in _SESOI_TEXT_FIELDS:
+        val = block.get(k)
+        if not (isinstance(val, str) and val.strip()):
+            errs.append(f"SESOI 登记块缺 {k}（七字段缺一不可）")
+    if block.get("direction") not in SESOI_DIRECTIONS:
+        errs.append(f"SESOI 登记块 direction 非法：{block.get('direction')!r}"
+                    f"（须为 {SESOI_DIRECTIONS} 之一）")
+    return errs
+
+
+def sesoi_canonical(block):
+    """登记块规范形（只取七字段，value 归一为 float）；非映射返回 None。"""
+    if not isinstance(block, dict):
+        return None
+    out: dict = {}
+    for k in SESOI_BLOCK_FIELDS:
+        v = block.get(k)
+        if k == "value" and isinstance(v, (int, float)) \
+                and not isinstance(v, bool):
+            v = float(v)
+        out[k] = v
+    return out
+
+
+def sesoi_diff_fields(a, b) -> list:
+    """两块规范形逐字段比对，返回不一致字段名列表。"""
+    ca, cb = sesoi_canonical(a), sesoi_canonical(b)
+    if ca is None or cb is None:
+        return ["<登记块不是映射>"]
+    return [k for k in SESOI_BLOCK_FIELDS if ca.get(k) != cb.get(k)]
+
 # 贝叶斯诊断硬字段门（约束 4：rank-normalized R̂ < 1.01、ESS 双 >400）
 R_HAT_MAX = 1.01
 ESS_MIN = 400
@@ -168,6 +218,10 @@ def verdict_row(registry_line_id: str, verdict: str, **kw) -> dict:
         "bayes": False,
         # 校正组
         "correction": None,            # {family_id, method, p_raw, p_adj}
+        # 结构组（ANA-D03）：{mode: paired|blocked|independent, assumption, key, source, n_units, warnings}
+        "structure": None,
+        # 稳健性覆盖组（ANA-D04 短期）：{computed, trace_only, trace_only_fraction, basis}
+        "robustness_scope": None,
         # 强度组
         "strength_grade": None,
         "strength_cap_reason": None,

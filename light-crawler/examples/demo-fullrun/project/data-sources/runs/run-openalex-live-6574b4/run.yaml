@@ -1,0 +1,14 @@
+run_id: run-openalex-live-6574b4
+target_id: openalex-live
+channel: official_api
+status: finished
+started_at: '2026-10-20T20:18:35+00:00'
+precheck_id: pc-bd2c13319d
+run_config_hash: 591eaf13b79928192cb8cb2537c0b6af11190eac41f26d66c923299b1bccae23
+requested: 1
+stored: 1
+not_modified: 0
+duplicates: 0
+errors: []
+refused: false
+finished_at: '2026-10-20T20:18:36+00:00'

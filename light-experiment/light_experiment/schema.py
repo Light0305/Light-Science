@@ -21,6 +21,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .events import validate_events
 from .util import canonical_json, component_hash, sha256_text
 
@@ -153,6 +155,39 @@ SEED_TOKENS = ("seed", "seeds", "random_seed", "random_seeds", "种子", "随机
 
 # 身份哈希的成分维度（草案 §2.7）：判定口径写死在此，变更走留痕。
 IDENTITY_DIMENSIONS = ("config", "code_snapshot", "data_version", "environment")
+
+# ---------- v1.1 词表（EXP-D04 占位符扫描 / EXP-D03 干预核验） ----------
+
+# 零占位符扫描的模式清单（EXP-D04，草案 §4）：清单成文冻结在此，
+# intake 对四件套原文逐行机械扫；修订清单走留痕（改本常量 + SKILL
+# 同步），不许静默增删。每项 = (模式名, 正则)。
+PLACEHOLDER_PATTERNS = (
+    ("双花括号模板位", re.compile(r"\{\{[^{}]*\}\}")),
+    ("尖括号占位记号", re.compile(r"<[A-Za-z_][A-Za-z0-9_]*>")),
+    ("TODO 标记", re.compile(r"\bTODO\b")),
+    ("TBD 标记", re.compile(r"\bTBD\b")),
+    ("FIXME 标记", re.compile(r"\bFIXME\b")),
+    ("XXX 占位", re.compile(r"\bX{3,}\b")),
+    ("待填/待补标记", re.compile(r"待填|待补")),
+    ("占位符字样", re.compile(r"占位符")),
+    ("下划线填空", re.compile(r"_{4,}")),
+    ("Lorem ipsum", re.compile(r"lorem ipsum", re.IGNORECASE)),
+)
+
+# 干预核查点机械核验（EXP-D03）：三类核验器——数值/标量相等、区间
+# 内、文件哈希一致。实际值只许从来源文件机械读取，不收执行者自述。
+INTERVENTION_VERIFY_KINDS = ("equals", "range", "file_hash")
+# 逐条核验结论：pass 通过 / fail 不符 / unverifiable 登记了核验方式
+# 但实际值机械取不到 / not_verified 未登记核验方式（v1.0 存档形态，
+# 如实报未核验，不冒充已验）。
+INTERVENTION_RESULT_STATES = ("pass", "fail", "unverifiable", "not_verified")
+# run 级核验总判（优先级 failed > unverifiable > passed >
+# not_verified > no_checks）。
+INTERVENTION_VERDICTS = ("passed", "failed", "unverifiable",
+                         "not_verified", "no_checks")
+# 核验不符时阻断静默通过的总判集合：completed 终止遇之自动转
+# deviated 候选（失败类终止本就不被消费，保留原状态只落记录）。
+INTERVENTION_BLOCKING_VERDICTS = ("failed", "unverifiable")
 
 SEED_DERIVATION_RULE = (
     "derived_seed = int(sha256(f'{root_seed}|{run_id}'.encode()).hexdigest()[:8], 16)"
@@ -485,6 +520,45 @@ def _validate_run(run: dict, pkg: dict) -> list[str]:
                 errs.append(f"{label} 冷启动标记 cold_start 与 run_started "
                             "事件锚不一致（验收证据的真伪靠此锚，不许事后回填）")
 
+    # —— 干预核验记录（EXP-D03）：终态 run 的核验结论与事件锚对账 ——
+    checks = ident.get("intervention_checks") or []
+    ver = conc.get("intervention_verification")
+    if status in RUN_TERMINAL_STATES:
+        if ver is None and any(isinstance(c, dict) and c.get("verify")
+                               for c in checks):
+            errs.append(f"{label} 登记了带核验方式的干预核查点，但结论区缺 "
+                        "intervention_verification 核验记录（run-finish 时"
+                        "应机械核验并落字，缺记录即未验）")
+        if isinstance(ver, dict):
+            results = ver.get("results") or []
+            if len(results) != len(checks):
+                errs.append(f"{label} 干预核验记录 {len(results)} 条与登记的"
+                            f"核查点 {len(checks)} 条不一一对应")
+            bad = [r for r in results
+                   if isinstance(r, dict) and
+                   r.get("status") in ("fail", "unverifiable")]
+            if bad and conc.get("exit_status") == "completed" and \
+                    status != "deviated":
+                names = "、".join(str(r.get("point")) for r in bad)
+                errs.append(f"{label} 干预核验不符（{names}）却落 "
+                            f"{status} 未转 deviated 候选：核验不符不许"
+                            "静默通过（EXP-D03）")
+            check_events = [e for e in events
+                            if e.get("type") == "intervention_check"
+                            and e.get("run_id") == rid]
+            if check_events:
+                ev_pairs = sorted(
+                    (str((e.get("payload") or {}).get("point")),
+                     str((e.get("payload") or {}).get("status")))
+                    for e in check_events)
+                rec_pairs = sorted(
+                    (str(r.get("point")), str(r.get("status")))
+                    for r in results if isinstance(r, dict))
+                if ev_pairs != rec_pairs:
+                    errs.append(f"{label} 干预核验结论与 intervention_check "
+                                "事件锚不一致（结论区核验记录终态后回改即"
+                                "在此暴露）")
+
     # —— 对账指针 ——
     recon = pkg.get("reconciliation")
     if isinstance(recon, dict):
@@ -497,6 +571,23 @@ def _validate_run(run: dict, pkg: dict) -> list[str]:
 
 
 # ---------- 二期纯函数（验收 / 偏离 / 失败 / 对账 / 预算） ----------
+
+def placeholder_hits(text: str, *, limit: int = 3) -> list[dict]:
+    """零占位符扫描（EXP-D04）：对交接件原文逐行扫冻结模式清单，
+    返回命中 [{pattern, line, excerpt}]（每文件至多 limit 条，
+    防打回清单被同一模式刷屏）。"""
+    hits: list[dict] = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        for label, pat in PLACEHOLDER_PATTERNS:
+            m = pat.search(line)
+            if m:
+                hits.append({"pattern": label, "line": lineno,
+                             "excerpt": line.strip()[:80]})
+                break
+        if len(hits) >= limit:
+            break
+    return hits
+
 
 def trigger_anchor(run: dict, dimension: str) -> str | None:
     """取 run 在某触发维上的比对锚（出生证明成分哈希 / params_hash）。

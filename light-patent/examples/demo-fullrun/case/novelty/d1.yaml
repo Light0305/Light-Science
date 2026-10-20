@@ -1,0 +1,38 @@
+kind: light-patent/d1-lock
+case_id: PT-case_4b3e0c
+locked_at: '2026-10-20'
+d1: DOI:10.1016/j.compag.2025.110856
+rationale: 团队已发表基础论文公开了单帧分类全流程，与本案同问题同场景，为最接近现有技术
+evidence_level: full_text
+feature_comparison:
+- feature_ref: CF-01
+  claim_feature: 抽帧序列
+  in_d1: true
+  note: 基础论文已公开
+- feature_ref: CF-02
+  claim_feature: 时序融合模型
+  in_d1: false
+  contribution: 对误报问题有贡献
+  note: 基础论文为单帧分类
+- feature_ref: CF-03
+  claim_feature: 个体基线偏差异常分数
+  in_d1: false
+  contribution: 对误报问题有贡献
+  note: 基础论文用群体统一阈值
+distinguishing_features:
+- fk: F1
+  feature_ref: CF-02
+  claim_feature: 时序融合模型
+  contribution: 对误报问题有贡献
+  note: 基础论文为单帧分类
+- fk: F2
+  feature_ref: CF-03
+  claim_feature: 个体基线偏差异常分数
+  contribution: 对误报问题有贡献
+  note: 基础论文用群体统一阈值
+gate: pass_with_doubts
+gate_reasons:
+- 区别特征组合（时序融合加个体基线）未被公开，创造性终局留代理师复核
+disclaimers:
+- 草案，需专利代理师复核
+- 只作初筛底稿、不作法律意见

@@ -1,7 +1,7 @@
 """light-memory CLI（Phase 1 + Phase 2）。
 
   init            建记忆项目骨架（memory.yaml 登记头 + 四账 + 目录群）
-  ingest          M0 承接：按水位线收编一个上游包的导出物（九包适配器）
+  ingest          M0 承接：按水位线收编一个上游包的导出物（九包 + 选刊 + 新三包适配器）
   verdict         M3 判定落账：模型提名的五值判定由代码执行（取代链
                   区间算术 / 争议登记 / 合并查表），逐条回报结果
   dispute-resolve 争议裁决：具名裁决人 + 结论 + 理由，事实按结论执行
@@ -210,6 +210,13 @@ def cmd_validate(args) -> int:
         return 1
     print("校验通过：四账一致、双时间合法、取代链无环、索引对账一致、"
           "硬约束自检无违规")
+    # 视图层体检（MM2-03e）：只报不自动改，不进错误列表、不改退出码。
+    if (Path(args.path) / obsidian_mod.VAULT_DIR).exists():
+        findings = obsidian_mod.view_lint(args.path)
+        print(f"视图层体检（只报不改）：{len(findings)} 条")
+        for f in findings:
+            where = f"（{f['note']}）" if f.get("note") else ""
+            print(f"  · [{f['category']}] {f['detail']}{where}")
     return 0
 
 
@@ -254,7 +261,7 @@ def cmd_candidate(args) -> int:
         if args.action == "propose":
             content = load_structured(args.file)
             row = cand_mod.propose(
-                args.path, args.kind, content,
+                args.path, args.kind or "fact", content,
                 nominator=args.nominator, confidence=args.confidence,
                 basis=[b for b in (args.basis or "").split(",") if b],
                 rationale=args.rationale or "")
@@ -280,6 +287,37 @@ def cmd_candidate(args) -> int:
     except cand_mod.CandidateError as exc:
         return _gaps_fail(exc)
     _drop_pending(args.path, "candidates:")
+    return 0
+
+
+def cmd_epilogue(args) -> int:
+    from . import epilogue as epilogue_mod
+    from .util import dump_json
+    try:
+        if args.action == "scan":
+            scan = epilogue_mod.scan_transcript(args.file)
+            if args.out:
+                dump_json(args.out, scan)
+            print(f"会话切段完成：{len(scan['segments'])} 段"
+                  f"（会话哈希 {scan['transcript']['sha256'][:16]}）"
+                  + (f"，清单 → {args.out}" if args.out else ""))
+            for s in scan["segments"]:
+                print(f"  {s['seg_id']} [{s['speaker']}] "
+                      f"{s['excerpt']}")
+        else:  # apply
+            if not args.path:
+                return _fail("epilogue apply 须给记忆项目路径")
+            res = epilogue_mod.apply_epilogue(
+                args.path, args.scan, args.file,
+                nominator=args.nominator or "epilogue")
+            print(f"epilogue 提名完成：候选 {len(res['created'])} 条"
+                  "（只产候选，未 accept 不入账）")
+            for cid in res["created"]:
+                print(f"  {cid}")
+            for g in res["gaps"]:
+                print(f"  · 缺口：{g}")
+    except epilogue_mod.EpilogueError as exc:
+        return _gaps_fail(exc)
     return 0
 
 
@@ -567,7 +605,10 @@ def main(argv=None) -> int:
     p.add_argument("path")
     p.add_argument("action",
                    choices=["propose", "list", "accept", "reject"])
-    p.add_argument("--kind", default="fact")
+    # --kind 默认 None：list 时不带 --kind 须列全部 kind（MM2-09，
+    # 默认值 fact 会把 annotation 等候选静默吞掉）；propose 未给时
+    # 在 cmd_candidate 内回落 fact（提名须有确定类型）。
+    p.add_argument("--kind", default=None)
     p.add_argument("--file", default=None)
     p.add_argument("--nominator", default="")
     p.add_argument("--confidence", type=float, default=None)
@@ -578,6 +619,20 @@ def main(argv=None) -> int:
     p.add_argument("--by", default="")
     p.add_argument("--note", default="")
     p.set_defaults(fn=cmd_candidate)
+
+    p = sub.add_parser("epilogue",
+                       help="会话沉淀规程（MM2-01）：scan 切段 / "
+                            "apply 提名候选（只产候选）")
+    p.add_argument("path", nargs="?", default=None,
+                   help="记忆项目路径（apply 必填；scan 不用）")
+    p.add_argument("action", choices=["scan", "apply"])
+    p.add_argument("--file", required=True,
+                   help="scan：会话记录文件；apply：提名文件")
+    p.add_argument("--scan", default=None,
+                   help="apply：scan 产出的切段清单")
+    p.add_argument("--out", default=None, help="scan 清单输出路径")
+    p.add_argument("--nominator", default="epilogue")
+    p.set_defaults(fn=cmd_epilogue)
 
     p = sub.add_parser("distill-export",
                        help="Phase 2 蒸馏导出（Review 覆盖层格式）")

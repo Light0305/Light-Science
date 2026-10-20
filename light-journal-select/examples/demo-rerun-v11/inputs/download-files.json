@@ -1,0 +1,14 @@
+[
+  {
+    "kind": "guideline",
+    "filename": "guide-for-authors.html",
+    "source_url": "https://www.sciencedirect.com/journal/computers-and-electronics-in-agriculture/publish/guide-for-authors",
+    "note": "演示环境未真下载官网指南页，待操作员从官网取回后回填登记"
+  },
+  {
+    "kind": "template",
+    "filename": "elsarticle-template.zip",
+    "source_url": "https://ctan.org/pkg/elsarticle",
+    "note": "演示环境未真下载模板包，待从 CTAN 取回后回填登记"
+  }
+]

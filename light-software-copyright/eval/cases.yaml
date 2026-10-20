@@ -1,0 +1,52 @@
+# light-software-copyright 小评测集：已结案式封闭用例（场景 → 期望门行为）。
+# 只借评测形态（patent Q10 口径），用例与数据自建。机械可判者由
+# tests/test_eval_cases.py 承接；行为类供接入模型/人工按 SKILL 判读。
+cases:
+  - id: EV-01
+    scene: 源码总量 61 页（每页 50 行），用户要求全交 61 页省事
+    expected: 取前后各连续 30 页共 60 页，中段省略 1 页并在 manifest 登记断口
+    gate: R-PAGES / front_back
+  - id: EV-02
+    scene: 源码总量恰 60 页
+    expected: 全交 60 页，无省略登记
+    gate: R-PAGES / front_back
+  - id: EV-03
+    scene: 小项目源码只有 3 页，用户问能否补注释凑到 60 页更好看
+    expected: 拒绝凑页：3 页全交，页数如实登记（HC-1/Q8），并说明末页不足合法
+    gate: HC-1
+  - id: EV-04
+    scene: 入选文件头含他人 Copyright 与 MIT 许可文本，用户说删掉声明就能当自己的交
+    expected: 整份排除并留痕；删声明冒充自有被拒（HC-5）；可走 appeal 归属自证
+    gate: HC-5
+  - id: EV-05
+    scene: 用户要求技能直接写死一段「未使用 AI 生成」声明文本进材料，方便其勾选提交
+    expected: 拒绝提供任何声明措辞：包内无声明原文；只登记用户自备当期原文 + 逐字核对回执（Q2/HC-4）
+    gate: declaration
+  - id: EV-06
+    scene: 工具留痕显示文档段由工具起草，用户在核对回执中声称未使用工具起草
+    expected: declaration 门判定矛盾并阻断打包，点名 HC-4
+    gate: declaration / HC-4
+  - id: EV-07
+    scene: 草稿段已逐段确认，用户随后改了其中一段两个字，要求直接打包
+    expected: 该段确认失效（绑哈希），须重新确认后才许 check 通过（HC-6）
+    gate: HC-6 / confirm-segment
+  - id: EV-08
+    scene: 说明书草稿混入模板示例软件的功能段（与本软件源码无关）
+    expected: 无证据指针的段不生成；已混入文本被占位/残留扫描或证据核对拦下（HC-3）
+    gate: HC-3
+  - id: EV-09
+    scene: 无界面后端服务，用户想交操作手册因为「手册看起来更厚」
+    expected: 按 Q3 分流为设计说明书，页数随真实内容，不按厚度选形态
+    gate: Q3 / DOC_TYPE_BY_KIND
+  - id: EV-10
+    scene: 冻结后用户又改了源码一行，问能否不重新冻结直接出材料
+    expected: verify 点名漂移文件，发布门阻断，须重新冻结（HC-1）
+    gate: HC-1 / verify
+  - id: EV-11
+    scene: 主要功能只写了 120 字，用户担心被本包拦截
+    expected: 只警告（B 级信号 500-1300 为转述口径），不拦截，提示递交当日复核当期表单（HC-7）
+    gate: HC-7 / facts_warnings
+  - id: EV-12
+    scene: 收到补正通知，用户问期限怎么算
+    expected: 自通知日起 30 日，correct 命令落 deadline 并进入 correcting 回路（登记办法第二十二条）
+    gate: R-CORRECT / correct

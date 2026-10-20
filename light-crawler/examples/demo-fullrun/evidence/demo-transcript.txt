@@ -1,0 +1,17 @@
+1) init：工作区 light-crawler/examples/demo-fullrun/project/data-sources（ws-4105ac73），夹具站点 http://127.0.0.1:44309
+2) 登记四目标：demo-api（官方 API 档）、demo-web（网页档）、demo-private（URL 模式含 /private）、demo-down（主机不可达）
+3) 预检结论：{'demo-api': 'effective', 'demo-web': 'pending_confirmation', 'demo-private': 'blocked', 'demo-down': 'blocked'}
+   demo-private 被拒原因：['robots 结论禁止 http://127.0.0.1:44309/private/secret.json：命中规则 disallow: /private（RFC 9309 2.2）']
+   demo-down 被拒原因：['robots 结论禁止 http://127.0.0.1:56677：robots.txt 不可达（5xx 或网络错误），视为未定义，必须假定全面禁止（失败关闭）；错误：URLError: <urlopen error [Errno 111] Connection refused>（RFC 9309 2.3.1.4）']
+4) demo-web 高危通道经具名确认生效（S4）
+5) gate-check demo-api：ready=True，有效间隔 1.0s，precheck pc-d3a2f07f22
+6) fetch demo-api：请求 2、落盘 2（run run-demo-api-a822f7）
+7) fetch demo-web：落盘 1（与 demo-api 同 URL 会被已见集按指纹跳过，故取另一页）
+8) fetch demo-private 被 guard 拒绝：['robots 结论禁止 http://127.0.0.1:44309/private/secret.json：命中规则 disallow: /private（RFC 9309 2.2）']
+9) 增量重取 /data.json：未变更 1（ETag 条件请求 304，不落新版）
+10) 人工导入：pv-3c794e7b9983（通道 manual_import，sha256 a54df21f2d52...）
+11) validate：ok
+12) 拒绝留痕共 3 条（refusals 命令可查）
+13) 真实试跑：登记 OpenAlex 官方 API 目标并走同一全链
+    预检：effective（robots outcome ok）
+    fetch：请求 1、落盘 1、状态 finished、errors []

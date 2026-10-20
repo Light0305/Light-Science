@@ -59,6 +59,24 @@ def full_card(status: str = "draft") -> dict:
             "ablations": ["去掉预训练", "冻结层数 0/2/4", "掩码率 0.5/0.75"],
             "resource_budget": {"gpu_hours": 40, "data": "公开集", "weeks": 3},
             "key_details": ["掩码率 0.75", "微调只解冻最后两层起步"],
+            "capability_fit": {
+                "required": [
+                    {"capability": "自监督预训练实现",
+                     "detail": "掩码重建预训练管线，能在叶片图上跑通"},
+                    {"capability": "田间数据采集",
+                     "detail": "田间番茄病害图的采集与标注通道"},
+                ],
+                "team_status": "队伍已完成两轮叶片分类项目，有单卡 GPU "
+                               "与公开集处理管线",
+                "gaps": [
+                    {"capability": "自监督预训练实现",
+                     "disposition": "have",
+                     "note": "上一项目已跑通同类预训练管线，有现成代码"},
+                    {"capability": "田间数据采集",
+                     "disposition": "fillable",
+                     "note": "合作农场已签意向，下个生长季两周内可启动采集"},
+                ],
+            },
             "discriminating_experiment": {
                 "description": "50-shot 田间集上与最强基线对决",
                 "readout_positive": "macro-F1 高 ≥3 点：机制成立，进 Design",

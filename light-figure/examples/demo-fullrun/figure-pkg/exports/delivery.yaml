@@ -1,8 +1,8 @@
 kind: light-figure/delivery
 version: 1
 status: current
-tool_version: 0.2.0
-package_id: turkey-behaviour-figures-light-figure-de_1b4072
+tool_version: 1.0.0
+package_id: turkey-behaviour-figures-light-figure-de_4da766
 package_status: audited
 generated_at: '2026-10-20'
 generated_by: demo-author
@@ -17,7 +17,7 @@ figures:
   caption_hash: a245711a459b070db1297dfe3822f338d3c7e0a4b2a489b5442be3480eeaa427
   files:
   - path: exports/fig-1.pdf
-    sha256: bea57265717ac2e52e544d2f48d8879116bff4397d8234a1f264b11c5d05e9a8
+    sha256: 421ed4c659aa1363c547b120351b24e0a1be30c52d8d0baf79e5e7ba1af9e43b
     role: main_pdf
   - path: data/previews/fig-1.png
     sha256: 9c686724311c8238b48c4669b2140d11a1c8e32317be553fc48c83275bc34622
@@ -29,13 +29,27 @@ figures:
     source_data_hash: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
     style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
     palette_registry_version: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+  correspondence:
+    source_assets:
+    - role: plotting_script
+      path: data/scripts/fig-1.py
+      sha256: 78f0a48f885d19192a8b8164e62a6fb2f3c5fee7774c9d6670a24e19832cc77f
+    - role: source_data
+      path: data/source-data/fig-1.csv
+      sha256: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
+    - role: style_bundle
+      path: data/styles/bundle.json
+      sha256: 00d811615487ffc73fdb5c65da8bd3027d1ad265ab303c923e369f8eefcf47b0
+    content_hashes:
+      alignment_panels: 05443f6a38c8b4a39260f8734bd51488d069771f733b466596c94d41e3053455
+    note: null
 - fig_id: fig-2
   kind: schematic
   line: schematic
   caption_hash: a3d95f89b2ffb95e272326d0d15397eac32f34389d81a31b2125ec91eb767f38
   files:
   - path: schematic/redraw/fig-2.vsdx
-    sha256: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+    sha256: b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a
     role: visio_source
   visio_verified: false
   visio_note: 文件级路线产物，未过 Visio 实机验证（拍板 D4：如实标注）
@@ -48,7 +62,7 @@ figures:
     reference_image_hash: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
     redraw_source:
       path: schematic/redraw/fig-2.vsdx
-      hash: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+      hash: b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a
   ai_disclosure:
     generation_model: *id001
     prompt_version: '1'
@@ -60,7 +74,29 @@ figures:
       version: '0.1'
       style_anchor: anchor-pipeline-flow
       prompt_version: '1'
+      reference_breakdown:
+        palette_hex:
+        - '#0072b2'
+        - '#d55e00'
+        - '#009e73'
+        - '#e69f00'
+        layout_flow: 左入右出两段流：左段自上而下（视频→跟踪），右段自上而下四级（统计量→预测→阈值→异常）
+        module_style: 矩形与圆角矩形模块交替，浅蓝描边、无填充
+        annotation_style: 模块内嵌一行英文标签，无面板角标
+        information_density: 中密度：六个模块两面板分置，箭头串联
+        special_elements: 跨面板长箭头连接跟踪与统计量两段
     visio_components:
     - component_id: VC-DEMO-SEED-ARROW
       version: '0.1'
     data_gallery: null
+  correspondence:
+    source_assets:
+    - role: redraw_manifest
+      path: schematic/redraw/fig-2.manifest.json
+      sha256: 21be5c9d194f1aa36203c757a63a77646c96e01c2ed3095217d2eeea8b5f2fbc
+    - role: reference_image
+      path: null
+      sha256: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
+    content_hashes:
+      extracted_shapes: 360c7512a2905534d4d2db630dd9869c447a653d8782e5410601a897c15e1fcd
+    note: null

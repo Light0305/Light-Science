@@ -1,7 +1,15 @@
-# light-figure SKILL（v1.0）
+---
+name: light-figure
+description: Use when 需要为稿件生产可交付的图表：生成数据图、为方法与机制图做提示词与 Visio 原生重绘，或过图审计门交付图包时。
+version: "1.1"
+author: light-figure contributors
+license: MIT
+---
+
+# light-figure SKILL（v1.1）
 
 > 定位：把 Write 稿件包的图表占位变成可交付的图。核心原则——**登记文件是权威源**：每张图的合同、后端、提示词、重绘清单、provenance、审计产物全部先登记后使用；交付时只产 `delivery.yaml` 供 Write 回填，Figure 不直接改 Write 的清单。
-> 设计依据：`07-figure/REDESIGN-DRAFT.md`（含用户拍板 D1–D7，文末附录）、`07-figure/LEARNING.md`（16 条硬约束，对应表见 §15）。实现范围：图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→重绘 manifest 与文件级 .vsdx 构建）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：账行逐行复验 + 编号冻结配合）。
+> 设计依据：`07-figure/REDESIGN-DRAFT.md`（含用户拍板 D1–D7，文末附录）、`07-figure/LEARNING.md`（16 条硬约束，对应表见 §15）。实现范围：图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→重绘 manifest 与文件级 .vsdx 构建）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：账行逐行复验 + 编号冻结配合）。v1.1 增补（第二轮拍板，FIG-D02–D11）：PowerPoint 文件层生产路线（与 Visio 文件层同级、合同字段分流）、manifest 三件（User.* 语义 ID 钉扎 / renderer-effective-fields 生效字段对账 / arrow_plan 箭头计划 + round_noop 无效轮次门）、合同调色板决定字段、图库参考图六维拆解、交付前本地复核环、Illustrator 精修路线（SVG 桥）、交付 correspondence 对应件清单、工具层执行规程（§16）。
 
 ---
 
@@ -16,7 +24,8 @@
 | `provenance.yaml` | 一本账：每图一条（§9），随图合同开立，哈希钉住 |
 | `data/` | 数据图线：`scripts/`（绘图脚本，与图一一对应）、`source-data/`（源数据或指针+哈希）、`previews/`（预览渲染）、`styles/`（样式编译产物：`bundle.json` + `light.mplstyle` + `theme.R`） |
 | `schematic/` | 方法图线：`prompts/`（提示词产物，§7；改版旧版存 `prompts/archive/`）、`reference/`（用户参考图，入包即登记哈希）、`redraw/`（重绘清单 +.vsdx 源，§8） |
-| `audit/` | 审计产物：`<fig_id>.audit.json`（七门判决，绑定交付物哈希，产物变更即 STALE 必重跑）+ `<fig_id>.alignment-input.json`（produce 落的 plot-area 量测清单） |
+| `audit/` | 审计产物：`<fig_id>.audit.json`（七门判决，绑定交付物哈希，产物变更即 STALE 必重跑）+ `<fig_id>.alignment-input.json`（produce 落的 plot-area 量测清单）+ `<fig_id>.recheck.json`（交付前本地复核记录，v1.1，§10） |
+| `schematic/redraw/`（续） | PowerPoint 文件层：`<fig_id>.pptx` + `<fig_id>.pptx-manifest.json`（后端为 powerpoint 时，§16.3）；Illustrator 精修入口 SVG 放 `schematic/refine/`（§16.4） |
 | `exports/` | 交付物（数据图最终 PDF）+ `delivery.yaml`（交付清单，§11） |
 | `FIGURE_REPORT.md` | `report` 生成的权威汇总，手工区（MANUAL 标记之间）刷新不覆盖 |
 
@@ -37,8 +46,8 @@ intake → contracted → produced → audited → delivered
 
 | 段 | 入口门（现行落点） |
 |---|---|
-| contracted | 承接快照齐全且哈希对齐；目标刊图形合同已登记；AI 政策快照在有效期内（schematic 线）；每图合同五点齐；数据图后端已按解析顺序决定并落盘；方法图已过配色确认门 |
-| produced | 产物齐备性深门：数据图——脚本 + 源数据 + 预览齐备、源级预检全过（样式哈希绑定/禁用色标/轴口径登记）、账面哈希与实物相符；方法图——提示词产物落盘、参考图入包登记且验收三项落字、重绘 manifest 落字且成品反抽对账无未登记差集、provenance 账行齐（提示词版本/生成模型/逐标签核对） |
+| contracted | 承接快照齐全且哈希对齐；目标刊图形合同已登记；AI 政策快照在有效期内（schematic 线）；每图合同五点齐；数据图后端已按解析顺序决定并落盘；方法图已过配色确认门；**每图调色板决定已落字**（合同 `palette_decision`：来源 + 依据 + 确认人/时点，v1.1） |
+| produced | 产物齐备性深门：数据图——脚本 + 源数据 + 预览齐备、源级预检全过（样式哈希绑定/禁用色标/轴口径登记）、账面哈希与实物相符、实际用色与调色板决定一致并落 `palette_decision_record`；方法图——提示词产物落盘、参考图入包登记且验收三项落字、重绘 manifest 落字且成品反抽对账无未登记差集（后端按合同 `schematic_backend` 分流：visio → .vsdx / powerpoint → .pptx，文件层证据级如实标注）、provenance 账行齐（提示词版本/生成模型/逐标签核对） |
 | audited | 审计门按线全跑且审计记录绑定当前交付物哈希（FRESH）；无 FIX_BEFORE_DELIVERY、无 NOT_AUDITABLE；REVIEW_REQUIRED 逐门有处置理由落字（`audit note`）。过门时逐图行落 `audit_final = pass` |
 | delivered | `delivery.yaml` 在场且为现行版（字段与 Write 回填一一对应，§11）；编号已冻结；逐图交付行主文件哈希与图注哈希与现状一致；交付前账行逐行复验全过（账面哈希按实物重算）；逐图审计 FRESH |
 
@@ -72,21 +81,26 @@ intake → contracted → produced → audited → delivered
 
 ## §7 方法图线：提示词与政策（F3/F4，约束 6/7/8/9，拍板 D1）
 
-1. **配色确认门先行**：生成任何提示词之前先定角色色板（预设选定或用户指定），落合同 `palette_confirmation`（确认人 + 时点）；未定不许出提示词。色值按元素角色登记，提示词只引角色名不写散色值。
-2. **提示词是结构化产物**（已实现：`prompt build` 生成 `schematic/prompts/<fig_id>.md`）：YAML 文件头登记（prompt_id、version、图库三元组引用 {条目 id + 版本、风格锚、绑定提示词版本}、风格规则 {id = 风格锚、版本}、角色色板指针、配色确认记录、政策快照指针）+ 正文六段——**全局 / 分区 / 全局标注 / 风格规格 / 负面约束 / 政策段**（草案旧命名对应：风格锚入全局段与风格规格段、构图与元素清单入分区段逐面板、文字标注约束即全局标注段）。纪律：正文只引色板角色名、不落 hex 色值（生成后自检正文无 hex）；每个模块框必须有子内容、不许空白占位与「...」省略；**度量数字不许入图**（px/pt/% 类字面量严禁写进会进图的文本，只有语义数字可入图；生成前逐标签机械拦截）。改版 = version 递增 + 旧版存 `prompts/archive/<fig_id>.v<n>.md`；首版 version 取图库条目绑定的提示词版本。生成后回填账面 `prompt_version` 与政策快照指针。
+1. **配色确认门先行**：生成任何提示词之前先定角色色板（预设选定或用户指定），落合同 `palette_confirmation`（确认人 + 时点）；未定不许出提示词。色值按元素角色登记，提示词只引角色名不写散色值。**v1.1 起配色决定升格为合同正式字段** `palette_decision`（两线通用）：`source` 三值词表（journal_contract 沿用期刊合同登记色板 / gallery_anchor 源自图库条目锚点 / user_specified 用户指定）+ `basis` 依据落字（journal_contract 时须点名色板条目 id 与版本）+ `confirmation{confirmed_by, confirmed_at}`；缺失 = contracted 门拦下点名，来源不在词表或无依据 = validate 报错。`palette_confirmation` 保留为方法图线的确认收据（与 palette_decision.confirmation 同源落字），不再单独充当决定本体。审计合同门与交付前复核（§10）核对实际用色与决定一致，数据图 produce 把决定快照落账面 `palette_decision_record`。
+2. **提示词是结构化产物**（已实现：`prompt build` 生成 `schematic/prompts/<fig_id>.md`）：YAML 文件头登记（prompt_id、version、图库三元组引用 {条目 id + 版本、风格锚、绑定提示词版本}、风格规则 {id = 风格锚、版本}、角色色板指针、配色确认记录、政策快照指针）+ 正文六段——**全局 / 分区 / 全局标注 / 风格规格 / 负面约束 / 政策段**（草案旧命名对应：风格锚入全局段与风格规格段、构图与元素清单入分区段逐面板、文字标注约束即全局标注段）。纪律：正文只引色板角色名、不落 hex 色值（生成后自检正文无 hex）；每个模块框必须有子内容、不许空白占位与「...」省略；**度量数字不许入图**（px/pt/% 类字面量严禁写进会进图的文本，只有语义数字可入图；生成前逐标签机械拦截）。改版 = version 递增 + 旧版存 `prompts/archive/<fig_id>.v<n>.md`；首版 version 取图库条目绑定的提示词版本。生成后回填账面 `prompt_version` 与政策快照指针。**参考图六维拆解（v1.1，FIG-D09）**：合同引用图库条目时，`sister_library_refs.method_gallery.reference_breakdown` 必须落**六维结构化拆解**——`palette_hex`（参考图主色实测 hex 列表）/ `layout_flow`（布局流向）/ `module_style`（模块形态）/ `annotation_style`（标注字体风格）/ `information_density`（信息密度）/ `special_elements`（特殊元素）；缺任一维 validate 报错点名。拆解是提示词风格段的事实源：`prompt build` 把五个文字维写进风格规格段，`palette_hex` **只以指针出现、绝不进正文**（沿用正文无 hex 纪律）——色从角色色板来，拆解只供构图/形态/密度判断。
 3. **政策口径（拍板 D1：「一条硬拦 + 一本账 + 一次逐刊核对」）**：
 - 立场（用户拍板）：Visio 人工原生重绘成品不算 AI 生图——成品无任何 AI 生成像素、每个形状都是人放的原生对象。**不设把重绘图当 AI 图的阻断门**。政策文本依据见 LEARNING 约束 8（受禁对象只限 AI 直接产出的图像物件；无条款及于构思/参考；具体情形属文本沉默，残余风险为编辑裁量）。
 - **一条硬拦**（全线唯一政策硬拦，机械执行）：AI 参考图本体文件不得进入交付/投稿包（已实现：审计 `policy_block` 门按 SHA-256 比对 provenance 账面参考图哈希，交付集 = `exports/` 全部文件 + 重绘成品，任一同哈希即 FAIL 点名文件；重绘成品哈希天然不同、不拦。合同 `policy_check.reference_not_in_delivery` 为自检落字，落 false 即 validate 报错）。
 - **一本账**：provenance 逐图留痕（§9），是披露生成的唯一事实源。
 - **一次逐刊核对**：投稿前经 Write 模板记录的 AI 政策组逐刊核对（字段 + `verified_at`，过期自动失效）；Science 系在核对环节标红提示「投稿前向编辑部书面问询」；目标刊从严或编辑答复否定时，该刊切**无 AI 参考降级路径**（合同 `policy_check.degradation_path = no_ai_reference`：方法文本 + 组件库按 spec 先行拼装，跳过 GPT Image 段）——路线不断，只换入口。
+- **政策依据三问（口径修订条文，v1.1 落字；学习期定版，依据 `07-figure/LEARNING.md` 约束 8）**：本立场不是「我们觉得没问题」，而是逐条核对政策文本后的结论——(1) 各刊 AI 政策的受禁对象只限 **AI 直接产出的图像物件**（生成/编辑出的图像本身），Visio/PPT 原生重绘成品不含任何 AI 生成像素与 AI 图像对象，不在受禁集合内；(2) **没有任何条款及于构思或参考环节**——用 AI 图作构图/风格参考再由人重绘，政策文本未设禁止；(3) 对「AI 参考 + 人工原生重绘」这一具体情形政策文本**属沉默**，因此残余风险不在文本层而在**编辑裁量**（个别编辑部可能从严解释，其中 Science 系最严）——这正是逐刊核对与 Science 书面问询提示存在的原因，而不是给重绘成品加阻断门的理由。**逐刊核查依据纪律**：核对时以目标刊**当期**作者指南/AI 政策页原文为准（政策文本会移动改版，学习期摘录只作定位线索、不作当期依据），核对记录落指南页面引用 + 核查日期（`verified_at`），过期即失效、须按当期原文重核；披露文本由 provenance 账生成（§9/§11），不凭记忆手写。
 4. **科学复核独立于政策**（约束 9）：披露 ≠ 免责。参考图验收与重绘两处各执行一次复核清单：逐个标签逐字对原文核对、每个结构对领域事实核对、公式/分子式/数值算对。**照描而不核事实是红项**（Frontiers「AI 大鼠图」撤稿案：作者已披露，败在三道关无人核事实）。
 
 ## §8 Visio 重绘（F5，约束 11/12，拍板 D4）
 
 
 
-1. **重绘清单是单一真相源**（`schematic/redraw/<fig_id>.manifest.json`）：面板四角标定（全局像素框 + 面板局部坐标系）动手前落字，对象清单（稳定语义 ID、类型、局部坐标框 0–1、样式 token、逐字文本、连接语义、z 序）足以不读其他文件重建本图；不在清单里的东西按漏画处理；要加形状先改清单。成品可反抽形状清单与正向清单闭环对账。状态只经工具推进、不许手写。命令面（已实现）：`redraw init`（按合同面板 + 已登记参考图生骨架，标定待补）→ 补齐标定后 `redraw install`（全量契约校验 + 与账面参考图哈希对表）→ `redraw build` → `redraw extract`（反抽对账）。坐标变换只在一处实现（面板局部 0–1 → 全局像素 → 英寸、Y 翻转），校验与构建共用。
-2. **路线三格分工**：COM 原生重建（主路线，有 Windows + Visio：两级坐标标定、局部坐标越界即断言、参考图只作临时锁定描图层且交付前移除、.vsdx 为唯一真相源、同源导出；PPTX 导出物是渲染幻灯片不是原生形状，交付说明须标注。v1.0 只立规程与接口——`redraw build` 对 route=com 如实落 gap，不冒充执行）/ 文件级从零构建（正式第二路线，**已实现**：手写 OPC 从零拼 .vsdx——内容类型/各级 rels/文档属性/pages/page1，Shape 内 Cell 必在 Section/Text 之前，几何走多段线近似，zip 条目时间戳固定保确定性；位图残留以 ForeignData 形状嵌入并绑 media rel，未在清单绑定的位图形状构建期报错）/ 文件级后处理（vsdx 库做批量改字改色与形状抽取，**没有从零绘制 API，不承担重建**）。
+1. **重绘清单是单一真相源**（`schematic/redraw/<fig_id>.manifest.json`，PPT 线同构为 `<fig_id>.pptx-manifest.json`）：面板四角标定（全局像素框 + 面板局部坐标系）动手前落字，对象清单（稳定语义 ID、类型、局部坐标框 0–1、样式 token、逐字文本、连接语义、z 序）足以不读其他文件重建本图；不在清单里的东西按漏画处理；要加形状先改清单。成品可反抽形状清单与正向清单闭环对账。状态只经工具推进、不许手写。命令面（已实现）：`redraw init`（按合同面板 + 已登记参考图生骨架，标定待补）→ 补齐标定后 `redraw install`（全量契约校验 + 与账面参考图哈希对表）→ `redraw build` → `redraw extract`（反抽对账）；PPT 线同构命令面 `pptx init/install/build/extract`（§16.3）。坐标变换只在一处实现（面板局部 0–1 → 全局像素 → 英寸、Y 翻转），校验与构建共用。
+1a. **User.\* 语义 ID 钉扎（v1.1，FIG-D04）**：构建出的每个图对象必须把语义 ID 写进宿主原生字段——.vsdx 形状写 ShapeSheet 的 User 段（`User.SemanticId`，连接形状另写 `User.ArrowPlan/ConnectFrom/ConnectTo`）；.pptx 对象写形状名 + `cNvPr descr` 标记（`light-figure:user-id=<id>`）双写。`extract` 回读语义 ID 与清单逐个对账，缺失/被改即对账失败点名——语义 ID 不是清单里的自说自话，是钉进成品、可被第三方工具读出的事实。
+1b. **renderer-effective-fields 生效字段对账（v1.1，FIG-D05）**：manifest 可落 `renderer_effective_fields` 声明渲染器实际消费的字段集（权威全集见工具 `schema.RENDERER_CONSUMED_FIELDS`）；校验逐项比对——**声明生效但渲染不消费**的字段点名（写了等于没写）、**形状用了但未声明生效**的字段点名、渲染词汇表之外的字段点名。没落声明时按形状实际用到的字段机械推导，不许靠声明掩盖未生效字段。
+1c. **arrow_plan 箭头计划 + round_noop 门（v1.1，FIG-D06）**：manifest 升版（version ≥ 1.1）或落了 `arrow_plan` 键即进严格模式：箭头先行登记成计划（`arrow_plan_id` + from/to + 事实依据），每个 connect 必须绑定计划 id 且端点与计划一致，计划登记了却没有形状实现的箭头同样点名；v1.0 格式 manifest 不追溯（宽容读、产出端升版）。每次 build 把内容投影哈希（形状/面板/残留/画布/箭头计划，不含时间戳与构建元数据）追加进 manifest 的 `rounds` 轮次账；**内容零变化的重复 build 被 round_noop 门拒绝并点名**——metadata-only 的往返不许冒充新一轮构建。
+2. **路线三格分工**：COM 原生重建（主路线，有 Windows + Visio：两级坐标标定、局部坐标越界即断言、参考图只作临时锁定描图层且交付前移除、.vsdx 为唯一真相源、同源导出；PPTX 导出物是渲染幻灯片不是原生形状，交付说明须标注。v1.0 只立规程与接口——`redraw build` 对 route=com 如实落 gap，不冒充执行）/ 文件级从零构建（正式第二路线，**已实现**：手写 OPC 从零拼 .vsdx——内容类型/各级 rels/文档属性/pages/page1，Shape 内 Cell 必在 Section/Text 之前，几何走多段线近似，zip 条目时间戳固定保确定性；位图残留以 ForeignData 形状嵌入并绑 media rel，未在清单绑定的位图形状构建期报错）/ 文件级后处理（vsdx 库做批量改字改色与形状抽取，**没有从零绘制 API，不承担重建**）。COM 路线的连接/枚举/坐标/保存校验细则见 §16.2，后处理工具的真实身份与许可见 §16.5 附录。
+2a. **PowerPoint 文件层（v1.1 正式路线，FIG-D02）**：方法图后端由合同字段 `schematic_backend: visio | powerpoint` 逐图分流（缺省 visio；数据图不许落此字段）。powerpoint 线以 python-pptx 文件层从 manifest 生成原生形状 .pptx（幻灯片尺寸 = 图尺寸、一页一图、形状全原生），与 Visio 文件层同级：同样的 manifest 契约、同样的语义 ID 钉扎与箭头计划、同样的原生性审计（OPC 口径）。文件层产物恒标 `powerpoint_verified: false` + 证据级 `file_layer`——文件层结构核验 ≠ PowerPoint 实机验证，实机冒烟（Windows + PowerPoint 打开/导出比对）属环境依赖项，规程见 §16.3，无实机时如实登记 gap、不许声称验过。PowerPoint COM 路线只立规程（§16.3），不冒充执行。
 3. **无 Visio 环境交付口径**：文件级路线产出的.vsdx 是正式交付物，但交付清单中该图须带 `visio_verified: false` 与「未过 Visio 实机验证」注记（如实落字，不许声称通过 Visio 验证）。
 4. **位图残留预先声明**：只许照片/视频帧/显微图/热图/复杂纹理/极密证据条六类、且为精确裁剪局部；未登记者不许以位图形态出现在成品中。原生性靠机械审计验（包内 media 清单 + 形状数 +「1 形状 1 位图」警告），不靠声明。
 
@@ -103,9 +117,11 @@ intake → contracted → produced → audited → delivered
 
 
 
-审计对象一律是**最终产物文件**（数据图 = `exports/<fig_id>.pdf`，方法图 = `schematic/redraw/<fig_id>.vsdx`），产物哈希写入每份审计 JSON，产物变更后审计即 STALE 必重跑。七门：对齐门（plot-area 量测 vs 可比组，豁免须登记理由，禁止调大容差掩盖例外）/ 碰撞门（FAIL 三类阻断、WARN 记录理由）/ 字形门（内容流 Tf 实测 ≥ 地板）/ 合同门（尺寸/格式白名单/可编辑文本未转曲/色板合规）/ 原生性门（方法图，§8.4)/ 诚实门（数据图，拍板 D6 分层硬度：反转轴检出阻断；截断轴声明对照——未声明阻断、已声明放行留记录；宽高比与面积编码先登记 + 警告）/ 政策硬拦（§7.3，参考图本体不入交付集）。NOT_AUDITABLE 不许声称审计通过。
+审计对象一律是**最终产物文件**（数据图 = `exports/<fig_id>.pdf`，方法图 = `schematic/redraw/<fig_id>.vsdx`，powerpoint 后端 = 同目录 `<fig_id>.pptx`），产物哈希写入每份审计 JSON，产物变更后审计即 STALE 必重跑。PPTX 的原生性门按 OPC 口径执行：未登记的图片对象、整页单图、对象命名与清单不一致任一即 FAIL（登记的残留图片对象按清单核对、带 media 哈希）。合同门对 powerpoint 后端核对 pptx 构建记录在场与 `powerpoint_verified: false` 如实标注，落 true 即以「虚假声称实机验证」点名拦截。七门：对齐门（plot-area 量测 vs 可比组，豁免须登记理由，禁止调大容差掩盖例外）/ 碰撞门（FAIL 三类阻断、WARN 记录理由）/ 字形门（内容流 Tf 实测 ≥ 地板）/ 合同门（尺寸/格式白名单/可编辑文本未转曲/色板合规）/ 原生性门（方法图，§8.4)/ 诚实门（数据图，拍板 D6 分层硬度：反转轴检出阻断；截断轴声明对照——未声明阻断、已声明放行留记录；宽高比与面积编码先登记 + 警告）/ 政策硬拦（§7.3，参考图本体不入交付集）。NOT_AUDITABLE 不许声称审计通过。
 
 **运行法（已实现）**：`audit run [--fig <id>]` 按线全跑并落 `audit/<fig_id>.audit.json`（绑定 `artifact_sha256`、容差快照、工具版本）；`audit-status` 逐图报 FRESH / STALE / MISSING / NO_ARTIFACT。判决四态：PASS / REVIEW_REQUIRED / FIX_BEFORE_DELIVERY / NOT_AUDITABLE（门不适用记 `applicable: false`，不占判决）。实测口径：对齐/碰撞/字形三门在最终 PDF 上真量测（PyMuPDF 抽文字行框/描边/填充/图像与内容流 Tf 算符），量测清单由 produce 同源生成、清单哈希与产物不符即 NOT_AUDITABLE；诚实门消费脚本头登记（判据在登记层，缺登记落 REVIEW 不许默认诚实）；原生性门解 .vsdx 包做 media 清单 + 形状计数（整图嵌入、未登记位图、登记残留缺失、描图层未移除均 FAIL）。**STALE 处置**：产物任何变更后先重跑 `audit run` 再谈过门，STALE 状态下不许落处置理由。**REVIEW 处置**：`audit note <fig> --gate <门> --reason <理由>` 逐门落字（仅 FRESH 时许落，同哈希重跑保留既有处置）；audited 门逐门核对，无落字即点名拦下。
+
+**交付前本地复核环（v1.1，FIG-D11）**：`recheck [--fig <id>] [--panels a,b]` 在交付前对最终产物做一轮**纯本地机械复核**，不依赖任何外部服务：数据图查整页尺寸 vs 期刊合同栏宽与最大高、字体真嵌入（查 FontDescriptor 的 FontFile 键，不许用会误报的抽取缓冲判据）、矢量描边/填充实际用色 vs 调色板决定（中性色豁免）、位图有效分辨率 vs 合同 dpi 地板（无位图时抽查预览 PNG ≥300 dpi）；方法图查页/幻灯片尺寸 vs manifest 画布标定、User 语义 ID 齐备、包内 media vs 残留登记、实际用色 vs 角色色板。结论落 `audit/<fig_id>.recheck.json` 并**如实声明量测口径**（文件层结构量测，不是渲染量测，不冒充像素级一致性）；`--panels` 为局部复检（只查指定面板的用色/ID 并在记录 scope 里落字，不冒充全图复核）。复核只产 findings、不改七门判决——发现问题回对应生产段修，不许在复核层放行。
 
 ## §11 与 Write 的接口（交付回填）
 
@@ -118,6 +134,7 @@ Figure **不直接改** Write 的 `figures_manifest.yaml`，交付只产 `export
 | 图注哈希对账 | 图注哈希（承接快照值，与现状逐图比对一致才许交付） |
 | 图件 provenance | 数据图：脚本/源数据/样式构建三哈希 + 运行时版本；方法图：账行指针 + 提示词版本/生成模型/参考图哈希 + 图库三元组与组件许可汇总 |
 | AI 披露素材 | 方法图 `ai_disclosure` → Write use_log 对接字段（模型、提示词版本、重绘方式、参考图本体不在交付集标记） |
+| 对应件清单（v1.1，REV-D09） | 逐图 `correspondence`：源资产映射（路径 + SHA-256；参考图本体只给哈希、路径记 null 不进交付集）+ 内容级哈希（数据图 = 对齐量测面板组件哈希、方法图 = 反抽形状集哈希），供 Write/Review 按图追溯「这张交付图由哪些源资产、哪一版内容生成」 |
 
 **编号冻结配合（与 Write 冻结纪律同构）**：首次 deliver 与编号冻结同步发生（`figure.yaml` 落 `numbering_freeze{frozen, at, by}`）；冻结后任何交付物变更，`deliver` 一律拒绝，须先 `deliver --unfreeze --reason <理由>` 登记解冻（旧 `delivery.yaml` 标 superseded、解冻事实追加进 `numbering_changes[]` 只增不改），变更后重新审计、重新 deliver（version 递增、重新冻结）。delivered 后新增/删除图走变更登记并通知 Write 重对账（回流条目记 `figure.yaml` 的 `reflux[]`，只生成条目不越权改上游）。
 
@@ -150,6 +167,13 @@ Figure 消费的是三库的**登记表**（条目记录），不是仓内文件
 - [] `deliver` 已生成现行版 `exports/delivery.yaml`：交付前账行逐行复验全过、逐图主文件哈希与图注哈希与现状一致
 - [] 编号已冻结（`numbering_freeze` 落字）；冻结后的变更均有解冻登记与理由、旧 delivery.yaml 标 superseded
 - [] delivery.yaml 中方法图的 `visio_verified` 标记与构建路线相符（文件级构建恒为 false 并带注记）
+- [] （v1.1）每图合同 `palette_decision` 已落字（来源词表合法 + 依据 + 确认人/时点）；数据图账面 `palette_decision_record` 在场
+- [] （v1.1）引用图库条目的图 `reference_breakdown` 六维齐备；提示词正文含五维文字、无 hex
+- [] （v1.1）manifest v1.1：arrow_plan 与 connect 逐条绑定、语义 ID 已钉进成品（extract 对账含 SemanticId 校验）、rounds 轮次账在场且无 noop 轮
+- [] （v1.1）powerpoint 后端的图：pptx manifest 对账 ok、交付行 `powerpoint_verified: false` + 注记在场
+- [] （v1.1）交付前 `recheck` 已跑且记录在场（全图或如实标注的局部 scope），findings 中的 fail 已回生产段修复
+- [] （v1.1）delivery.yaml 逐图 `correspondence` 在场：源资产哈希可按实物复算、内容级哈希与审计/反抽产物一致
+- [] （v1.1）计划走 Illustrator 精修的图：入口 SVG 过受限子集校验（`svg-check`）、合同 `illustrator_refinement.readback` 落字（对象数/文本逐字/锚点/preflight 五项）
 
 ## §14 失败模式（v1.0）
 
@@ -170,6 +194,11 @@ Figure 消费的是三库的**登记表**（条目记录），不是仓内文件
 | F13 | 交付前账行复验哈希不符 | `deliver` 拒交付并点名分量；正当变更走对应生产命令回填账面（produce / redraw build / provenance set），不明变更按 F12 同纪律核查来源 |
 | F14 | 编号冻结后改图 | `deliver` 拒绝：先 `deliver --unfreeze --reason` 登记解冻，改图后重新审计、重新交付（version 递增、重新冻结） |
 | F15 | delivery.yaml 已被取代或与产物漂移 | delivered 门点名拦下；重新 `deliver` 生成现行版后再 advance |
+| F16 | manifest 声明了渲染不生效的字段（declaration≠consumption） | effective-fields 对账点名字段：删声明或改形状让字段真生效，不许改声明造假 |
+| F17 | 无变化往返被 round_noop 门拒绝 | 这是预期拦截：确有修改先改 manifest 内容再 build；只想刷新元数据走对应登记命令，不许绕门 |
+| F18 | 成品语义 ID 被改/丢失（User 段被其他工具洗掉） | extract 对账点名：回 manifest 重建成品；第三方工具处理过 .vsdx 后必须重跑 extract 对账 |
+| F19 | 合同缺调色板决定 / 实际用色与决定不符 | contracted 门/合同门点名：补落 palette_decision（来源+依据+确认）；用色不符回样式编译或脚本改色，不许改决定追认既成事实而不留痕（决定变更走合同修订） |
+| F20 | 本地复核查出字体未嵌入/位图分辨率不足 | 回 produce 段修（换嵌入字体、提位图 dpi 或改矢量）；复核层不放行、不改判决 |
 
 ## §15 LEARNING 16 条硬约束对应表
 
@@ -193,3 +222,68 @@ Figure 消费的是三库的**登记表**（条目记录），不是仓内文件
 | 14 | 导出合同硬数字（期刊侧） | §6.3 | `style.py` 按栏宽推导图尺寸 + contract 门对刊硬数字实测（89/183 mm 等） |
 | 15 | 数据诚实四项分层硬度 | §10 | `audit.py` honesty 门：反转/未声明截断阻断、宽高比与面积登记+警告 |
 | 16 | 姊妹仓登记纪律七项 | §12 | 合同/账面只引条目 ID + 版本 + 哈希；已发表图只登记出处 + 哈希不打包 |
+
+
+## §16 工具层执行规程（v1.1 新增，诊断 §2.2 工具层总规划落点）
+
+本节管「执行者怎么操作真实软件与文件层工具」，与 §4–§15 的图包规程分工：那边管登记与门，这边管手艺与工具纪律。规程形态参考 CLI-Anything 式 harness（trsdn/mcp-server-visio 等同类工具的公开形态），**纪律可迁移、生成法不迁移**——闭源软件（Visio/PowerPoint/Illustrator）没有可编程的从零生成内层，任何「一键生成原生图」的承诺都不许采信，路线只有 COM 驱动真软件与文件层从零构建两条。
+
+### §16.1 执行者五纪律（一切工具路线通用）
+
+1. **探针先行（probe-before-mutate）**：改任何真实产物前，先跑只读探测并落盘结果——软件路线先查进程/文档/页面/对象清单，文件层先读 manifest 与成品现状；探测结果与预期不符就停，不许带着错误的世界模型动手。
+2. **双通道输出（--json）**：每条工具命令同时给人话摘要与机器可读 JSON；后续步骤只消费 JSON 通道，不许从人话输出里猜状态。
+3. **真软件硬依赖、不降级冒充**：路线声明依赖某软件（如 COM 路线依赖 Visio）时，软件不在场就如实停摆并点名缺什么；不许用文件层产物、截图或其他软件的近似结果冒充该路线已执行。文件层路线本身是正式路线，但必须以自己的名义交付（`visio_verified: false` / `powerpoint_verified: false`），不许借真软件的名头。
+4. **E2E 真产物核验**：一条路线算「跑通」的判据是最终产物文件过审计（形状数/语义 ID/media 清单/尺寸逐项机械核对），不是命令返回成功、不是日志好看。核验对象永远是产物文件本体。
+5. **预览真实性**：预览图必须由最终产物渲染导出（同源），不许用另一条管线（如绘图库重画一张）冒充成品预览；无渲染环境时如实声明「无预览」，不许拿示意图顶替。
+
+配套收窄：执行面的工具白名单按图合同收窄（本合同没声明的路线/操作不许顺手执行）；每次变更如实汇报改了什么、没改什么，自动化卡死（COM 无响应、文件锁）时安全停机、保留现场、报告卡点，不许强杀后假装完成。
+
+### §16.2 Visio COM 规程细则（有 Windows + Visio 时的主路线）
+
+候选驱动形态以 trsdn/mcp-server-visio 类工具的公开接口为首选参考（进程外 COM 驱动 Visio.Application，分层 = 连接层/文档层/形状层/校验层），其能力分层按其 FEATURES.md 自述的 Validated / MVP 口径引用——**只许调用已验证层能力，MVP 层能力先在副本上试**；该工具自带的 Validation 输出是**证据材料**，不是本包的通过判决（判决只认 §10 审计门）。
+
+- **连接**：先探针——枚举已运行的 Visio 进程与打开的文档，能接管就不新开；新开实例要登记（进程/版本/文档路径落 provenance 修正日志）。连接失败按五纪律 3 停摆报告，不许转文件层冒充 COM 已跑。
+- **对象枚举与命名**：动手前全量枚举当前页形状（ID / NameU / 文本 / 类型）落盘，与 manifest 逐条对表；新建形状当场按 manifest 语义 ID 命名（NameU = 语义 ID），并把语义 ID 写进 ShapeSheet 的 User 段（`User.SemanticId`，连接形状加 `User.ArrowPlan/ConnectFrom/ConnectTo`，与文件层构建同口径，§8.1a）。枚举里出现 manifest 之外的形状先停下问清来源，不许顺手删。
+- **面板局部坐标助手**：一切落位走「面板局部坐标（0–1）→ 全局英寸」单一换算（与文件层共用变换，含 Y 翻转）；助手函数只接受局部坐标（RectRel/TextRel 形态），落位后立即断言全局框不越出面板框，越界即停、不许静默钳制。
+- **写入纪律**：写前备份（同目录时间戳副本）+ 另导出一份 base 副本供 diff；写后当场回读枚举复核（数量/命名/文本逐字），再走 `redraw extract` 对账。
+- **保存校验**：保存后重新打开成品复验（不信任保存返回值）；导出物（PDF/PNG）从 .vsdx 同源导出，.vsdx 始终是唯一真相源。
+- **后处理格**（不承担重建）：批量改字/改色/形状抽取走文件级后处理工具格——dave-howard/vsdx（BSD-3-Clause）及其 Jinja 模板变体、vsdxdiff 类比对工具；后处理改过的成品必须重跑 extract 对账与审计，处理记录落 provenance 修正日志。
+
+### §16.3 PowerPoint 路线规程（文件层已实现 / COM 只立规程）
+
+- **文件层（已实现，`pptx` 命令族）**：与 Visio 文件层同构——manifest 驱动、幻灯片尺寸 = 图尺寸、一页一图、形状全原生（矩形/圆角矩形/文本/连接线箭头/登记残留图片）；对象语义 ID 双写（形状名 + cNvPr descr 标记）；构建后反抽对账；产物恒标 `powerpoint_verified: false`、证据级 `file_layer`。适用定位：需要 PPTX 交付形态（汇报/可编辑分发）或无 Visio 环境时的原生形状路线；**不替代** §8 的 Visio 主路线在投稿图上的地位，投稿主交付仍按合同与期刊格式白名单走。
+- **COM 路线（只立规程）**：有 Windows + PowerPoint 时可由 COM 驱动真软件打开文件层产物做实机冒烟——打开无报错、逐形状枚举与 manifest 对账、导出 PDF/PNG 与文件层量测比对（尺寸/形状数/文本逐字）；冒烟通过后才许把该图的验证注记升格为「已过 PowerPoint 实机冒烟（日期/版本落字）」，`powerpoint_verified` 字段口径不变（它指路线级验证，非单图冒烟）。本包当前环境无 Windows/Office，COM 冒烟属环境依赖项：规程与文件层落地即算本项完成，实机部分登记为 gap，不许假称验过。
+- **幻灯片化交付注意**：把成图放进汇报幻灯片是另一回事（标题层级/对比度/16:9 版式），属使用建议不是质量证据；交付 .pptx 本体时保持一页一图、尺寸 = 图尺寸，不许为了「像幻灯片」改图内容。
+
+### §16.4 Illustrator 精修路线（印前精修，非第三条生产路线）
+
+定位写死：Illustrator 只做**精修/印前期**（字体轮廓与字距微调、专色与 CMYK 终检、PDF/X 交付），不从零生产方法图，不与 Visio/PPT 争生产路线。
+
+- **入口 = SVG 桥**：精修入口只收本包矢量产物导出的 SVG，且必须先过**受限子集校验**（`svg-check` 命令）：只许纯矢量基元（path/rect/circle/ellipse/line/polyline/polygon/text/g/use/defs）；image/script/filter/style/foreignObject 与一切外部 href 引用一律拒绝点名——防参考图位图与脚本混入精修链。校验同时抽出 SVG 内全部文本成清单：**SVG 导入 Illustrator 会静默丢字形/改字体**，文本清单是精修后逐字回读核对的基准，丢字以清单对账抓，不靠眼看。
+- **合同登记**：计划精修的图在合同落 `illustrator_refinement` 段（planned / entry_svg_ref / status / readback）；status 落 done 前 readback 必须齐：对象数、文本逐字已核（对 SVG 文本清单）、锚点框已核、印前五项（rgb_mixed 混色空间 / broken_links 断链 / low_res_images 低分辨率位图 / white_overprint 白色叠印 / pdfx 规格）逐项落字，任一未清不许标 done。
+- **回退**：无 Illustrator 宿主时回退 Visio/SVG 原路线交付并如实标注「未走 Illustrator 精修」，不许拿其他软件的近似处理冒充精修已做。实机精修属环境依赖项（本包环境无 Adobe 软件），规程与数据形状（合同段 + 校验器）落地即算本项完成，实机部分登记 gap。
+
+### §16.5 附录：拍板 D4 修订条文与未采纳清单
+
+**D4 修订条文**（第二轮拍板后定版，取代草案 D4 的「双路线」表述）：
+
+> 方法图原生重绘的后端为三格：(一) Visio——COM 原生重建（主路线，§16.2 规程）+ 文件级从零构建 .vsdx（正式第二路线，已实现）；(二) PowerPoint——文件层从 python-pptx 生成原生形状 .pptx（正式路线，v1.1 落地，§16.3）+ COM 实机冒烟规程（只立规程）；(三) Illustrator——精修/印前路线（SVG 桥入口，§16.4），不承担从零生产。三格共用同一 manifest 契约、语义 ID 钉扎与原生性审计口径；一切文件层产物如实标注未过实机验证（visio_verified / powerpoint_verified 恒 false），不许以文件层证据冒充实机证据。
+
+**未采纳清单**（学习期评估过、明确不做，防后人重提）：CLI-Anything 式「为闭源软件自动生成 CLI harness」的方法论本体（无可编程内层，不迁移；只借 harness 形态与执行纪律）；以截图/渲染图冒充原生对象核验；把第三方工具的自检输出当本包审计判决；在 PPT 文件层引入主题母版/占位符体系（一页一图、空白版式写死）；SVG 全集（滤镜/样式/外链）进精修链。
+
+### §16.6 v1.1 诊断条目对应表
+
+| 条目 | 内容 | 落点 |
+|---|---|---|
+| FIG-D02 | PPT 文件层全链 + COM 规程 + powerpoint_verified 口径 | `pptxbuild.py` + §8.2a/§16.3 |
+| FIG-D03 | Illustrator 精修路线 + SVG 桥 + DOM 回读数据形状 | `svgbridge.py` + 合同段校验 + §16.4 |
+| FIG-D04 | User.* 语义 ID 写入图对象、审计回读核对 | `redraw.py`/`pptxbuild.py` User 段与 descr 双写 + extract 对账 |
+| FIG-D05 | renderer-effective-fields 生效字段清单与对账 | manifest 契约校验（`schema.RENDERER_CONSUMED_FIELDS`） |
+| FIG-D06 | arrow_plan 先行登记 + 导出回读核对 | manifest 严格模式校验 + extract 端点比对 |
+| FIG-D07 | round_noop 无效轮次门 | build 轮次账 `rounds` + 内容投影哈希 |
+| FIG-D08 | 调色板决定入合同、审计核对实际用色 | 合同 `palette_decision` + contracted 门 + 合同门 + produce 落账 |
+| FIG-D09 | 参考图六维拆解入图包、提示词消费 | 合同 `reference_breakdown` + `prompt.py` 风格段 |
+| FIG-D10 | 执行者五纪律 + 工具面收窄 | §16.1 |
+| FIG-D11 | 交付前本地复核环（纯本地机械复核） | `recheck.py` + `recheck` 命令 + §10 |
+| D4 附则 | COM 规程细则（连接/枚举/命名/保存校验） | §16.2 |
+| REV-D09 | 交付对应件清单（源资产 → 交付物 + 内容级哈希） | `delivery.yaml` 逐图 `correspondence` + §11 |

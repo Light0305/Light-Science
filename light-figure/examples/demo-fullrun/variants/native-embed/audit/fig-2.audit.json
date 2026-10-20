@@ -3,9 +3,9 @@
   "fig_id": "fig-2",
   "line": "schematic",
   "artifact": "schematic/redraw/fig-2.vsdx",
-  "artifact_sha256": "0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a",
-  "audited_at": "2026-10-20T10:52:56+00:00",
-  "tool_version": "0.2.0",
+  "artifact_sha256": "f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013",
+  "audited_at": "2026-10-20T19:26:48+00:00",
+  "tool_version": "1.0.0",
   "tolerances": {
     "alignment_pt": 1.5,
     "collision_inset_pt": 0.6,

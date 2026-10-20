@@ -7,8 +7,9 @@
   advance  按状态机验门推进状态（不过门逐条报错，不许静默放行）
   dedup    离线去重：疑似重复对 + 去重率报告（只报告，不删卡）
   list     列出项目内全部想法卡与状态
-  novelty prepare  facet 查新取证：逐面构式 → 四源实查 → 证据包落盘
+  novelty prepare  facet 查新取证：逐面构式 → 七源实查 → 证据包落盘
   novelty verdict  判定落卡：跨模型判定 + 逐面举证写入查新证据区
+  novelty cases    查新判例集：列构成 / 补种种子 / 导出判定材料包摘录
   chain    演进链取材：按种子 DOI 拉引文邻居落盘成链素材（三期）
   duel     两两对决记录：结果追加进双方卡 aux.pairwise_record（三期）
   rank     对决汇总：胜率矩阵 + Elo 风格参考分（辅助信号，三期）
@@ -23,6 +24,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import casebook as casebook_mod
 from . import chain as chain_mod
 from . import dedup as dedup_mod
 from . import duel as duel_mod
@@ -158,9 +160,13 @@ def cmd_novelty_prepare(args) -> int:
         card = load_card(root, args.idea_id)
     except FileNotFoundError as e:
         return _fail(str(e))
+    sources = novelty_mod.SOURCES
+    if args.sources:
+        sources = tuple(s.strip() for s in args.sources.split(",")
+                        if s.strip())
     try:
         summary = novelty_mod.prepare(
-            root, card, per_query=args.per_query,
+            root, card, per_query=args.per_query, sources=sources,
             interleave_sleep=args.sleep)
     except novelty_mod.NoveltyError as e:
         print(f"查新取证失败：{args.idea_id}（{len(e.errors)} 条）：")
@@ -174,7 +180,7 @@ def cmd_novelty_prepare(args) -> int:
           f"（evidence.jsonl / queries.json / pool_report.md）")
     print(f"  查询式：{summary['query_count']} 条（逐面短语式+关键词式 + 整想法召回）")
     print(f"  证据池：{summary['pool_size']} 条（原始命中 {summary['raw_source_hits']}，去重后）")
-    for source in novelty_mod.SOURCES:
+    for source in (s for s in novelty_mod.SOURCES if s in st):
         s = st[source]
         state = "可用" if s["ok"] else "不可用"
         print(f"  - {novelty_mod.SOURCE_LABELS[source]}：{state}"
@@ -184,10 +190,11 @@ def cmd_novelty_prepare(args) -> int:
         for spot in summary["blind_spots"]:
             print(f"    · {spot}")
     if not summary["any_source_ok"]:
-        print("错误：四源全部不可用，证据池为空——本次查新未成立，"
+        print("错误：全部源不可用，证据池为空——本次查新未成立，"
               "不许在此基础上落判定。", file=sys.stderr)
         return 1
-    print("  下一步：把证据包交给另一模型家族判定，再用 novelty verdict 落卡。")
+    print("  下一步：把证据包交给另一模型家族判定（材料包附 novelty cases "
+          "--md 的判例摘录），再用 novelty verdict 落卡。")
     return 0
 
 
@@ -235,6 +242,14 @@ def cmd_novelty_verdict(args) -> int:
           f"（verdict_id {record['receipt']['verdict_id']}，"
           f"review_status {record['review_status']}）")
     print(f"  最接近工作 {len(record['closest_works'])} 条（均已核对在证据池中）")
+    cb = record.get("casebook") or {}
+    if cb.get("appended"):
+        print(f"  判例集已追加：{cb.get('case_id')}"
+              f"（novelty/cases/casebook.jsonl，供后续判定校准）")
+    elif cb.get("case_id"):
+        print(f"  判例集已有同判定判例：{cb.get('case_id')}（未重复追加）")
+    elif cb:
+        print(f"  ⚠️ 判例集追加失败（判定本身已落卡）：{cb.get('error')}")
     if record["review_status"] == "REVIEW_UNAVAILABLE":
         print("  ⚠️ 降级通道：本次无跨模型判定收据，卡可继续流转，"
               "但定版门会拦截——恢复后须补跨模型判定。")
@@ -248,6 +263,36 @@ def cmd_novelty_verdict(args) -> int:
               f"然后运行 advance --to killed。")
     else:
         print(f"  下一步：advance {args.idea_id} --to novelty_checked 过查新门。")
+    return 0
+
+
+def cmd_novelty_cases(args) -> int:
+    root = Path(args.project)
+    if not (root / "project.yaml").exists():
+        return _fail(f"项目不存在：{root}（先用 init 建项目）")
+    if args.seed:
+        try:
+            result = casebook_mod.seed_casebook(root)
+        except casebook_mod.CasebookError as e:
+            print(f"判例播种失败（{len(e.errors)} 条）：")
+            for err in e.errors:
+                print(f"  - {err}")
+            return 1
+        print(f"种子判例播种完成：新增 {result['added']} 条，"
+              f"判例集共 {result['total']} 条")
+    cases = casebook_mod.load_cases(root)
+    summary = casebook_mod.summarize_cases(cases)
+    print(f"判例集：{summary['total']} 条"
+          f"（按判定 {summary['by_verdict']}；按来源 {summary['by_origin']}）")
+    if args.md:
+        print(casebook_mod.render_cases_md(
+            casebook_mod.recent_cases(root, args.limit)))
+    else:
+        for c in casebook_mod.recent_cases(root, args.limit):
+            idea = c.get("idea") or {}
+            print(f"  - {c.get('case_id')}｜{c.get('date')}｜"
+                  f"{c.get('verdict')}｜{idea.get('title')}"
+                  f"（{c.get('source')}）")
     return 0
 
 
@@ -332,8 +377,15 @@ def cmd_rank(args) -> int:
         print(f"    {a}：{'  '.join(cells)}")
     print("  Elo 风格参考分（辅助字段，暂定，未经执行验证）：")
     for s in rank["standings"]:
+        cap = s.get("capability") or {}
+        counts = cap.get("counts") or {}
+        cap_txt = (f"能力匹配 未评估" if not cap.get("assessed") else
+                   f"能力匹配 最差处置 {cap.get('worst')}"
+                   f"（已有 {counts.get('have', 0)}/可短期补 "
+                   f"{counts.get('fillable', 0)}/构成不可行 "
+                   f"{counts.get('blocking', 0)}）")
         print(f"    {s['idea_id']}：{s['elo']}（胜 {s['win']} 负 {s['loss']} "
-              f"平 {s['draw']}，胜率 {s['win_rate']}）")
+              f"平 {s['draw']}，胜率 {s['win_rate']}）｜{cap_txt}")
     for cyc in rank["cycles"]:
         print(f"  ⚠️ 循环胜负：{'、'.join(cyc)} 之间对决分不开"
               f"（循环胜负），Elo 在这些卡之间只作并列参考。")
@@ -447,14 +499,29 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("novelty", help="facet 查新子流程（二期）")
     nsub = p.add_subparsers(dest="novelty_cmd", required=True)
 
-    np_ = nsub.add_parser("prepare", help="查新取证：构式→四源实查→证据包落盘")
+    np_ = nsub.add_parser("prepare", help="查新取证：构式→七源实查→证据包落盘")
     np_.add_argument("project")
     np_.add_argument("idea_id")
     np_.add_argument("--per-query", type=int, default=novelty_mod.DEFAULT_PER_QUERY,
                      help="每条查询式每源取回条数（默认 10）")
+    np_.add_argument("--sources", default=None,
+                     help="逗号分隔的源清单子集（默认七源全查："
+                          "crossref,openalex,semanticscholar,europepmc,"
+                          "dblp,core,openaire）")
     np_.add_argument("--sleep", type=float, default=0.0,
                      help="每次请求后的间隔秒数（源限流时调大，如 0.3）")
     np_.set_defaults(func=cmd_novelty_prepare)
+
+    nc = nsub.add_parser("cases", help="查新判例集（IDEA-D04）：列构成 / "
+                                       "补种种子 / 导出材料包摘录")
+    nc.add_argument("project")
+    nc.add_argument("--seed", action="store_true",
+                    help="把随包种子判例播种进本项目（幂等）")
+    nc.add_argument("--limit", type=int, default=5,
+                    help="列出/摘录的最近判例条数（默认 5）")
+    nc.add_argument("--md", action="store_true",
+                    help="输出 Markdown 摘录（供判定材料包附带）")
+    nc.set_defaults(func=cmd_novelty_cases)
 
     nv = nsub.add_parser("verdict", help="判定落卡（跨模型 + 逐面举证）")
     nv.add_argument("project")

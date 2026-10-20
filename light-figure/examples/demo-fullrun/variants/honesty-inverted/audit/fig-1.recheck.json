@@ -1,0 +1,48 @@
+{
+  "kind": "light-figure/recheck",
+  "fig_id": "fig-1",
+  "line": "data",
+  "checked_at": "2026-10-20T19:26:42+00:00",
+  "measurement_basis": "file_layer（文件层结构量测，非渲染量测）",
+  "scope": {
+    "figures": [
+      "fig-1"
+    ],
+    "panels": null,
+    "whole_file_checks": [
+      "page_size",
+      "fonts_embedded",
+      "min_font_size"
+    ],
+    "note": "全图复检"
+  },
+  "artifact": "exports/fig-1.pdf",
+  "findings": [
+    {
+      "check": "page_size",
+      "level": "pass",
+      "message": "页尺寸 183.0 × 47.6 mm 与期刊栏宽相符"
+    },
+    {
+      "check": "fonts_embedded",
+      "level": "pass",
+      "message": "2 个字体全部嵌入"
+    },
+    {
+      "check": "min_font_size",
+      "level": "pass",
+      "message": "实测最小字号 6.00 pt ≥ 地板 5.0 pt"
+    },
+    {
+      "check": "colors_vs_palette",
+      "level": "pass",
+      "message": "采样用色 5 个均在合同色板或中性色内"
+    },
+    {
+      "check": "raster_resolution",
+      "level": "pass",
+      "message": "无嵌入位图（纯矢量）"
+    }
+  ],
+  "overall": "PASS"
+}

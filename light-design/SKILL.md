@@ -1,14 +1,23 @@
+---
+name: light-design
+description: Use when 已有定版想法卡、需要把它变成可直接开工且可被证伪的研究设计书，或需要冻结设计、修订已冻结设计并向实验阶段交接时。
+version: "1.1"
+author: light-design contributors
+license: MIT
+---
+
 # light-design
 
 把 light-idea 的**定版想法卡**变成**可直接开工且可被证伪的研究设计书**。
+设计依据：`03-design/REDESIGN-DRAFT.md` v0.1（含 2026-10-20 用户拍板 7 项）
+与 `03-design/LEARNING.md` 十三条硬约束。
 
-> 版本：**v1.0（封版，2026-10-20）**。设计依据（学习期文档、重构
-> 草案、十三条硬约束与定版决策记录）属开发档案，不在本仓库；本
-> 文件即产品的完整执行规范。结构地图：定位与能力环 D0–D7 → 命令
-> 面 → D0 入口承接与打回 → D1/D2 主张反推实验清单 → D3/D5 评估
-> 与功效口径 → D4 效度登记 → D6 评审与冻结（含 amendment 分级）
-> → D7 交接四件套与对账 → 极简级边界 → 硬纪律 → 状态机 →
-> 交付前自检清单 → 演示小结 → 已知边界。
+**当前版本：v1.0（封版，2026-10-20）**——一期：项目骨架 + 设计书系统
+（design.yaml 十一区）+ 确定性校验器 + 状态机（draft → reviewed →
+frozen）+ amendment 追加协议。二期：定版评审子流程（review prepare/
+record，REVIEW_UNAVAILABLE 正式通道）、交接四件套导出（D7）、
+DESIGN_REPORT 刷新、D0–D7 逐环规程。三期：真实想法卡端到端演示
+（见文末「三期演示小结」）与本定版。
 
 ## 定位与边界
 
@@ -44,9 +53,13 @@ light-design new <project> --title <题名> --idea-id <idea_id> [--tier full|min
 light-design validate <project> <design_id>
 light-design advance <project> <design_id> --to reviewed|frozen|returned|blocked|draft
 light-design amend <project> <design_id> --field <路径> --value <新值> \
-    --reason <为何改> --results-seen <改时可见性声明> [--user-signed]
+    --reason <为何改> --results-seen <改时可见性声明> [--user-signed] \
+    [--category unforeseen|prewritten_branch] [--branch-ref <分支 id>]
 light-design review prepare <project> <design_id>
 light-design review record <project> <design_id> --from-json <判定.json>
+light-design review prepare <project> <design_id> --amendment <n>
+light-design review record <project> <design_id> --amendment <n> \
+    --from-json <判定.json>
 light-design review record <project> <design_id> [--checklist <清单.yaml>] \
     [--reviewer-model <模型> --reviewer-family <家族> --decision pass|reject]
 light-design review record <project> <design_id> --review-unavailable [--note <附注>]
@@ -63,8 +76,16 @@ light-design render <project> <design_id>
    key_details）逐项承接进 intake.spec_intake，登记交接原值摘要与
    设计落点；original_question **逐字**落盘，不许改写成自己的话。
 2. 有值 → accepted；设计中展开深化了口径 → expanded（须在对应区能
-   找到展开后的实体，不许只改状态字样）。缺失/为空 → status=returned
-   + returned_items 打回记录 + intake_log.md 留痕。
+   找到展开后的实体，不许只改状态字样）。**跨区实体核查已命令化
+   （v1.1 DES-D04）**：校验器对每项 expanded 承接按 schema 冻结的
+   映射表到对应区查实体（datasets → evaluation.data_protocol /
+   plan.variables；strongest_baseline → contract.controls 的
+   status_quo；metrics → evaluation.primary_metric；ablations →
+   contract.ablations；resource_budget → resources.budget/power；
+   key_details → plan.intervention_mechanism /
+   intervention_checkpoints / handoff.repro_fields），查无实体报错
+   点名。缺失/为空 → status=returned + returned_items 打回记录 +
+   intake_log.md 留痕。
 3. **打回纪律**：六项未齐、或有未清打回项（resolved=false），设计
    不许离开 draft（reviewed 门硬拦并逐项点名）。回补后逐项置
    resolved=true 并经 returned → draft 回到主线；往返记录不许删。
@@ -115,6 +136,19 @@ light-design render <project> <design_id>
 6. 比较三支柱（约束 7）：主指标唯一点名 + 惯例出处；护栏指标与主
    指标分离登记；tuning_parity 写明自家方法与每个基线的调参预算
    对等（试验次数/搜索空间同级），基线不许用默认参数凑数。
+7. **SESOI 结构化登记（v1.1 DES-D01）**：SESOI 在 `evaluation.sesoi`
+   登记为结构化块（全设计单一事实源），七字段缺一不可：`value`
+   （正数）/ `unit` / `direction`（higher 或 lower，须与主指标方向
+   一致）/ `bounds`（边界定义，如等价界取 ±value 对称双侧界）/
+   `basis`（推导依据引用——优先序第 1 条的 basis 落点，无依据不许
+   登记）/ `estimand_ref`（目标量引用，如 claims.primary_claims[C1]，
+   使 SESOI 与估计目标绑定）/ `summary_measure`（汇总度量类型，如
+   mean_diff）。带确认性主张的完整级设计**必须登记**（校验器硬拦）；
+   resources.power.sesoi 文本保留为人类可读表述，两者不得互相矛盾。
+   登记行（handoff.expected_registry 与导出登记表）只许携带登记块
+   的**派生副本**并逐字段一致，不许登记行单独填（校验器与 export
+   双重拦截）。evaluation.sesoi 是命门字段：冻结后变更只能走
+   amendment + 用户签，派生副本在同一 amendment 内机械刷新。
 
 ## D4 规程：效度登记填法
 
@@ -162,11 +196,40 @@ light-design render <project> <design_id>
   结果、见了什么——决定该修订的可信度等级）。
 - **命门字段必须 --user-signed**：evaluation.readout（判读标准）、
   evaluation.primary_metric（主指标）、claims（主张）、
-  resources.circuit_breakers（停止规则）。无签拒收，已落盘的伪造
-  无签 amendment 会被 validate 检出。
+  resources.circuit_breakers（停止规则）、evaluation.sesoi
+  （SESOI 登记块）。无签拒收，已落盘的伪造无签 amendment 会被
+  validate 检出。
 - 其余字段自动追加留痕（approved_by 记为工具自动留痕）。
 - 命门字段 amendment 后，评审对象变更：引用该设计的结果在对账时
   须按 amendment 链核对版本（exports 的 content_hash 取现行哈希）。
+
+### amendment 类别分流与增量评审（v1.1 DES-D02 + C-补04）
+
+- **每条 amendment 必须声明类别**（`--category`，落盘不可改）：
+  `prewritten_branch` = 执行定版时已预写的偏离分支；
+  `unforeseen` = 未预见变更（默认，未声明取此最严口径）。定版时把
+  可预见的偏离分支预写进 `plan.deviation_branches`（每条含 id /
+  trigger / fields 影响面 / fallback 备援方法）；定版前的诊断迭代
+  不是 amendment，走设计史留痕。
+- **分流由代码执行**：声称 prewritten_branch 必须 `--branch-ref`
+  点名预写分支，且变更字段必须落在该分支声明的 fields 影响面内；
+  无此分支、或字段越界，apply 点名拒绝（类别与影响面不符），改按
+  unforeseen 登记。拿不出预写证据不许自称预写。
+- **命门 amendment 落盘即 pending_review**：增量评审落盘 pass 前
+  `export` 被拦并点名；决议 reject 同样拦，须以补偿 amendment 回退
+  变更（只追加纪律）。非命门 amendment 不触发增量评审。
+- **增量评审流程**（只审变更项及其影响面，不重开全量评审）：
+  `review prepare --amendment <n>` 生成自包含增量包（变更字段前后
+  值 + 按字段依赖映射生成的受影响登记行/主张清单 + 原冻结评审
+  收据指针）；异家族评审后 `review record --amendment <n>
+  --from-json <判定.json>` 落盘（同族拒收，与定版评审同纪律）。
+  分流两轨：预写分支走**轻评审**（只核 trigger_verified 触发条件
+  成立与 fallback_as_predeclared 按预写执行两项）；未预见变更走
+  **全评审**（只核依赖映射圈定的 Stage 1 条目子集）。
+- **降级通道**：`review record --amendment <n>
+  --review-unavailable` 显式落字解除待审，导出件（brief/repro）
+  会注明该 amendment 增量评审未完成；恢复后重新 prepare/record
+  补审覆盖降级记录。不许伪造评审收据。
 
 ## D7 规程：交接四件套与对账约定
 
@@ -176,7 +239,7 @@ light-design render <project> <design_id>
 |---|---|---|
 | experiment_brief.md | 运行清单：runs 依赖拓扑序逐个列明角色/对照/阶段/预期登记 + 变量表 + 判读三向 + 熔断线 + 阶段转移条件 | Experiment 照单执行 |
 | design_card.json | design.yaml 的结构化全量 JSON 投影 | 程序消费 |
-| expected_registry.jsonl | 每 run 一行：readout 三向 + 主指标 + 预期 + 种子/重复 + 现行内容哈希 | Analysis 事后逐条对账 |
+| expected_registry.jsonl | 每 run 一行：readout 三向 + 主指标 + 结构化 SESOI 派生副本（自 evaluation.sesoi 机械复制）+ 预期 + 种子/重复 + 现行内容哈希 | Analysis 事后逐条对账、判定直读 SESOI |
 | reproducibility.md | 种子/环境/数据版本/调参对等/冻结锚点清单 | 复现与审计 |
 
 对账约定：Experiment 逐 run 回填实际结果与干预生效证据；Analysis 按
@@ -229,7 +292,8 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
 ## 交付前自检清单（定版/交接前逐项过）
 
 - [ ] validate 全过（不是「差不多」：逐条错误清零）
-- [ ] intake 六项 accepted/expanded、无未清打回项、原始问题逐字在位
+- [ ] intake 六项 accepted/expanded、无未清打回项、原始问题逐字在位；
+  expanded 项已过跨区实体核查（DES-D04：对应区查得到实体）
 - [ ] 承接卡的定版状态已核对：未定版卡只许作演示/预演承接且须在
       报告中明示，不许冒充正式定版交接；打回往返（returned ↔ draft）
       记录完整在案、未删改
@@ -238,33 +302,39 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
 - [ ] status_quo 对照在场；处理组 depends_on 含其对照；拓扑序可排
 - [ ] 功效：SESOI 有据、derived 与 seeds/repetitions 对账、敏感性范围已写；
       sufficient=false 时声称已下调并落字
+- [ ] SESOI 结构化登记：evaluation.sesoi 七字段齐全、direction 与主指标
+      一致；登记行派生副本逐字段一致（确认性设计缺一不可）
 - [ ] 效度四类齐全、逐项三态 + note；结构错误清单逐项自查完
 - [ ] 登记头可见性档位与实际进度相符（已看结果不许报 no_runs_yet）
 - [ ] 评审包已 prepare；评审者异家族；五条逐项 + note 齐全；收据已落盘
       （或 REVIEW_UNAVAILABLE 显式降级并知会用户）
+- [ ] 每条 amendment 类别已声明；命门 amendment 增量评审已落盘
+  pass（或 REVIEW_UNAVAILABLE 显式落字且导出件已注明，DES-D02）
 - [ ] 冻结后 export 四件套齐全；expected_registry 与 runs 一一对应
 - [ ] DESIGN_REPORT 已 report 刷新；偏离/amendment 计数与实际一致
 - [ ] aux 区无判定字段混入；所有分数类信号标注「暂定」
 
-## 演示小结（开发期端到端验证，脱敏）
+## 三期演示小结（2026-10-20，examples/demo-poultry-design/）
 
-开发期以一张真实想法卡（light-idea 演示的 top 卡，执行级规格
-六项齐全）为输入跑通全链，结论如下，原始产物属开发档案、不在
-本仓库：
+以 light-idea 演示 top 卡 C1「零调参阈值预测」（idea_id
+`zero-tuning-tracker-thresholds-predicted_77cdb7`）为输入跑通全链，
+全过程与逐字门记录见演示目录 demo-report.md。要点：
 
-- **承接前提如实标注**：该卡在 Idea 侧未定版（跨模型硬门未过），
-  演示承接的是「规格完备但未定版」的卡，属演示安排、不冒充正式
-  定版交接——正式流程只消费定版卡，本演示验证的是 Design 侧
-  机制全链。
-- 主设计（完整级）承接 6/6、一次校验零错误 → reviewed；评审包
-  生成后，因演示环境无异家族模型走 REVIEW_UNAVAILABLE 落盘，
-  frozen 被定版门如实拦下、export 亦被拒。**演示终点 = reviewed
-  + 评审包就绪**：不定版、不停工、不伪造收据；多模型环境中
-  一次异家族评审回填即可定版导出。
-- 缺项变体（人为删去交接件两项）：new 当场列打回清单 →
-  reviewed 被承接门逐项点名拦下 → returned → 回补（重新承接 +
-  逐项 resolved、往返记录不删）→ 回 draft，打回纪律全流程走通。
-- 极简级小设计（公开基准上的判别实验）：底线六件齐全、校验
+- **承接前提如实标注**：C1 在 Idea 侧未定版（pre_mortem_passed，
+  跨模型硬门未过），本演示承接的是「规格完备但未定版」的卡，属
+  演示安排、不冒充正式定版交接——正式流程只消费定版卡，本演示
+  验证的是 Design 侧机制全链。
+- 主设计（完整级）承接 6/6，一次校验零错误 → reviewed；review
+  prepare 生成自包含评审包；本环境无异家族模型，走
+  REVIEW_UNAVAILABLE 落盘（收据 RV-5baf031de4），advance frozen
+  被 8 条门**如实拦下**，export 亦被拒（2 条缺口）。**演示终点 =
+  reviewed + 评审包就绪**，与 Idea 演示同构：不定版、不停工、
+  不伪造收据；多模型环境中一次异家族评审回填即可定版导出。
+- 缺项变体（人为删交接件 metrics/ablations 两项）：new 当场列
+  打回清单 → reviewed 被承接门逐项点名拦下 → returned → 回补
+  （重新承接 + 逐项 resolved，往返记录不删）→ 回 draft，打回
+  纪律全流程走通。
+- 极简级小设计（MOT17 映射存在性判别）：底线六件齐全、校验
   通过、渲染带「不承载确认性结论」标注，停 draft 不评审冻结。
 
 ## 已知边界（v1.0 封版口径，如实标注）
@@ -272,14 +342,15 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
 - 本技能的真实定版（frozen + 四件套导出）尚未在多模型环境中
   走通：演示终点止于 reviewed + REVIEW_UNAVAILABLE，与上游卡
   的跨模型硬门是同一个环境限制；流程与补完路径已验证到门口。
-- amendment 的**增量评审**（只审变更项及其影响面）尚未命令化：
-  命门 amendment 现靠用户签把关，未自动生成增量评审包。
+- amendment 的**增量评审**已命令化（v1.1 DES-D02）：命门 amendment
+  待审拦导出、两轨分流、降级落字均落代码；残余边界是评审判定质量
+  仍靠评审者规程，工具只验结构、异家族与影响面圈定（与定版评审同界）。
 - `advance --to returned` 的打回单（return_record）须由执行者
   先行写入 design.yaml：CLI 尚无把 intake 打回清单一键组装为
   打回单的命令（演示中为手工落字后推进）。
-- intake 的 `expanded`（展开承接）只验状态与六项在场：「展开后
-  的实体在对应区真实存在」靠定版评审核对，校验器不做跨区
-  实体核查。
+- intake 的 `expanded`（展开承接）已由校验器做跨区实体核查
+  （v1.1 DES-D04，映射表在 schema 冻结）；残余边界是核查只验实体
+  「在场」，实体内容与交接原值的口径一致性仍靠定版评审。
 - 评审包的判定质量靠评审者规程（packet 内须知 + 五条标准），
   工具只验结构完整与异家族，不验判定内容质量（与 Idea 查新
   同界）。

@@ -1,4 +1,4 @@
-# demo-fullrun 演示报告（light-figure v1.0）
+# demo-fullrun 演示报告（light-figure v1.1）
 
 ## 1. 终点与全链
 
@@ -25,6 +25,18 @@ delivered。全程命令与输出见 `evidence/run-log.txt`。
 无任何门落 REVIEW_REQUIRED，故本次演示未触发 `audit note` 处置
 流程（该流程由单元测试覆盖）。
 
+**v1.1 增件在本演示中的落点**：两图合同均落 `palette_decision`
+（fig-1 = journal_contract 沿用期刊合同色板、fig-2 =
+gallery_anchor 源自图库条目六维拆解）；fig-2 的图库引用带
+`reference_breakdown` 六维拆解且被提示词正文消费（拆解的
+palette_hex 只以指针出现、正文无 hex）；fig-2 重绘 manifest 升
+v1.1（五条 arrow_plan 逐条绑定 connect、形状写入 User.SemanticId
+语义 ID、构建轮次账 rounds 落盘）；produced 后主包过**交付前本地
+复核**（`recheck`，双图 PASS，记录在 `audit/<fig>.recheck.json`，
+口径 = 文件层结构量测、不改审计判决）；交付 `delivery.yaml`
+逐图新增 `correspondence` 对应件清单（源资产哈希 + 内容级哈希，
+已按实物复算一致）。
+
 数据图合同要点：面板 a（primary_quantitative_evidence）逐段 MOTA
 曲线、面板 b（baseline_or_control）臂均值 ± 95% CI；源数据为三臂
 逐段均值（fixed 72.638 / oracle 77.887 / predicted 77.835），与
@@ -41,6 +53,8 @@ light-experiment 合成演示 summary.json 逐值一致。
 |---|---|---|
 | `variants/honesty-inverted/` | 复制主包后把 fig-1 脚本头 y 轴登记改为 decreasing 且绘图真反转 y 轴，重跑 produce + audit | 总判决 **FIX_BEFORE_DELIVERY**：honesty 门以 `honesty.reversed_axis` 阻断；其余四门仍 PASS——拦截来自诚实门本身，不是连带失败 |
 | `variants/native-embed/` | 复制主包后在 manifest 里把整张参考图登记为 photo 类残留（box 占满面板 a），重建 + audit | 总判决 **FIX_BEFORE_DELIVERY**：native 门以 `native.full_page_bitmap` 阻断（登记≠放行，整幅尺寸比对抓出）；contract/policy_block 仍 PASS |
+| `variants/round-noop/`（v1.1 新增） | 复制主包后对 fig-2 原样再跑一次 `redraw build`（内容零变化） | 命令被 **round_noop 门拒绝**：内容投影哈希与上一轮相同，无变化的往返不许冒充新一轮构建 |
+| `variants/pptx-chain/`（v1.1 新增） | 复制主包后把 fig-2 合同后端切 `powerpoint`，pptx manifest 由已对账的 vsdx manifest 派生，走 install/build/extract 文件层全链后审计 + 复核；随后向成品塞入整页参考图图片对象再审计 | 第一段：contract/native/policy_block 三门 **PASS**、recheck **PASS**，交付口径 `powerpoint_verified: false`（文件层证据级）；第二段：native 门以未登记/整页图片对象判 **FIX_BEFORE_DELIVERY** 拦截 |
 
 ### 3.1 变体抓出的一个真实产品缺陷（已修复）
 
@@ -62,7 +76,8 @@ native-embed 变体首跑时**未被拦下**（总判决 PASS）。根因在审�
 | Write 需要 | delivery.yaml 提供（实值） | 核对 |
 |---|---|---|
 | figure_id + 交付状态 | fig-1 / fig-2 两行，包状态 delivered | ✓ |
-| 交付文件 + 哈希 | fig-1：`exports/fig-1.pdf` sha256 `bea57265717a…`（+ 预览 PNG 一行）；fig-2：`schematic/redraw/fig-2.vsdx` sha256 `34337f1bc797…` | ✓ 与 exports/ 实物重算一致 |
+| 交付文件 + 哈希 | fig-1：`exports/fig-1.pdf` sha256 `421ed4c659aa…`（+ 预览 PNG 一行）；fig-2：`schematic/redraw/fig-2.vsdx` sha256 `b0aa8f840fdc…` | ✓ 与 exports/ 实物重算一致 |
+| 对应件清单（v1.1 新增，REV-D09） | 逐图 `correspondence`：fig-1 源资产 = 绘图脚本/源数据/样式 bundle 三件哈希 + 内容哈希 alignment_panels；fig-2 源资产 = 重绘 manifest + 参考图（只给哈希、路径为 null 不进交付集）+ 内容哈希 extracted_shapes | ✓ 逐项按实物复算一致 |
 | 图注哈希对账 | 两图 `caption_hash` 与承接快照 `caption_draft_hash` 逐一相等（程序核对 True/True） | ✓ 未漂移 |
 | 图件 provenance | fig-1：脚本/源数据/样式三哈希 + 运行时版本；fig-2：`provenance.yaml#fig-2` 账行指针 + 提示词版本/生成模型/参考图哈希 | ✓ 交付前 verify_provenance_rows 全过 |
 | AI 披露素材 | fig-2 `ai_disclosure`：generation_model、prompt_version=1、redraw_route=file_build、reference_not_in_delivery=true | ✓ 可直接喂 Write use_log |

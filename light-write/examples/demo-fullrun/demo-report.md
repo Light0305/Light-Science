@@ -110,3 +110,20 @@ audited + REVIEW_UNAVAILABLE（复核拦停与主包同口径）。
 另：首次回复尝试时对账曾真实报警——回复未登记阶段 check 报 3 条
 `revision.unanswered` + 3 条 `revision.unclaimed_change`，证明双向对账在
 "只改稿未回复"与"只回复未回指"两种半成品状态下都会拦（日志见 run-log）。
+
+---
+
+## 附记：v1.1 复跑（2026-10-21，第二轮七个必做项落地验证）
+
+原报告正文（v1.0）不动；本附记记录同一演示包在 v1.1 口径下的复跑。
+
+- **溯源键三元组迁移（WRT-D13）**：数字账三行 trace_ref 由裸键显式迁移为量名后缀形态——N001 `R-ORA#v1:effect_size`、N002 `R-PRED#v1:effect_size`、N003 `R-FIX#v1:effect_size`（三行均为 effect_size，与卡内登记一致）。
+- **贡献确认回执（WRT-D04）**：本包承接时无草案（v1.0 形态），按 v1.1 规程补生成草案——草案为空（上游结论卡未给 C1 规范文本，v1.0 既有缺口），故签认走「作者亲笔 + drift 点名」路径：签认文本由演示作者按 C1（untested/insufficient，只进局限口径）亲笔给出，receipt 落 drift_from_draft=true 与 drift_note，statement_hash `518597711dec…`。工具未代拟。
+- **卡内一致性证据（WRT-D05）**：对承接的同一结论卡单独运行 check_card_consistency（不重做 intake 快照）：gaps 为零；卡同目录 spec_results.jsonl 在场，effect_size 4 行按（登记行，spec_id）逐项比对通过（spec_rows_checked=4），p_ab 4 行只做卡内自查（如实登记）。
+- **审计复跑**：disclose 重跑后以同一在线记录（fixtures/online_records.json）重跑审计——四门全 pass、overall=pass、产物非 STALE（稿件哈希 `9544b862…`，因数字账迁移与披露重生成而不同于 v1.0 终审哈希，属预期）；程式化核查（WRT-D01）随审计生成 tone_report，本稿 findings 为 0。
+- **终点不变**：状态保持 audited；submission_ready 仍被 REVIEW_UNAVAILABLE 拦停（口径未动）。validate 0 errors（1 warning 为 C1 text_pending，如实保留）。
+
+完成项：七个必做项在演示包上全部实走（D05 卡内校验、D04 签认含 drift 路径、D13 迁移、D01 tone 产物、D02 词表口径、D08 记录校验、D06 分册）。
+跳过项：返修副本包（manuscript-pkg-revision）未复跑——其内容未被本轮七项触及，v1.0 对账结论原样保留。
+未验项：程式化核查在本稿 0 命中，advisory 的实际提示效果以测试夹具正反例为准（演示稿为受控文本）。
+风险：演示卡的 p_ab 行无 spec_results 对应字段，指针目标比对只覆盖 effect_size 行——已在 WRT-D05 设计与本附记中如实登记。

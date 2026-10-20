@@ -1,0 +1,36 @@
+[页眉]微统计算工具 V1.0  第 1 页
+# 微统计算工具 设计说明书
+软件全称：微统计算工具
+版本号：V1.0
+著作权人：演示著作权人（脱敏虚构）
+本设计说明书对应软件 微统计算工具（版本 V1.0），内容由登记事
+实单源与冻结源码快照派生，功能陈述逐段回指源码证据。
+## 模块 tinystats/__init__.py
+微统计算工具包：对数值序列计算描述统计并生成文本报表。
+本模块对外提供：（无顶层函数/类）。上述符号经演示者复核，与
+源码 AST 机械抽取结果一致，与证据指针逐一对应；段落内不陈述
+证据之外的功能。
+## 模块 tinystats/cli.py
+命令行入口：从标准输入或参数读数值序列，输出统计报表。
+本模块对外提供：parse_values、main。上述符号由源码 AST 机械
+抽取，与证据指针逐一对应；段落内不陈述证据之外的功能。
+## 模块 tinystats/report.py
+报表生成：把统计结果字典渲染为定宽文本表。
+本模块对外提供：render_table、render_markdown。上述符号由源
+码 AST 机械抽取，与证据指针逐一对应；段落内不陈述证据之外的
+功能。
+## 模块 tinystats/stats.py
+描述统计计算：均值、中位数、方差、分位数与异常值标记。
+本模块对外提供：mean、median、variance、quantile、flag_outli
+ers、summarize。上述符号由源码 AST 机械抽取，与证据指针逐一
+对应；段落内不陈述证据之外的功能。
+## 运行与支撑环境
+- dev_hardware：通用 x86-64 个人计算机
+- dev_os：Ubuntu 24.04
+- dev_tools：Python 3.12 + VS Code
+- runtime_hardware：通用 x86-64 个人计算机
+
+[页眉]微统计算工具 V1.0  第 2 页
+- runtime_os：Linux / Windows / macOS 任一可运行 Python 3 者
+- runtime_platform：Python 3.10 及以上标准库，无第三方依赖
+本段由登记事实 environment 区派生，与申请表环境字段同源。

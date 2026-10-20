@@ -1,7 +1,7 @@
 # 评审交付清单 — review-pkg（round 1）
 
 - 状态：delivered（2026-10-20）
-- 承接稿件：zero-tuning-tracker-thresholds-predicted_c8d0fc（快照哈希 e346ed3ca429…）
+- 承接稿件：zero-tuning-tracker-thresholds-predicted_c8d0fc（快照哈希 b75d3ab37d9e…）
 - 隔离模式：degraded
 - **降档声明**：本轮评审隔离降档（degraded）：三席同属单一模型家族（claude），席间独立性仅由文件级隔离（reports/drafts 物理分开、冻结前互不可见）与可见性矩阵保证，无法实现跨模型家族互盲；法医层与领域门为确定性代码检查、不受此限；共识标注与决定建议的置信上限受单家族同源偏差约束。跨家族席位到位后应开新 round 重跑本轮评审。
 
@@ -20,8 +20,8 @@
 
 ## 领域门
 
-- 条目 11：命中 1、未命中 7、不适用 3（有效命中 1）
-- 按刊事实：light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（verified_at 2026-10-20，状态 verified）
+- 条目 11：命中 0、未命中 8、不适用 3（有效命中 0）
+- 按刊事实：../../../../light-journal-select/examples/demo-fullrun/selection-pkg/journal/target/check-record.json（verified_at 2026-10-20，状态 verified）
 
 ## 决定建议
 

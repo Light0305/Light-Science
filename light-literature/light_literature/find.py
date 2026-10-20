@@ -43,6 +43,7 @@ from pathlib import Path
 import requests
 
 from . import project as project_mod
+from . import searchlayer as _sl
 from .util import literature_dir
 
 # ---------------------------------------------------------------------------
@@ -81,8 +82,8 @@ _CACHE_DIRNAME = ".find-cache"
 _HTTP_TIMEOUT = 30
 
 
-class FetchError(Exception):
-    """单源请求失败（网络错误 / 非预期状态码 / 响应不可解析）。"""
+#: 单源请求失败异常：与 searchlayer 共用同一类，适配层与 Find 线口径统一。
+FetchError = _sl.FetchError
 
 
 # ---------------------------------------------------------------------------
@@ -127,15 +128,8 @@ def _ua(mailto: str | None) -> dict:
 # ---------------------------------------------------------------------------
 # 文本规范化与相似度
 
-def normalize_doi(doi: str | None) -> str | None:
-    """DOI 规范化：去 https://doi.org/ 等前缀、转小写、去空白。"""
-    if not doi:
-        return None
-    text = str(doi).strip().lower()
-    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
-        if text.startswith(prefix):
-            text = text[len(prefix):]
-    return text.strip() or None
+#: DOI 规范化：实现在 searchlayer（全套共用一份，避免口径漂移）。
+normalize_doi = _sl.normalize_doi
 
 
 def normalize_title(title: str | None) -> str:
@@ -211,274 +205,32 @@ def _first_author(record: dict) -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# 统一记录 schema 与各源适配器
+# 统一记录 schema 与各源适配器 —— 已迁入共享检索适配层 searchlayer
+# (LIT-D05)：统一结果模型 Paper、逐源适配器、缓存与失败隔离都在该层
+# 定义一次。本节只保留同名委托包装：注入本模块的 _get (保既有打桩点
+# 与口径)，返回与历史一致的 (record dict 列表, 原始响应)。
 #
 # 记录字段：source / source_id / doi / title / authors / year / venue /
 # type / version_hint(preprint|version_of_record|unknown) / abstract /
 # url / retracted_hint（源内已知的撤稿线索字符串或 None）。
 
 def _record(source: str, source_id: str, **kw) -> dict:
-    rec = {
-        "source": source,
-        "source_id": str(source_id),
-        "doi": normalize_doi(kw.get("doi")),
-        "title": (kw.get("title") or "").strip(),
-        "authors": [a for a in (kw.get("authors") or []) if a],
-        "year": kw.get("year"),
-        "venue": (kw.get("venue") or "").strip(),
-        "type": kw.get("type") or "",
-        "version_hint": kw.get("version_hint") or "unknown",
-        "abstract": (kw.get("abstract") or "").strip(),
-        "url": kw.get("url") or "",
-        "retracted_hint": kw.get("retracted_hint"),
-        "queries": list(kw.get("queries") or []),
-    }
-    return rec
+    return _sl._paper(source, source_id, **kw).to_record()
 
 
-_JATS_TAG_RE = re.compile(r"<[^>]+>")
+def _wrap_search(name: str):
+    def _search(query: str, n: int, mailto: str | None):
+        papers, raw = _sl.get_adapter(name).search(
+            query, n, mailto=mailto, get=_get)
+        return [p.to_record() for p in papers], raw
+    return _search
 
 
-def _strip_jats(text: str | None) -> str:
-    """Crossref 摘要常带 JATS XML 标签，粗暴去标签只留文本。"""
-    if not text:
-        return ""
-    return re.sub(r"\s+", " ", _JATS_TAG_RE.sub(" ", text)).strip()
-
-def _openalex_abstract(inverted: dict | None) -> str:
-    """OpenAlex 摘要倒排索引 {词: [位置,...]} 还原为文本。"""
-    if not inverted:
-        return ""
-    positions: dict[int, str] = {}
-    for word, idxs in inverted.items():
-        for i in idxs:
-            positions[i] = word
-    return " ".join(positions[i] for i in sorted(positions))
-
-
-_OPENALEX_VERSION = {
-    "publishedVersion": "version_of_record",
-    "acceptedVersion": "preprint",
-    "submittedVersion": "preprint",
-}
-
-
-def _search_openalex(query: str, n: int, mailto: str | None):
-    params = {"search": query, "per-page": n}
-    if mailto:
-        params["mailto"] = mailto
-    data, raw = _get_json("https://api.openalex.org/works", params=params,
-                          headers=_ua(mailto))
-    records = []
-    for w in data.get("results", []):
-        loc = w.get("primary_location") or {}
-        src = loc.get("source") or {}
-        hint = _OPENALEX_VERSION.get(loc.get("version") or "", "unknown")
-        if (src.get("display_name") or "").lower() == "arxiv":
-            hint = "preprint"
-        records.append(_record(
-            "openalex", w.get("id", ""),
-            doi=w.get("doi"), title=w.get("display_name") or w.get("title"),
-            authors=[(a.get("author") or {}).get("display_name")
-                     for a in w.get("authorships", [])],
-            year=w.get("publication_year"),
-            venue=src.get("display_name"),
-            type=w.get("type") or "",
-            version_hint=hint,
-            abstract=_openalex_abstract(w.get("abstract_inverted_index")),
-            url=(w.get("doi") and f"https://doi.org/{normalize_doi(w['doi'])}")
-                or w.get("id"),
-            queries=[query],
-        ))
-    return records, raw
-
-
-def _crossref_year(item: dict) -> int | None:
-    for key in ("published-print", "published-online", "published",
-                "issued", "created"):
-        parts = ((item.get(key) or {}).get("date-parts") or [[]])[0]
-        if parts and isinstance(parts[0], int):
-            return parts[0]
-    return None
-
-
-def _crossref_authors(item: dict) -> list[str]:
-    out = []
-    for a in item.get("author", []) or []:
-        name = " ".join(x for x in (a.get("given"), a.get("family")) if x)
-        out.append(name or a.get("name") or "")
-    return out
-
-
-def _crossref_retraction_hint(item: dict) -> str | None:
-    """从 Crossref 记录本体提取撤稿线索（update-to 指向他人不算自身被撤，
-    只认 title 的 RETRACTED 前缀——真正的被撤判定在撤稿检查步反查）。"""
-    title = (item.get("title") or [""])[0]
-    if title.strip().lower().startswith("retracted"):
-        return "crossref:title-retracted-prefix"
-    return None
-
-
-def _search_crossref(query: str, n: int, mailto: str | None):
-    params = {"query.bibliographic": query, "rows": n}
-    if mailto:
-        params["mailto"] = mailto
-    data, raw = _get_json("https://api.crossref.org/works", params=params,
-                          headers=_ua(mailto))
-    records = []
-    for item in (data.get("message") or {}).get("items", []):
-        records.append(_record(
-            "crossref", item.get("DOI", ""),
-            doi=item.get("DOI"),
-            title=(item.get("title") or [""])[0],
-            authors=_crossref_authors(item),
-            year=_crossref_year(item),
-            venue=(item.get("container-title") or [""])[0],
-            type=item.get("type") or "",
-            version_hint="version_of_record"
-            if item.get("type") in ("journal-article", "proceedings-article",
-                                    "book-chapter")
-            else "unknown",
-            abstract=_strip_jats(item.get("abstract")),
-            url=item.get("URL"),
-            retracted_hint=_crossref_retraction_hint(item),
-            queries=[query],
-        ))
-    return records, raw
-
-
-def _search_semanticscholar(query: str, n: int, mailto: str | None):
-    params = {
-        "query": query, "limit": n,
-        "fields": "title,authors,year,venue,externalIds,abstract,url,"
-                  "publicationTypes",
-    }
-    data, raw = _get_json(
-        "https://api.semanticscholar.org/graph/v1/paper/search",
-        params=params, headers=_ua(mailto))
-    records = []
-    for p in data.get("data", []) or []:
-        ext = p.get("externalIds") or {}
-        venue = p.get("venue") or ""
-        hint = "preprint" if venue.lower().startswith("arxiv") else "unknown"
-        records.append(_record(
-            "semanticscholar", p.get("paperId", ""),
-            doi=ext.get("DOI"),
-            title=p.get("title"),
-            authors=[a.get("name") for a in p.get("authors", []) or []],
-            year=p.get("year"), venue=venue,
-            type=",".join(p.get("publicationTypes") or []),
-            version_hint=hint,
-            abstract=p.get("abstract"),
-            url=p.get("url"),
-            queries=[query],
-        ))
-    return records, raw
-
-
-_ARXIV_NS = {"atom": "http://www.w3.org/2005/Atom",
-             "arxiv": "http://arxiv.org/schemas/atom"}
-
-
-def _search_arxiv(query: str, n: int, mailto: str | None):
-    params = {"search_query": f"all:{query}", "start": 0, "max_results": n}
-    status, body = _get("https://export.arxiv.org/api/query", params=params,
-                        headers=_ua(mailto))
-    if status != 200:
-        raise FetchError(f"HTTP {status}：arXiv API")
-    try:
-        root = ET.fromstring(body.decode("utf-8"))
-    except (ET.ParseError, UnicodeDecodeError) as exc:
-        raise FetchError(f"arXiv 响应不是合法 XML（{exc}）") from exc
-    records = []
-    for entry in root.findall("atom:entry", _ARXIV_NS):
-        def _text(tag):
-            el = entry.find(tag, _ARXIV_NS)
-            return (el.text or "").strip() if el is not None else ""
-        full_id = _text("atom:id")
-        arxiv_id = full_id.rsplit("/", 1)[-1] if full_id else ""
-        published = _text("atom:published")
-        doi = _text("arxiv:doi") or None
-        records.append(_record(
-            "arxiv", arxiv_id,
-            doi=doi,
-            title=re.sub(r"\s+", " ", _text("atom:title")),
-            authors=[(a.findtext("atom:name", "", _ARXIV_NS) or "").strip()
-                     for a in entry.findall("atom:author", _ARXIV_NS)],
-            year=int(published[:4]) if published[:4].isdigit() else None,
-            venue="arXiv",
-            type="preprint",
-            version_hint="preprint",
-            abstract=re.sub(r"\s+", " ", _text("atom:summary")),
-            url=full_id,
-            queries=[query],
-        ))
-    return records, body
-
-
-def _epmc_retraction_hints(res: dict) -> tuple[str | None, list[str]]:
-    """从 Europe PMC 单条结果提取撤稿信号，返回 (retracted_hint, signals)。
-
-    signals 是撤稿检查步用的分类信号（retracted/concern/corrected 前缀）。
-    """
-    signals: list[str] = []
-    pub_types = (res.get("pubTypeList") or {}).get("pubType") or []
-    if any("retract" in str(t).lower() for t in pub_types):
-        signals.append("retracted:europepmc:pubtype-retracted-publication")
-    if str(res.get("isRetracted") or "").upper() == "Y":
-        signals.append("retracted:europepmc:isRetracted=Y")
-    corrections = (res.get("commentCorrectionList") or {}).get(
-        "commentCorrection") or []
-    for c in corrections:
-        ctype = str(c.get("type") or "").lower()
-        if "retraction" in ctype or "withdrawal" in ctype:
-            signals.append("retracted:europepmc:commentCorrection:retraction-in")
-        elif "expression of concern" in ctype:
-            signals.append(
-                "concern:europepmc:commentCorrection:expression-of-concern-in")
-        elif "correction" in ctype or "erratum" in ctype:
-            signals.append("corrected:europepmc:commentCorrection:correction-in")
-    hint = ("europepmc:" + ";".join(s.split(":", 1)[1] for s in signals)
-            if signals else None)
-    return hint, signals
-
-
-def _epmc_record(res: dict, query: str | None = None) -> dict:
-    hint, _signals = _epmc_retraction_hints(res)
-    authors = []
-    for a in (res.get("authorList") or {}).get("author", []) or []:
-        authors.append(a.get("fullName") or "")
-    journal = ((res.get("journalInfo") or {}).get("journal") or {}).get(
-        "title") or ""
-    year = res.get("pubYear")
-    return _record(
-        "europepmc", f"{res.get('source', '')}:{res.get('id', '')}",
-        doi=res.get("doi"),
-        title=res.get("title"),
-        authors=authors,
-        year=int(year) if str(year).isdigit() else None,
-        venue=journal,
-        type=",".join((res.get("pubTypeList") or {}).get("pubType") or []),
-        version_hint="unknown",
-        abstract=res.get("abstractText"),
-        url=(res.get("doi")
-             and f"https://doi.org/{normalize_doi(res['doi'])}")
-            or f"https://europepmc.org/article/{res.get('source')}/{res.get('id')}",
-        retracted_hint=hint,
-        queries=[query] if query else [],
-    )
-
-
-def _search_europepmc(query: str, n: int, mailto: str | None):
-    params = {"query": query, "format": "json", "resultType": "core",
-              "pageSize": n}
-    data, raw = _get_json(
-        "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
-        params=params, headers=_ua(mailto))
-    records = [_epmc_record(r, query)
-               for r in (data.get("resultList") or {}).get("result", [])]
-    return records, raw
-
+_search_openalex = _wrap_search("openalex")
+_search_crossref = _wrap_search("crossref")
+_search_semanticscholar = _wrap_search("semanticscholar")
+_search_arxiv = _wrap_search("arxiv")
+_search_europepmc = _wrap_search("europepmc")
 
 _SEARCHERS = {
     "openalex": _search_openalex,
@@ -487,6 +239,15 @@ _SEARCHERS = {
     "arxiv": _search_arxiv,
     "europepmc": _search_europepmc,
 }
+
+# 适配层内部工具的同名别名 (本模块后段的身份比对/撤稿检查沿用)
+_crossref_year = _sl.crossref_year
+_crossref_authors = _sl.crossref_authors
+_epmc_retraction_hints = _sl.epmc_retraction_hints
+
+
+def _epmc_record(res: dict, query: str | None = None) -> dict:
+    return _sl.get_adapter("europepmc").record_from_raw(res, query).to_record()
 
 
 # ---------------------------------------------------------------------------
@@ -699,29 +460,15 @@ def find(project_dir: Path, queries: list[str],
     project_mod.init_project(project_dir)
     lit = literature_dir(project_dir)
     cache_dir = lit / _CACHE_DIRNAME
-    cache_dir.mkdir(parents=True, exist_ok=True)
 
-    all_records: list[dict] = []
-    per_source_stats: dict[str, dict] = {}
-    failures: list[dict] = []
-    for source in sources:
-        stat = {"hits": 0, "ok": True, "error": None}
-        for query in queries:
-            try:
-                records, raw = _SEARCHERS[source](query, per_source, mailto)
-            except FetchError as exc:
-                stat["ok"] = False
-                stat["error"] = str(exc)
-                failures.append({"source": source, "query": query,
-                                 "error": str(exc)})
-                continue
-            stat["hits"] += len(records)
-            all_records.extend(records)
-            digest = hashlib.sha1(
-                f"{source}|{query}|{per_source}".encode("utf-8")).hexdigest()[:10]
-            ext = "xml" if source == "arxiv" else "json"
-            (cache_dir / f"{source}__{digest}.{ext}").write_bytes(raw)
-        per_source_stats[source] = stat
+    # 检索执行走共享适配层 (LIT-D05)：统一模型 + (源+式+上限) 磁盘缓存
+    # (命中不联网) + 单源失败隔离；注入本模块 _get 保打桩点与口径。
+    result = _sl.search_all(list(queries), tuple(sources),
+                            per_source=per_source, mailto=mailto,
+                            cache_dir=cache_dir, get=_get)
+    all_records = result["records"]
+    per_source_stats = result["per_source"]
+    failures = result["failures"]
 
     studies = dedup_records(all_records)
     report_total = sum(s["report_count"] for s in studies)
@@ -805,17 +552,13 @@ def find(project_dir: Path, queries: list[str],
 # 权威记录，但记录与候选条目对不上」。
 
 def _crossref_work(doi: str, mailto: str | None) -> tuple[int, dict | None]:
-    """按 DOI 取 Crossref 记录；返回 (status, message|None)。"""
-    status, body = _get(f"https://api.crossref.org/works/{doi}",
-                        headers=_ua(mailto))
-    if status == 404:
-        return 404, None
-    if status != 200:
-        raise FetchError(f"Crossref 按 DOI 查询返回 HTTP {status}")
-    try:
-        return 200, json.loads(body.decode("utf-8")).get("message") or {}
-    except (ValueError, UnicodeDecodeError) as exc:
-        raise FetchError(f"Crossref 响应解析失败（{exc}）") from exc
+    """按 DOI 取 Crossref 记录；返回 (status, message|None)。
+
+    实现在适配层 CrossrefAdapter.fetch_work (LIT-D05)，此处注入本
+    模块 _get 委托，语义不变 (404 不抛、其他非 200 抛 FetchError)。
+    """
+    return _sl.get_adapter("crossref").fetch_work(doi, mailto=mailto,
+                                                  get=_get)
 
 
 def _crossref_best_bibliographic(title: str, mailto: str | None) -> dict | None:
@@ -834,13 +577,13 @@ def _crossref_best_bibliographic(title: str, mailto: str | None) -> dict | None:
 
 def _epmc_search(query: str, mailto: str | None,
                  page_size: int = 5) -> list[dict]:
-    """Europe PMC 原始结果列表（resultType=core）。"""
-    params = {"query": query, "format": "json", "resultType": "core",
-              "pageSize": page_size}
-    data, _raw = _get_json(
-        "https://www.ebi.ac.uk/europepmc/webservices/rest/search",
-        params=params, headers=_ua(mailto))
-    return (data.get("resultList") or {}).get("result", []) or []
+    """Europe PMC 原始结果列表（resultType=core）。
+
+    实现在适配层 EuropePMCAdapter.search_raw (LIT-D05)，注入本模块
+    _get 委托，语义不变。
+    """
+    return _sl.get_adapter("europepmc").search_raw(
+        query, mailto=mailto, page_size=page_size, get=_get)
 
 
 def _epmc_by_doi(doi: str, mailto: str | None) -> dict | None:

@@ -1,0 +1,35 @@
+kind: light-patent/check-report
+case_id: PT-case_4b3e0c
+checked_at: '2026-10-20'
+findings:
+- check_id: C-05
+  level: WARN
+  detail: 权要 2「所述的家禽异常行为检」未见先行引入（启发式，需人工复核）
+- check_id: C-05
+  level: WARN
+  detail: 权要 3「所述方法中的时序融合」未见先行引入（启发式，需人工复核）
+- check_id: C-05
+  level: WARN
+  detail: 权要 4「所述的方法步骤」未见先行引入（启发式，需人工复核）
+errors: 0
+warnings: 3
+coverage:
+  checked:
+  - claims_structure_and_text
+  - antecedent_basis_heuristic
+  - title_and_abstract
+  - numeral_consistency
+  - support_coverage
+  - placeholder_gap_reconciliation
+  - ai_sufficiency_84order
+  - ethics_registration
+  - filing_cleanliness
+  not_checked: []
+redteam_present: true
+delivery_grade: deliverable_draft
+artifact_hashes:
+  claims_md: 38ab62118317056f2eae3a6c0c737cd7ee930c6321bf63211fa1a094c821e6f8
+  specification_md: b258dc79560f8b3320cbac49142e7e4d19c46fbbe0200188236e246a66fcc926
+  abstract_md: aed9a5baeac937e8f7c6167fd93680d4a9e2ee034e9b9d9507aca75482f4deeb
+disclaimers:
+- 草案，需专利代理师复核

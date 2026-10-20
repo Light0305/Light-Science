@@ -1,4 +1,4 @@
-# demo-fullrun：light-figure v1 端到端双线演示
+# demo-fullrun：light-figure v1.1 端到端双线演示
 
 **终点：图包走完 intake → contracted → produced → audited → delivered，`exports/delivery.yaml` 已生成、编号已冻结。**
 
@@ -20,10 +20,14 @@
 - `figure-pkg/`：演示图包本体（终点 delivered）。fig-1 数据图
   （三臂 MOTA 双面板）、fig-2 方法图（火鸡检测流水线示意，
   文件级 .vsdx 重绘，`visio_verified: false`）。
-- `variants/`：两个拦截变体（produced 段从主包分叉，**不进正式
-  交付**）：`honesty-inverted/`（脚本登记反转轴并真反转绘图，
-  被诚实门拦下）、`native-embed/`（整张参考图登记为残留整幅
-  嵌入，被原生性门拦下）。
+- `variants/`：四个拦截/旁路变体（produced 段从主包分叉，**不进
+  正式交付**）：`honesty-inverted/`（脚本登记反转轴并真反转
+  绘图，被诚实门拦下）、`native-embed/`（整张参考图登记为残留
+  整幅嵌入，被原生性门拦下）、`round-noop/`（v1.1：内容零变化
+  的重复构建被 round_noop 门拒绝）、`pptx-chain/`（v1.1：fig-2
+  切 PowerPoint 文件层后端走全链审计 PASS，再塞整页图片被
+  native 门拦下）。主包在 produced 后另过一道交付前本地复核
+  （`recheck`，双图 PASS）。
 - `evidence/`：run-log.txt（全程命令日志）、summary.json。
 
 ## 重跑

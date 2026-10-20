@@ -1,0 +1,307 @@
+{
+  "fig_id": "fig-2",
+  "version": "1.1",
+  "arrow_plan": [
+    {
+      "arrow_plan_id": "AP-1",
+      "from": "video-frame",
+      "to": "tracking",
+      "fact": "参考图左段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-2",
+      "from": "tracking",
+      "to": "statistics",
+      "fact": "参考图跨面板长箭头"
+    },
+    {
+      "arrow_plan_id": "AP-3",
+      "from": "statistics",
+      "to": "predictor",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-4",
+      "from": "predictor",
+      "to": "thresholds",
+      "fact": "参考图右段竖直箭头"
+    },
+    {
+      "arrow_plan_id": "AP-5",
+      "from": "thresholds",
+      "to": "anomaly",
+      "fact": "参考图右段竖直箭头"
+    }
+  ],
+  "status": "verified",
+  "route": "file_build",
+  "reference": {
+    "path": "schematic/reference/fig-2.png",
+    "sha256": "ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c"
+  },
+  "canvas": {
+    "reference_size_px": [
+      800,
+      500
+    ],
+    "page_size_in": [
+      10.0,
+      6.25
+    ]
+  },
+  "role_palette": {
+    "entry_id": "PAL-ROLE-METHOD",
+    "version": "1.2"
+  },
+  "panels": [
+    {
+      "panel_id": "a",
+      "pixel_box": [
+        0,
+        0,
+        400,
+        500
+      ],
+      "contract_panel_id": "a"
+    },
+    {
+      "panel_id": "b",
+      "pixel_box": [
+        400,
+        0,
+        400,
+        500
+      ],
+      "contract_panel_id": "b"
+    }
+  ],
+  "shapes": [
+    {
+      "shape_id": "video-frame",
+      "type": "rect",
+      "panel_id": "a",
+      "box_local": [
+        0.075,
+        0.18,
+        0.85,
+        0.2
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      }
+    },
+    {
+      "shape_id": "video-label",
+      "type": "text",
+      "panel_id": "a",
+      "box_local": [
+        0.1,
+        0.26,
+        0.8,
+        0.08
+      ],
+      "text": "Barn camera video",
+      "style": {
+        "font_pt": 9
+      }
+    },
+    {
+      "shape_id": "tracking",
+      "type": "rect",
+      "panel_id": "a",
+      "box_local": [
+        0.075,
+        0.6,
+        0.85,
+        0.2
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      },
+      "connect": {
+        "from": "video-frame",
+        "to": "tracking",
+        "arrow": true,
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-1"
+      }
+    },
+    {
+      "shape_id": "tracking-label",
+      "type": "text",
+      "panel_id": "a",
+      "box_local": [
+        0.1,
+        0.68,
+        0.8,
+        0.08
+      ],
+      "text": "Multi-object tracking",
+      "style": {
+        "font_pt": 9
+      }
+    },
+    {
+      "shape_id": "statistics",
+      "type": "rounded_rect",
+      "panel_id": "b",
+      "box_local": [
+        0.075,
+        0.12,
+        0.85,
+        0.16
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      },
+      "connect": {
+        "from": "tracking",
+        "to": "statistics",
+        "arrow": true,
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-2"
+      }
+    },
+    {
+      "shape_id": "statistics-label",
+      "type": "text",
+      "panel_id": "b",
+      "box_local": [
+        0.1,
+        0.175,
+        0.8,
+        0.07
+      ],
+      "text": "Video-level statistics",
+      "style": {
+        "font_pt": 9
+      }
+    },
+    {
+      "shape_id": "predictor",
+      "type": "rounded_rect",
+      "panel_id": "b",
+      "box_local": [
+        0.075,
+        0.36,
+        0.85,
+        0.16
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      },
+      "connect": {
+        "from": "statistics",
+        "to": "predictor",
+        "arrow": true,
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-3"
+      }
+    },
+    {
+      "shape_id": "predictor-label",
+      "type": "text",
+      "panel_id": "b",
+      "box_local": [
+        0.1,
+        0.415,
+        0.8,
+        0.07
+      ],
+      "text": "Threshold prediction",
+      "style": {
+        "font_pt": 9
+      }
+    },
+    {
+      "shape_id": "thresholds",
+      "type": "rect",
+      "panel_id": "b",
+      "box_local": [
+        0.075,
+        0.6,
+        0.85,
+        0.16
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      },
+      "connect": {
+        "from": "predictor",
+        "to": "thresholds",
+        "arrow": true,
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-4"
+      }
+    },
+    {
+      "shape_id": "thresholds-label",
+      "type": "text",
+      "panel_id": "b",
+      "box_local": [
+        0.1,
+        0.655,
+        0.8,
+        0.07
+      ],
+      "text": "Per-tracklet thresholds",
+      "style": {
+        "font_pt": 9
+      }
+    },
+    {
+      "shape_id": "anomaly",
+      "type": "rounded_rect",
+      "panel_id": "b",
+      "box_local": [
+        0.075,
+        0.82,
+        0.85,
+        0.14
+      ],
+      "style": {
+        "fill_role": "input_data",
+        "line_role": "neutral"
+      },
+      "connect": {
+        "from": "thresholds",
+        "to": "anomaly",
+        "arrow": true,
+        "semantics": "data flow",
+        "arrow_plan_id": "AP-5"
+      }
+    },
+    {
+      "shape_id": "anomaly-label",
+      "type": "text",
+      "panel_id": "b",
+      "box_local": [
+        0.1,
+        0.875,
+        0.8,
+        0.07
+      ],
+      "text": "Anomaly flagging",
+      "style": {
+        "font_pt": 9
+      }
+    }
+  ],
+  "bitmap_residue": [],
+  "trace_layer": {
+    "used": true,
+    "opacity": 0.25,
+    "removed_before_delivery": true
+  },
+  "label_check": {
+    "done": false,
+    "by": null,
+    "at": null
+  },
+  "backend": "powerpoint_file"
+}

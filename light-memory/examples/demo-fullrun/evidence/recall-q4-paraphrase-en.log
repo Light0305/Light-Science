@@ -1,4 +1,4 @@
-$ light-memory recall light-memory/examples/demo-fullrun/world/proj-a predicting tracker thresholds from video-level statistics --recipe paraphrase
+$ light-memory recall ../../../../light-memory/examples/demo-fullrun/world/proj-a predicting tracker thresholds from video-level statistics --recipe paraphrase
 [exit 0]
 回供：配方 paraphrase，作用域 turkey-threshold-prediction，命中 20 条（上限 20）
   · 降级：索引与真相不一致（stale）：events.jsonl、facts.jsonl、relations.jsonl；结果基于旧索引，索引重建后复核

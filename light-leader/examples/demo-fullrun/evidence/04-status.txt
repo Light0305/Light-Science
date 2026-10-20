@@ -1,18 +1,27 @@
 项目状态：火鸡异常行为检测：零调参跟踪阈值预测（总控演示拼装）（project）
 [literature（light-literature）] literature/Literature/文献索引.csv：篇目 1（精读完成x1），证据行 14
 [idea（light-idea）] idea/cards/zero-tuning-tracker-thresholds-predicted_77cdb7/idea.yaml：status=pre_mortem_passed
+    规范态：进行中（LD-03 映射表）
     硬门标记：review_status = REVIEW_UNAVAILABLE
 [design（light-design）] design/designs/zero-tuning-tracker-thresholds_979ee7/design.yaml：status=reviewed
+    规范态：进行中（LD-03 映射表）
     硬门标记：review_status = REVIEW_UNAVAILABLE
 [experiment（light-experiment）] experiment/executions/video-threshold-predict_synth01-b2/execution.yaml：status=delivered（终态）
+    规范态：已达终态（LD-03 映射表）
 [experiment（light-experiment）] experiment/executions/video-threshold-predict_synth01-b1/execution.yaml：status=intake
+    规范态：进行中（LD-03 映射表）
 [analysis（light-analysis）] analysis/analysis-pkg/analysis.yaml：status=blocked
+    规范态：被门拦（LD-03 映射表）
     硬门标记：review_status = REVIEW_UNAVAILABLE
     blocked 原因：判定复核不可用（REVIEW_UNAVAILABLE）
 [journal-select（light-journal-select，write 前置扩展位）] journal-select/selection.yaml：status=handed_off（终态）
+    规范态：已达终态（LD-03 映射表）
 [write（light-write）] write/manuscript-pkg/manuscript.yaml：status=audited
+    规范态：进行中（LD-03 映射表）
     硬门标记：submission_blocked_reason = REVIEW_UNAVAILABLE：跨模型复核不可用，稿件停在 audited（与 Idea/Design/Analysis 同构降级，恢复后补复核再置真）
     硬门标记：review_status = REVIEW_UNAVAILABLE
 [figure（light-figure）] figure/figure-pkg/figure.yaml：status=delivered（终态）
+    规范态：已达终态（LD-03 映射表）
 [review（light-review）] review/review-pkg/review.yaml：status=delivered（终态）
+    规范态：已达终态（LD-03 映射表）
 [memory（light-memory）] memory/memory.yaml：对象 26、事件 88、事实 30、关系 16；registry-view.json 已导出

@@ -10,15 +10,21 @@ entries:
   source_data_hash: 9d7831d921a4b808d5528ae90cc8ee53fd73c07cbe6a471767c18232edcc4a3e
   style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
   palette_registry_version: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+  palette_decision_record: &id001
+    source: journal_contract
+    basis: 沿用期刊合同登记色板 PAL-OI-8（版本 2002.1，Okabe-Ito 色盲友好八色）
+    categorical: PAL-OI-8@2002.1
+    continuous: PAL-BATLOW@8.0
+    style_build_hash: f39c196b05109b8a4bb139266e91238dfbe53a12436087bfab126813b03c0d9f
 - fig_id: fig-2
   line: schematic
   opened_at: '2026-10-20'
   prompt_version: '1'
-  generation_model: &id001
+  generation_model: &id002
     name: local PIL script (demo stand-in)
     version: run_demo.py
   reference_image_hash: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
-  reference_acceptance: &id002
+  reference_acceptance: &id003
     done: true
     by: demo-author
     at: '2026-10-20'
@@ -26,10 +32,10 @@ entries:
       labels_verbatim: true
       structures_factual: true
       formulas_values_checked: true
-  redraw_source: &id005
+  redraw_source: &id006
     path: schematic/redraw/fig-2.vsdx
-    hash: 0d8ccc9eb66435a805fcc96dbc41d45128638d6bf68ea901f1cc72fdb772070a
-  label_check: &id003
+    hash: f53e3b0baa3ca8d5bc7e90929be24f6071c409c03afd3daca4de1d4db8124013
+  label_check: &id004
     done: true
     by: demo-author
     at: '2026-10-20'
@@ -37,11 +43,11 @@ entries:
   manual_corrections_log: null
 history:
 - fig_id: fig-1
-  at: '2026-10-20T10:52:49+00:00'
+  at: '2026-10-20T19:26:38+00:00'
   date: '2026-10-20'
   by: demo-author
   supersedes: 90fb6fd0fe66d5203e954f0471a2175ad5a4484a2e9c882ede5cf1b65139d8fc
-  row_hash: d0f17ac64caefeaa1458cd92e69aa3c13562d159de8d98c73735fd39b57b8f4d
+  row_hash: f16af628995337080a870e5847c7754644e7400c96434744781b2c737207b686
   changes:
     backend:
       from: null
@@ -61,8 +67,11 @@ history:
     palette_registry_version:
       from: null
       to: PAL-OI-8@2002.1 + PAL-BATLOW@8.0
+    palette_decision_record:
+      from: null
+      to: *id001
 - fig_id: fig-2
-  at: '2026-10-20T10:52:49+00:00'
+  at: '2026-10-20T19:26:38+00:00'
   date: '2026-10-20'
   by: demo-author
   supersedes: 1d464371a680f8e98e149bbf0b4b50988cec2029b4bc8c7945e7395f0c916727
@@ -75,7 +84,7 @@ history:
       from: null
       to: figure.yaml#ai_policy_snapshot
 - fig_id: fig-2
-  at: '2026-10-20T10:52:50+00:00'
+  at: '2026-10-20T19:26:39+00:00'
   date: '2026-10-20'
   by: demo-author
   supersedes: 74f7b140f352614783c7b77d8a4573a4de1e4e7669085d550b8739bc1ab9ebaa
@@ -86,9 +95,9 @@ history:
       to: ede26be2a7fc615b10b79ae9d58be509d7ab4c3a8df8d63142b753d680780f7c
     generation_model:
       from: null
-      to: *id001
+      to: *id002
 - fig_id: fig-2
-  at: '2026-10-20T10:52:50+00:00'
+  at: '2026-10-20T19:26:39+00:00'
   date: '2026-10-20'
   by: demo-author
   supersedes: 23f402041bc2427b584b8d8f05d890a4c9ae4bd3cdddc98a6cbbc813aa0ab0b1
@@ -100,39 +109,39 @@ history:
         by: null
         at: null
         checks: {}
-      to: *id002
+      to: *id003
 - fig_id: fig-2
-  at: '2026-10-20T10:52:52+00:00'
+  at: '2026-10-20T19:26:41+00:00'
   date: '2026-10-20'
   by: demo-author
   supersedes: 24aa197efdfc5ac235ec559ff317344fa71b1983dd40aedb2309b766343621dc
-  row_hash: ed38e26876d43beb8e7a25a47f6ab6d17b48c806b78174436d4ca188f8c029e6
+  row_hash: bd00cfd6604b0b2e47381be27e5b2671a3b27ee8ed1fde1c7039e5ca9ff1d830
   changes:
     redraw_source:
       from: null
-      to: &id004
+      to: &id005
         path: schematic/redraw/fig-2.vsdx
-        hash: 34337f1bc7975ae19a973a20206f12cbd2254ee61a8abe5a6e4992f9e813b0d0
+        hash: b0aa8f840fdc04484cc29489485fe084360a60434e4f20bc094e2823dd890c7a
 - fig_id: fig-2
-  at: '2026-10-20T10:52:52+00:00'
+  at: '2026-10-20T19:26:41+00:00'
   date: '2026-10-20'
   by: demo-author
-  supersedes: ed38e26876d43beb8e7a25a47f6ab6d17b48c806b78174436d4ca188f8c029e6
-  row_hash: 9ce8c0d7d1202ab3c10ee140cf3923f5267de88a68d3502c7129b305e0b393fc
+  supersedes: bd00cfd6604b0b2e47381be27e5b2671a3b27ee8ed1fde1c7039e5ca9ff1d830
+  row_hash: b67210ecae04e1e54a46a0202936e74ba16c20e49bdc0f909f94613c6c62582f
   changes:
     label_check:
       from:
         done: false
         by: null
         at: null
-      to: *id003
+      to: *id004
 - fig_id: fig-2
-  at: '2026-10-20T10:52:55+00:00'
+  at: '2026-10-20T19:26:47+00:00'
   date: '2026-10-20'
   by: light-figure redraw build
-  supersedes: 9ce8c0d7d1202ab3c10ee140cf3923f5267de88a68d3502c7129b305e0b393fc
-  row_hash: 4b52e0e7c75812d683e5780e8a445072f39512aff1c4e3989a8fa1b61e00c8ba
+  supersedes: b67210ecae04e1e54a46a0202936e74ba16c20e49bdc0f909f94613c6c62582f
+  row_hash: 2ede7b961397c13da78793e193ffd0f3ba487ce3c9c269435f2b58a4c608908c
   changes:
     redraw_source:
-      from: *id004
-      to: *id005
+      from: *id005
+      to: *id006

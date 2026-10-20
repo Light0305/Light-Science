@@ -1,4 +1,4 @@
-$ light-memory candidate light-memory/examples/demo-fullrun/world/proj-a list
+$ light-memory candidate ../../../../light-memory/examples/demo-fullrun/world/proj-a list
 [exit 0]
 候选 2 条：
   cand_b96241dafbe9 [fact] accepted（提名 demo-driver，源 local）

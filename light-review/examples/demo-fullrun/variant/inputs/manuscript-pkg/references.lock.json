@@ -3,7 +3,7 @@
   "version": "1.0",
   "generated_at": "2026-10-20T08:59:40+00:00",
   "source": {
-    "path": "light-literature/examples/demo-find/Literature/候选池.jsonl",
+    "path": "../../../../../../light-literature/examples/demo-find/Literature/候选池.jsonl",
     "set_hash": "4281319cb286d278306d8caac114fb4def4222403e42c6f64cbc35247cd7cc11",
     "entry_count": 4
   },

@@ -33,8 +33,10 @@ from pathlib import Path
 
 from .events import append_event, read_events
 from .gates import BUDGET_KEYS, GateError
+from .interventions import verify_intervention_checks
 from .schema import (
     EXIT_STATUSES,
+    INTERVENTION_BLOCKING_VERDICTS,
     build_birth_certificate,
     compute_identity_hash,
     compute_params_hash,
@@ -42,6 +44,7 @@ from .schema import (
     empty_execution,
     empty_run,
     identity_minimum_errors,
+    placeholder_hits,
 )
 from .util import load_structured, read_yaml, slugify, today, utcnow, write_yaml
 
@@ -281,13 +284,49 @@ def _next_batch(root: Path, design_id: str) -> int:
     return n + 1
 
 
+def _execution_plan_order(brief_runs: list[dict]) -> tuple[list[str], list[str]]:
+    """依赖计划（EXP-D04 第三件）：按 depends_on 对 brief 条目做稳定
+    拓扑排序（Kahn，同层保持 brief 原序）。返回 (顺序, 错误)：
+    依赖指向清单外条目或依赖成环时逐条报错、顺序为空。"""
+    ids = [r.get("run_id") for r in brief_runs]
+    idset = set(ids)
+    errors: list[str] = []
+    deps: dict[str, list[str]] = {}
+    for r in brief_runs:
+        rid = r.get("run_id")
+        ds = list(r.get("depends_on") or [])
+        deps[rid] = ds
+        for dep in ds:
+            if dep not in idset:
+                errors.append(f"依赖计划：条目 {rid} 的前置依赖 {dep} 不在 "
+                              "brief 运行清单内（依赖图对不齐，不许带缺口开跑）")
+    if errors:
+        return [], errors
+    order: list[str] = []
+    done: set[str] = set()
+    remaining = list(ids)
+    while remaining:
+        ready = [rid for rid in remaining
+                 if all(d in done for d in deps.get(rid) or [])]
+        if not ready:
+            errors.append("依赖计划：brief 依赖图成环，无法拓扑排序"
+                          f"（环内条目 {sorted(remaining)}）——回 Design 解环")
+            return [], errors
+        nxt = ready[0]
+        order.append(nxt)
+        done.add(nxt)
+        remaining.remove(nxt)
+    return order, []
+
+
 def intake(root: Path, export_dir: Path, *, date: str | None = None) -> tuple[dict, list[str]]:
     """消费 Design 交接四件套建执行包。返回 (execution, gaps)。
 
-    校验顺序（草案 §4 的一期子集）：四件套齐全 → 设计 frozen →
+    校验顺序（草案 §4；v1.1 起为全集）：四件套齐全 → 设计 frozen →
     brief/reproducibility 所钉哈希与 design_card 现行哈希一致 →
     registry 逐行 design_id/content_hash 对齐 → registry 行与运行
-    清单一对应 → 每行判读三向与主指标在场。
+    清单一对应 → 每行判读三向与主指标在场 → 零占位符扫描 →
+    干预核查点齐备检查 → 依赖计划产出（EXP-D04 三件）。
     有缺口：执行包照样落盘（status=intake、缺口进 intake_report 与
     intake_log），但不建 run、不生成对账表，advance 到 sanity 被门拦。
     design_card 缺失/不可解析到无法识别设计时抛 IntakeError（无从打回）。
@@ -355,6 +394,42 @@ def intake(root: Path, export_dir: Path, *, date: str | None = None) -> tuple[di
         gaps.append(f"预期登记行与 brief 运行清单不一一对应："
                     f"登记 {sorted(reg_ids)} ≠ 清单 {sorted(brief_ids)}")
 
+    # —— v1.1 承接补三件（EXP-D04，草案 §4 子集补齐） ——
+    # (1) 零占位符扫描：四件套原文逐件机械扫冻结模式清单——交接件
+    #     带未填占位即未完成，不许承接端替设计把空填上。
+    for name in EXPORT_FILES:
+        p = paths[name]
+        if p.exists():
+            for hit in placeholder_hits(p.read_text(encoding="utf-8")):
+                gaps.append(f"交接件 {name} 含占位符残留（{hit['pattern']}，"
+                            f"第 {hit['line']} 行：{hit['excerpt']}）："
+                            "零占位符纪律，交接件不许带未填占位")
+    # (2) 干预核查点齐备检查：每条处理（treatment）条目须有核查点
+    #     声明才许承接清零。声明来源三处（任一非空即算齐备）：设计级
+    #     plan.intervention_checkpoints（light-design 导出形态：方案
+    #     区全局核查点，每 run 后留证）、brief 行 intervention_checks、
+    #     登记行 intervention_checks。
+    global_cps = (card.get("plan") or {}).get("intervention_checkpoints") or []
+    line_by_id = {line.get("run_id"): line for line in registry_lines}
+    for brow in brief_runs:
+        rid = brow.get("run_id")
+        role = brow.get("role") or (line_by_id.get(rid) or {}).get("role")
+        if role != "treatment":
+            continue
+        declared = brow.get("intervention_checks") or \
+            (line_by_id.get(rid) or {}).get("intervention_checks") or \
+            global_cps
+        if not declared:
+            gaps.append(f"处理条目 {rid} 未声明干预核查点（intervention_checks）："
+                        "处理 run 必须预置干预生效核查点（设计级 plan"
+                        ".intervention_checkpoints 或条目级声明）才许承接清零")
+    # (3) 依赖计划产出：按 brief depends_on 做稳定拓扑序（同层保持
+    #     brief 原序，与 Design export 的拓扑序口径一致），落盘
+    #     execution_plan.md 并登记进 intake_report；成环/指向清单外
+    #     条目进 gaps（计划本身就是承接校验的一部分，不许带环开跑）。
+    plan_order, plan_errors = _execution_plan_order(brief_runs)
+    gaps.extend(plan_errors)
+
     exec_id = f"{design_id}-b{_next_batch(root, design_id)}"
     execution = empty_execution(exec_id, date)
     execution["design_ref"] = {
@@ -372,6 +447,7 @@ def intake(root: Path, export_dir: Path, *, date: str | None = None) -> tuple[di
         "source_dir": str(export_dir),
         "gaps": gaps,
         "registry_run_ids": reg_ids,
+        "execution_plan": plan_order,
     }
     execution["brief_runs"] = brief_runs
     execution["registry_lines"] = registry_lines
@@ -381,6 +457,28 @@ def intake(root: Path, export_dir: Path, *, date: str | None = None) -> tuple[di
     (d / "artifacts").mkdir(parents=True, exist_ok=True)
     (d / "events.jsonl").write_text("", encoding="utf-8")
     save_execution(root, execution)
+    if plan_order:
+        brow_by_id = {r.get("run_id"): r for r in brief_runs}
+        plan_lines = [
+            f"# 依赖计划（执行顺序）— {exec_id}", "",
+            f"> intake 于 {date} 按 brief depends_on 拓扑排序生成（稳定序："
+            "同层保持 brief 原序，与 Design export 拓扑序口径一致）；"
+            "照此序开跑，前置依赖未完成不许跳跑。",
+            f"> 承接缺口：{len(gaps)} 项"
+            "（未清零前本计划只作打回对照，不许照此开跑）" if gaps else
+            "> 承接齐全，本计划即执行顺序。", "",
+            "| 序 | 条目 | 角色 | 前置依赖 | 对照 run |",
+            "|---|---|---|---|---|",
+        ]
+        for i, rid in enumerate(plan_order, 1):
+            brow = brow_by_id.get(rid) or {}
+            deps = "、".join(brow.get("depends_on") or []) or "—"
+            plan_lines.append(
+                f"| {i} | {rid} | {brow.get('role') or '—'} | {deps} "
+                f"| {brow.get('control_run') or '—'} |")
+        plan_lines.append("")
+        (d / "execution_plan.md").write_text(
+            "\n".join(plan_lines), encoding="utf-8")
     append_event(d, "intake_done" if not gaps else "intake_rejected",
                  payload={"design_id": design_id, "content_hash": cur_hash,
                           "gaps": gaps})
@@ -452,6 +550,10 @@ def _create_run(root: Path, execution: dict, brief_row: dict,
         oident = origin.get("identity") or {}
         for key in ("config", "params", "code_snapshot", "data_version", "environment"):
             run["identity"][key] = copy.deepcopy(oident.get(key))
+        # 干预核查点随身份一并继承（EXP-D03 补齐：同一干预在替代
+        # run 上仍须受同样的机械核验，v1.0 继承清单漏此项）
+        run["identity"]["intervention_checks"] = copy.deepcopy(
+            oident.get("intervention_checks") or [])
         run["identity"]["seeds"]["root_seed"] = \
             (oident.get("seeds") or {}).get("root_seed")
         lineage = run["identity"]["lineage"]
@@ -580,6 +682,18 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
                          "失败先抢救留产物，只留一句报错不合格（约束 4）"])
     if no_salvage and not salvage_note:
         salvage_note = "无可抢救产物（--no-salvage 显式声明）"
+    # 干预机械核验（EXP-D03）：终止落字前，工具按身份区登记的核验
+    # 方式从产物机械读取实际生效值与声称值比对，结果落结论区 +
+    # intervention_check 事件锚；总判 failed/unverifiable 时
+    # completed 终止自动转 deviated 候选——核验不符不许静默通过，
+    # 执行者没有任何手工标 pass 的入口。失败类终止本就不被消费、
+    # 另有失败分类流程承接，保留原状态只落记录（构建单判断 J2）。
+    verification = verify_intervention_checks(run, metrics_file=metrics_file)
+    conc["intervention_verification"] = verification
+    intervention_blocked = \
+        verification["verdict"] in INTERVENTION_BLOCKING_VERDICTS
+    if intervention_blocked and target == "completed":
+        target = "deviated"
     conc["exit_status"] = exit_status
     conc["failure_ref"] = failure_ref
     conc["salvage"] = salvage
@@ -593,7 +707,11 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
     spent = {"wall_clock_s": wall_clock_s, "gpu_hours": gpu_hours, "api_cost": api_cost}
     for k in BUDGET_KEYS:
         obs["attempts_budget"][k] = (obs["attempts_budget"].get(k) or 0) + spent[k]
-    _transition(run, target, by, date, f"终止：{exit_status}")
+    note = f"终止：{exit_status}"
+    if intervention_blocked and target == "deviated" and not mark_deviated:
+        note += (f"；干预核验总判 {verification['verdict']}，自动转 deviated "
+                 "候选（不符核查点见结论区 intervention_verification）")
+    _transition(run, target, by, date, note)
     save_run(root, exec_id, run)
     execution = load_execution(root, exec_id)
     ledger_spent = execution["budget_ledger"]["spent"]
@@ -601,7 +719,15 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
         ledger_spent[k] = (ledger_spent.get(k) or 0) + spent[k]
     execution["updated"] = date
     save_execution(root, execution)
-    append_event(exec_dir(root, exec_id), "run_finished", run_id=run_id,
+    d = exec_dir(root, exec_id)
+    for res in verification["results"]:
+        append_event(d, "intervention_check", run_id=run_id,
+                     payload={"point": res["point"], "kind": res["kind"],
+                              "status": res["status"],
+                              "claimed": res["claimed"],
+                              "actual": res["actual"],
+                              "detail": res["detail"]})
+    append_event(d, "run_finished", run_id=run_id,
                  payload={"exit_status": exit_status, "status": target,
                           "budget": spent})
     return run

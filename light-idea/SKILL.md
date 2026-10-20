@@ -1,10 +1,20 @@
+---
+name: light-idea
+description: Use when 需要从研究方向、种子文献或缺口出发产生可证伪的研究想法：做查新、给想法卡定版、做候选对决排序，或向设计阶段交接定版想法时。
+version: "1.1"
+author: light-idea contributors
+license: MIT
+---
+
 # light-idea 技能说明
 
-> 版本：**v1.0（封版，2026-10-20）**。设计依据（重构草案与学习期
-> 文档）属开发档案，不在本仓库；本文件即产品的完整执行规范。
-> 章节地图：产物规范第 3 节 → 状态机与定版门第 5 节 → I3 查新
-> 第 8 节 → I0/I1 生成算子第 9 节 → I4 对决排序第 10 节 → I5 打磨与
-> pre-mortem 第 11 节 → I6 交接导出第 12 节 → 自检清单第 13 节。
+> 版本：**v1.0（封版，2026-10-20）**。设计依据：`~/workspace/light-science/02-idea/REDESIGN-DRAFT.md`
+> （用户已拍板 §9 六项全按推荐）与 `LEARNING.md` 八条硬约束。
+> 一期范围：项目骨架 + 想法卡系统 + 状态机定版门 + 离线去重。
+> 二期范围：I3 facet 查新子流程（取证 prepare + 判定落卡 verdict，见第 8 节）。
+> 三期范围：I0/I1 生成算子规程 + chain 取材工具（第 9 节）、I4 两两对决
+> 排序（第 10 节）、I5 打磨规程与 pre-mortem 执行规程（第 11 节）、
+> I6 交接三件套导出与项目报告（第 12 节）、交付前自检清单（第 13 节）。
 > 执行顺序：按第 3 节产物规范建项目 → 按七环顺序推进（I0/I1 第 9 节 →
 > I2 补卡 → I3 第 8 节 → I4 第 10 节 → I5 第 11 节 → 定版门第 5 节 →
 > I6 第 12 节），交付前逐项过第 13 节自检清单；异常先查第 8.4 节
@@ -43,19 +53,19 @@ I6 见第 12 节。未落地的只剩第 14 节明列的 v2 项，不许假装�
 ├── project.yaml              # 项目元数据
 ├── index.yaml / index.md     # 项目级索引（自动维护：状态计数 + 卡清单）
 ├── idea-stage/
-│   ├── IDEA_REPORT.md        # 唯一权威文档（折叠各环结论）
+│   ├── IDEA_REPORT.md        # 唯一权威文档（二期起折叠各环结论）
 │   ├── candidates.md         # 候选池：幸存者 + 已杀区 + 切换日志 + 方向层留痕
 │   └── research_contract.md  # 交接契约（定版选定后生成）
 ├── cards/<idea_id>/          # 一卡一目录
 │   ├── idea.yaml             # 结构化字段（权威源）
 │   └── card.md               # 人读版（由 idea.yaml 渲染，两区物理分离）
-├── novelty/<idea_id>/        # 查新证据包：evidence.jsonl（证据池）
+├── novelty/<idea_id>/        # 查新证据包（二期落盘）：evidence.jsonl（证据池）
 │                             # queries.json（查询式与逐式日志）pool_report.md
 │                             # （池报告+盲区声明）verdict.json（判定与收据存根）
-├── chains/<chain_id>/        # 演进链素材（chain 命令落盘）：
+├── chains/<chain_id>/        # 演进链素材（三期，chain 命令落盘）：
 │                             # seed.json（根种子+已展开的跳）neighbors.jsonl
 │                             # （双向邻居清单）chain_report.md（素材报告）
-└── exports/<idea_id>/        # 交接三件套（只对定版卡）：
+└── exports/<idea_id>/        # 交接三件套（三期，只对定版卡）：
                               # design_handoff.md / idea_card.json /
                               # memory_export.jsonl（方向层条目）
 ```
@@ -80,7 +90,7 @@ idea_id 规则：`<slug>_<hash6>`——题名 ASCII 化 slug（截断 40 字符�
 - **试点标注诚实**（拍板 9.6-B）：试点环可选、默认关；未经试点验证的
   定版卡必须在卡面标注「未经试点验证」。
 
-## 5. 状态机与定版门（确定性校验）
+## 5. 状态机与定版门（一期核心，确定性校验）
 
 ```text
 draft → screened → novelty_checked → pre_mortem_passed
@@ -106,6 +116,11 @@ draft → screened → novelty_checked → pre_mortem_passed
 - **两级定版**（拍板 9.2-B）：概念定版须先在卡上显式标注
   finalization_level=conceptual 才许过门，且渲染出的卡面带「不得直接
   开工」横幅——概念级不许冒充可执行级。
+- **能力匹配门**（v1.1 IDEA-D03）：定版（两级皆然）须先填
+  exec_spec.capability_fit——所需能力逐项点名、队伍现状有据、每项
+  能力有处置结论（已有 / 可短期补 / 构成不可行，三选一且依据必填）；
+  可执行级另要求无「构成不可行」缺口，概念级允许带不可行缺口定版
+  （能力未就位正是概念级的题中之义），但不许以未评估冒充概念级。
 - **失败二分类**（硬约束 8）：killed 必填 failure_class——fundamental
   （附 root_cause + boundary_conditions）或 implementation（附
   retry_guidance）；分类决定该方向是永久剪枝还是可重试，不分类的黑名单
@@ -132,15 +147,16 @@ draft → screened → novelty_checked → pre_mortem_passed
 | `light-idea advance <project> <idea_id> --to <状态> [--by …] [--note …]` | 验门推进状态，不过门逐条列明 |
 | `light-idea dedup <project> [--threshold 0.55] [--no-write]` | 去重报告 + 回写 dedup 字段 |
 | `light-idea list <project>` | 列出全部卡与状态 |
-| `light-idea novelty prepare <project> <idea_id> [--per-query 10] [--sleep 0]` | facet 查新取证（逐面构式 → 四源实查 → 证据包落盘 + search_scope 回填） |
-| `light-idea novelty verdict <project> <idea_id> --verdict … --judge-model … --judge-family … --executor-model … --executor-family … [--caution-reason …] [--closest-file …] [--review-unavailable]` | 判定落卡（跨模型收据 + 逐面举证，纪律见第 8 节） |
-| `light-idea chain <project> --seed-doi … [--chain-id …] [--per-direction 25]` | 演进链取材——拉一种子的参考文献+施引邻居落盘成链素材（不做自动生成，规程见第 9 节） |
-| `light-idea duel <project> --a <id> --b <id> --winner <id\|draw> --by … [--note …]` | 两两对决落卡（双方 aux.pairwise_record，规程见第 10 节） |
-| `light-idea rank <project> [--no-write]` | 对决汇总——胜率矩阵 + Elo 参考分（回写 aux.elo；分数不作淘汰依据） |
-| `light-idea export <project> <idea_id>` | 交接三件套（只对定版卡；未定版拒绝并逐条说明缺口，见第 12 节） |
-| `light-idea report <project>` | 生成/刷新 IDEA_REPORT.md（全池状态/定版清单/已杀区/去重率/对决摘要） |
+| `light-idea novelty prepare <project> <idea_id> [--per-query 10] [--sources a,b,…] [--sleep 0]` | 二期：facet 查新取证（逐面构式 → 七源实查 → 证据包落盘 + search_scope 回填）；v1.1 扩源 dblp/CORE/OpenAIRE，源清单可经 --sources 配置 |
+| `light-idea novelty verdict <project> <idea_id> --verdict … --judge-model … --judge-family … --executor-model … --executor-family … [--caution-reason …] [--closest-file …] [--review-unavailable]` | 二期：判定落卡（跨模型收据 + 逐面举证，纪律见第 8 节）；落卡后自动追加判例集（IDEA-D04） |
+| `light-idea novelty cases <project> [--seed] [--limit N] [--md]` | v1.1：查新判例集——列构成、给老项目补种种子判例、--md 输出最近 N 条摘录供判定材料包附带 |
+| `light-idea chain <project> --seed-doi … [--chain-id …] [--per-direction 25]` | 三期：演进链取材——拉一种子的参考文献+施引邻居落盘成链素材（不做自动生成，规程见第 9 节） |
+| `light-idea duel <project> --a <id> --b <id> --winner <id\|draw> --by … [--note …]` | 三期：两两对决落卡（双方 aux.pairwise_record，规程见第 10 节） |
+| `light-idea rank <project> [--no-write]` | 三期：对决汇总——胜率矩阵 + Elo 参考分（回写 aux.elo；分数不作淘汰依据） |
+| `light-idea export <project> <idea_id>` | 三期：交接三件套（只对定版卡；未定版拒绝并逐条说明缺口，见第 12 节） |
+| `light-idea report <project>` | 三期：生成/刷新 IDEA_REPORT.md（全池状态/定版清单/已杀区/去重率/对决摘要） |
 
-## 8. I3 facet 查新规程
+## 8. I3 facet 查新规程（二期已实现）
 
 查新是两步命令 + 一道状态门：`novelty prepare`（取证）→ 跨模型判定
 （人工/编排层把证据包交给另一模型家族）→ `novelty verdict`（落卡）→
@@ -156,13 +172,19 @@ draft → screened → novelty_checked → pre_mortem_passed
    逐面构式（purpose / mechanism / evaluation 每面至少 2 条——短语式
    用 facet 短语原文、关键词式从短语+展开抽词；另加整想法召回式
    1–2 条，**只作召回层**，命中记录标 `whole`，不许据此单独判定）；
-   四源实查（Crossref / OpenAlex / Semantic Scholar / Europe PMC，
-   均免 Key）；归池去重（DOI 优先、无 DOI 用规范化题名）并离线粗排。
+   七源实查（Crossref / OpenAlex / Semantic Scholar / Europe PMC /
+   dblp / CORE / OpenAIRE——v1.1 IDEA-D02 扩源：dblp 补计算机
+   会议文献、CORE 补开放全文、OpenAIRE 补欧盟开放仓储；均免 Key，
+   CORE 可选 Key 经环境变量 CORE_API_KEY 注入、绝不落盘）；源清单
+   可用 `--sources` 配置子集，但不许为了好看裁掉失败源——失败要
+   留痕不要绕开；归池去重（DOI 优先、无 DOI 用规范化题名）并
+   离线粗排。
 3. **查证据包**：打开 `novelty/<idea_id>/pool_report.md`——先看各源
    状态与**已知盲区声明**：某源 429/不可达会写明「覆盖不全」，
-   某面零命中会点名；盲区已同步回填卡的 `search_scope`
-   （sources / pool_size / known_blind_spots）。四源全灭时 prepare
-   返回失败，**不许在此基础上落任何判定**，等源恢复后重跑 prepare。
+   某面零命中会点名；盲区已同步回填卡的 `search_scope`（sources
+   只记**实际成功源**、全灭源另列 failed_sources、pool_size /
+   known_blind_spots）。全部源全灭时 prepare 返回失败，**不许在
+   此基础上落任何判定**，等源恢复后重跑 prepare。
 4. **交判定**：按 §8.3 协议把证据包交给**另一模型家族**的判定者，
    收回结构化判定（verdict + closest_works + 逐面举证）后写成
    closest JSON 文件：`{"closest_works": [ {doi 或 paper_id, title,
@@ -210,8 +232,10 @@ draft → screened → novelty_checked → pre_mortem_passed
   亦然）。同家族自审判在 verdict 落卡时被直接拒绝——不是警告。
 - **交什么**：给判定者的材料包 = 想法卡全文（idea.yaml / card.md）
   + 证据包三件（evidence.jsonl、pool_report.md、queries.json）
-  + 本节 §8.2 守则 + 判定宪法原文。判定者不需要也不应该拿到
-  执行者的内部推理过程。
+  + 本节 §8.2 守则 + 判定宪法原文 + **判例集摘录**（跑
+  `novelty cases <project> --md` 取最近 5 条判例——v1.1 IDEA-D04：
+  判例给判定者校准口径，判例里的论文不许当作本卡证据引用）。
+  判定者不需要也不应该拿到执行者的内部推理过程。
 - **收什么**：结构化判定（§8.1 第 4 步的 closest JSON）+ 判定者
   模型名与家族名。口头结论不落卡。
 - **收据怎么记**：`novelty verdict` 自动生成
@@ -230,14 +254,26 @@ draft → screened → novelty_checked → pre_mortem_passed
 - 单源限流/不可达是常态（免 Key 源的共享配额）：prepare 如实记录
   并写入盲区，不重试到把源打挂，不假装查全；赶时间可调大
   `--sleep` 降低触发限流的概率。
+- dblp 有机器人校验（v1.1 实测）：dblp 对机房出口 IP 启用
+  Anubis 校验，程序化客户端会收到 HTTP 202 的 HTML 挑战页
+  （错误记为「响应不是合法 JSON（HTTP 202…）」），本机环境下
+  该源实查不可用属环境限制、非适配器缺陷（响应形状已由离线
+  夹具钉住）；不许用绕过校验的手段硬打——如实落盲区，换用户
+  本机等正常网络环境再跑该源。CORE 无 Key 时可能 401，盲区
+  声明会提示配置 CORE_API_KEY。
 - 重排目前只有离线文本粗排一段（向量粗排 + 按面 LLM 重排的第二
-  段在判定者阅读环节完成，没有独立命令）——这是已知边界，
+  段在判定者阅读环节完成，没有独立命令）——这是已知的二期边界，
   不许把粗排分包装成「两段重排」的结论。
-- 本领域查新判例集（带判例判定是 facet 路线准确率的主要增益
-  来源）尚未冷启动：判定者目前只靠 §8.2 守则与判定宪法，
-  判例集建设列入后续工作，建成后按 §8.3 材料包一并交付判定者。
+- 查新判例集已冷启动（v1.1 IDEA-D04）：落点
+  `novelty/cases/casebook.jsonl`（只增不改）——每次判定落卡自动
+  追加一条判例（facet 摘要 + closest 前三条 + 判定 + 薄点说明，
+  不含判定者/执行者模型名）；随包 4 条种子判例逐条标源（真实
+  演示判定 1、测试夹具场景 1、构建期构造 2，含一条 ABANDON
+  正例），新项目 init 自动播种、老项目用 `novelty cases --seed`
+  补种。判例随真实判定持续增长；降级（REVIEW_UNAVAILABLE）
+  判例在集内明示 review_status，校准时权重低于正式跨模型判例。
 
-## 9. I0 缺口感知与 I1 生成算子规程
+## 9. I0 缺口感知与 I1 生成算子规程（三期已实现）
 
 程序为主、工具为辅：工具只做确定性的取材与落盘（chain 命令），
 缺口判断、建链、生成全部由执行智能体按本节步骤执行并留痕——
@@ -358,7 +394,7 @@ draft → screened → novelty_checked → pre_mortem_passed
 - 回流只许驱动「换掉被撞的那一面」（单 facet 替换，见第 11 节），
   不许借回流之名重写整卡。
 
-## 10. I4 评估与排序规程
+## 10. I4 评估与排序规程（三期已实现）
 
 主机制两两对决（duel/rank 命令），相对判断优先、分数只粗筛：
 
@@ -366,6 +402,9 @@ draft → screened → novelty_checked → pre_mortem_passed
    约束 1）；判定者只看两卡的 facet + 正文 + 执行级规格，
    **可行性独立成维展示**，不许只给一个被新颖性主导的总评——
    判语里须分别说清「新颖性谁强、可行性谁强、综合谁先行」。
+   可行性维的事实底座是各卡的 capability_fit（IDEA-D03）：`rank`
+   输出随每张卡附能力匹配摘要（最差处置 + 三档计数），只作并列
+   展示的排序参考，与 Elo 同纪律——不作淘汰依据。
 2. **怎么判**：正反序各评一次消位置偏倚（先 A 后 B 与先 B 后 A
    各一遍，结论冲突记 draw 并注明）；判语落 duel 的 --note，
    不许只给胜负不给理由。
@@ -380,7 +419,7 @@ draft → screened → novelty_checked → pre_mortem_passed
    会明示「分不开」——此时不许引用 Elo 小数点硬排座次，按并列
    处理，并列组整体进下一环或交人裁。
 
-## 11. I5 打磨规程与 pre-mortem 执行规程
+## 11. I5 打磨规程与 pre-mortem 执行规程（三期已实现）
 
 ### 11.1 修订算子与落痕纪律
 
@@ -417,7 +456,7 @@ draft → screened → novelty_checked → pre_mortem_passed
 
 ### 11.3 pre-mortem 执行规程（定版前的独立关）
 
-以**执行阶段评审者的问题清单**逐项过（清单六项写死在 schema
+以**执行阶段评审者的问题清单**逐项过（清单七项写死在 schema
 PRE_MORTEM_ITEMS，门的校验见第 5 节）。执行者逐项给出 pass 或
 na（na 必须附理由，如「理论型想法无数据集，datasets 项 na」），
 任一项答不出 = open_items 留项，清单不清空不许过门：
@@ -430,6 +469,17 @@ na（na 必须附理由，如「理论型想法无数据集，datasets 项 na」
 | resources_realistic | 资源预算逐项对账：GPU 小时、数据获取路径、工期，与实验室实际条件比对，写明比对依据 |
 | null_result_learning | 方法无效/零结果时能学到什么，是否已写进判别实验的 readout_null；学不到东西的实验不值得做 = 未过 |
 | method_instantiable | 核心方法逐步复述到可实例化：任一步出现「某种方法处理一下」式含糊 = 未过，须先写死关键细节（exec_spec.key_details） |
+| capability_match | 能力匹配对账（v1.1 IDEA-D03 独立成项）：exec_spec.capability_fit 已填——所需能力逐项点名、队伍现状写的是既往实绩不是愿望、每项能力有处置结论（已有/可短期补/构成不可行）且依据可核验；有 blocking 缺口时本项只许在「已如实登记且定版级别据此降为概念级或先补能力」的前提下 pass，瞒报缺口 = 未过 |
+
+**capability_fit 填写规程**（与 capability_match 项配套）：所需
+能力从 facet 与 exec_spec 反推——机制面要什么技能、正文方法步骤
+要什么设备/数据管线、评测面要什么标注与统计能力，逐项写
+{capability, detail（具体指什么、要到什么程度）}；team_status
+写队伍的既往实绩（做过的同类项目、现成管线、可用设备与数据
+通道），不许写「可以学」式愿望；gaps 逐项给处置——have（已有，
+依据是哪次实绩）、fillable（可短期补，依据是补齐路径与时限）、
+blocking（构成不可行，依据是缺口为何补不上）。评级一律给出处，
+空评在 schema 校验层就会被拒。
 
 执行形态：执行者按上表逐项自查并把 {status, note} 写进卡的
 pre_mortem.checklist、open_items 清空后 `advance --to
@@ -439,7 +489,7 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
 之前写死（pre-mortem 门会验），判读标准事后不许改口径——改了
 要在 revision_log 里留痕并说明。
 
-## 12. I6 交接导出规程
+## 12. I6 交接导出规程（三期已实现）
 
 1. **导出**：`light-idea export <project> <idea_id>` 只对
    finalized 两级定版卡产出三件套到 `exports/<idea_id>/`：
@@ -481,11 +531,13 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
 - [ ] 判定逐面举证：closest 每条有 collided_facets + delta，且都在证据池中
 - [ ] CAUTION 都写清了 delta 薄在哪；ABANDON 都点名了在先论文且转 killed 落痕
 - [ ] 收据跨模型（异家族）或 review_status=REVIEW_UNAVAILABLE 如实登记；无一例自评冒充判定
-- [ ] search_scope 的已知盲区与 pool_report 一致，未把「没查到」写成「不存在」
+- [ ] search_scope 的已知盲区与 pool_report 一致，未把「没查到」写成「不存在」；search_scope.sources 只含实际成功源、失败源在 failed_sources 里有账
+- [ ] 本周期每张落判定卡都已自动追加判例集（verdict.json 的 casebook 字段 appended=true，或同 case_id 已在集内）；判定材料包附了判例摘录
 
 **打磨与定版**
 - [ ] revision_log 每轮有触发事件与字段变更集；bad_case 回流 ≤3 轮、总打磨 ≤6 轮
-- [ ] pre-mortem 六项逐项 pass/na（na 有理由）、open_items 为空、判读标准未事后改口径（如改已留痕）
+- [ ] pre-mortem 七项逐项 pass/na（na 有理由）、open_items 为空、判读标准未事后改口径（如改已留痕）
+- [ ] 定版卡 capability_fit 齐备：所需能力逐项有处置结论与依据，可执行级无 blocking 缺口
 - [ ] 定版卡执行级规格六项齐（可执行级）或概念级已显式标注且卡面有「不得直接开工」横幅
 - [ ] 定版卡 closest_works 全部 verified=true；未试点定版卡卡面有「未经试点验证」标注
 
@@ -501,9 +553,11 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
   格式已预留（拍板 9.3-B）。
 - **I3 第二段重排未独立成命令**：向量粗排 + 按面 LLM 重排目前
   在判定者阅读环节完成（第 8.4 节口径不变）。
-- **本领域查新判例集未冷启动**：判定者目前只靠 §8.2 守则与
-  判定宪法；判例集（想法+最相关论文+判定+理由）是最值得长期
-  投入的自建资产，按领域持续扩充，建成后按 §8.3 材料包交付。
+- **查新判例集已冷启动、仍属早期**（v1.1 IDEA-D04）：种子只有
+  4 条且真实判定仅 1 条（演示 C1，尚是降级判定），校准增益要靠
+  真实判定逐条累积——每次判定自动追加已成机制，但集子长大
+  之前，判定者仍以 §8.2 守则与判定宪法为主、判例为辅，不许
+  拿 4 条种子夸大成「判例驱动」。
 - **试点环（拍板 9.6-B）只落标注纪律**：pilot 字段与卡面标注
   已就位，试点执行归 light-experiment，本技能不代跑实验。
 - **跨周期记忆只留导出**：memory_export 的方向层条目格式已定，
@@ -515,7 +569,8 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
 
 ## 15. 验收口径
 
-见 README「开发记录（节略）」与「v1.0 封版记录」：schema 校验、
-状态机每条门的正/反例、killed 分类必填、去重对构造样本的检出、
-查新 fixture 测试与真实联网冒烟、交接导出与端到端演示，
+见 README「一期验收记录」「二期验收记录」「三期验收记录与 v1.0
+封版记录」：schema 校验、状态机每条门的正/反例、killed 分类必填、
+去重对构造样本的检出、查新 fixture 测试与真实联网冒烟、三期新
+命令的 fixture 测试与端到端真实演示（examples/demo-poultry/），
 测试全过才算完成。

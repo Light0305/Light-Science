@@ -1,0 +1,20 @@
+kind: light-patent/redteam
+case_id: PT-case_4b3e0c
+recorded_at: '2026-10-20'
+claims_team:
+  checked:
+  - 新颖性
+  - 创造性三步法
+  - 客体
+  not_checked:
+  - 同族检索
+  findings:
+  - point: 独权区别特征组合成立
+    severity: info
+package_team:
+  checked:
+  - 跨文件一致性
+  - 哈希时序
+  - 正文洁净
+  not_checked: []
+  findings: []

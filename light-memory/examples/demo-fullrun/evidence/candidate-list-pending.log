@@ -1,4 +1,4 @@
-$ light-memory candidate light-memory/examples/demo-fullrun/world/proj-a list --kind annotation --status pending
+$ light-memory candidate ../../../../light-memory/examples/demo-fullrun/world/proj-a list --kind annotation --status pending
 [exit 0]
 候选 1 条：
   cand_a2d6377faafd [annotation] pending（提名 obsidian-readback，源 annotation_readback）

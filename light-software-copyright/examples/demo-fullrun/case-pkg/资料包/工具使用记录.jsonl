@@ -1,0 +1,18 @@
+{"ts": "2026-10-20", "actor": "tool", "action": "init", "target": "case", "detail": "建案"}
+{"ts": "2026-10-20", "actor": "user", "action": "set-facts", "target": "facts", "detail": "来源 ../../../../../light-software-copyright/examples/demo-fullrun/inputs/facts.yaml"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "facts:facts", "detail": "确认回执 哈希 a114691015c2"}
+{"ts": "2026-10-20", "actor": "tool", "action": "freeze", "target": "snapshot", "detail": "4 个文件 / 源程序量 139 行"}
+{"ts": "2026-10-20", "actor": "tool", "action": "select-scan", "target": "selection", "detail": "入选 4 / 排除 0"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "selection:selection", "detail": "确认回执 哈希 b398a3f00588"}
+{"ts": "2026-10-20", "actor": "tool", "action": "render", "target": "code-material", "detail": "3 页（全量 3 页）"}
+{"ts": "2026-10-20", "actor": "tool", "action": "draft", "target": "doc-segments", "detail": "设计说明书 草稿 6 段"}
+{"ts": "2026-10-20", "actor": "user", "action": "revise-segment", "target": "segment:SEG-02", "detail": "用户改写，旧确认失效"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-01", "detail": "确认回执 哈希 9d2ad9f92e8f"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-02", "detail": "确认回执 哈希 9026966a503c"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-03", "detail": "确认回执 哈希 23945182cbbb"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-04", "detail": "确认回执 哈希 cd9710506c6f"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-05", "detail": "确认回执 哈希 173f2a79721b"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "segment:SEG-06", "detail": "确认回执 哈希 4c4e0023f9a8"}
+{"ts": "2026-10-20", "actor": "tool", "action": "render", "target": "doc-material", "detail": "设计说明书 2 页"}
+{"ts": "2026-10-20", "actor": "user", "action": "declaration-record", "target": "declaration", "detail": "来源：演示占位（非官方文本，仅演示登记机制）；哈希 521056e1a5ed"}
+{"ts": "2026-10-20", "actor": "user", "action": "confirm", "target": "declaration:current_text", "detail": "确认回执 哈希 521056e1a5ed"}

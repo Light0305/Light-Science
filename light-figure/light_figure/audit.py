@@ -73,17 +73,25 @@ class _Ctx:
 
 def artifact_for(root, pkg, fig_id):
     """逐图最终产物（审计对象）：数据图 = exports/<fig>.pdf；
-    方法图 = schematic/redraw/<fig>.vsdx。不存在返回 None。"""
+    方法图按合同后端 = .vsdx（visio）/ .pptx（powerpoint）。
+    不存在返回 None。"""
     root = Path(root)
     row = next((r for r in (pkg["head"] or {}).get("figures") or []
                 if r.get("fig_id") == fig_id), None)
     if row is None:
         return None
     if row.get("line") == "schematic":
-        path = root / "schematic" / "redraw" / f"{fig_id}.vsdx"
+        from .project import schematic_artifact_relpath
+        contract = pkg["contracts"].get(fig_id) or {}
+        path = root / schematic_artifact_relpath(contract, fig_id)
     else:
         path = root / "exports" / f"{fig_id}.pdf"
     return path if path.exists() else None
+
+
+def _schematic_backend(ctx) -> str:
+    from .project import schematic_backend
+    return schematic_backend(ctx.contract)
 
 
 def _gate(gate, verdict, findings=None, metrics=None, applicable=True):
@@ -361,6 +369,12 @@ def gate_glyph(ctx: _Ctx) -> dict:
 def gate_contract(ctx: _Ctx) -> dict:
     findings = []
     if ctx.line == "data":
+        if not ctx.contract.get("palette_decision"):
+            findings.append({
+                "level": "warn",
+                "code": "contract.palette_decision_unrecorded",
+                "message": "图合同未登记配色决定（FIG-D08：数据图线的"
+                           "配色决定也须显性落字，不许静默导出）"})
         doc, err = _open_pdf(ctx)
         if doc is None:
             return _na("contract", err)
@@ -423,6 +437,37 @@ def gate_contract(ctx: _Ctx) -> dict:
                                    "不一致"})
         metrics = {"width_mm": round(w_mm, 2), "height_mm": round(h_mm, 2),
                    "text_spans": spans}
+    elif _schematic_backend(ctx) == "powerpoint":
+        from .pptxbuild import load_pptx_manifest
+        manifest = load_pptx_manifest(ctx.root, ctx.fig_id)
+        if manifest is None:
+            findings.append({
+                "level": "fail", "code": "contract.manifest_missing",
+                "message": "方法图（powerpoint 后端）缺 pptx manifest"
+                           "（单一真相源）"})
+            return _gate("contract", _compose(findings), findings)
+        build = manifest.get("build") or {}
+        if not build:
+            findings.append({
+                "level": "warn", "code": "contract.build_unrecorded",
+                "message": "成品 .pptx 无构建记录（非本工具构建或"
+                           "未登记）"})
+        elif build.get("backend") == "powerpoint_file" \
+                and build.get("powerpoint_verified") is not False:
+            findings.append({
+                "level": "fail",
+                "code": "contract.powerpoint_verified_false_claim",
+                "message": "PPT 文件层产物被标 powerpoint_verified≠"
+                           "false：未经 PowerPoint 实机原生验证不许"
+                           "声称通过（FIG-D02，与 visio_verified 同构）"})
+        for residue in manifest.get("bitmap_residue") or []:
+            if residue.get("class") not in schema.BITMAP_RESIDUE_CLASSES:
+                findings.append({
+                    "level": "fail", "code": "contract.residue_class",
+                    "message": f"位图残留 {residue.get('residue_id')} 类别"
+                               f" {residue.get('class')!r} 不在合法类别"})
+        metrics = {"backend": "powerpoint",
+                   "build_recorded": bool(build)}
     else:
         manifest = load_manifest(ctx.root, ctx.fig_id)
         if manifest is None:
@@ -446,6 +491,36 @@ def gate_contract(ctx: _Ctx) -> dict:
                 "level": "fail", "code": "contract.visio_verified_false_claim",
                 "message": "文件级路线产物被标 visio_verified≠false："
                            "未过 Visio 实机验证不许声称通过（拍板 D4）"})
+        # User.* 语义 ID 钉扎核查（FIG-D04）：本工具构建的成品，
+        # 每形状 User.SemanticId 须与形状名一致，缺失即点名。
+        if build and ctx.artifact is not None:
+            from .redraw import extract_shapes
+            try:
+                extracted = extract_shapes(ctx.artifact)
+            except Exception:
+                extracted = None
+            if extracted is not None:
+                missing = [s["shape_id"] for s in extracted
+                           if s.get("user_semantic_id") is None]
+                mismatched = [
+                    s["shape_id"] for s in extracted
+                    if s.get("user_semantic_id") is not None
+                    and s["user_semantic_id"] != s["shape_id"]]
+                if missing:
+                    findings.append({
+                        "level": "fail",
+                        "code": "contract.semantic_id_missing",
+                        "message": "成品形状缺 User.SemanticId（"
+                                   + "、".join(missing)
+                                   + "）：构建产物须把 manifest 语义 ID "
+                                   "写进对象本身（FIG-D04）"})
+                if mismatched:
+                    findings.append({
+                        "level": "fail",
+                        "code": "contract.semantic_id_mismatch",
+                        "message": "成品形状的 User.SemanticId 与形状"
+                                   "名不一致（"
+                                   + "、".join(mismatched) + "）"})
         for residue in manifest.get("bitmap_residue") or []:
             if residue.get("class") not in schema.BITMAP_RESIDUE_CLASSES:
                 findings.append({
@@ -482,9 +557,94 @@ def _image_dims(data: bytes):
         return None
 
 
+def _gate_native_pptx(ctx: _Ctx) -> dict:
+    """PPTX 原生性（FIG-D02 七门移植）：OPC 解包数 sp/cxnSp/pic/
+    graphicFrame——整页一张大图判 FAIL，口径与 .vsdx 侧同构，
+    无需 PowerPoint 在场（python-pptx/XML 层即可判）。"""
+    import xml.etree.ElementTree as ET
+
+    def local(tag):
+        return tag.rsplit("}", 1)[-1]
+
+    try:
+        zf = zipfile.ZipFile(ctx.artifact)
+    except Exception as e:
+        return _na("native", f".pptx 无法按 OPC 包打开：{e}")
+    names = zf.namelist()
+    slide_names = sorted(n for n in names
+                         if re.match(r"ppt/slides/slide\d+\.xml$", n))
+    if not slide_names:
+        return _na("native", ".pptx 内无 ppt/slides/slideN.xml，"
+                             "形状数无从审计")
+    slide_size = None
+    if "ppt/presentation.xml" in names:
+        pres = ET.fromstring(zf.read("ppt/presentation.xml"))
+        for el in pres.iter():
+            if local(el.tag) == "sldSz":
+                slide_size = (int(el.get("cx", 0)), int(el.get("cy", 0)))
+    tree = ET.fromstring(zf.read(slide_names[0]))
+    counts = {"sp": 0, "cxnSp": 0, "graphicFrame": 0}
+    pics = []
+    for el in tree.iter():
+        tag = local(el.tag)
+        if tag in counts:
+            counts[tag] += 1
+        elif tag == "pic":
+            name = None
+            ext = None
+            for sub in el.iter():
+                stag = local(sub.tag)
+                if stag == "cNvPr":
+                    name = sub.get("name")
+                elif stag == "ext" and ext is None:
+                    ext = (int(sub.get("cx", 0)), int(sub.get("cy", 0)))
+            pics.append({"name": name, "ext": ext})
+    from .pptxbuild import load_pptx_manifest
+    manifest = load_pptx_manifest(ctx.root, ctx.fig_id) or {}
+    declared = {f"residue-{r.get('residue_id')}"
+                for r in manifest.get("bitmap_residue") or []}
+    findings = []
+    total_shapes = counts["sp"] + counts["cxnSp"] \
+        + counts["graphicFrame"] + len(pics)
+    for pic in pics:
+        if pic["name"] not in declared:
+            findings.append({
+                "level": "fail", "code": "native.undeclared_bitmap",
+                "message": f"幻灯片图片对象 {pic['name']!r} 未在 pptx "
+                           "manifest 登记为位图残留（未登记的位图不许"
+                           "出现在成品中，约束 12）"})
+            continue
+        if pic["ext"] and slide_size and slide_size[0] > 0 \
+                and pic["ext"][0] >= 0.9 * slide_size[0] \
+                and pic["ext"][1] >= 0.9 * slide_size[1]:
+            findings.append({
+                "level": "fail", "code": "native.full_page_bitmap",
+                "message": f"图片对象 {pic['name']} 尺寸 ≈ 整页：登记"
+                           "的残留只许精确裁剪局部，整页大图即 FAIL"})
+    if total_shapes == 1 and pics:
+        findings.append({
+            "level": "fail", "code": "native.one_shape_one_bitmap",
+            "message": "首页恰好 1 个对象且为嵌入图片：不是真重建"})
+    if total_shapes == 0:
+        findings.append({
+            "level": "fail", "code": "native.no_shapes",
+            "message": "首页对象数为 0：无原生对象"})
+    metrics = {"slide_objects": counts, "pictures": len(pics),
+               "declared_residues": sorted(declared),
+               "slide_size_emu": slide_size}
+    if not findings:
+        findings.append({
+            "level": "info", "code": "native.ok",
+            "message": f"首页 {total_shapes} 个原生对象、图片 "
+                       f"{len(pics)} 个均有登记"})
+    return _gate("native", _compose(findings), findings, metrics)
+
+
 def gate_native(ctx: _Ctx) -> dict:
     if ctx.line != "schematic":
-        return _skip("native", "原生性门只审方法图 .vsdx")
+        return _skip("native", "原生性门只审方法图成品（.vsdx / .pptx）")
+    if _schematic_backend(ctx) == "powerpoint":
+        return _gate_native_pptx(ctx)
     try:
         zf = zipfile.ZipFile(ctx.artifact)
     except Exception as e:

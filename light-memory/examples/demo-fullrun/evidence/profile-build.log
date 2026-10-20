@@ -1,3 +1,3 @@
-$ light-memory profile light-memory/examples/demo-fullrun/world/proj-a build
+$ light-memory profile ../../../../light-memory/examples/demo-fullrun/world/proj-a build
 [exit 0]
-画像已再生：light-memory/examples/demo-fullrun/world/proj-a/profile/profile-static.md / light-memory/examples/demo-fullrun/world/proj-a/profile/profile-dynamic.md（决策 0、方法 0、近期事件 12；只装处置与指针）
+画像已再生：../../../../light-memory/examples/demo-fullrun/world/proj-a/profile/profile-static.md / ../../../../light-memory/examples/demo-fullrun/world/proj-a/profile/profile-dynamic.md（决策 0、方法 0、近期事件 12；只装处置与指针）

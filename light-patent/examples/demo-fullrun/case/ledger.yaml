@@ -1,0 +1,73 @@
+kind: light-patent/ledger
+case_id: PT-case_4b3e0c
+deadlines:
+- kind: office_action_response
+  label: 审查意见答复期（OA-1（演示模拟））
+  due: '2027-07-01'
+  basis: 以通知书载明期限为准，本清单按登记月数机械算
+- kind: request_examination
+  label: 请求实质审查期限（自申请日起 3 年）
+  due: '2029-10-22'
+  basis: 专利法（2020 年修正）第 35 条
+version_chain:
+- at: '2026-10-20'
+  event: check
+  grade: incomplete_draft
+  artifact_hashes:
+    claims_md: fa5c39ed202a944a7cc1f7df31ce2b62869e365e336a754535f9b43376bfc7d9
+    specification_md: b258dc79560f8b3320cbac49142e7e4d19c46fbbe0200188236e246a66fcc926
+    abstract_md: aed9a5baeac937e8f7c6167fd93680d4a9e2ee034e9b9d9507aca75482f4deeb
+- at: '2026-10-20'
+  event: check
+  grade: deliverable_draft
+  artifact_hashes:
+    claims_md: 38ab62118317056f2eae3a6c0c737cd7ee930c6321bf63211fa1a094c821e6f8
+    specification_md: b258dc79560f8b3320cbac49142e7e4d19c46fbbe0200188236e246a66fcc926
+    abstract_md: aed9a5baeac937e8f7c6167fd93680d4a9e2ee034e9b9d9507aca75482f4deeb
+worth_it:
+  verdict: file_narrowed
+  rationale: 区别特征组合有实验支撑，值得以收窄独权申请；多摄像头拼接另行立项
+  evidence:
+  - ref: novelty/d1.yaml
+  - ref: intake/candidates.yaml
+  - ref: check/check_report.yaml
+  decided_at: '2026-10-20'
+  disclaimers:
+  - 草案，需专利代理师复核
+  - 只作初筛底稿、不作法律意见
+memory_export:
+  objects:
+  - object: patent_case
+    case_id: PT-case_4b3e0c
+    title: 一种基于时序融合的家禽异常行为检测方法
+    status: office_action
+  events:
+  - event: status:intake
+    at: '2026-10-20'
+  - event: status:audited
+    at: '2026-10-20'
+  - event: status:mined
+    at: '2026-10-20'
+  - event: status:searched
+    at: '2026-10-20'
+  - event: status:drafted
+    at: '2026-10-20'
+  - event: status:checked
+    at: '2026-10-20'
+  - event: status:filed
+    at: '2026-10-20'
+  - event: status:office_action
+    at: '2026-10-20'
+  - event: deadline:office_action_response
+    due: '2027-07-01'
+  - event: deadline:request_examination
+    due: '2029-10-22'
+  facts:
+  - fact: 查新门=pass_with_doubts，D1=DOI:10.1016/j.compag.2025.110856
+    evidence_ref: novelty/d1.yaml
+    disclaimers:
+    - 只作初筛底稿、不作法律意见
+  - fact: worth-it=file_narrowed
+    evidence_ref: ledger.yaml#worth_it
+    disclaimers:
+    - 只作初筛底稿、不作法律意见

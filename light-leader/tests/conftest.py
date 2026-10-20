@@ -131,6 +131,52 @@ def make_memory(root, with_view=True, n_objects=3):
     return mem
 
 
+def make_patent(root, status="responded", blocked=None, deadlines=None,
+                case_id="PT-case_demo"):
+    case_dir = root / "patent" / "cases" / case_id
+    case = {"kind": "light-patent/case", "version": "1.0",
+            "case_id": case_id, "title": "演示专利案件",
+            "patent_type": "invention", "jurisdiction": "CN",
+            "status": status, "blocked": blocked}
+    write_yaml(case_dir / "case.yaml", case)
+    ledger = {"kind": "light-patent/ledger", "case_id": case_id,
+              "deadlines": deadlines or []}
+    return write_yaml(case_dir / "ledger.yaml", ledger)
+
+
+def make_copyright(root, status="packaged", correction=None):
+    d = {"kind": "light-software-copyright/case", "version": 1,
+         "title": "演示软著案件", "status": status,
+         "correction": correction}
+    return write_yaml(root / "软件著作权申请资料" / "copyright.yaml", d)
+
+
+def make_crawler(root, targets=(), workspace_status="active"):
+    ds = root / "data-sources"
+    broken = [t["target_id"] for t in targets if t.get("circuit_broken")]
+    write_yaml(ds / "crawler.yaml",
+               {"kind": "light-crawler/workspace", "version": 1,
+                "workspace_id": "ws-demo", "project": "demo",
+                "status": workspace_status,
+                "circuit_broken_targets": broken})
+    for t in targets:
+        tid = t["target_id"]
+        write_yaml(ds / "targets" / tid / "target.yaml",
+                   {"target_id": tid, "name": f"目标 {tid}",
+                    "channel": t.get("channel", "official_api")})
+        write_yaml(ds / "targets" / tid / "state.yaml",
+                   {"target_id": tid,
+                    "circuit_broken": bool(t.get("circuit_broken")),
+                    "circuit_reason": t.get("circuit_reason")})
+        if t.get("precheck_status") is not None:
+            write_jsonl(ds / "prechecks" / f"{tid}.jsonl", [{
+                "kind": "precheck", "precheck_id": f"pc-{tid}",
+                "target_id": tid, "status": t["precheck_status"],
+                "blocked_reasons": t.get("blocked_reasons") or [],
+                "missing": t.get("missing") or []}])
+    return ds
+
+
 @pytest.fixture()
 def empty_project(tmp_path):
     return tmp_path / "proj"

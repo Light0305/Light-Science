@@ -1,0 +1,11 @@
+kind: light-crawler/workspace
+version: 1
+workspace_id: ws-4105ac73
+project: demo-poultry-research
+status: active
+created_at: '2026-10-20T20:18:34+00:00'
+lock:
+  min_interval_sec: null
+  allow_browser: true
+  max_personal_data_risk: low
+circuit_broken_targets: []

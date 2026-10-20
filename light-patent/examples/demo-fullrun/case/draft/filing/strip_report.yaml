@@ -1,0 +1,18 @@
+case_id: PT-case_4b3e0c
+stripped_at: '2026-10-20'
+files:
+- file: claims.md
+  work_sha256: 38ab62118317056f2eae3a6c0c737cd7ee930c6321bf63211fa1a094c821e6f8
+  filing_sha256: 38ab62118317056f2eae3a6c0c737cd7ee930c6321bf63211fa1a094c821e6f8
+  removed_chars: 0
+  process_hits: []
+- file: specification.md
+  work_sha256: b258dc79560f8b3320cbac49142e7e4d19c46fbbe0200188236e246a66fcc926
+  filing_sha256: 8f9cc9d458d70c7f98dbf2671adb133e37532925e2da769bed3bbf55029308ba
+  removed_chars: 73
+  process_hits: []
+- file: abstract.md
+  work_sha256: aed9a5baeac937e8f7c6167fd93680d4a9e2ee034e9b9d9507aca75482f4deeb
+  filing_sha256: aed9a5baeac937e8f7c6167fd93680d4a9e2ee034e9b9d9507aca75482f4deeb
+  removed_chars: 0
+  process_hits: []

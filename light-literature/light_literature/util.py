@@ -53,6 +53,21 @@ def paper_dir(project_dir: Path, paper_id: str) -> Path:
     return pdir
 
 
+def corpus_paper_ids(project_dir: Path) -> list[str]:
+    """已入库且已有 source_map 的论文 ID 列表 (目录名字典序)。
+
+    claim-check 定位与 ask 检索的语料范围：Literature/ 下同时具备
+    paper.yaml 与 source_map.json 的单篇目录。
+    """
+    lit = literature_dir(project_dir)
+    if not lit.is_dir():
+        return []
+    return sorted(
+        d.name for d in lit.iterdir()
+        if d.is_dir() and (d / "paper.yaml").exists()
+        and (d / "source_map.json").exists())
+
+
 def load_paper_yaml(project_dir: Path, paper_id: str) -> tuple[Path, dict]:
     pdir = paper_dir(project_dir, paper_id)
     ypath = pdir / "paper.yaml"

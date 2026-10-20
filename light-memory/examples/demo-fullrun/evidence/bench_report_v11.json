@@ -1,0 +1,732 @@
+{
+  "kind": "light-memory/bench-report",
+  "version": "1.0",
+  "generated_at": "2026-10-20T19:28:26+00:00",
+  "world": "../../../../20-build/phase3-memory-bench/world",
+  "set": "../../../../light-memory/examples/demo-fullrun/inputs/bench_set_fullrun.jsonl",
+  "config": {
+    "recipes": {
+      "default": {
+        "weights": {
+          "fts": 1.0,
+          "vector": 1.0,
+          "relation": 0.8
+        },
+        "scope": "project"
+      },
+      "cross-project": {
+        "weights": {
+          "fts": 1.0,
+          "vector": 1.0,
+          "relation": 0.8
+        },
+        "scope": "cross"
+      },
+      "failure-lookup": {
+        "weights": {
+          "fts": 0.8,
+          "vector": 0.8,
+          "relation": 1.4
+        },
+        "scope": "project"
+      },
+      "paraphrase": {
+        "weights": {
+          "fts": 0.5,
+          "vector": 1.6,
+          "relation": 0.5
+        },
+        "scope": "project"
+      }
+    },
+    "embedder": {
+      "registered_provider": "local",
+      "registered_model": "BAAI/bge-small-zh-v1.5",
+      "effective": "local-onnx",
+      "model": "BAAI/bge-small-zh-v1.5",
+      "dim": 512,
+      "note": "本地真实嵌入（ONNX/fastembed，本机运行零外发），向量由登记模型产生"
+    },
+    "index_built_at": {
+      "a": "2026-10-20T19:28:17+00:00"
+    },
+    "config_hash": "08048c01cedfaee255d345d35b5a74b4e02b17a386f46212bf02e07c0775f96c"
+  },
+  "pass_line": null,
+  "verdict": "not_judged",
+  "note": "通过线待构建期首测后由用户定版；本报表只报数不判线（MM-32）。释义类单列；拒答判据 = top-5 内无与查询共享至少 2 个实义 token 的词法/关系有据命中。",
+  "categories": {
+    "knowledge_update": {
+      "total": 10,
+      "correct": 7,
+      "items": [
+        {
+          "qid": "ku-01",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-02",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-03",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-04",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-05",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "结论仅适用于数据版本完整交付的登记条目"
+            ]
+          }
+        },
+        {
+          "qid": "ku-06",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-07",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-08",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "ku-09",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "第二代结论包·构造演示"
+            ]
+          }
+        },
+        {
+          "qid": "ku-10",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "口径收紧为"
+            ]
+          }
+        }
+      ],
+      "rate": 0.7
+    },
+    "cross_project": {
+      "total": 8,
+      "correct": 7,
+      "items": [
+        {
+          "qid": "cx-01",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-02",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-03",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-04",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-05",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-06",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing_by_project": [
+              "与最优关联阈值之间存在稳定映射 @ turkey-threshold-prediction"
+            ]
+          }
+        },
+        {
+          "qid": "cx-07",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "cx-08",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        }
+      ],
+      "rate": 0.875
+    },
+    "failure_reuse": {
+      "total": 10,
+      "correct": 7,
+      "items": [
+        {
+          "qid": "fr-01",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "承接执行前必须核验登记数据版本的完整交付"
+            ]
+          }
+        },
+        {
+          "qid": "fr-02",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-03",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "seg-05/06 缺失"
+            ]
+          }
+        },
+        {
+          "qid": "fr-04",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-05",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-06",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-07",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-08",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-09",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "fr-10",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "逐段清单对账"
+            ]
+          }
+        }
+      ],
+      "rate": 0.7
+    },
+    "refusal": {
+      "total": 10,
+      "correct": 7,
+      "items": [
+        {
+          "qid": "rf-01",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-02",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 2
+          }
+        },
+        {
+          "qid": "rf-03",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 1
+          }
+        },
+        {
+          "qid": "rf-04",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-05",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-06",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-07",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 1
+          }
+        },
+        {
+          "qid": "rf-08",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-09",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        },
+        {
+          "qid": "rf-10",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "evidenced_hits": 0
+          }
+        }
+      ],
+      "rate": 0.7
+    },
+    "paraphrase": {
+      "total": 12,
+      "correct": 11,
+      "items": [
+        {
+          "qid": "pp-01",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-02",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-03",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-04",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-05",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-06",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-07",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-08",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-09",
+          "ok": false,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ],
+            "missing": [
+              "与最优关联阈值之间存在稳定映射"
+            ]
+          }
+        },
+        {
+          "qid": "pp-10",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-11",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        },
+        {
+          "qid": "pp-12",
+          "ok": true,
+          "detail": {
+            "hits": 5,
+            "old_answer": false,
+            "evidence_routes": [
+              "fts",
+              "vector"
+            ]
+          }
+        }
+      ],
+      "rate": 0.9167
+    }
+  },
+  "overall": {
+    "total": 50,
+    "correct": 39
+  }
+}

@@ -1,0 +1,9 @@
+{
+ "target_id": "demo-api",
+ "ready": true,
+ "status": "effective",
+ "reasons": [],
+ "channel": "official_api",
+ "effective_interval_sec": 1.0,
+ "precheck_id": "pc-d3a2f07f22"
+}

@@ -89,6 +89,31 @@ exec_spec:
     readout_positive: 留出段 MOTA 达神谕值 98% 以内（差 ≤2 点）且全面优于固定阈值：映射成立，进 Design
     readout_negative: 任一留出段 MOTA 低于固定阈值基线：统计量→阈值映射不存在，假设为假，回炉 facet
     readout_null: 与固定阈值差 <1 点且距神谕 >2 点：判别力不足，先扩样本段数再判，不许直接宣称成立
+  capability_fit:
+    required:
+    - capability: 多目标跟踪管线改造与评测
+      detail: 能在 ByteTrack 类管线的关联层改三阈值逻辑，并按 MOTChallenge 口径跑 MOTA/IDF1/HOTA
+    - capability: 视频级统计量与回归建模
+      detail: 轨迹长度/检测置信/目标密度三类统计量构造 + 小样本联合回归 + 留一视频交叉验证
+    - capability: 火鸡行为视频数据与标注
+      detail: 自建 6 段栏舍视频采集（种子作者数据未公开）与异常事件口径对齐
+    - capability: 中等 GPU 算力
+      detail: 神谕阈值扫描 + 回归训练，预算 30 GPU 小时（见 resource_budget）
+    team_status: 种子论文已完成精读（Literature 四件套在案），其检测+跟踪管线与附录 A 逐视频神谕扫描协议已摸清；本项目已跑通演进链取材与查新全流程，判别实验按留一交叉验证写死；算力为单卡工作站量级，与
+      30 GPU 小时预算匹配。短板在数据：种子数据未公开，评测集须自建采集。
+    gaps:
+    - capability: 多目标跟踪管线改造与评测
+      disposition: fillable
+      note: 管线结构已从论文与附录摸清，但尚未实际改过该关联层代码；先按附录 A 复现神谕扫描基线（一周内）即可进入可改状态
+    - capability: 视频级统计量与回归建模
+      disposition: have
+      note: 统计量构造与留一交叉验证是判别实验的既定设计，属常规统计建模技能，评测脚本可直接按此口径实现
+    - capability: 火鸡行为视频数据与标注
+      disposition: fillable
+      note: 采集通道为自有栏舍（见 datasets 的 access 口径），6 段视频量级小、3 周工期内可完成；标注复用种子论文异常口径，需一次对齐
+    - capability: 中等 GPU 算力
+      disposition: have
+      note: 30 GPU 小时在现有单卡预算内，神谕扫描为离线批跑，不构成瓶颈
 negative:
   strongest_objection: 审稿人会说：你只有 6 段视频，回归器学的不过是「时长→阈值」的查表，而附录 A 本来就按时长给了两组数——增量为零
   risks:
@@ -122,6 +147,9 @@ pre_mortem:
       status: pass
       note: 第三方可照卡执行：输入=三组视频级统计量（只用视频前段）、输出=三阈值联合回归、验证=留一视频交叉、对照=神谕/固定双锚、判读=三分法；歧义点（三阈值联合而非独立回归）已在
         key_details 写死
+    capability_match:
+      status: pass
+      note: v1.1 回填（IDEA-D03）：capability_fit 已逐项对账——2 项已有、2 项可短期补、无构成不可行缺口；处置依据见 exec_spec.capability_fit
   open_items: []
 finalization_level: null
 novelty:

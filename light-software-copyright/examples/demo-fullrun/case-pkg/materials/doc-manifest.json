@@ -1,0 +1,12 @@
+{
+  "kind": "doc",
+  "doc_type": "设计说明书",
+  "file": "文档鉴别材料-设计说明书.txt",
+  "constructed_pages": 2,
+  "omitted": null,
+  "lines_per_page": 30,
+  "header": "微统计算工具 V1.0",
+  "page_basis": "constructed（文本模型）",
+  "docx": "文档鉴别材料-设计说明书.docx",
+  "toc_basis": "文本模型 30 行/页回填；真分页以办公套件打开为准"
+}

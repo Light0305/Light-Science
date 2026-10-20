@@ -1,6 +1,14 @@
+---
+name: light-literature
+description: Use when 需要为科研项目查找、获取并精读论文，或为下游阶段提供带锚点的文献证据：按主题检索文献、把论文 PDF 变成原文 MD 与中文翻译、写图文阅读笔记、核查撤稿状态时。
+version: "1.1"
+author: light-literature contributors
+license: MIT
+---
+
 # light-literature 技能说明
 
-> 版本：**v1.0 定版（2026-10-20 封版）**。开发历程为八个增量（地基 → 笔记线/翻译对齐/证据行 → Find 线 → 解析补强 → Doc2X 适配器与对照评测 → 图组与端到端验收 → 视觉引擎实测 → 解析改双轨制），每步的主题与结论见 README「开发记录（节略）」，完整验收记录属开发档案、不在本仓库；本文件只写定版口径。**定版原则：模型无关——质量下限靠流程、质量门与 §8 自检清单保证，不靠执行模型的临场发挥；任何模型接入都照本文件逐步执行、逐步勾检。** 执行顺序：§4 流水线 → §5 对应轨道规程 → §3 硬规则全程生效 → 交付前 §8 逐项勾检 → 遇异常先查 §9 失败模式附录。
+> 版本：**v1.1 定版（2026-10-21 封版）**。开发历程为八个增量（地基 → 笔记线/翻译对齐/证据行 → Find 线 → 解析补强 → Doc2X 适配器与对照评测 → 图组与端到端验收 → 视觉引擎实测 → 解析改双轨制），v1.1 增补共享检索适配层、元数据回填、claim-support 与问语料四件（见 §5/§6），每步的主题与结论见 README「开发记录（节略）」，完整验收记录属开发档案、不在本仓库；本文件只写定版口径。**定版原则：模型无关——质量下限靠流程、质量门与 §8 自检清单保证，不靠执行模型的临场发挥；任何模型接入都照本文件逐步执行、逐步勾检。** 执行顺序：§4 流水线 → §5 对应轨道规程 → §3 硬规则全程生效 → 交付前 §8 逐项勾检 → 遇异常先查 §9 失败模式附录。
 > 定位：把外部论文变成项目内**可核查、可复用**的研究材料。本文件是给执行 agent 的操作规范，不是宣传文案：每条规则都可执行、可检查。**定版原则：模型无关——质量下限靠流程、质量门与 §8 自检清单保证，不靠执行模型的临场发挥；任何模型接入都照本文件逐步执行、逐步勾检。** 执行顺序：§4 流水线 → §5 对应轨道规程 → §3 硬规则全程生效 → 交付前 §8 逐项勾检 → 遇异常先查 §9 失败模式附录。
 
 ## 1. 触发与模式
@@ -11,6 +19,7 @@
 |---|---|---|---|
 | Find | 主题 / 研究问题 | 候选清单 + 纳入/排除记录（不自动下载全文，清单经用户确认才下载） | **已实现**（见 §5 Find 线）；下载仍走 Read 的 ingest |
 | Read | DOI / 链接 / PDF | 四件套 + 证据行 | **已实现**（见 §5）；**产品解析走 §5 双轨制**：`parse` 命令（Doc2X 轨）或模型直读轨；翻译/笔记的正文由 agent 按本规范逐块填写；本地管线为研究/对照工具，非产品路径 |
+| Ask | 对已入库语料的具体问题 | 问答记录（命中块 + 带锚点引用的答案，或固定拒答） | **已实现**（v1.1 新增，见 §5「问语料」；与 light-memory 的 recall 分工见 §6） |
 | Compare | ≥2 篇已入库论文 | 证据矩阵行 + 冲突清单 | 未实现（v1.0 范围外） |
 | Reuse | 已入库论文 | 方法/代码资产登记（复现执行交 light-experiment） | 未实现（v1.0 范围外） |
 
@@ -30,7 +39,7 @@ assets/figures/、assets/tables/、supplementary/
 verify_report.json
 ```
 
-项目级：`Literature/` 下 `00-文献总览.md`、`文献索引.csv`、`证据表.jsonl`、`研究证据矩阵.md`、`参考文献.bib`、`术语账本.md`。
+项目级：`Literature/` 下 `00-文献总览.md`、`文献索引.csv`、`证据表.jsonl`、`研究证据矩阵.md`、`参考文献.bib`、`术语账本.md`；v1.1 新增 `claim_support.jsonl`（claim-check 判定账，只增）与 `问答记录/`（ask 产物）。单篇 `paper.yaml` 自 v1.1 起含 `metadata` 回填区（authors/venue/year 逐字段带来源与核实状态，见 §5「元数据回填」）。
 
 **锚点纪律**：正文 `S`、图注 `C`、图 `F`、表 `T`、公式 `E` 五命名空间，格式 `<字母><三位序号>`；块必带 `page / type / order / bbox / confidence / provenance`。ID 只增不改不复用。原文↔译文↔笔记一律用同一套 ID 互链；笔记指针格式 `[Paper: PDF p.N, Sxxx]`。
 
@@ -43,7 +52,7 @@ verify_report.json
 5. **证据纪律**：数字逐字可溯；直接引文上限一句且必填页码；作者自述局限与 Agent 批评分开写、互不冒充；结论措辞受强度动词表约束（`causes`、`demonstrates` 等强动词需有对应证据档位；`first/novel/SOTA` 须查新后才许用）；正文与图表矛盾时两值并记并写明消解条件，不静默选一。
 6. **出处五标签**：笔记与矩阵中的每条陈述标 `[Paper] / [External] / [Analysis] / [Hypothesis] / [User]` 之一，最小适用；Agent 的分析不许用用户口吻写。
 7. **撤稿/更正检查独立成步**：在身份核实门之后、粗筛之前执行；命中撤稿默认排除并留痕，用户显式覆写须把理由写入记录。
-8. **核实成本三级**：全库只跑字段级核实；入选精读的跑存在+准确性；被写进我方稿件的主张级引用才跑上下文支持。不许全库跑最贵档。
+8. **核实成本三级**：全库只跑字段级核实；入选精读的跑存在+准确性；被写进我方稿件的主张级引用才跑上下文支持。不许全库跑最贵档。第三档的命令面（v1.1 新增）= `claim-locate`（块级定位候选锚点，无命中如实回 not_mentioned）+ `claim-check`（三值判定 supports / contradicts / not_mentioned 经机械校验后追加 `Literature/claim_support.jsonl`，见 §5），供 light-write 交接时附带。
 9. **质量门**：交付前逐项自检——主要数字可溯、主要图表已盘点、覆盖范围不冒充、作者局限与 Agent 批评不混写、想法未查新不称新颖、无为填模板而编的内容。不过门则状态标 `Partial` 并在总览写明缺口，不许标完成。
 10. **解析双轨制（2026-10-20 用户裁决，覆盖原「解析诚实 / 超越 Doc2X」口径）**：产品解析只有两个后端——**Doc2X 轨**（用户自配 Key，`parse` 命令）与**模型直读轨**（未配置 Doc2X 时由接入模型亲自撰写四件套，见 §5「解析双轨制」）；本地自研管线（extract / MinerU / 对照线）**退出产品路径**，仅作研究/对照工具保留，**不许拿来顶替产品产物**。原「超越 Doc2X」正式判定已出结论「未超越」（LS-HardSet 封存集：已配对 25 篇总分差 −0.0970、95% CI [−0.1128, −0.0816]，正文/公式/表格/顺序/图注五项全破非劣界值；已知差距构成 = 公式 LaTeX 转写、复杂表格结构、个别页阅读顺序；判定含一处执行偏离——MinerU basic 路由因部署 config 未切换致公式路由任务全灭，属可修复 bug 而非能力问题，数字与结论不变）。用户据此裁决走 Doc2X：一个完整科研项目的文章量有限，¥0.01–0.02/页的成本可接受。Doc2X 纪律（硬规则）：参数冻结（model=v3-2026, formula_mode=dollar, formula_level=0, merge_cross_page_forms）；**提交前先按页数估算费用并核对剩余额度或向用户确认**（额度曾在判定运行中耗尽）；uid 提交后立即落盘，崩溃恢复优先、**不许无记录重提烧钱**；结果只存 24 小时，**24 小时内取回**；`parse` 失败置 paper.yaml 的 parse 状态为 `awaiting_model_direct` 并明确报错，**不静默切换后端、不回退本地抽取**。
 
@@ -104,17 +113,21 @@ verify_report.json
 - **精读卡骨架**（已实现，`notes <paper_dir>` 命令）：文件头由 paper.yaml 自动生成（作者/venue/年份在 paper.yaml 中无此字段，留待填，**不许凭记忆补**）；证据状态头四项按 source_map 与 verify 结果自动填初值；速读段 S1–S7 中 S4 图表清单由 source_map 的 F/T/E 块自动盘点；精读 16 节逐节带证据纪律注释（如第 10 节「不支持的更强结论」必填、第 12 节只许作者自述局限、第 16 节想法六道门）；文末原子卡附录（金句/概念/反直觉/方法/结构，微结构：出处 → 复述 → 启发）。**速读卡只是精读流水线的中间检查点，默认终点是精读卡**，与 §3 硬规则 3 一致。
 - **证据行与术语账本**（已实现）：`evidence add <project_dir> --paper <id> --finding ... --page N [...]` 只增追加（page 必填、quote 超一句拒绝、claim_strength 枚举校验、finding 空拒绝）；`evidence correct` 追加纠错行；`glossary add <project_dir> --term ... --zh ...` 向 术语账本.md 追加，中英任一重复即拒绝并提示已有行。
 - **Find 线**（已实现，`light_literature/find.py`）：五条命令与硬规则的代码落点——
-  - `find <project_dir> --query … [--query …] [--sources …] [--per-source N] [--mailto …]`（`find()`）：OpenAlex / Crossref / Semantic Scholar / arXiv / Europe PMC 五源免 Key 检索，原始响应缓存 `Literature/.find-cache/`；**单源失败只记入检索报告「失败源」一节，不中断全程**。产物 `候选池.jsonl`（一行一个 study）+ `检索报告.md`（各源命中、三层对账计数、合并样例、模糊合并复核队列、失败源）。
+  - `find <project_dir> --query … [--query …] [--sources …] [--per-source N] [--mailto …]`（`find()`）：OpenAlex / Crossref / Semantic Scholar / arXiv / Europe PMC 五源免 Key 检索，原始响应缓存 `Literature/.find-cache/`；**单源失败只记入检索报告「失败源」一节，不中断全程**。产物 `候选池.jsonl`（一行一个 study）+ `检索报告.md`（各源命中、三层对账计数、合并样例、模糊合并复核队列、失败源）。**v1.1 起检索执行走共享检索适配层**（`light_literature/searchlayer.py`，见 §6 消费契约）：统一结果模型 Paper、逐源适配器封装来源差异、(源+式+上限) 磁盘缓存**命中不重复联网**、失败隔离口径只在适配层定义一次；Semantic Scholar 支持可选 Key（环境变量 `SEMANTIC_SCHOLAR_API_KEY` 注入，绝不落盘），无 Key 维持现行口径。
   - **三层对账**（`dedup_records()`，规则在 `_same_report()` / `_same_study()`）：records → reports（L1 DOI 精确合并；无 DOI 时题名规范化精确 + 姓氏/年份相容；**预印本与正式版绝不并入同一 report**）→ studies（题名精确或 token Jaccard ≥ `TITLE_JACCARD_THRESHOLD=0.9` 且姓氏相容才合并多版本；主记录正式版优先，非主记录以 `version_of` 指向主记录，合并全程留痕 `merged_from`）。靠 Jaccard 近似合并的 study 标 `needs_review` 进复核队列，不静默自动判重。
   - `verify-identity <project_dir> [--limit N]`（`verify_identity()` / `_verify_one()`）：逐条查 Crossref（按 DOI）与 Europe PMC，字段级比对题名相似度（difflib ≥ `TITLE_SIM_THRESHOLD=0.85`）/ 第一作者姓氏 / 年份 ±1，结果只回写 `verification` 字段（identity_status ∈ verified/mismatch/unverifiable），**永不删条**——这是硬规则 1「候选层保留打标」的落点。注意与 ref-verifier 的有意偏离：Crossref 对 DOI 返 404 不直接判 mismatch（DataCite 注册的 DOI 如 arXiv 的 10.48550 本就不在 Crossref），先 Europe PMC 兜底，两边都查无才判 unverifiable；mismatch 只用于「查到权威记录但对不上」。
   - **撤稿/更正检查独立一步**（`check_retraction()`，硬规则 7 的落点）：在身份核实内、粗筛之前执行。双源信号——Crossref 反查 `filter=updates:{doi}` 读通知记录 `update-to[].type`（retraction/correction/expression_of_concern 等；注意 update-to 挂在通知记录上指向原文，不是原文记录自带）+ Europe PMC 的 `pubTypeList` / `commentCorrectionList` / `isRetracted`；优先级 retracted > concern > corrected > clear，双源都查成才算 clear、都查不成是 unknown。retraction_status 与 identity_status 一并回写。
   - `screen <project_dir>` 与 `screen check <project_dir>`（`generate_screen()` / `check_screen()`）：生成 `粗筛表.csv` + `粗筛说明.md`（**判定先行格式**写在说明里：先填 decision 再写 reason；六维 1–5 分，dim_relevance 为门控维）。check 硬规则：decision 枚举必填、**retracted 条目 decision 非 exclude 直接报错**；unverifiable 条目 include 只警告留痕（候选层允许跟进）。粗筛表已存在时不覆盖（防冲掉人工填写）。
   - `matrix <project_dir>`（`generate_matrix()`）：**成稿层硬规则 1 的执行点**——只有 `identity_status=verified` 且 `retraction_status != retracted` 的 study 进矩阵主体；unverifiable / mismatch / retracted / 尚未核实的全部进文末「排除清单」并注明原因，禁止静默丢弃。corrected/concern 进主体带 ⚠ 标记；仅预印本标「仅预印本」；撤稿状态 unknown 的进主体但备注明示。证据列按 DOI/题名从 `证据表.jsonl` 关联已入库论文（纠错链已消解：被 corrects 取代的原行不呈现），无证据显示「待精读」。
 - **Doc2X 适配器（轨一后端）**（`engines/doc2x.py`）：整篇解析（无页范围选项、按整篇页数计费，`pages` 只过滤输出）。流程：preupload → PUT 预签名地址 → status 轮询（间隔 2s / 上限 600s / HTTP 超时 60s）→ convert 导出 md（zip 落盘）→ 转统一 middle_json（v3-2026 的 layout 块优先、逐页 MD 兜底）。冻结参数：model=`v3-2026`、formula_mode=`dollar`、formula_level=`0`、论文类默认开 `merge_cross_page_forms`，全部写入 `doc2x/run_record.json`；**uid 在 submit 后立即落盘**，后段任何失败凭 uid 续查，**不许无记录地重复 submit（重复计费）**；结果云端只存 24 小时，success 后立即取回落盘到 `<paper_dir>/doc2x/`；调用前按页数估算费用（¥0.01–0.02/页）并记账。Key 只经连接器凭据 surrogate 注入（连接名 `custom.doc2x`），**不许落盘到项目文件、不许出现在日志/命令行/异常信息里**（适配器异常全脱敏）。REST 端点与枚举以 Doc2X 官方 API 文档为准（开发期已逐项核实）。`parse` 命令以本适配器为后端做锚点化（见上「解析双轨制」轨一）。
+- **元数据回填**（v1.1 新增，LIT-D03，`light_literature/metadata.py`）：`metadata-backfill <paper_dir> [--online] [--confirm]`——向 `paper.yaml` 的 `metadata` 区回填 authors/venue/year，**逐字段记 value + source + verified**；来源优先级：Crossref 按 DOI 权威记录（须 `--online` 显式联网）> PDF 首页文本层/PDF 元数据 > source_map 首页块。**自动回填的 verified 恒为 false**（有出处的候选不冒充已核实），只有用户逐字核对原文首页后 `--confirm` 才置 true；抽不到留空并把试过的源记进 `attempted_sources`，不许猜。`ingest` 入库时自动跑本地源回填（不联网、失败不阻断入库；`--backfill-online` 才联网）。`notes` 文件头优先读 metadata 区（有值显示值 + 来源 + 核实状态），无值保持原「待填」行。
+- **claim-support 命令面**（v1.1 新增，LIT-D04，`light_literature/claimcheck.py`，硬规则 8 第三档的产物形态）：`claim-locate <project_dir> --claim … [--paper …]` 在已入库语料 source_map 做块级机械定位（词项/数字匹配 + 证据强度门，见下），输出候选锚点与命中信号，**全语料无命中如实回 `not_mentioned`，不许推断补齐**；`claim-check <project_dir> --paper … --claim … --verdict supports|contradicts|not_mentioned [--anchors …] [--note …]` 在 agent 读块判定后落账 `Literature/claim_support.jsonl`（只增）。机械校验（代码强制）：锚点必须真实存在；**verdict=supports 时主张中每个数字必须逐字出现在所引块中，缺一拒绝写入**；contradicts 须至少一个锚点；not_mentioned 允许零锚点并以 signals.reason 区分无块提及/所引块不提及/上下文不足。
+- **问语料 ask 模式**（v1.1 新增，LIT-D01，`light_literature/ask.py`）：`ask <project_dir> --question … [--answer … --cite paper_id#S001 …] [--max-citations N]`——对已入库语料的 source_map 块（S/C 正文、T 表格）做块级检索，命中块与分数全留痕，产物落 `Literature/问答记录/<日期>-<序号>.md`。纪律：**引用白名单**——答案引用只能取自本次命中块、须真实存在、数量不超上限（默认 5），越界拒绝落盘；**证据强度门**——块命中须 ≥1 个数字命中或 ≥2 个不同词项命中，单个泛词碰撞不算证据；**固定拒答**——无块命中时产物只写固定拒答句，传入答案也报错拒绝；**证据资格门**——paper.yaml 顶层标 `identity_status` 非 verified 或 `retraction_status=retracted` 的论文，其块不进命中集（硬规则 1 在问答面的落点）。
 
 ## 6. 接口契约（只写边界，不展开对方实现）
 
-- → **light-memory**：证据行、阅读结论、失败/撤稿记录以带来源与版本的事件提供；Memory 不反向改写四件套。
+- → **light-memory**：证据行、阅读结论、失败/撤稿记录以带来源与版本的事件提供；Memory 不反向改写四件套。**ask 与 recall 的边界**：ask（本包）查文献全文证据（source_map 块级），recall（Memory）查沉淀后的事实账；问「这篇论文里怎么说」走 ask，问「项目里定过什么」走 recall，不许互相替代。
+- → **共享检索适配层**（v1.1 新增，LIT-D05）：`light_literature.searchlayer` 是三包共用的检索底座——idea 的 facet 查新与 journal-select 的先例检索经其 `search_all(queries, sources, per_source, mailto, cache_dir)` 消费，统一结果模型为 `Paper`（`to_record()` 给出与候选池一致的 record dict）；缓存目录约定为消费方项目的 `Literature/.find-cache`（与 Find 线共用同一缓存池，避免重复打源耗配额）；单源失败以 failures 清单返回、由消费方按各自口径落痕，适配层不吞失败；源级口径（端点、限流形态、盲区）只在适配层定义，消费方不许再各写一份。
 - → **light-idea**：证据矩阵 + 矛盾清单 + 笔记第 15/16 节；Idea 的查新请求走 Find 全价模式。
 - → **light-write**：`参考文献.bib` 与证据行是引用的唯一来源；成稿层未核实禁用规则在此交接处执行。
 - → **Obsidian 视图**：只投影阅读笔记与关系边，不投影 PDF/全文/译文。
@@ -196,3 +209,4 @@ verify_report.json
 13. **Find 某源整源无结果** → OpenAlex / Semantic Scholar 免 Key 限流 429（第三增量真实冒烟两源均被挡）。→ 单源失败只记入检索报告「失败源」一节，不中断全程、不拿别源结果冒充该源；给 OpenAlex 配 `--mailto` 礼貌池，Semantic Scholar 无 Key 配置位是已知局限（如实报告召回缺口）。
 14. **公式密集论文的 E 块碎片淹没清单（研究线）** → 文本层公式候选判定把行内数学逐片标 E（Adam 实测约 400 个，多为单字符碎片），notes S4 被淹没。→ 产品轨不经文本层，无此问题；研究线产物引用时只盘点 F/T 与关键公式，碎片 E 只作定位计数，不逐条进笔记。
 15. **Doc2X 图注碎片拆分（轨一）** → layout 把一条表注拆成「标签块 + 正文块」（如 "Table 1" 与 "Video lengths ..." 两块 caption_of 同指一表），宿主 caption_id 只认领其一：正文块成孤儿、正文里的数字（如 2.5-minute）被编号兜底误当图号、附录 Table A.1 型编号与正文编号混查撞号（CEA 110856 首跑实测：12 孤儿 + 编号重复报错）。→ 转换层已修：`parse.build_source_map` 按 caption_of 合并同宿主图注碎片（merged_from 留痕），附录编号单列 caption_series=appendix、verify 按 series 分组查序列；再现时先查合并逻辑，不要手动硬配或改 verify 迁就。已付费结果凭 doc2x_result.json 离线重建，不许重提。
+16. **问语料单词泛词假命中（v1.1 实测）** → ask 首跑时语料外问题（光合作用）被火鸡语料里一个含 energy 的无关块以单泛词命中放行成「待答」。→ 已立证据强度门：块命中须 ≥1 个数字命中或 ≥2 个不同词项命中（`textmatch.is_evidence`，claim-locate 共用）；再现时先查强度门与停用词表，不要调低门槛迁就单例。
