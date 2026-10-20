@@ -1,0 +1,1351 @@
+[
+  {
+    "candidate": "Computers and Electronics in Agriculture",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 1385,
+        "source_url": "https://openalex.org/S116775814",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S116775814",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Pressacademia",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 66,
+        "source_url": "https://openalex.org/S2764440460",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S2764440460",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "International Journal of Developmental Neuroscience",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 106,
+        "source_url": "https://openalex.org/S198195568",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S198195568",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Sensors",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 7770,
+        "source_url": "https://openalex.org/S101949793",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S101949793",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Scientific Reports",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 48727,
+        "source_url": "https://openalex.org/S196734849",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S196734849",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Electronics",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 5032,
+        "source_url": "https://openalex.org/S4210202905",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210202905",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Multimedia Tools and Applications",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 620,
+        "source_url": "https://openalex.org/S110206669",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S110206669",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Nigerian Journal of Physics",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 80,
+        "source_url": "https://openalex.org/S5406946469",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S5406946469",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Zenodo (CERN European Organization for Nuclear Research)",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 783670,
+        "source_url": "https://openalex.org/S4306400562",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4306400562",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Poultry Science",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 1602,
+        "source_url": "https://openalex.org/S133896805",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S133896805",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Smart Agricultural Technology",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 1003,
+        "source_url": "https://openalex.org/S4210238883",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210238883",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Animals",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 3701,
+        "source_url": "https://openalex.org/S4210168508",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210168508",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Frontiers in Veterinary Science",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 1996,
+        "source_url": "https://openalex.org/S2594976040",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S2594976040",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Frontiers in Animal Science",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 223,
+        "source_url": "https://openalex.org/S4210230110",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210230110",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Agriculture",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 2654,
+        "source_url": "https://openalex.org/S4210202585",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210202585",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Gomal Journal of Agriculture and Biology",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 12,
+        "source_url": "https://openalex.org/S7407056596",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S7407056596",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "AgriEngineering",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 428,
+        "source_url": "https://openalex.org/S4210177564",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210177564",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Edelweiss Applied Science and Technology",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 1937,
+        "source_url": "https://openalex.org/S4210188960",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210188960",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Biosystems Engineering",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 239,
+        "source_url": "https://openalex.org/S65230043",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S65230043",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "IEEE Access",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 13603,
+        "source_url": "https://openalex.org/S2485537415",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "DOAJ 收录（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S2485537415",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "International Journal of Advanced Biochemistry Research",
+    "source_status": "partial",
+    "metrics": {
+      "annual_volume": {
+        "value": 4000,
+        "source_url": "https://openalex.org/S4210236697",
+        "source_year": "2025",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "indexing": {
+        "value": "未收录于 DOAJ（OpenAlex 源记录）",
+        "source_url": "https://openalex.org/S4210236697",
+        "source_year": "2026",
+        "queried_at": "2026-10-20",
+        "status": "verified",
+        "provenance": "aggregator"
+      },
+      "apc": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）"
+      },
+      "scope_fit": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网首页未抓得或未检得主题词（页面可能需 JS 渲染）"
+      },
+      "impact_factor": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_jcr": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "quartile_cas": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）"
+      },
+      "self_cite_rate": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "skipped",
+        "note": "自引率需 WoS 数据，本演示未接入"
+      },
+      "review_cycle": {
+        "value": null,
+        "status": "unconfirmed",
+        "source_status": "attempted",
+        "note": "官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）"
+      }
+    }
+  },
+  {
+    "candidate": "Journal of Fictional Turkey Studies",
+    "source_status": "skipped",
+    "metrics": {}
+  }
+]

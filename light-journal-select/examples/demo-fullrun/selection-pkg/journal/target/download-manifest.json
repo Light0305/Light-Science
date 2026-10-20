@@ -1,0 +1,26 @@
+{
+  "kind": "light-journal-select/download-manifest",
+  "usage": "local_use_only",
+  "journal": {
+    "candidate_id": "J-smart-agricultural-technology_621fa6",
+    "name": "Smart Agricultural Technology",
+    "issn": "2772-3755"
+  },
+  "generated_at": "2026-10-20",
+  "entries": [
+    {
+      "entry_id": "DL-001",
+      "kind": "guideline",
+      "filename": "author-guide",
+      "source_url": "https://www.journals.elsevier.com/smart-agricultural-technology",
+      "status": "pending_download",
+      "downloaded_at": null,
+      "sha256": null,
+      "stored_path": null,
+      "supersedes": null,
+      "superseded_by": null,
+      "note": "演示环境未真下载，待从官网取回后回填登记"
+    }
+  ],
+  "updated_at": "2026-10-20"
+}

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "light-journal-select"
+version = "1.0.0"
+description = "Light-Journal-Select：Write 前置选刊——先例路候选生成、逐刊联网核验、两级风险门、三档证据卡与定刊交接（Light-Science 子技能，v1 构建中）"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+light-journal-select = "light_journal_select.cli:main"
+
+[tool.setuptools]
+packages = ["light_journal_select"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

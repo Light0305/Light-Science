@@ -1,0 +1,3036 @@
+kind: light-journal-select/selection
+version: '1.0'
+selection_id: abnormal-turkey-behaviour-detection-in-i_c771be
+title: Abnormal turkey behaviour detection in intensive farming using computer vision
+status: handed_off
+status_history:
+- state: draft
+  at: '2026-10-20'
+  by: light-journal-select init
+- state: candidates_ready
+  at: '2026-10-20'
+  by: light-journal-select precedent
+- state: verified
+  at: '2026-10-20'
+  by: light-journal-select verify
+- state: gated
+  at: '2026-10-20'
+  by: light-journal-select gate
+- state: decided
+  at: '2026-10-20'
+  by: light-journal-select decide
+- state: handed_off
+  at: '2026-10-20'
+  by: light-journal-select handoff
+created_at: '2026-10-20'
+updated_at: '2026-10-20'
+manuscript:
+  title: Abnormal turkey behaviour detection in intensive farming using computer vision
+  abstract: We present a computer-vision method for detecting abnormal behaviour of
+    turkeys in commercial barns. A multi-object tracker follows individual birds in
+    top-view video; video-level statistics predict per-tracklet decision thresholds
+    without per-video manual tuning, and abnormal events (piling, huddling, prolonged
+    immobility) are flagged for stockperson review. On a multi-barn benchmark the
+    method matches an oracle per-video tuned baseline while requiring no manual threshold
+    setting.
+  keywords:
+  - turkey
+  - abnormal behaviour detection
+  - computer vision
+  - multi-object tracking
+  - precision livestock farming
+  type: research
+  language: en
+  source_ref: null
+fingerprint:
+  field: agricultural engineering
+  subfield: precision livestock farming
+  study_object: turkeys
+  core_problem: abnormal behaviour detection from barn video
+  contribution_type: method
+  audience: precision livestock farming and agricultural engineering researchers
+  methods_role: core_method_contribution
+queries:
+- turkey behaviour detection
+- poultry welfare monitoring computer vision
+- livestock behaviour recognition tracking
+constraints:
+  tier_expectation: challenge/target/safety 三档都要
+  apc_budget: 3500
+  review_cycle_limit: 12
+  excluded_journals: null
+  excluded_publishers: null
+  excluded_modes: null
+  journal_language_pref: en
+  recognized_catalogs:
+  - SCI
+  - Scopus
+constraints_confirmed: true
+precedent_runs:
+- query_index: 0
+  query: turkey behaviour detection
+  url: https://api.openalex.org/works?search=turkey+behaviour+detection&filter=from_publication_date%3A2022-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=50
+  window: &id001
+    from: '2022-01-01'
+    to: '2026-12-31'
+  queried_at: '2026-10-20'
+  status: succeeded
+  works_returned: 50
+  evidence_file: evidence/openalex-q0-2026-10-20-6fac1a9a.json
+  error: null
+- query_index: 1
+  query: poultry welfare monitoring computer vision
+  url: https://api.openalex.org/works?search=poultry+welfare+monitoring+computer+vision&filter=from_publication_date%3A2022-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=50
+  window: *id001
+  queried_at: '2026-10-20'
+  status: succeeded
+  works_returned: 50
+  evidence_file: evidence/openalex-q1-2026-10-20-370568af.json
+  error: null
+- query_index: 2
+  query: livestock behaviour recognition tracking
+  url: https://api.openalex.org/works?search=livestock+behaviour+recognition+tracking&filter=from_publication_date%3A2022-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=50
+  window: *id001
+  queried_at: '2026-10-20'
+  status: succeeded
+  works_returned: 50
+  evidence_file: evidence/openalex-q2-2026-10-20-00ed5760.json
+  error: null
+precedent_near_misses:
+- name: Business And Management Studies An International Journal
+  source_id: https://openalex.org/S2765070652
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 5
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Social Sciences and Management Review
+  source_id: https://openalex.org/S4210236628
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 7
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Animal Ecology
+  source_id: https://openalex.org/S33456383
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 8
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Natural Hazards
+  source_id: https://openalex.org/S86860186
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 9
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Climatology
+  source_id: https://openalex.org/S32061424
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 10
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Informatics
+  source_id: https://openalex.org/S2738238905
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 11
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Nutrients
+  source_id: https://openalex.org/S110785341
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 12
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Advanced Research in Science Communication and Technology
+  source_id: https://openalex.org/S4210201094
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 13
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Functional Ecology
+  source_id: https://openalex.org/S174303711
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 14
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal for Research in Applied Science and Engineering Technology
+  source_id: https://openalex.org/S2764566388
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 15
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Law & Social Studies
+  source_id: https://openalex.org/S4210190328
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 16
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Wireless Mobile Networks Ubiquitous Computing and Dependable Applications
+  source_id: https://openalex.org/S2738080829
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 17
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Cognitive Research Principles and Implications
+  source_id: https://openalex.org/S3035657644
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 18
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Balıkesır Health Sciences Journal
+  source_id: https://openalex.org/S4210197891
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 20
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: DergiPark (Istanbul University)
+  source_id: https://openalex.org/S4306401840
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 21
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Indonesian Journal of Electrical Engineering and Computer Science
+  source_id: https://openalex.org/S2764855249
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 22
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: GigaScience
+  source_id: https://openalex.org/S2735135405
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 23
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Italian Journal of Animal Science
+  source_id: https://openalex.org/S19154483
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 25
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Van Yüzüncü Yıl University Academic Data Management System
+  source_id: https://openalex.org/S7407055328
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 27
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Scientific Journal Sui Generis
+  source_id: https://openalex.org/S5407037362
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 28
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Nursing Practice
+  source_id: https://openalex.org/S122874067
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 29
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Information Technology and Computer Engineering
+  source_id: https://openalex.org/S4210176603
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 30
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Uludağ University Journal of The Faculty of Engineering
+  source_id: https://openalex.org/S2736726804
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 31
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Australian Journal of Primary Health
+  source_id: https://openalex.org/S74719093
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 32
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Geophysical Journal International
+  source_id: https://openalex.org/S108821158
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 34
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Data Science and IoT Management System
+  source_id: https://openalex.org/S5407051256
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 36
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Frontiers in Medicine
+  source_id: https://openalex.org/S2597052008
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 37
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Route Educational and Social Science Journal
+  source_id: https://openalex.org/S4210214320
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 38
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: MGIMO Review of International Relations
+  source_id: https://openalex.org/S4210234655
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 39
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Global Warming
+  source_id: https://openalex.org/S102255861
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 40
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Criminology and Criminal Law
+  source_id: https://openalex.org/S4210205222
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 41
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Karadeniz Teknik Üniversitesi İletişim Araştırmaları Dergisi
+  source_id: https://openalex.org/S4210202306
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 43
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Harran Üniversitesi Tıp Fakültesi Dergisi
+  source_id: https://openalex.org/S4210232220
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 44
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Asthma Allergy Immunology
+  source_id: https://openalex.org/S4210179696
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 45
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Expert Systems with Applications
+  source_id: https://openalex.org/S13144211
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 46
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Wildlife Society Bulletin
+  source_id: https://openalex.org/S5406991451
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 47
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Primary care diabetes
+  source_id: https://openalex.org/S67695068
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 48
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of the Knowledge Economy
+  source_id: https://openalex.org/S60370010
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 49
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Aestimum
+  source_id: https://openalex.org/S2737950648
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 50
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Poultry
+  source_id: https://openalex.org/S4210193948
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 4
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Advanced Computer Science and Applications
+  source_id: https://openalex.org/S23629721
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 8
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Kinetik Game Technology Information System Computer Network Computing Electronics
+    and Control
+  source_id: https://openalex.org/S4210206379
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 11
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Informatics and Web Engineering
+  source_id: https://openalex.org/S4387278993
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 12
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: AI and Ethics
+  source_id: https://openalex.org/S4210170699
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 13
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: HAL (Le Centre pour la Communication Scientifique Directe)
+  source_id: https://openalex.org/S4306402512
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 15
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: World s Poultry Science Journal
+  source_id: https://openalex.org/S160392558
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 17
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Aquaculture Fish and Fisheries
+  source_id: https://openalex.org/S4210241052
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 18
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: ESRJ
+  source_id: https://openalex.org/S7407076052
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 22
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal Science and Technology
+  source_id: https://openalex.org/S4387280678
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 23
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Animal Frontiers
+  source_id: https://openalex.org/S2764890660
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 25
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Science Advances
+  source_id: https://openalex.org/S2737427234
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 28
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: PLoS ONE
+  source_id: https://openalex.org/S202381698
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 29
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Revista de Informática Teórica e Aplicada
+  source_id: https://openalex.org/S4210170866
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 30
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: National Journal of Animal Health and Sustainable Livestock
+  source_id: https://openalex.org/S7407078087
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 31
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Dairy Science
+  source_id: https://openalex.org/S28349394
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 32
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Devotion Journal of Research and Community Service
+  source_id: https://openalex.org/S4210181204
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 33
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: IEEE Sensors Journal
+  source_id: https://openalex.org/S189694085
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 34
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: World Journal of Advanced Engineering Technology and Sciences
+  source_id: https://openalex.org/S4210239011
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 35
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Computing and artificial intelligence.
+  source_id: https://openalex.org/S4404662150
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 36
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Applied Sciences
+  source_id: https://openalex.org/S4210205812
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 37
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Tropical Animal Health and Production
+  source_id: https://openalex.org/S153189382
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 40
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Animal Science Papers and Reports
+  source_id: https://openalex.org/S4306502127
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 47
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of applied science and environmental management
+  source_id: https://openalex.org/S4210197014
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 50
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Journal of Applied Animal Research
+  source_id: https://openalex.org/S161957261
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 7
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: INTERANTIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT
+  source_id: https://openalex.org/S4210240841
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 8
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Heliyon
+  source_id: https://openalex.org/S2898612692
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 9
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: 電腦學刊
+  source_id: https://openalex.org/S4210197104
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 11
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Rural Criminology
+  source_id: https://openalex.org/S4210231248
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 13
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Scientific Research in Science and Technology
+  source_id: https://openalex.org/S2764908356
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 15
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Discover Animals
+  source_id: https://openalex.org/S5407042865
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 17
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Wasit Journal of Computer and Mathematics Science
+  source_id: https://openalex.org/S4210197231
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 21
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: AI
+  source_id: https://openalex.org/S4210200511
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 24
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Computer Vision
+  source_id: https://openalex.org/S25538012
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 25
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Emerging Science Journal
+  source_id: https://openalex.org/S4210232528
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 26
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Archivos Latinoamericanos de Producción Animal
+  source_id: https://openalex.org/S2738407129
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 32
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Animal Bioscience
+  source_id: https://openalex.org/S4210214709
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 34
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Artificial Intelligence in Agriculture
+  source_id: https://openalex.org/S4210228435
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 36
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: International Journal of Distributed Sensor Networks
+  source_id: https://openalex.org/S64417657
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 38
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: SinkrOn
+  source_id: https://openalex.org/S4210219095
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 40
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Czech Journal of Animal Science
+  source_id: https://openalex.org/S102449613
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 43
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Animal Health Research Reviews
+  source_id: https://openalex.org/S2111646
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 45
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: Meat Research | ISSN (Online Version) 2790-1971
+  source_id: https://openalex.org/S4210185516
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 47
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+- name: IEEE Journal of Radio Frequency Identification
+  source_id: https://openalex.org/S4210234470
+  similar_works_n: 1
+  queries_covered: 1
+  best_rank: 48
+  queried_at: '2026-10-20'
+  reason: 未过入门门槛（相似数/多式覆盖/单式名次均不足）
+candidates:
+- candidate_id: J-computers-and-electronics-in-agriculture_36f4fc
+  name: Computers and Electronics in Agriculture
+  issn: 0168-1699
+  eissn: null
+  publisher: Elsevier BV
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S116775814
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 7
+    rate_per_10k: 13.16
+    journal_volume_window: 5318
+    volume_status: succeeded
+    queries_covered: 3
+    best_rank: 1
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Open Datasets and AI/GenAI-Driven Computer Vision for Precision Livestock
+        Farming: A Bidirectional Review'
+      year: 2026
+      doi: https://doi.org/10.1016/j.compag.2026.111917
+      openalex_id: https://openalex.org/W7162099780
+    - title: Abnormal turkey behaviour detection using self-supervised video anomaly
+        detection and multiple object tracking
+      year: 2025
+      doi: https://doi.org/10.1016/j.compag.2025.110856
+      openalex_id: https://openalex.org/W4413446424
+    - title: Automatic recognition of isolated piglet outliers based on multi-object
+        tracking
+      year: 2025
+      doi: https://doi.org/10.1016/j.compag.2025.110377
+      openalex_id: https://openalex.org/W4409348688
+    - title: A computer vision approach to monitor activity in commercial broiler
+        chickens using trajectory-based clustering analysis
+      year: 2024
+      doi: https://doi.org/10.1016/j.compag.2023.108591
+      openalex_id: https://openalex.org/W4390763791
+    - title: A systematic survey of public computer vision datasets for precision
+        livestock farming
+      year: 2024
+      doi: https://doi.org/10.1016/j.compag.2024.109718
+      openalex_id: https://openalex.org/W4405351140
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 1385
+        source_url: https://openalex.org/S116775814
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S116775814
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 7 篇发在本刊（归一化 13.16 篇/万篇，覆盖 3 条检索式）
+  flags: []
+- candidate_id: J-pressacademia_ad3e2d
+  name: Pressacademia
+  issn: 2146-7943
+  eissn: null
+  publisher: Association of Food Technology, Turkey
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S2764440460
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 1
+    rate_per_10k: 18.94
+    journal_volume_window: 528
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 2
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Shifts in Borsa Istanbul return behaviour: an analysis with change-point
+        detection'
+      year: 2023
+      doi: https://doi.org/10.17261/pressacademia.2023.1694
+      openalex_id: https://openalex.org/W4318778353
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 66
+        source_url: https://openalex.org/S2764440460
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S2764440460
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 1 篇发在本刊（归一化 18.94 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-international-journal-of-developmental-n_1d50d8
+  name: International Journal of Developmental Neuroscience
+  issn: 0736-5748
+  eissn: null
+  publisher: Wiley
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S198195568
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 1
+    rate_per_10k: 21.01
+    journal_volume_window: 476
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 3
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Knowledge, Behaviours, and Attitudes of Family Physicians and Residents
+        About Autism Spectrum Disorder in Turkey: A Descriptive Cross‐Sectional Study'
+      year: 2025
+      doi: https://doi.org/10.1002/jdn.70003
+      openalex_id: https://openalex.org/W4406999078
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 106
+        source_url: https://openalex.org/S198195568
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S198195568
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 1 篇发在本刊（归一化 21.01 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-sensors_76140e
+  name: Sensors
+  issn: 1424-8220
+  eissn: null
+  publisher: Multidisciplinary Digital Publishing Institute
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S101949793
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 6
+    rate_per_10k: 1.42
+    journal_volume_window: 42158
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 4
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Applications of Artificial Intelligence for Heat Stress Management in
+        Ruminant Livestock
+      year: 2024
+      doi: https://doi.org/10.3390/s24185890
+      openalex_id: https://openalex.org/W4402446977
+    - title: Evaluation of Machine Learning Algorithms for Malware Detection
+      year: 2023
+      doi: https://doi.org/10.3390/s23020946
+      openalex_id: https://openalex.org/W4316466921
+    - title: Research on the Recognition and Tracking of Group-Housed Pigs’ Posture
+        Based on Edge Computing
+      year: 2023
+      doi: https://doi.org/10.3390/s23218952
+      openalex_id: https://openalex.org/W4388288787
+    - title: 'Industry 4.0 and Precision Livestock Farming (PLF): An up to Date Overview
+        across Animal Productions'
+      year: 2022
+      doi: https://doi.org/10.3390/s22124319
+      openalex_id: https://openalex.org/W4282821949
+    - title: Keypoint Detection for Injury Identification during Turkey Husbandry
+        Using Neural Networks
+      year: 2022
+      doi: https://doi.org/10.3390/s22145188
+      openalex_id: https://openalex.org/W4285095665
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 7770
+        source_url: https://openalex.org/S101949793
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S101949793
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 6 篇发在本刊（归一化 1.42 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-scientific-reports_bef6dc
+  name: Scientific Reports
+  issn: 2045-2322
+  eissn: null
+  publisher: Nature Portfolio
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S196734849
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 3
+    rate_per_10k: 0.18
+    journal_volume_window: 167153
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 4
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Comparative detection of selection signatures in indigenous and crossbred
+        Turkish sheep breeds
+      year: 2025
+      doi: https://doi.org/10.1038/s41598-025-29969-1
+      openalex_id: https://openalex.org/W4416557265
+    - title: Proximity tracking using ultra-wideband technology for equine social
+        behaviour research
+      year: 2024
+      doi: https://doi.org/10.1038/s41598-024-60805-0
+      openalex_id: https://openalex.org/W4396553628
+    - title: 'Puzzle: taking livestock tracking to the next level'
+      year: 2024
+      doi: https://doi.org/10.1038/s41598-024-69058-3
+      openalex_id: https://openalex.org/W4401391942
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 48727
+        source_url: https://openalex.org/S196734849
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S196734849
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 3 篇发在本刊（归一化 0.18 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-electronics_7ae9c2
+  name: Electronics
+  issn: 2079-9292
+  eissn: null
+  publisher: Multidisciplinary Digital Publishing Institute
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210202905
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 2
+    rate_per_10k: 0.83
+    journal_volume_window: 24030
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 19
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: A SIEM-Integrated Cybersecurity Prototype for Insider Threat Anomaly
+        Detection Using Enterprise Logs and Behavioural Biometrics
+      year: 2026
+      doi: https://doi.org/10.3390/electronics15010248
+      openalex_id: https://openalex.org/W7118193729
+    - title: A Survey on Ambient Sensor-Based Abnormal Behaviour Detection for Elderly
+        People in Healthcare
+      year: 2023
+      doi: https://doi.org/10.3390/electronics12071539
+      openalex_id: https://openalex.org/W4360850654
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 5032
+        source_url: https://openalex.org/S4210202905
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210202905
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 2 篇发在本刊（归一化 0.83 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-multimedia-tools-and-applications_3a2fe7
+  name: Multimedia Tools and Applications
+  issn: 1380-7501
+  eissn: null
+  publisher: Springer Science+Business Media
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S110206669
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 2
+    rate_per_10k: 1.98
+    journal_volume_window: 10079
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 24
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Selection and evaluation of a set of attributes appropriate for detection
+        of antisocial behaviour in online media
+      year: 2025
+      doi: https://doi.org/10.1007/s11042-024-20514-2
+      openalex_id: https://openalex.org/W4406300752
+    - title: 'Unsafe-Net: YOLO v4 and ConvLSTM based computer vision system for real-time
+        detection of unsafe behaviours in workplace'
+      year: 2024
+      doi: https://doi.org/10.1007/s11042-024-19276-8
+      openalex_id: https://openalex.org/W4396641638
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 620
+        source_url: https://openalex.org/S110206669
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S110206669
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 2 篇发在本刊（归一化 1.98 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-nigerian-journal-of-physics_f47d0a
+  name: Nigerian Journal of Physics
+  issn: 1118-7638
+  eissn: null
+  publisher: Nigerian Institute of Physics
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S5406946469
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 1
+    rate_per_10k: 27.55
+    journal_volume_window: 363
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 1
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Review of Poultry Monitoring using Computer Vision
+      year: 2024
+      doi: https://doi.org/10.62292/njp.v33i1.2024.216
+      openalex_id: https://openalex.org/W4399203637
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 80
+        source_url: https://openalex.org/S5406946469
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S5406946469
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: target
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 1 篇发在本刊（归一化 27.55 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-zenodo-cern-european-organization-for-nu_4e8f6e
+  name: Zenodo (CERN European Organization for Nuclear Research)
+  issn: null
+  eissn: null
+  publisher: European Organization for Nuclear Research
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4306400562
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 2
+    rate_per_10k: 0.01
+    journal_volume_window: 2087165
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 3
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Smart Welfare: How Precision Technologies are Reshaping Sustainable
+        Poultry Production'
+      year: 2026
+      doi: https://doi.org/10.5281/zenodo.18731845
+      openalex_id: https://openalex.org/W7130942483
+    - title: 'AI-Based Welfare Monitoring : Non-Invasive Techniques for Poultry Behaviour
+        Analysis'
+      year: 2025
+      doi: https://doi.org/10.5281/zenodo.17535957
+      openalex_id: https://openalex.org/W7104040512
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 783670
+        source_url: https://openalex.org/S4306400562
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S4306400562
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 2 篇发在本刊（归一化 0.01 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-poultry-science_33d731
+  name: Poultry Science
+  issn: 0032-5791
+  eissn: null
+  publisher: Elsevier BV
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S133896805
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 5
+    rate_per_10k: 8.02
+    journal_volume_window: 6231
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 6
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: An Integrated Commercial Poultry Breeding Framework for Natural Mating
+        and Animal Welfare
+      year: 2026
+      doi: https://doi.org/10.1016/j.psj.2026.107938
+      openalex_id: https://openalex.org/W7221325440
+    - title: Aerial monitoring of turkey behavior using unmanned aerial vehicles and
+        computer vision
+      year: 2025
+      doi: https://doi.org/10.1016/j.psj.2025.106103
+      openalex_id: https://openalex.org/W4416275885
+    - title: 'Review: The application and challenges of advanced detection technologies
+        in poultry farming'
+      year: 2025
+      doi: https://doi.org/10.1016/j.psj.2025.105870
+      openalex_id: https://openalex.org/W4414564365
+    - title: 'Sustainable poultry farming practices: a critical review of current
+        strategies and future prospects'
+      year: 2024
+      doi: https://doi.org/10.1016/j.psj.2024.104295
+      openalex_id: https://openalex.org/W4402218332
+    - title: Perception of laying hen farmers, poultry veterinarians, and poultry
+        experts regarding sensor-based continuous monitoring of laying hen health
+        and welfare
+      year: 2023
+      doi: https://doi.org/10.1016/j.psj.2023.102581
+      openalex_id: https://openalex.org/W4320481115
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 1602
+        source_url: https://openalex.org/S133896805
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S133896805
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 5 篇发在本刊（归一化 8.02 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-smart-agricultural-technology_621fa6
+  name: Smart Agricultural Technology
+  issn: 2772-3755
+  eissn: null
+  publisher: Elsevier BV
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210238883
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 6
+    rate_per_10k: 23.34
+    journal_volume_window: 2571
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 5
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Computer vision in livestock and poultry farming: A quantitative and
+        translational review of research trends and real-world impact'
+      year: 2026
+      doi: https://doi.org/10.1016/j.atech.2026.102018
+      openalex_id: https://openalex.org/W7138861778
+    - title: 'Computer vision-based detection of locomotor activity patterns associated
+        with play behavior in chickens as a positive welfare indicator: A proof of
+        concept for precision poultry farming'
+      year: 2026
+      doi: https://doi.org/10.1016/j.atech.2026.102100
+      openalex_id: https://openalex.org/W7153794204
+    - title: Investigation of poultry feces removal rate and vision-based feces weight
+        estimation on grooved-floor panels
+      year: 2026
+      doi: https://doi.org/10.1016/j.atech.2026.102476
+      openalex_id: https://openalex.org/W7167506167
+    - title: 'Pig-RDF: A smart livestock framework for pig mounting behaviour recognition
+        and reproductive observation support in group-housed environments'
+      year: 2026
+      doi: https://doi.org/10.1016/j.atech.2026.102459
+      openalex_id: https://openalex.org/W7196924918
+    - title: 'Review of movement sensor applications in livestock animal activity
+        recognition: Communications, data collection practices, and edge-AI solutions'
+      year: 2026
+      doi: https://doi.org/10.1016/j.atech.2026.101986
+      openalex_id: https://openalex.org/W7138847061
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 1003
+        source_url: https://openalex.org/S4210238883
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210238883
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: target
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 6 篇发在本刊（归一化 23.34 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-animals_85c3f9
+  name: Animals
+  issn: 2076-2615
+  eissn: null
+  publisher: Multidisciplinary Digital Publishing Institute
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210168508
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 7
+    rate_per_10k: 3.88
+    journal_volume_window: 18050
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 1
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Monitoring Pig Structural Soundness and Body Weight in Pork Production
+        Systems Using Computer Vision Approaches
+      year: 2025
+      doi: https://doi.org/10.3390/ani15050635
+      openalex_id: https://openalex.org/W4407837692
+    - title: Improving Known–Unknown Cattle’s Face Recognition for Smart Livestock
+        Farm Management
+      year: 2023
+      doi: https://doi.org/10.3390/ani13223588
+      openalex_id: https://openalex.org/W4388823697
+    - title: 'Precision Livestock Farming: What Does It Contain and What Are the Perspectives?'
+      year: 2023
+      doi: https://doi.org/10.3390/ani13050779
+      openalex_id: https://openalex.org/W4321495860
+    - title: The Role of Sound in Livestock Farming—Selected Aspects
+      year: 2023
+      doi: https://doi.org/10.3390/ani13142307
+      openalex_id: https://openalex.org/W4384297828
+    - title: Towards Early Poultry Health Prediction through Non-Invasive and Computer
+        Vision-Based Dropping Classification
+      year: 2023
+      doi: https://doi.org/10.3390/ani13193041
+      openalex_id: https://openalex.org/W4387120115
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 3701
+        source_url: https://openalex.org/S4210168508
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210168508
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: soft_warn
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: true
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: 名单命中
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 7 篇发在本刊（归一化 3.88 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-frontiers-in-veterinary-science_e981ee
+  name: Frontiers in Veterinary Science
+  issn: 2297-1769
+  eissn: null
+  publisher: Frontiers Media
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S2594976040
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 3
+    rate_per_10k: 3.2
+    journal_volume_window: 9364
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 19
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'MMBs_TransNeXt: a hierarchical adaptive feature learning model for pig
+        behavior recognition in precision livestock farming'
+      year: 2026
+      doi: https://doi.org/10.3389/fvets.2026.1904986
+      openalex_id: https://openalex.org/W7207790696
+    - title: Towards Machine Vision for Insect Welfare Monitoring and Behavioural
+        Insights
+      year: 2022
+      doi: https://doi.org/10.3389/fvets.2022.835529
+      openalex_id: https://openalex.org/W4212980793
+    - title: Twelve Threats of Precision Livestock Farming (PLF) for Animal Welfare
+      year: 2022
+      doi: https://doi.org/10.3389/fvets.2022.889623
+      openalex_id: https://openalex.org/W4281821804
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 1996
+        source_url: https://openalex.org/S2594976040
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S2594976040
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 3 篇发在本刊（归一化 3.2 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-frontiers-in-animal-science_c5d252
+  name: Frontiers in Animal Science
+  issn: 2673-6225
+  eissn: null
+  publisher: Frontiers Media
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210230110
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 3
+    rate_per_10k: 32.47
+    journal_volume_window: 924
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 20
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: Computer vision-based forecasting of body weight and carcass in tom turkeys
+      year: 2026
+      doi: https://doi.org/10.3389/fanim.2026.1868845
+      openalex_id: https://openalex.org/W7165131114
+    - title: A Review of Monitoring Techniques for Livestock Respiration and Sounds
+      year: 2022
+      doi: https://doi.org/10.3389/fanim.2022.904834
+      openalex_id: https://openalex.org/W4283700209
+    - title: Seeing is caring – automated assessment of resource use of broilers with
+        computer vision techniques
+      year: 2022
+      doi: https://doi.org/10.3389/fanim.2022.945534
+      openalex_id: https://openalex.org/W4290612184
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 223
+        source_url: https://openalex.org/S4210230110
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210230110
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: target
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 3 篇发在本刊（归一化 32.47 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-agriculture_f0b1b0
+  name: Agriculture
+  issn: 2077-0472
+  eissn: null
+  publisher: Multidisciplinary Digital Publishing Institute
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210202585
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 4
+    rate_per_10k: 3.43
+    journal_volume_window: 11671
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 10
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Livestock Biometrics Identification Using Computer Vision Approaches:
+        A Review'
+      year: 2025
+      doi: https://doi.org/10.3390/agriculture15010102
+      openalex_id: https://openalex.org/W4406084820
+    - title: Precision Livestock Farming Applications (PLF) for Grazing Animals
+      year: 2023
+      doi: https://doi.org/10.3390/agriculture13020288
+      openalex_id: https://openalex.org/W4318054783
+    - title: Automated Behavior Recognition and Tracking of Group-Housed Pigs with
+        an Improved DeepSORT Method
+      year: 2022
+      doi: https://doi.org/10.3390/agriculture12111907
+      openalex_id: https://openalex.org/W4308974974
+    - title: Emerging Precision Management Methods in Poultry Sector
+      year: 2022
+      doi: https://doi.org/10.3390/agriculture12050718
+      openalex_id: https://openalex.org/W4280544931
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 2654
+        source_url: https://openalex.org/S4210202585
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210202585
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 4 篇发在本刊（归一化 3.43 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-gomal-journal-of-agriculture-and-biology_579ee1
+  name: Gomal Journal of Agriculture and Biology
+  issn: 3007-1364
+  eissn: null
+  publisher: null
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S7407056596
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 1
+    rate_per_10k: 270.27
+    journal_volume_window: 37
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 41
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: AI APPLICATIONS IN LIVESTOCK BEHAVIOR MONITORING AND WELFARE
+      year: 2023
+      doi: https://doi.org/10.66406/gjab01202348
+      openalex_id: https://openalex.org/W7149316456
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 12
+        source_url: https://openalex.org/S7407056596
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S7407056596
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: target
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 1 篇发在本刊（归一化 270.27 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-agriengineering_250b2b
+  name: AgriEngineering
+  issn: 2624-7402
+  eissn: null
+  publisher: Multidisciplinary Digital Publishing Institute
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210177564
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 3
+    rate_per_10k: 21.6
+    journal_volume_window: 1389
+    volume_status: succeeded
+    queries_covered: 2
+    best_rank: 20
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Advancing Livestock Facial Recognition with AI: From Algorithm Innovation
+        to End-to-End Precision Farming Application'
+      year: 2026
+      doi: https://doi.org/10.3390/agriengineering8030077
+      openalex_id: https://openalex.org/W7131306057
+    - title: Application of a Lightweight, Open-Hardware Wearable System for Robust
+        Behaviour Monitoring in Precision Livestock Farming
+      year: 2026
+      doi: https://doi.org/10.3390/agriengineering8080301
+      openalex_id: https://openalex.org/W7170134080
+    - title: Precision Farming Technologies for Monitoring Livestock and Poultry
+      year: 2026
+      doi: https://doi.org/10.3390/agriengineering8020064
+      openalex_id: https://openalex.org/W7128705390
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 428
+        source_url: https://openalex.org/S4210177564
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210177564
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: target
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 3 篇发在本刊（归一化 21.6 篇/万篇，覆盖 2 条检索式）
+  flags: []
+- candidate_id: J-edelweiss-applied-science-and-technology_7737e5
+  name: Edelweiss Applied Science and Technology
+  issn: 2576-8484
+  eissn: null
+  publisher: null
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210188960
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 1
+    rate_per_10k: 2.85
+    journal_volume_window: 3511
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 2
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Role of computer vision and deep learning algorithms in livestock behavioural
+        recognition: A state-of-the-art- review'
+      year: 2024
+      doi: https://doi.org/10.55214/25768484.v8i6.3396
+      openalex_id: https://openalex.org/W4404873348
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 1937
+        source_url: https://openalex.org/S4210188960
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210188960
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 1 篇发在本刊（归一化 2.85 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-biosystems-engineering_2927c1
+  name: Biosystems Engineering
+  issn: 1537-5110
+  eissn: null
+  publisher: Elsevier BV
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S65230043
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 2
+    rate_per_10k: 19.14
+    journal_volume_window: 1045
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 3
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Livestock feeding behaviour: A review on automated systems for ruminant
+        monitoring'
+      year: 2024
+      doi: https://doi.org/10.1016/j.biosystemseng.2024.08.003
+      openalex_id: https://openalex.org/W4401454813
+    - title: Determining the onset of heat stress in a dairy herd based on automated
+        behaviour recognition
+      year: 2023
+      doi: https://doi.org/10.1016/j.biosystemseng.2023.01.009
+      openalex_id: https://openalex.org/W4318570199
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 239
+        source_url: https://openalex.org/S65230043
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S65230043
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 2 篇发在本刊（归一化 19.14 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-ieee-access_75d093
+  name: IEEE Access
+  issn: 2169-3536
+  eissn: null
+  publisher: Institute of Electrical and Electronics Engineers
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S2485537415
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 2
+    rate_per_10k: 0.35
+    journal_volume_window: 56408
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 12
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: A Survey on the Role of IoT in Agriculture for the Implementation of
+        Smart Livestock Environment
+      year: 2022
+      doi: https://doi.org/10.1109/access.2022.3142848
+      openalex_id: https://openalex.org/W4206234913
+    - title: 'Livestock Management With Unmanned Aerial Vehicles: A Review'
+      year: 2022
+      doi: https://doi.org/10.1109/access.2022.3168295
+      openalex_id: https://openalex.org/W4226193045
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 13603
+        source_url: https://openalex.org/S2485537415
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: DOAJ 收录（OpenAlex 源记录）
+        source_url: https://openalex.org/S2485537415
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 2 篇发在本刊（归一化 0.35 篇/万篇，覆盖 1 条检索式）
+  flags: []
+- candidate_id: J-international-journal-of-advanced-bioche_d44336
+  name: International Journal of Advanced Biochemistry Research
+  issn: 2617-4693
+  eissn: null
+  publisher: null
+  homepage_url: null
+  guide_url: null
+  openalex_source_id: https://openalex.org/S4210236697
+  source: precedent
+  source_detail: null
+  precedent:
+    similar_works_n: 3
+    rate_per_10k: 2.63
+    journal_volume_window: 11424
+    volume_status: succeeded
+    queries_covered: 1
+    best_rank: 18
+    window: *id001
+    queried_at: '2026-10-20'
+    precedents:
+    - title: 'Cognitive behaviour in livestock: A new direction for scientific management,
+        productivity and future challenges: A review'
+      year: 2026
+      doi: https://doi.org/10.33545/26174693.2026.v10.i7f.9037
+      openalex_id: https://openalex.org/W7168149794
+    - title: 'Precision livestock farming technologies: A review of sensors and data
+        analytics'
+      year: 2026
+      doi: https://doi.org/10.33545/26174693.2026.v10.i7sa.8922
+      openalex_id: https://openalex.org/W7167265240
+    - title: 'Digital livestock farming: A review'
+      year: 2024
+      doi: https://doi.org/10.33545/26174693.2024.v8.i4sf.1027
+      openalex_id: https://openalex.org/W4395684315
+  verification:
+    checked_at: '2026-10-20'
+    source_status: partial
+    metrics:
+      annual_volume:
+        value: 4000
+        source_url: https://openalex.org/S4210236697
+        source_year: '2025'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      indexing:
+        value: 未收录于 DOAJ（OpenAlex 源记录）
+        source_url: https://openalex.org/S4210236697
+        source_year: '2026'
+        queried_at: '2026-10-20'
+        status: verified
+        provenance: aggregator
+      apc:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: DOAJ 未检得该刊 APC 登记（混合刊多不在 DOAJ）
+      scope_fit:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网首页未抓得或未检得主题词（页面可能需 JS 渲染）
+      impact_factor:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 影响因子为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_jcr:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: JCR 分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      quartile_cas:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 中科院分区为专有数据（需机构订阅或用户自备 Key 实时查询），本演示未接入（JS-11）
+      self_cite_rate:
+        value: null
+        status: unconfirmed
+        source_status: skipped
+        note: 自引率需 WoS 数据，本演示未接入
+      review_cycle:
+        value: null
+        status: unconfirmed
+        source_status: attempted
+        note: 官网未检得可抓取的官方审稿周期统计（E4：官方无则未确认，不许众包单独定档）
+  risk:
+    level: clear
+    checks:
+    - condition: predatory_list_hit
+      hit: false
+      source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    - condition: volume_surge
+      hit: false
+      source: demo-fixture（演示注入的软警告，非真实核查结论）
+      source_ref: name_list vdemo-0.1
+      checked_at: '2026-10-20'
+      note: null
+    override: null
+    evaluated_at: '2026-10-20'
+  tier: null
+  provisional: false
+  match_reasons:
+  - 先例路：近 5 年同题论文 3 篇发在本刊（归一化 2.63 篇/万篇，覆盖 1 条检索式）
+  flags: []
+excluded:
+- candidate_id: J-journal-of-fictional-turkey-studies_5e6fea
+  name: Journal of Fictional Turkey Studies
+  level: quasi_hard
+  reasons:
+  - predatory_list_hit（来源：demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中），name_list
+    vdemo-0.1）
+  candidate_snapshot:
+    candidate_id: J-journal-of-fictional-turkey-studies_5e6fea
+    name: Journal of Fictional Turkey Studies
+    issn: null
+    eissn: null
+    publisher: null
+    homepage_url: null
+    guide_url: null
+    openalex_source_id: null
+    source: search
+    source_detail: 演示虚构刊（gate fixture 靶子，非真实期刊）
+    precedent: null
+    verification:
+      checked_at: '2026-10-20'
+      source_status: skipped
+      metrics: {}
+    risk:
+      level: quasi_hard
+      checks:
+      - condition: predatory_list_hit
+        hit: true
+        source: demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）
+        source_ref: name_list vdemo-0.1
+        checked_at: '2026-10-20'
+        note: 名单命中
+      - condition: volume_surge
+        hit: false
+        source: demo-fixture（演示注入的软警告，非真实核查结论）
+        source_ref: name_list vdemo-0.1
+        checked_at: '2026-10-20'
+        note: null
+      override: null
+      evaluated_at: '2026-10-20'
+    tier: excluded
+    provisional: false
+    match_reasons: []
+    flags: []
+  at: '2026-10-20'
+  by: light-journal-select gate
+decision:
+  candidate_id: J-smart-agricultural-technology_621fa6
+  journal: Smart Agricultural Technology
+  decided_at: '2026-10-20'
+  decided_by: demo-author（演示代行）
+  reason: 演示定刊：先例 6 篇（归一化 23.34 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊
+    scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。
+  tier: target
+  risk_level: clear
+handoff:
+  journal: Smart Agricultural Technology
+  candidate_id: J-smart-agricultural-technology_621fa6
+  target_dir: journal/target
+  check_record: journal/target/check-record.json
+  download_manifest: journal/target/download-manifest.json
+  handoff_list: journal/target/handoff.md
+  record_id: TR-2026-623ddd
+  record_hash: 2ea3531f34d92c9794a87d74635afe0992b5eb3b2879bef06ed15d8db257b80a
+  self_check:
+    local_structure: pass
+    write_check: pass
+    write_note: null
+    write_errors: []
+  at: '2026-10-20'
+notes: []
+handoff_history:
+- at: '2026-10-20'
+  kind: initial
+  guideline_version: '2026-10-20'
+  record_id: TR-2026-623ddd

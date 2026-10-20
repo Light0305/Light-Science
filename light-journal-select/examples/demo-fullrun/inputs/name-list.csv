@@ -1,0 +1,3 @@
+name,issn,condition,source,version
+Journal of Fictional Turkey Studies,,predatory_list_hit,demo-fixture 名单（stop-predatory 风格，演示注入；靶子为虚构刊，非真实名单命中）,demo-0.1
+Animals,,volume_surge,demo-fixture（演示注入的软警告，非真实核查结论）,demo-0.1
