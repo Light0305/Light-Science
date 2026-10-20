@@ -1,6 +1,6 @@
-# 演示：对 Light-Experiment 合成执行包的端到端判定（v1.0）
+# 演示：对 light-experiment 合成执行包的端到端判定（v1.0）
 
-**身份明示**：输入是 Light-Experiment v1 演示用的**合成自签执行包**
+**身份明示**：输入是 light-experiment v1 演示用的**合成自签执行包**
 （`light-experiment/examples/demo-synthetic/`，design 自签、非真实
 冻结设计，数据为合成集）。本演示只验证 Analysis 的承接 → 判定 →
 结论包链路，不传播任何数字为真实结论。完整逐行判定表、逐门数据与

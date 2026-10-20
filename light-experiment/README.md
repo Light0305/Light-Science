@@ -1,6 +1,6 @@
-# Light-Experiment
+# light-experiment
 
-按 Light-Design 的**冻结设计书**执行实验，产出与设计书逐项对账的**执行包**
+按 light-design 的**冻结设计书**执行实验，产出与设计书逐项对账的**执行包**
 （Light-Science 子技能）。
 
 **当前版本：v1.0**。三条质量纪律：承接对不齐逐条打回、执行端不许
@@ -14,7 +14,7 @@
 python -m venv .venv && .venv/bin/pip install -e ".[test]"
 
 .venv/bin/light-experiment init ./my-direction --direction "番茄病害检测"
-# 消费 Light-Design 导出的交接四件套（exports/<design_id>/ 目录）：
+# 消费 light-design 导出的交接四件套（exports/<design_id>/ 目录）：
 .venv/bin/light-experiment intake ./my-direction \
     --from-export ../design-proj/exports/<design_id>
 # → 承接齐全时按 brief 条目各建一条 planned run，并生成对账占位表；

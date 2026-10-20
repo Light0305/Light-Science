@@ -1,4 +1,4 @@
-"""Light-Review CLI（Phase 1 + Phase 2）。
+"""light-review CLI（Phase 1 + Phase 2）。
 
   init        建评审包骨架（review.yaml / seats.yaml / consensus.yaml /
               forensic/ / reports/drafts/）
@@ -340,7 +340,7 @@ def cmd_status(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-review",
-        description="Light-Review：投稿前内部评审包（Phase 1 + Phase 2）")
+        description="light-review：投稿前内部评审包（Phase 1 + Phase 2）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="建评审包骨架")

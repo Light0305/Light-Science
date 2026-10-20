@@ -1,4 +1,4 @@
-"""Light-Write CLI：init / intake / register-template / freeze-contract /
+"""light-write CLI：init / intake / register-template / freeze-contract /
 validate / advance / status / audit / disclose / review / revision /
 figures / reverify-claim。
 
@@ -39,7 +39,7 @@ def _print(obj):
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(prog="light-write", description="Light-Write 稿件包工具")
+    parser = argparse.ArgumentParser(prog="light-write", description="light-write 稿件包工具")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="新建稿件包骨架")

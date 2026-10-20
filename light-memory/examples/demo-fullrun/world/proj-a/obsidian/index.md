@@ -5,7 +5,7 @@ light_memory_view: index.md
 <!-- light-memory:machine:start -->
 # proj-a · 阶段索引
 
-本页由 Light-Memory 从关系与事实记录单向投影生成（派生视图，可整册重建，非唯一副本）。
+本页由 light-memory 从关系与事实记录单向投影生成（派生视图，可整册重建，非唯一副本）。
 
 ## Analysis
 - [[claim-c1]]（claim:C1）

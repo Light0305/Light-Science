@@ -1,6 +1,6 @@
-# Light-Design
+# light-design
 
-把 Light-Idea 的**定版想法卡**变成**可直接开工且可被证伪的研究设计书**。
+把 light-idea 的**定版想法卡**变成**可直接开工且可被证伪的研究设计书**。
 
 > 版本：**v1.0（封版，2026-10-20）**。设计依据（学习期文档、重构
 > 草案、十三条硬约束与定版决策记录）属开发档案，不在本仓库；本
@@ -12,11 +12,11 @@
 
 ## 定位与边界
 
-- 输入：Light-Idea 交接三件套（只消费**定版**卡）。交接字段缺失时
+- 输入：light-idea 交接三件套（只消费**定版**卡）。交接字段缺失时
   **打回、不许临场发明**（AgentLaboratory 反面教训：输入只有主题+综述，
   模型/数据/基线/判读/预算全被现编）——走 intake 打回记录退回 Idea 补规格。
 - 输出：冻结的设计书 design.yaml（权威源）+ design.md（渲染）+ 交接
-  四件套（exports/<design_id>/）。拿到它，Light-Experiment 不需要再做
+  四件套（exports/<design_id>/）。拿到它，light-experiment 不需要再做
   任何设计决策就能执行；设计本身写明「什么结果会推翻这个想法」。
 - 不做：实验执行（归 Experiment）、结果对账回填（归 Analysis，凭
   expected_registry.jsonl 逐条对）、查新（归 Idea/Literature）、长期
@@ -142,7 +142,7 @@ light-design render <project> <design_id>
    直接拒收（自评不作定版依据，约束 13）。逐项 verdict（pass/fail）
    + note（依据）五条缺一不可；decision=pass 与逐项有 fail 并存
    会被判「决议与逐项矛盾」拒收。
-3. **落盘**（二选一，与 Light-Idea 复核包同构）：
+3. **落盘**（二选一，与 light-idea 复核包同构）：
    - 外部判定 JSON：`review record --from-json verdict.json`，JSON
      字段 = {reviewer_model, reviewer_family, decision,
      items: {五条: {verdict, note}}}；
@@ -248,7 +248,7 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
 
 ## 演示小结（开发期端到端验证，脱敏）
 
-开发期以一张真实想法卡（Light-Idea 演示的 top 卡，执行级规格
+开发期以一张真实想法卡（light-idea 演示的 top 卡，执行级规格
 六项齐全）为输入跑通全链，结论如下，原始产物属开发档案、不在
 本仓库：
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-literature"
 version = "1.0.0"
-description = "Light-Literature：把外部论文变成项目内可核查、可复用的研究材料（Light-Science 子技能）"
+description = "light-literature：把外部论文变成项目内可核查、可复用的研究材料（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pymupdf>=1.24",

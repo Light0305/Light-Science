@@ -1,4 +1,4 @@
-# demo-fullrun 演示报告（Light-Figure v1.0）
+# demo-fullrun 演示报告（light-figure v1.0）
 
 ## 1. 终点与全链
 
@@ -28,7 +28,7 @@ delivered。全程命令与输出见 `evidence/run-log.txt`。
 数据图合同要点：面板 a（primary_quantitative_evidence）逐段 MOTA
 曲线、面板 b（baseline_or_control）臂均值 ± 95% CI；源数据为三臂
 逐段均值（fixed 72.638 / oracle 77.887 / predicted 77.835），与
-Light-Experiment 合成演示 summary.json 逐值一致。
+light-experiment 合成演示 summary.json 逐值一致。
 
 方法图合同要点：面板 a setup_schematic（视频输入 + 跟踪）、
 面板 b mechanistic_evidence（统计量 → 阈值预测 → 逐轨迹阈值 →
@@ -86,5 +86,5 @@ native-embed 变体首跑时**未被拦下**（总判决 PASS）。根因在审�
 - **字体替换**：期刊合同登记 Arial，本机无此字体，produce 按
   规程以 DejaVu Sans 替换并在生产结果落 `font_substituted`，
   未静默换字。
-- **数据身份**：三臂 MOTA 为 Light-Experiment 合成演示数据
+- **数据身份**：三臂 MOTA 为 light-experiment 合成演示数据
   （非真实实验结果），转写时逐值核对源 summary.json。

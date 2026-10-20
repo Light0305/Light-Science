@@ -1,4 +1,4 @@
-# Light-Idea 技能说明
+# light-idea 技能说明
 
 > 版本：**v1.0（封版，2026-10-20）**。设计依据（重构草案与学习期
 > 文档）属开发档案，不在本仓库；本文件即产品的完整执行规范。
@@ -12,8 +12,8 @@
 
 ## 1. 定位
 
-Light-Idea 负责「把领域缺口变成经得起查新的定版想法卡」：输入是研究方向/问题
-与 Light-Literature 的既有产物，输出是可直接交给 Light-Design 的**定版想法卡
+light-idea 负责「把领域缺口变成经得起查新的定版想法卡」：输入是研究方向/问题
+与 light-literature 的既有产物，输出是可直接交给 light-design 的**定版想法卡
 + 查新证据包**。核心交付不是灵感碎片，而是定版卡——生成只是七环中的一环，
 查新与执行级规格化才是这个 skill 的质量所在。
 
@@ -23,7 +23,7 @@ I4 评估与排序 → I5 打磨迭代（含 pre-mortem 独立关）→ I6 交�
 状态机（第 4、5 节）；I3 见第 8 节；I4 见第 10 节；I5 见第 11 节；
 I6 见第 12 节。未落地的只剩第 14 节明列的 v2 项，不许假装可用。）
 
-## 2. 与 Light-Literature 的衔接（写死）
+## 2. 与 light-literature 的衔接（写死）
 
 - 取材优先消费 Literature 的项目内产物（精读卡、证据矩阵、矛盾清单、笔记
   第 15/16 节的研究候选），不自建平行的文献库。
@@ -61,7 +61,7 @@ I6 见第 12 节。未落地的只剩第 14 节明列的 v2 项，不许假装�
 ```
 
 idea_id 规则：`<slug>_<hash6>`——题名 ASCII 化 slug（截断 40 字符）+
-`sha256(题名)` 前 6 位（沿用 Light-Literature 的 paper_id 习惯）。
+`sha256(题名)` 前 6 位（沿用 light-literature 的 paper_id 习惯）。
 
 ## 4. 想法卡纪律
 
@@ -447,7 +447,7 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
    实验与判读标准、最强基线、查新结论、风险与反对意见、
    next-step）、idea_card.json（结构化全量）、memory_export.jsonl
    （**方向层**条目：抽象到方向层级而非具体做法，带 Retrieval
-   Tags 与 Evidence 指针，供 Light-Memory 日后收编 —— 拍板
+   Tags 与 Evidence 指针，供 light-memory 日后收编 —— 拍板
    9.5-A：v1 只留结构化导出，不自建记忆系统）。
 2. **未定版拒绝**：未定版卡 export 会被拒绝并逐条列明缺口
    （当前状态、主线还差哪几步、定版门未过条目）——导出不是
@@ -505,9 +505,9 @@ pre_mortem_passed` 验门；有条件时 pre-mortem 由**另一模型家族**
   判定宪法；判例集（想法+最相关论文+判定+理由）是最值得长期
   投入的自建资产，按领域持续扩充，建成后按 §8.3 材料包交付。
 - **试点环（拍板 9.6-B）只落标注纪律**：pilot 字段与卡面标注
-  已就位，试点执行归 Light-Experiment，本技能不代跑实验。
+  已就位，试点执行归 light-experiment，本技能不代跑实验。
 - **跨周期记忆只留导出**：memory_export 的方向层条目格式已定，
-  收编与检索归 Light-Memory（总路线图最后做）；衰竭状态机
+  收编与检索归 light-memory（总路线图最后做）；衰竭状态机
   （approaching exhaustion / claimed territory）在 candidates.md
   方向层留痕里人工维护，未做自动判定。
 - **去重仍是字符级**：语义级嵌入去重未接入（离线、无外部服务

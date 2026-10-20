@@ -1,4 +1,4 @@
-"""Light-Figure CLI：init / intake / validate / advance / report /
+"""light-figure CLI：init / intake / validate / advance / report /
 style build / produce / prompt build / reference add|accept /
 redraw init|install|build|extract / audit run|audit-status|audit note /
 provenance set|show / deliver。
@@ -49,7 +49,7 @@ def _parse_value(raw: str):
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
-        prog="light-figure", description="Light-Figure 图包工具")
+        prog="light-figure", description="light-figure 图包工具")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="新建图包骨架")

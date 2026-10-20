@@ -1,7 +1,7 @@
 """A0 承接与可判性校验（Phase 1 核心）。
 
-消费 Light-Experiment 的 execution_card.json（只认 delivered 包）与
-Light-Design 的 expected_registry.jsonl，做三件事：
+消费 light-experiment 的 execution_card.json（只认 delivered 包）与
+light-design 的 expected_registry.jsonl，做三件事：
 
 1. 哈希对齐：execution_card.design_ref.content_hash ≡ 登记行 content_hash
    ≡ 对账 content_hash，任一不一致逐项点名、整包拦截（不放行）；

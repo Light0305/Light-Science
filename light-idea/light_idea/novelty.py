@@ -58,7 +58,7 @@ DEFAULT_PER_QUERY = 10
 _HTTP_TIMEOUT = 25
 _ABSTRACT_SNIPPET_CHARS = 400
 
-_UA = {"User-Agent": "Light-Idea/0.2 (novelty-check; stdlib-urllib)"}
+_UA = {"User-Agent": "light-idea/0.2 (novelty-check; stdlib-urllib)"}
 
 # 关键词抽取停用词（英文功能词 + 学术套话；只影响关键词式查询的构成）
 _STOPWORDS = {

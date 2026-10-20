@@ -1,6 +1,6 @@
 """通用小工具：YAML/JSON 读写、规范化哈希、时间戳、ID 生成。
 
-口径与 Light-Write / Light-Idea 等姊妹包对齐：规范化 JSON
+口径与 light-write / light-idea 等姊妹包对齐：规范化 JSON
 （sort_keys + 紧凑分隔符）是全包哈希计算的唯一序列化口径，
 不许另起炉灶。
 """

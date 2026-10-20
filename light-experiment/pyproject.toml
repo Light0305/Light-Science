@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-experiment"
 version = "1.0.0"
-description = "Light-Experiment：按冻结设计书执行实验——逐 run 留全痕、与预期登记逐行对账（Light-Science 子技能）"
+description = "light-experiment：按冻结设计书执行实验——逐 run 留全痕、与预期登记逐行对账（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

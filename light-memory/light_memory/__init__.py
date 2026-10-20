@@ -1,4 +1,4 @@
-"""Light-Memory：独立研究记忆（Light-Science 子技能）。
+"""light-memory：独立研究记忆（Light-Science 子技能）。
 
 Phase 1：骨架 + 数据模型（登记头与四账）+ 承接 M0（九包适配器）+
 取代链 M3 核心（五值判定落账、双时间区间算术、派生失效传播、

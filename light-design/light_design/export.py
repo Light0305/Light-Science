@@ -169,7 +169,7 @@ def _render_brief(design: dict, runs: list[dict], date: str) -> str:
     L: list[str] = []
     L.append(f"# 实验运行清单 — {design.get('title')}")
     L.append("")
-    L.append(f"> 交接自 Light-Design 定版设计书 `{design['design_id']}`"
+    L.append(f"> 交接自 light-design 定版设计书 `{design['design_id']}`"
              f"（承接 idea `{design.get('idea_id')}`），导出于 {date}。")
     L.append(f"> 🔒 冻结哈希 `{current_frozen_hash(design)}`"
              f"｜结果可见性声明：**{reg.get('visibility')}**"

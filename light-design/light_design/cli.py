@@ -1,4 +1,4 @@
-"""Light-Design CLI（一期 + 二期）。
+"""light-design CLI（一期 + 二期）。
 
 命令：
   init     建项目骨架（design-stage/ + designs/ + exports/ + review/ + 索引）
@@ -279,7 +279,7 @@ def cmd_render(args) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="light-design",
-        description="Light-Design：定版想法卡 → 可开工可证伪的研究设计书")
+        description="light-design：定版想法卡 → 可开工可证伪的研究设计书")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("init", help="建项目骨架")

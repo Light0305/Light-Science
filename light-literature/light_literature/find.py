@@ -118,7 +118,7 @@ def _get_json(url: str, params: dict | None = None,
 
 
 def _ua(mailto: str | None) -> dict:
-    ua = "Light-Literature/0.1 (Find; https://example.invalid/light-literature)"
+    ua = "light-literature/0.1 (Find; https://example.invalid/light-literature)"
     if mailto:
         ua += f" (mailto:{mailto})"
     return {"User-Agent": ua}

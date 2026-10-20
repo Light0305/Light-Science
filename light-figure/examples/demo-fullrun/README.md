@@ -1,8 +1,8 @@
-# demo-fullrun：Light-Figure v1 端到端双线演示
+# demo-fullrun：light-figure v1 端到端双线演示
 
 **终点：图包走完 intake → contracted → produced → audited → delivered，`exports/delivery.yaml` 已生成、编号已冻结。**
 
-身份如实说明：这是一条**合成演示链**——数据是 Light-Experiment
+身份如实说明：这是一条**合成演示链**——数据是 light-experiment
 合成演示的三臂结果，期刊合同是按 Nature Figure Guide 现行硬数字
 登记的演示合同，AI 政策快照是演示 fixture，图库/组件引用是演示
 种子条目，参考图是本地程序绘制的替身（见 demo-report 的逐项披露）。
@@ -14,7 +14,7 @@
 - `run_demo.py`：演示驱动（全程经 CLI 子进程执行；可重跑，会先
   清空 figure-pkg/、variants/、evidence/ 再重建）。
 - `inputs/`：承接清单（Write 形态 figures_manifest）、期刊合同、
-  AI 政策快照、三臂逐段 MOTA 源数据（转写自 Light-Experiment
+  AI 政策快照、三臂逐段 MOTA 源数据（转写自 light-experiment
   demo-synthetic 的三份 summary.json）、参考图替身原图、fig-2
   重绘 manifest 源文件。
 - `figure-pkg/`：演示图包本体（终点 delivered）。fig-1 数据图

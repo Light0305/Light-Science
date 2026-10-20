@@ -1,13 +1,13 @@
-# Light-Analysis
+# light-analysis
 
-Light-Science 第五棒：吃 Light-Experiment 已交付（`delivered`）的执行包与
-Light-Design 冻结的登记表，按登记行冻结的判读标准逐行回写 readout 三向
+Light-Science 第五棒：吃 light-experiment 已交付（`delivered`）的执行包与
+light-design 冻结的登记表，按登记行冻结的判读标准逐行回写 readout 三向
 正式判定，产出**可审计的分析结论包**——每个数字判了什么、凭什么判、
 强度几何、边界在哪，都落成结构化文件，Write 可直接消费、用户可逐项审计。
 
 > **v1.0 已封版（2026-10-20）**。Phase 1 = 骨架/数据模型/校验器/A0
 > 承接；Phase 2 = 最小判定计算集 + 判定/复核子流程 + 结论包填充；
-> Phase 3 = 端到端演示（承 Light-Experiment 合成执行包判至 graded、
+> Phase 3 = 端到端演示（承 light-experiment 合成执行包判至 graded、
 > 复核不可用如实停 blocked）+ SKILL/README 定版。
 
 ## 定版纪律（校验器写死，非自觉）
@@ -84,7 +84,7 @@ BY 校正（与 statsmodels 文档口径对拍）、Type S/M 闭式（Gelman & C
 
 ## 演示
 
-`examples/demo-synthetic/`：对 Light-Experiment 合成演示执行包（明示
+`examples/demo-synthetic/`：对 light-experiment 合成演示执行包（明示
 合成身份）的端到端判定——承接（5 行：可判 4、R-NEG 因 fundamental
 失败预登记 untested）→ 规格集账本冻结（estimator × outlier_handling，
 4 规格）→ SESOI 登记（合成 design 只有文本判读标准，F1 实测后经转写
@@ -103,7 +103,7 @@ python -m pytest   # 109 个：计算集已知答案对拍、校验器逐条纪�
                    # 对真实（合成）上游执行包的承接
 ```
 
-（在无上游 Light-Experiment 演示包的干净检出中，真实承接一项自动
+（在无上游 light-experiment 演示包的干净检出中，真实承接一项自动
 skip，其余全过。）
 
 ## 已知局限（v1.0，如实）

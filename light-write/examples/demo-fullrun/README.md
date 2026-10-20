@@ -1,4 +1,4 @@
-# demo-fullrun：端到端完整链演示（Light-Write v1 Phase 3）
+# demo-fullrun：端到端完整链演示（light-write v1 Phase 3）
 
 与 `demo-synthetic/`（Phase 1 承接骨架演示：只走到 intake 并如实暴露缺口）区分，
 本目录是一次**从承接到终点的完整运行**：承 Analysis 演示结论卡走完
@@ -8,7 +8,7 @@ intake → 模板登记 → 合同冻结 → outlined → 起草 → 披露 → 
 
 ## 身份声明（必读）
 
-- **合成链身份**：上游结论卡来自 Light-Analysis 的合成演示包
+- **合成链身份**：上游结论卡来自 light-analysis 的合成演示包
   （`light-analysis/examples/demo-synthetic/`），其数据为合成自签执行包的产物；
   本演示稿件是合成演示稿，不是真实研究投稿。
 - 模板核查记录（`fixtures/journal_record.json`）是**演示自备 fixture**：

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-idea"
 version = "1.0.0"
-description = "Light-Idea：把领域缺口变成经得起查新的定版想法卡（Light-Science 子技能）"
+description = "light-idea：把领域缺口变成经得起查新的定版想法卡（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

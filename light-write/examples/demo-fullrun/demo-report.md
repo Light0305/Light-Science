@@ -1,6 +1,6 @@
-# demo-report：Light-Write v1 端到端演示报告
+# demo-report：light-write v1 端到端演示报告
 
-> 身份：合成链演示。上游结论卡 = Light-Analysis 合成演示包的 `conclusion_card.json`
+> 身份：合成链演示。上游结论卡 = light-analysis 合成演示包的 `conclusion_card.json`
 > （status=blocked、review=REVIEW_UNAVAILABLE、唯一主张 C1=untested/insufficient）。
 > 本稿为合成演示稿；模板记录为演示 fixture；在线记录为构建时真实调用 Crossref 现拉。
 > 全程命令与原始输出见 `evidence/run-log.txt`。

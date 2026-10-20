@@ -1,6 +1,6 @@
 """通用小工具：YAML 读写、题名 slug、design_id 生成。
 
-design_id 规则（与 Light-Idea 的 idea_id 口径一致）：
+design_id 规则（与 light-idea 的 idea_id 口径一致）：
     <slug>_<hash6>
 - slug：题名 ASCII 化、连字符连接、截断 40 字符（全非 ASCII 时退化为 'design'）；
 - hash6：sha256(规范化题名) 的前 6 位。

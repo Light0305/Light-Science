@@ -1,6 +1,6 @@
-# Light-Analysis 演示报告：对 Light-Experiment 合成执行包的端到端判定（Phase 3）
+# light-analysis 演示报告：对 light-experiment 合成执行包的端到端判定（Phase 3）
 
-**身份明示**：承接对象是 Light-Experiment v1 演示的**合成自签执行包**
+**身份明示**：承接对象是 light-experiment v1 演示的**合成自签执行包**
 `video-threshold-predict_synth01-b2`（design 自签、非真实冻结设计，数据
 turkey-barn-repro-v3 为合成集）。本报告的全部判定只验证 Analysis 的判定
 链路（一期承接 → 规格冻结 → 逐行判定 → 强度合成 → 复核门 → 交接），

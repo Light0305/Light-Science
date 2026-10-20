@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Light-Review v1 demo-fullrun 驱动：经 CLI 子进程真跑一轮投稿前评审。
+"""light-review v1 demo-fullrun 驱动：经 CLI 子进程真跑一轮投稿前评审。
 
 主演示：承接 Write 演示稿件包（audited）+ Analysis 演示结论包 +
 Figure 演示 delivery + Journal-Select 演示 check-record，全链走
@@ -268,7 +268,7 @@ def write_report(f: dict, v: dict) -> None:
     ds = f.get("domain_summary") or {}
     bench = f.get("bench") or {}
     lines = []
-    lines.append("# Light-Review v1 演示报告（demo-fullrun）")
+    lines.append("# light-review v1 演示报告（demo-fullrun）")
     lines.append("")
     lines.append("驱动：`run_demo.py` 经 CLI 子进程真跑（日志 "
                  "evidence/run-log.txt，机器事实 evidence/summary.json）。")
@@ -418,7 +418,7 @@ def write_report(f: dict, v: dict) -> None:
 
 def main() -> int:
     EVIDENCE.mkdir(parents=True, exist_ok=True)
-    log("=== Light-Review v1 demo-fullrun 运行日志 ===")
+    log("=== light-review v1 demo-fullrun 运行日志 ===")
     log("上游输入：")
     for name, p in (("稿件包", WRITE_PKG), ("结论包", ANALYSIS_PKG),
                     ("图包 delivery 目录", FIGURE_DIR),

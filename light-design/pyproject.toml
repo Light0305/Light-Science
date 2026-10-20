@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-design"
 version = "1.0.0"
-description = "Light-Design：把定版想法卡变成可直接开工且可证伪的研究设计书（Light-Science 子技能）"
+description = "light-design：把定版想法卡变成可直接开工且可证伪的研究设计书（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

@@ -1,15 +1,15 @@
 ---
 name: light-analysis
-description: 按 Design 冻结登记行逐行回写 readout 正式判定，产出可审计的分析结论包。用于：消费 Light-Experiment 已交付执行包做承接与可判性校验（A0）、逐行判定回写、规格集稳健性复判、结论强度分级与结论包交接 Write。判定口径只认冻结登记行；判不了落 undetermined/untested，不许硬判。
+description: 按 Design 冻结登记行逐行回写 readout 正式判定，产出可审计的分析结论包。用于：消费 light-experiment 已交付执行包做承接与可判性校验（A0）、逐行判定回写、规格集稳健性复判、结论强度分级与结论包交接 Write。判定口径只认冻结登记行；判不了落 undetermined/untested，不许硬判。
 ---
 
-# Light-Analysis 操作规程
+# light-analysis 操作规程
 
 > **版本：v1.0（2026-10-20 封版）**。Phase 1 = 数据模型、校验器、
 > A0 承接与可判性规程、状态机骨架；Phase 2 = 最小判定计算集（§7.0）、
 > A1–A7 判定规程全文（§7）、判定/复核子流程、结论包填充与交接、
 > 判定自检清单（§8）、失败模式附录（§9）；Phase 3 = 端到端演示
-> （examples/demo-synthetic：承接 Light-Experiment 合成执行包判至
+> （examples/demo-synthetic：承接 light-experiment 合成执行包判至
 > graded，复核不可用如实停 blocked）+ 本定版。与 LEARNING.md 13 条
 > 硬约束的逐条对应见文末附录。
 > 本文件与 `light_analysis/` 工具同源：规程里写死的纪律，校验器逐条机械核。
@@ -18,7 +18,7 @@ description: 按 Design 冻结登记行逐行回写 readout 正式判定，产�
 
 核心交付 = **可审计的分析结论包**：判定权在 Analysis（全流程只有本技能
 能下 readout 三向正式判定），但**判定口径不自创**——判据只能来自
-Light-Design 冻结登记行（方向/阈值/SESOI/重复层级）。分析期发现标准
+light-design 冻结登记行（方向/阈值/SESOI/重复层级）。分析期发现标准
 缺失或不适用：该行落 undetermined 并生成回 Design 的报告条目，
 不许在分析包里临时立标准。
 

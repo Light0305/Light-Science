@@ -1,4 +1,4 @@
-# Light-Memory SKILL（v1.0）
+# light-memory SKILL（v1.0）
 
 > 定位：独立的研究记忆——沉淀前序八包 + 选刊的结构化产物与事件，支持跨会话恢复、跨项目复用、失败经验防重复试错，并为 Obsidian 轻量图谱视图供给精选笔记与真实关系。**Memory 独立于 Obsidian**：不用 Obsidian 时记忆照常工作，视图只是投影。Memory 只收编、永不反向改写任何上游产物；条目与上游冲突时以上游为真，记忆走取代或争议流程。
 > 设计依据：`10-memory/REDESIGN-DRAFT.md`（含拍板附录 8 条，2026-10-20 全按推荐定版）、`10-memory/LEARNING.md`（33 条硬约束 MM-01–MM-33）。

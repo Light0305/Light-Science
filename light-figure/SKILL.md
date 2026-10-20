@@ -1,4 +1,4 @@
-# Light-Figure SKILL（v1.0）
+# light-figure SKILL（v1.0）
 
 > 定位：把 Write 稿件包的图表占位变成可交付的图。核心原则——**登记文件是权威源**：每张图的合同、后端、提示词、重绘清单、provenance、审计产物全部先登记后使用；交付时只产 `delivery.yaml` 供 Write 回填，Figure 不直接改 Write 的清单。
 > 设计依据：`07-figure/REDESIGN-DRAFT.md`（含用户拍板 D1–D7，文末附录）、`07-figure/LEARNING.md`（16 条硬约束，对应表见 §15）。实现范围：图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→重绘 manifest 与文件级 .vsdx 构建）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：账行逐行复验 + 编号冻结配合）。

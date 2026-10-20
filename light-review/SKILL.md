@@ -1,4 +1,4 @@
-# Light-Review SKILL（v1.0 定版）
+# light-review SKILL（v1.0 定版）
 
 > 定位：投稿前内部评审包。Write 稿件包成稿（audited 之后、submission_ready 之前）运行，只做三件事——**法医式一致性核查**（四方对账 + GRIM 族）、**模拟审稿人组**逐席评审（可见性矩阵 / 报告冻结 / 共识门）、把发现装订成作者可执行的评审产物。Review **不改稿、不回注、不改任何已冻结报告**；修订回 Write 执行，复审走新 round。以「是否已收到真实审稿意见」为界：未收到归 Review，已收到（返修）归 Write 的 W7。
 > 设计依据：`09-review/REDESIGN-DRAFT.md`（含拍板附录 R1–R6，全按推荐）、`09-review/LEARNING.md`（18 条硬约束 RV-01–RV-18）。

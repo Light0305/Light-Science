@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-analysis"
 version = "1.0.0"
-description = "Light-Analysis：按 Design 冻结登记行逐行回写正式判定——可审计的分析结论包（Light-Science 子技能，v1.0）"
+description = "light-analysis：按 Design 冻结登记行逐行回写正式判定——可审计的分析结论包（Light-Science 子技能，v1.0）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

@@ -28,7 +28,7 @@ def _issue(level, code, message, where=None):
 
 
 class Report:
-    """与 Light-Write validate.Report 同构的判定收集器。"""
+    """与 light-write validate.Report 同构的判定收集器。"""
 
     def __init__(self):
         self.issues = []

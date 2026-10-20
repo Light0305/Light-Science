@@ -1,7 +1,7 @@
-# demo-fullrun：Light-Journal-Select v1 端到端演示
+# demo-fullrun：light-journal-select v1 端到端演示
 
 真实联网演示（非 fixture）：以「火鸡异常行为检测」稿件指纹
-（主题承 Light-Literature / Light-Write 演示的 CEA 2025
+（主题承 light-literature / light-write 演示的 CEA 2025
 火鸡论文）走完整选刊链——指纹 → OpenAlex 实时先例路 →
 逐刊联网核验 → 风险门 → 三档证据卡 → 定刊 CEA 优先 →
 `journal/target/` 交接（check-record 过 Write 校验器自检）。

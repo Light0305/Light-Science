@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-journal-select"
 version = "1.0.0"
-description = "Light-Journal-Select：Write 前置选刊——先例路候选生成、逐刊联网核验、两级风险门、三档证据卡与定刊交接（Light-Science 子技能，v1 构建中）"
+description = "light-journal-select：Write 前置选刊——先例路候选生成、逐刊联网核验、两级风险门、三档证据卡与定刊交接（Light-Science 子技能，v1 构建中）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

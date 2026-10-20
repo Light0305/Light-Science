@@ -92,7 +92,7 @@ def computed_severity(proposals: dict) -> str | None:
     return max(vals, key=severity_rank)
 
 
-# Write writable_form 形态序（承 Light-Write §3 规则表，Review 只复核不重定）
+# Write writable_form 形态序（承 light-write §3 规则表，Review 只复核不重定）
 WRITABLE_FORMS = ["full", "qualified", "downgraded", "limitations_only", "omit"]
 
 

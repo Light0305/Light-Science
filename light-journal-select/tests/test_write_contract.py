@@ -1,4 +1,4 @@
-"""与 Light-Write 的接口合同（集成验收）：
+"""与 light-write 的接口合同（集成验收）：
 
 Phase 2 handoff 将生成的 check-record.json 必须能过 Write 的
 check_template_record 校验。本测试把目标记录形态钉在 Write 的

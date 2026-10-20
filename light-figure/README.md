@@ -1,6 +1,6 @@
-# Light-Figure
+# light-figure
 
-承接 Light-Write 图表清单的图包工具：**图合同先行、双线生成、审计与账目先行登记**。每张图先落五点合同再动手：数据图走代码线（Python 默认 / R 条件启用），方法图走「图库匹配 → GPT Image 提示词 → 用户供参考图 → Visio 原生重绘」线；交付只产 `delivery.yaml` 供 Write 回填对账。
+承接 light-write 图表清单的图包工具：**图合同先行、双线生成、审计与账目先行登记**。每张图先落五点合同再动手：数据图走代码线（Python 默认 / R 条件启用），方法图走「图库匹配 → GPT Image 提示词 → 用户供参考图 → Visio 原生重绘」线；交付只产 `delivery.yaml` 供 Write 回填对账。
 
 当前版本：**v1.0（已封版）**。图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→文件级 .vsdx 重绘）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：`delivery.yaml` 生成 + 账行逐行复验 + 编号冻结配合）全部落地；端到端双线演示走完 intake → contracted → produced → audited → delivered（`examples/demo-fullrun/`）。
 
@@ -18,7 +18,7 @@
 - **provenance 更新命令**（`provenance set/show`）：append-only——旧行哈希入 history 的 supersedes 链、逐字段 from→to 留痕，哈希字段强制 SHA-256 格式。
 - **审计引擎**（`audit run` / `audit-status` / `audit note`）：七门在最终产物上实测——对齐（量测清单 vs 容差 1.5 pt）/ 碰撞（PyMuPDF 抽取：文字重叠比 0.05、细描边穿字、出页 0.5 pt、背景豁免 20%）/ 字形（内容流 Tf 实测 vs 地板）/ 合同（尺寸、格式白名单、色板合规；方法图查路线口径）/ 原生性（解 .vsdx：media 清单 + 形状计数，整图嵌入与未登记位图 FAIL）/ 诚实（反转轴阻断、数据被裁未声明阻断、宽高比与面积编码登记 + 警告）/ 政策硬拦（交付集任一文件哈希 == 参考图哈希即 FAIL）。判决四态 PASS / REVIEW_REQUIRED / FIX_BEFORE_DELIVERY / NOT_AUDITABLE；审计绑产物哈希，改动即 STALE；REVIEW 门须 `audit note` 落处置理由才许过 audited 门。
 - **交付**（`deliver` / `deliver --unfreeze --reason`）：audited 段生成 `exports/delivery.yaml`——逐图交付文件与哈希（按实物重算）、图注哈希、provenance 汇总与 AI 披露素材、方法图 `visio_verified` 标记；生成前逐行复验 provenance 账（账面哈希按实物重算，不符即拒交付）；首次交付同步冻结编号，冻结后改图须先登记解冻（旧清单标 superseded 不删），重新交付版本递增并重新冻结。
-- **报告**：`report` 生成 `FIGURE_REPORT.md`（逐图状态 / 容差与豁免 / provenance 账面 / 校验结论），手工区保留不覆盖（同 Light-Design 体例）。
+- **报告**：`report` 生成 `FIGURE_REPORT.md`（逐图状态 / 容差与豁免 / provenance 账面 / 校验结论），手工区保留不覆盖（同 light-design 体例）。
 
 ## 快速开始
 

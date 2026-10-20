@@ -1,6 +1,6 @@
 """通用小工具：YAML 读写、题名 slug、idea_id 生成。
 
-idea_id 规则（沿用 Light-Literature 的 paper_id 习惯）：
+idea_id 规则（沿用 light-literature 的 paper_id 习惯）：
     <slug>_<hash6>
 - slug：题名 ASCII 化、连字符连接、截断 40 字符（全非 ASCII 时退化为 'idea'）；
 - hash6：sha256(规范化题名) 的前 6 位，保证同名不同想法的目录不撞车概率低、

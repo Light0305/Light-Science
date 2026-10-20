@@ -1,6 +1,6 @@
-# Light-Write
+# light-write
 
-承接 Light-Analysis 结论包的稿件包工具：**先登记后使用、成稿门逐项对账**。主张、数字、引用、图表、声明全部先登记进稿件包，正文只许引用登记过的东西；引用只来自 Light-Literature 的 verified 集，数字只来自 Analysis 溯源表，措辞永不超过 Analysis 强度档。
+承接 light-analysis 结论包的稿件包工具：**先登记后使用、成稿门逐项对账**。主张、数字、引用、图表、声明全部先登记进稿件包，正文只许引用登记过的东西；引用只来自 light-literature 的 verified 集，数字只来自 Analysis 溯源表，措辞永不超过 Analysis 强度档。
 
 当前版本：**v1.0（封版）**。端到端演示见 `examples/demo-fullrun/`（合成链：承 Analysis 演示结论卡走完 intake → outlined → drafted → 披露 → 审计四门 → audited，跨模型复核 REVIEW_UNAVAILABLE 如实拦停，另含 W7 返修全环）；Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
 
@@ -76,7 +76,7 @@ python -m pytest   # 129 个测试
 7. **措辞门是词表级机械比对**：抓得到标记句内的越档词，抓不到无标记断言与语义级夸大；未标记的事实断言仍须人工补审（约束 11 的诚实边界）。
 8. **相关性/支撑判定只验机械面**：工具校验判定词表合法、逐字句在场、双角色落名，不判语义真伪；判定本身由人/模型按对抗协议给出，工具不代判。
 9. **跨模型复核依赖外部异家族模型**：本环境单一模型家族时只能落 REVIEW_UNAVAILABLE 停在 audited（演示即此终点）；收据不可自签自赦是设计而非缺陷。
-10. **图件只登记指针 + 哈希**：figures 只对账清单/正文标记/图注三方一致性，不验图-文内容一致性（图内数据与正文数字的语义核对归 Light-Figure/人工）。
+10. **图件只登记指针 + 哈希**：figures 只对账清单/正文标记/图注三方一致性，不验图-文内容一致性（图内数据与正文数字的语义核对归 light-figure/人工）。
 11. **撤稿态无自动订阅**：成稿时点的撤稿复核靠 lock 快照 + 注入记录的 retraction_state 字段；无自动更新通道，投稿前应重新注入最新记录复核。
 
 ## 封版记录

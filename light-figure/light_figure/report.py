@@ -1,4 +1,4 @@
-"""FIGURE_REPORT.md 生成/刷新（手工区保留，同 Light-Design 体例）。
+"""FIGURE_REPORT.md 生成/刷新（手工区保留，同 light-design 体例）。
 
 报告是图包的唯一权威汇总文档：包状态 / 逐图状态表 / 后端解析 /
 期刊合同与容差 / provenance 账面 / 校验结论。手工区（MANUAL 标记

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-write"
 version = "1.0.0"
-description = "Light-Write：承接 Analysis 结论包的稿件包——先登记后使用、成稿门逐项对账（Light-Science 子技能，v1.0）"
+description = "light-write：承接 Analysis 结论包的稿件包——先登记后使用、成稿门逐项对账（Light-Science 子技能，v1.0）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

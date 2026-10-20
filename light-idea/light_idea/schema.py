@@ -2,7 +2,7 @@
 
 设计依据：02-idea/REDESIGN-DRAFT.md §2.1 字段草案 + LEARNING.md 八条硬约束。
 核心纪律（校验器写死）：
-- 文献引用（种子文献、facet 出处、最接近工作）必须带 Light-Literature 的
+- 文献引用（种子文献、facet 出处、最接近工作）必须带 light-literature 的
   paper_id 或 DOI，不许裸文本（与 Literature「未核实成稿层一律不用」对齐）；
 - 查新判定区（novelty）与辅助字段区（aux）物理分离：novelty 区不许出现
   相似度分等辅助信号，aux 区不许出现 verdict（约束 3：分数不进判定区）；

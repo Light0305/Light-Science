@@ -1,4 +1,4 @@
-"""Light-Analysis CLI（Phase 1 + Phase 2）。
+"""light-analysis CLI（Phase 1 + Phase 2）。
 
   init            建分析包骨架（analysis.yaml / verdicts.jsonl / spec_ledger.yaml /
                   spec_results.jsonl / conclusions.yaml / exploratory/）
@@ -219,7 +219,7 @@ def cmd_reflux(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-analysis",
-        description="Light-Analysis：可审计的分析结论包（Phase 2）")
+        description="light-analysis：可审计的分析结论包（Phase 2）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="建分析包骨架")

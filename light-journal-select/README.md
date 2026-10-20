@@ -1,4 +1,4 @@
-# Light-Journal-Select
+# light-journal-select
 
 Light-Science 子技能（Write 前置扩展位）：帮用户选刊 → 用户定刊 →
 从目标刊官网下载模板与作者指南到本地项目 → 现场生成 Write

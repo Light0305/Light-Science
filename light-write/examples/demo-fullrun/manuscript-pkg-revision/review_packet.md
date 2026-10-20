@@ -8,7 +8,7 @@
 
 ## 成稿口径宪法（复核者须知，判据不重开）
 
-- 引用只许来自 Light-Literature verified 集快照（references.lock）；
+- 引用只许来自 light-literature verified 集快照（references.lock）；
   数字只许来自 Analysis 溯源表；正文措辞强度永不超过 Analysis 强度档。
 - writable_form 与 wording_ceiling 由上游状态 × 强度档规则表机械导出，
   不许临场升格；untested 主张只许 limitations_only / omit。

@@ -1,4 +1,4 @@
-# Light-Design
+# light-design
 
 Light-Science 的研究设计子技能：把定版想法卡变成**可直接开工且
 可被证伪的研究设计书**。技能规范见 [SKILL.md](SKILL.md)。

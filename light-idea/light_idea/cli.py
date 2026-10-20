@@ -1,4 +1,4 @@
-"""Light-Idea CLI（一期 + 二期 + 三期）。
+"""light-idea CLI（一期 + 二期 + 三期）。
 
 命令：
   init     建项目骨架（idea-stage/ + cards/ + novelty/ + 索引）
@@ -369,7 +369,7 @@ def cmd_export(args) -> int:
     print(f"  - design_handoff.md：{result['design_handoff']}")
     print(f"  - idea_card.json：{result['idea_card_json']}")
     print(f"  - memory_export.jsonl：{result['memory_export']}"
-          f"（方向层条目，供 Light-Memory 日后收编）")
+          f"（方向层条目，供 light-memory 日后收编）")
     return 0
 
 
@@ -405,7 +405,7 @@ def cmd_list(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="light-idea", description="Light-Idea 想法卡系统（v1.0）")
+    ap = argparse.ArgumentParser(prog="light-idea", description="light-idea 想法卡系统（v1.0）")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="建项目骨架")

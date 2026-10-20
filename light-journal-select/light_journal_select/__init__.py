@@ -1,4 +1,4 @@
-"""Light-Journal-Select：Light-Write 前置选刊技能包。
+"""light-journal-select：light-write 前置选刊技能包。
 
 定位（REDESIGN-DRAFT v0.1 + 拍板 E1）：Analysis 出结论包之后、
 Write 开工之前运行；每次投稿运行一次，产物落本地项目目录，

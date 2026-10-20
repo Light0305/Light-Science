@@ -1,4 +1,4 @@
-# Light-Review v1 演示报告（demo-fullrun）
+# light-review v1 演示报告（demo-fullrun）
 
 驱动：`run_demo.py` 经 CLI 子进程真跑（日志 evidence/run-log.txt，机器事实 evidence/summary.json）。
 

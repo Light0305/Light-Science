@@ -1,4 +1,4 @@
-# Light-Write SKILL（v1.0）
+# light-write SKILL（v1.0）
 
 > 定位：把 Analysis 的结论包变成可投稿的稿件包。核心原则——**登记文件是权威源，正文只许引用登记过的东西**：主张、数字、引用、图表、声明全部先登记后使用，成稿门逐项对账。
 > 设计依据：`06-write/REDESIGN-DRAFT.md`（含拍板 6 项）、`06-write/LEARNING.md`（16 条硬约束，文末附对应表）。v1.0 范围：数据模型、承接与主张登记、模板记录消费校验、验收合同冻结、五段状态机门（intake→outlined→drafted→audited→submission_ready）、审计四门、按刊披露生成、跨模型复核门、W7 返修子包、W5 图表回填三方对账与编号冻结。端到端演示见 `examples/demo-fullrun/`（合成链，终点 audited + REVIEW_UNAVAILABLE 拦停），Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
@@ -15,7 +15,7 @@
 | `numbers_ledger.yaml` | 数字溯源账：逐数字 ↔ Analysis 溯源表条目指针（起草期填充） |
 | `references.lock.json` | 引用快照：verified 集快照子集（key、条目 ID、撤稿四态、entry_hash） |
 | `references.bib` | **生成物，禁手改**：由 lock 回填渲染，文件头带 GENERATED 标记与条目集哈希 |
-| `figures_manifest.yaml` | 图表清单：占位/交付/回填三态 + 编号冻结标记（与 Light-Figure 协同） |
+| `figures_manifest.yaml` | 图表清单：占位/交付/回填三态 + 编号冻结标记（与 light-figure 协同） |
 | `submission_checklist.yaml` | 投稿检查落点映射（提纲期填充、投稿前门四复核） |
 | `acceptance_contract.yaml` | 验收合同：动笔前断言清单，冻结后哈希锁定 |
 | `template_record.json` | 目标刊核查记录快照（九组字段，register-template 落） |

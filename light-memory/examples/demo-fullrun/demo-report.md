@@ -1,4 +1,4 @@
-# Light-Memory Phase 3 真实演示报告（demo-fullrun）
+# light-memory Phase 3 真实演示报告（demo-fullrun）
 
 > 驱动：`run_demo.py`，全链经 CLI 子进程真跑（可整删 `world/` 重复执行，结果确定性复现）。输入全部为全项目各包的真实演示产物；唯一的构造物是第二代结论包（§3 明确标注）。证据在 `evidence/`（逐条 CLI 日志 + `summary.json` + `bench_report.json`）。
 

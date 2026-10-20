@@ -1,4 +1,4 @@
-"""Light-Experiment CLI（二期）。
+"""light-experiment CLI（二期）。
 
 一期命令：
   init        建项目骨架（experiment-stage/ + executions/ + 索引）
@@ -613,7 +613,7 @@ def cmd_export_card(args) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-experiment",
-        description="Light-Experiment：按冻结设计书执行、逐 run 留痕、逐行对账")
+        description="light-experiment：按冻结设计书执行、逐 run 留痕、逐行对账")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("init", help="建项目骨架")

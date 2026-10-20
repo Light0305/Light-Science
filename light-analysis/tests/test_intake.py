@@ -109,7 +109,7 @@ def test_intake_twice_rejected(pkg, upstream):
 
 
 def test_intake_real_demo_package(tmp_path):
-    """对 Light-Experiment 合成演示执行包（明示合成身份）真实承接一遍。"""
+    """对 light-experiment 合成演示执行包（明示合成身份）真实承接一遍。"""
     demo = REPO_ROOT / "light-experiment" / "examples" / "demo-synthetic"
     card_path = demo / "proj" / "executions" / \
         "video-threshold-predict_synth01-b2" / "execution_card.json"

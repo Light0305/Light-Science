@@ -1,4 +1,4 @@
-# Light-Memory
+# light-memory
 
 Light-Science 的研究记忆层：沉淀前序八包 + 选刊的结构化产物与事件，支持跨会话恢复、跨项目复用、失败经验防重复试错，并为 Obsidian 轻量图谱视图供给精选笔记与真实关系。Memory 独立于 Obsidian——不用 Obsidian 时记忆照常工作，视图只是可整删重建的投影。
 

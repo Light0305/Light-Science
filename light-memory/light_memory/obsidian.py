@@ -193,7 +193,7 @@ def _render_index(pkg: dict, selected: dict) -> str:
     disputed = sum(1 for f in pkg.get("facts") or []
                    if f.get("status") == "disputed")
     lines = [f"# {memory.get('memory_id') or '记忆'} · 阶段索引", "",
-             "本页由 Light-Memory 从关系与事实记录单向投影生成"
+             "本页由 light-memory 从关系与事实记录单向投影生成"
              "（派生视图，可整册重建，非唯一副本）。", ""]
     by_stage: dict[str, list] = {}
     for oid, slot in selected.items():

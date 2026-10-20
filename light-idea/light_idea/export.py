@@ -2,13 +2,13 @@
 
 交接三件套（ARIS 形态，草案 §7）：对 **finalized**（两级定版之一）
 的卡产出到 <project>/exports/<idea_id>/：
-- design_handoff.md —— 给 Light-Design 的人读交接：核心主张、执行级
+- design_handoff.md —— 给 light-design 的人读交接：核心主张、执行级
   规格、最小判别实验与判读标准（= minimum convincing evidence）、
   最强基线、查新结论与证据指针、风险与最强反对意见、next-step；
 - idea_card.json —— 想法卡结构化全量（idea.yaml 的 JSON 形态）；
 - memory_export.jsonl —— 按 evo-memory 风格抽象到**方向层级**的条目
   （Summary / Why / Evidence 指针 / Status / Retrieval Tags /
-  Boundary Conditions），供未来 Light-Memory 收编（拍板 9.5-A：
+  Boundary Conditions），供未来 light-memory 收编（拍板 9.5-A：
   判据先行、系统后置，v1 只留结构化导出，不自建记忆系统）。
 
 **未定版卡拒绝导出**：差哪一步、定版门还剩什么错，逐条说明——导出
@@ -220,7 +220,7 @@ def _render_handoff(card: dict, date: str) -> str:
     L.append("")
     L.append("## Next step")
     L.append("")
-    L.append("- Light-Design 以本交接件 + idea_card.json 为输入做实验设计；"
+    L.append("- light-design 以本交接件 + idea_card.json 为输入做实验设计；"
              "细化时若动核心（facet 三面/假设），按保真规则回写本卡 "
              "lineage（核心未动 / 细节改了什么）。")
     L.append("- 本想法若在 Design/Experiment 阶段被证伪，从项目候选池"

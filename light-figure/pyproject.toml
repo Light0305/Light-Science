@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-figure"
 version = "1.0.0"
-description = "Light-Figure：承接 Write 图表清单的图包——图合同先行、双线生成（数据图代码线 / 方法图提示词→Visio 重绘线）、审计门与 provenance 一本账（Light-Science 子技能）"
+description = "light-figure：承接 Write 图表清单的图包——图合同先行、双线生成（数据图代码线 / 方法图提示词→Visio 重绘线）、审计门与 provenance 一本账（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

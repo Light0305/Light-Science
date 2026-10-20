@@ -267,7 +267,7 @@ def _transition(obj: dict, to: str, by: str, date: str, note: str = "") -> None:
 
 def current_design_hash(card: dict) -> str | None:
     """交接件的现行内容哈希：有 amendment 取链尾 new_hash，否则冻结哈希
-    （与 Light-Design current_frozen_hash 同口径）。"""
+    （与 light-design current_frozen_hash 同口径）。"""
     fr = card.get("freeze") or {}
     amds = fr.get("amendments") or []
     if amds:

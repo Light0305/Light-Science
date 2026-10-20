@@ -22,9 +22,9 @@ my-direction/                       # 一个研究方向 = 一个项目目录
 │   └── verdict.json                # 判定收据存根（verdict 落卡时写入）
 ├── chains/<chain_id>/              # 演进链素材（chain 落盘，只取材不生成）
 ├── exports/<idea_id>/              # 交接三件套（只对定版卡）
-│   ├── design_handoff.md           # 给 Light-Design 的交接说明
+│   ├── design_handoff.md           # 给 light-design 的交接说明
 │   ├── idea_card.json              # 定版卡机器可读形态
-│   └── memory_export.jsonl         # 跨周期留痕导出（等 Light-Memory 收编）
+│   └── memory_export.jsonl         # 跨周期留痕导出（等 light-memory 收编）
 └── idea-stage/
     ├── IDEA_REPORT.md              # 唯一权威文档：折叠各环结论
     ├── candidates.md               # Landscape 缺口图 / 候选与切换日志
@@ -48,7 +48,7 @@ my-direction/                       # 一个研究方向 = 一个项目目录
 - top 卡 pre-mortem 六项全过 → `pre_mortem_passed`；定版被两道门
   如实拦下：①跨模型收据硬门（演示环境为单模型家族，走
   REVIEW_UNAVAILABLE 降级，不伪造收据）；②最接近工作未过
-  Light-Literature 核实口径——其后已补核实：三篇最接近工作逐条
+  light-literature 核实口径——其后已补核实：三篇最接近工作逐条
   按 Literature 的 `verify-identity` 同标准（Crossref + Europe
   PMC 对账）全部核实通过并回填 `verified=true`，重跑定版后拦截
   项只剩跨模型硬门一道，卡保持 `pre_mortem_passed`，待多模型

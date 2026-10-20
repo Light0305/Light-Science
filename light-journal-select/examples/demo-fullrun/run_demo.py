@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Light-Journal-Select v1 端到端真实联网演示驱动。
+"""light-journal-select v1 端到端真实联网演示驱动。
 
-主题承 Light-Literature / Light-Write 演示的那篇火鸡论文
+主题承 light-literature / light-write 演示的那篇火鸡论文
 （Zhang et al., Computers and Electronics in Agriculture 239
 (2025) 110856 的研究主题）：以「火鸡异常行为检测」稿件指纹
 走完整选刊链——init → fingerprint → precedent（OpenAlex
@@ -365,7 +365,7 @@ def write_report_skeleton(facts: dict) -> None:
     key_state = ("已注入（值不落字）" if facts["api_key_present"]
                  else "未注入（匿名共享预算）")
     lines = [
-        "# Light-Journal-Select v1 演示报告（demo-fullrun，骨架）",
+        "# light-journal-select v1 演示报告（demo-fullrun，骨架）",
         "",
         "> 本文件由 run_demo.py 跑完后自动生成：机器可采的事实",
         "> 由脚本回填（第一节），叙述性结论留第四节「主线回填」",
@@ -479,7 +479,7 @@ def main() -> int:
         "today": today_str,
         "api_key_present": bool(os.environ.get("OPENALEX_API_KEY")),
     }
-    log("=== Light-Journal-Select v1 demo-fullrun 运行日志 ===")
+    log("=== light-journal-select v1 demo-fullrun 运行日志 ===")
     driver_note("OpenAlex API Key："
                 + ("已注入（只记有无，值不落字）"
                    if facts["api_key_present"]

@@ -1,9 +1,9 @@
-# Light-Literature
+# light-literature
 
 Light-Science 的文献子技能：把外部论文变成项目内可核查、可复用的研究材料。
 技能规范见 [SKILL.md](SKILL.md)。
 
-当前版本：**v1.0**。Light-Literature 把一篇外部论文加工成「四件套」——
+当前版本：**v1.0**。light-literature 把一篇外部论文加工成「四件套」——
 原文 PDF、带 S/C/F/T/E 锚点的原文 MD、块级对齐的中文翻译 MD、图文并茂的
 精读笔记——并配套证据行、术语账本与 Find 线（多源检索 → 身份核实与撤稿
 检查 → 粗筛 → 研究证据矩阵）。

@@ -1,6 +1,6 @@
 """通用小工具：YAML/JSON 读写、规范化哈希、时间戳、ID 生成。
 
-口径与 Light-Idea / Light-Design / Light-Experiment / Light-Analysis 对齐：
+口径与 light-idea / light-design / light-experiment / light-analysis 对齐：
 - 规范化 JSON（sort_keys + 紧凑分隔符）是全包哈希计算的唯一序列化口径，
   校验器重算哈希时用同一口径，序列化口径漂移即哈希全灭——不许另起炉灶。
 """

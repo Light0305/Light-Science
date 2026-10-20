@@ -1,4 +1,4 @@
-# FIGURE_REPORT — Turkey Behaviour Figures (Light-Figure demo)
+# FIGURE_REPORT — Turkey Behaviour Figures (light-figure demo)
 
 > 本图包唯一权威汇总（report 命令生成/刷新于 2026-10-20）：包状态 / 逐图状态 / 后端与期刊合同 / provenance 账面 / 校验结论。手工区在文末标记之间，刷新不覆盖。
 

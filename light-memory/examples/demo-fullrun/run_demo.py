@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Light-Memory Phase 3 真实演示驱动（全链经 CLI 子进程真跑）。
+"""light-memory Phase 3 真实演示驱动（全链经 CLI 子进程真跑）。
 
 沿火鸡主线把全项目九包 + 选刊的真实演示产物收编进一个真实记忆
 项目（world/proj-a），外加 MOT17 极简项目（world/proj-b）与全局层

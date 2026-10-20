@@ -1,4 +1,4 @@
-# Light-Idea
+# light-idea
 
 Light-Science 的选题子技能：把领域缺口变成经得起查新的**定版想法卡**。
 技能规范见 [SKILL.md](SKILL.md)。
@@ -9,7 +9,7 @@ I3 facet 查新（四源实查取证 + 判定落卡）→ I4 两两对决排序 
 迭代（pre-mortem 独立关）→ I6 交接三件套导出。质量纪律三条写死：
 查新结论只认实查证据（分数只作粗筛辅助，不进判定区）；判想法死刑
 （ABANDON）必须点名一篇已发表的在先论文；定版必须过跨模型收据
-硬门与「最接近工作全部经 Light-Literature 核实」门，缺一不可。
+硬门与「最接近工作全部经 light-literature 核实」门，缺一不可。
 
 > 开发说明：设计草案、学习期深读文档与完整验收记录属开发档案，
 > 不在本仓库；本仓库只有产品本体。
@@ -134,7 +134,7 @@ finalized_executable / finalized_conceptual`；旁路 `killed / parked`
 
 ## v1.0 封版记录（2026-10-20）
 
-Light-Idea v1.0 至此封版：全部交付，SKILL.md 定版 v1.0，
+light-idea v1.0 至此封版：全部交付，SKILL.md 定版 v1.0，
 pyproject 版本 1.0.0，全量测试 101 passed。已知局限总表：
 
 1. 图谱路径算子未做（v2）：v1 只有演进链 + 远域碰撞两个算子。
@@ -146,14 +146,14 @@ pyproject 版本 1.0.0，全量测试 101 passed。已知局限总表：
 4. 试点环只落标注纪律（未试点定版卡标注「未经试点验证」），
    工具不代跑试点。
 5. 跨周期记忆只做结构化留痕与 memory_export.jsonl 导出，未做检
-   索与回流，等 Light-Memory 收编。
+   索与回流，等 light-memory 收编。
 6. 去重仍为字符 n-gram 级：语义近重（同义改写）检不出，只报告
    不删卡的纪律不变。
 7. chain 与 novelty 的源依赖公开 API 限流：三/四源中任一源 429
    时覆盖不全（工具自动落盲区声明，但结论须按盲区打折）。
 8. duel 的跨家族判定靠规程（逐场 note 声明），代码不强制判定者
    家族；Elo 只给对决过卡的子集分，未对决的卡无分。
-9. 定版要求 closest works 先过 Light-Literature 核实口径
+9. 定版要求 closest works 先过 light-literature 核实口径
    （verified=true）：演示证明该门真实存在——从题名级证据池直
    接定版会被拦，这是设计而非缺陷，但意味着定版流程必须安排
    核实环节。

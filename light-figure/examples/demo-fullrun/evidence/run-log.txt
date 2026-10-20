@@ -1,7 +1,7 @@
-=== Light-Figure v1 demo-fullrun 运行日志 ===
-[driver] inputs 已生成：arms_segments.csv（三臂逐段 MOTA，转写自 Light-Experiment 合成演示三份 summary.json）、figures_manifest.yaml、journal_contract.yaml、ai_policy.yaml（演示 fixture）
+=== light-figure v1 demo-fullrun 运行日志 ===
+[driver] inputs 已生成：arms_segments.csv（三臂逐段 MOTA，转写自 light-experiment 合成演示三份 summary.json）、figures_manifest.yaml、journal_contract.yaml、ai_policy.yaml（演示 fixture）
 
-$ light_figure init examples/demo-fullrun/figure-pkg --title Turkey Behaviour Figures (Light-Figure demo)   (cwd=examples/demo-fullrun)
+$ light_figure init examples/demo-fullrun/figure-pkg --title Turkey Behaviour Figures (light-figure demo)   (cwd=examples/demo-fullrun)
 {
   "package_id": "turkey-behaviour-figures-light-figure-de_1b4072",
   "status": "intake"
@@ -317,7 +317,7 @@ $ light_figure advance examples/demo-fullrun/figure-pkg   (cwd=examples/demo-ful
 $ light_figure status examples/demo-fullrun/figure-pkg   (cwd=examples/demo-fullrun/figure-pkg)
 {
   "package_id": "turkey-behaviour-figures-light-figure-de_1b4072",
-  "title": "Turkey Behaviour Figures (Light-Figure demo)",
+  "title": "Turkey Behaviour Figures (light-figure demo)",
   "status": "delivered",
   "figures": [
     {

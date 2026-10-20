@@ -240,7 +240,7 @@ def _emit_reflux(root: Path, exec_id: str, record: dict, run: dict,
             path = dossiers / f"{record['failure_id']}.md"
             path.write_text(
                 f"# Idea 回流 dossier 草稿 — {record['failure_id']}\n\n"
-                f"> 由 Light-Experiment 失败分类自动生成（{date}），经 Design "
+                f"> 由 light-experiment 失败分类自动生成（{date}），经 Design "
                 "中转回 Idea 的修订/杀卡流程；本草稿不直接改想法卡。\n\n"
                 f"- 来源 run：{record['run_id']}（exit_status "
                 f"{record['exit_status']}）\n"

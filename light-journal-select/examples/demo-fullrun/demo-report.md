@@ -1,4 +1,4 @@
-# Light-Journal-Select v1 演示报告（demo-fullrun，骨架）
+# light-journal-select v1 演示报告（demo-fullrun，骨架）
 
 > 本文件由 run_demo.py 跑完后自动生成：机器可采的事实
 > 由脚本回填（第一节），叙述性结论留第四节「主线回填」

@@ -1,4 +1,4 @@
-"""Light-Memory CLI（Phase 1 + Phase 2）。
+"""light-memory CLI（Phase 1 + Phase 2）。
 
   init            建记忆项目骨架（memory.yaml 登记头 + 四账 + 目录群）
   ingest          M0 承接：按水位线收编一个上游包的导出物（九包适配器）
@@ -508,7 +508,7 @@ def cmd_promote(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-memory",
-        description="Light-Memory：独立研究记忆（Phase 1 + Phase 2）")
+        description="light-memory：独立研究记忆（Phase 1 + Phase 2）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="建记忆项目骨架")

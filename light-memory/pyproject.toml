@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "light-memory"
 version = "1.0.0"
-description = "Light-Memory：独立研究记忆——收编九包 + 选刊的结构化产物与事件为事件/事实/笔记三层，维护双时间取代链与关系记录，回供检索与恢复注入，并投影 Obsidian 精选视图与研究者画像（Light-Science 子技能）"
+description = "light-memory：独立研究记忆——收编九包 + 选刊的结构化产物与事件为事件/事实/笔记三层，维护双时间取代链与关系记录，回供检索与恢复注入，并投影 Obsidian 精选视图与研究者画像（Light-Science 子技能）"
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",

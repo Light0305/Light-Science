@@ -119,7 +119,7 @@ def _render_handoff_md(selection: dict, candidate: dict, record: dict,
         if e["status"] == "pending_download":
             pending_names.append(e["filename"])
     lines = [
-        "# 定刊交接清单（Light-Journal-Select → Light-Write）", "",
+        "# 定刊交接清单（light-journal-select → light-write）", "",
         f"- 目标刊：{candidate.get('name')}"
         f"（ISSN {candidate.get('issn') or '未确认'}，"
         f"出版商 {candidate.get('publisher') or '未确认'}）",
@@ -146,7 +146,7 @@ def _render_handoff_md(selection: dict, candidate: dict, record: dict,
         "回填登记（状态与哈希不许手改冒充）；",
         "- 本目录的模板与作者指南仅本地投稿使用，不分发、"
         "不入任何公开仓库（E5）；",
-        f"- 生成日期：{today_str}（Light-Journal-Select handoff）",
+        f"- 生成日期：{today_str}（light-journal-select handoff）",
         "",
     ]
     return "\n".join(lines)

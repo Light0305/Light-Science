@@ -1,6 +1,6 @@
 """Write 九组（A–I）目标刊核查记录的生成与自检（Phase 2）。
 
-字段口径以 Light-Write 的 `light_write/template_reg.py` +
+字段口径以 light-write 的 `light_write/template_reg.py` +
 `validate.check_template_record` + `schema.TEMPLATE_GROUPS`
 为唯一权威（46 顶层字段、九组）。本模块不 import light_write
 （产品代码不形成跨包运行时依赖）：

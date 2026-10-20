@@ -1,4 +1,4 @@
-# 定刊交接清单（Light-Journal-Select → Light-Write）
+# 定刊交接清单（light-journal-select → light-write）
 
 - 目标刊：Smart Agricultural Technology（ISSN 2772-3755，出版商 Elsevier BV）
 - 定刊：2026-10-20 由 demo-author（演示代行） 定刊，理由：演示定刊：先例 6 篇（归一化 23.34 篇/万篇）、风险等级 clear、报告档位 target；scope_fit 未确认（官网未取得，正式投稿前须人工核对该刊 scope），证据见 SELECTION_REPORT.md。由演示脚本代用户执行 CEA 优先口径的选择，正式投稿前请用户复核。
@@ -17,4 +17,4 @@ light-write register-template <稿件包目录> --record examples/demo-fullrun/s
 
 - 待下载条目请按 manifest 的 source_url 从官网取回后回填登记（状态与哈希不许手改冒充）；
 - 本目录的模板与作者指南仅本地投稿使用，不分发、不入任何公开仓库（E5）；
-- 生成日期：2026-10-20（Light-Journal-Select handoff）
+- 生成日期：2026-10-20（light-journal-select handoff）

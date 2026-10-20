@@ -1,7 +1,7 @@
 """定版评审子流程（D6 补完，二期）。
 
 一期 frozen 门只验 freeze.review 的结构与异家族，评审记录靠手写 yaml。
-二期把评审做成正式子流程（与 Light-Idea 查新复核包同构）：
+二期把评审做成正式子流程（与 light-idea 查新复核包同构）：
 
   review prepare  生成自包含评审包 review/<design_id>/：
                   - review_packet.md   设计书全文渲染 + Stage 1 五条评审
@@ -94,7 +94,7 @@ def review_dir(root: Path, design_id: str) -> Path:
 def make_review_id(design_id: str, date: str, reviewer_model: str | None,
                    decision: str | None) -> str:
     """评审收据 id：RV-<sha256(design_id|日期|评审模型|决议)[:10]>
-    （与 Light-Idea 的 verdict_id 口径同构）。"""
+    （与 light-idea 的 verdict_id 口径同构）。"""
     raw = f"{design_id}|{date}|{reviewer_model or 'REVIEW_UNAVAILABLE'}|{decision or ''}"
     return "RV-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:10]
 
@@ -145,7 +145,7 @@ def _render_packet(design: dict, date: str) -> str:
     L: list[str] = []
     L.append(f"# 定版评审包 — {design.get('title')}")
     L.append("")
-    L.append(f"> 用途：Light-Design 设计书 `{design['design_id']}`"
+    L.append(f"> 用途：light-design 设计书 `{design['design_id']}`"
              f"（承接 idea `{design.get('idea_id')}`）的定版（frozen）评审。")
     L.append("> 本包自包含：把全文交给**另一个模型家族**的模型（或人工专家）"
              "即可独立评审，不需要访问本项目。评审回来后按文末「回填」"

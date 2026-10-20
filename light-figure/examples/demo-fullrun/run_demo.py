@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Light-Figure v1 端到端双线演示驱动（合成链，身份见 README.md）。
+"""light-figure v1 端到端双线演示驱动（合成链，身份见 README.md）。
 
 全程经 CLI 子进程执行（`python -m light_figure ...`），每条命令与
 输出 tee 进 evidence/run-log.txt；合同/backend 等登记文件由本驱动
 按用户手写文件的形态落盘。流程：
 
-  数据线 fig-1：承接三臂 MOTA 结果（源自 Light-Experiment 合成演示
+  数据线 fig-1：承接三臂 MOTA 结果（源自 light-experiment 合成演示
   的 R-FIX-a1 / R-ORA-a1 / R-PRED-a2 summary）做双面板图；
   方法线 fig-2：火鸡行为检测流水线示意（图库种子条目 → 提示词 →
   程序绘制的参考图替身 → 文件级 .vsdx 重绘）。
@@ -126,7 +126,7 @@ def write_inputs() -> None:
     }
     dump_yaml(INPUTS / "ai_policy.yaml", policy)
     driver_note("inputs 已生成：arms_segments.csv（三臂逐段 MOTA，转写自"
-                " Light-Experiment 合成演示三份 summary.json）、"
+                " light-experiment 合成演示三份 summary.json）、"
                 "figures_manifest.yaml、journal_contract.yaml、"
                 "ai_policy.yaml（演示 fixture）")
 
@@ -474,11 +474,11 @@ def main() -> int:
         if target.exists():
             shutil.rmtree(target)
     EVIDENCE.mkdir(parents=True)
-    log("=== Light-Figure v1 demo-fullrun 运行日志 ===")
+    log("=== light-figure v1 demo-fullrun 运行日志 ===")
     write_inputs()
 
     run_cli("init", str(PKG), "--title",
-            "Turkey Behaviour Figures (Light-Figure demo)")
+            "Turkey Behaviour Figures (light-figure demo)")
     run_cli("intake", str(PKG),
             "--manifest", str(INPUTS / "figures_manifest.yaml"),
             "--journal-contract", str(INPUTS / "journal_contract.yaml"),

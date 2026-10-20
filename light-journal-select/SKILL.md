@@ -1,8 +1,8 @@
-# Light-Journal-Select
+# light-journal-select
 
-> Light-Science 子技能：Light-Write 前置扩展位（拍板 E1，进主仓与
-> 十件套并列，不改号）。位于 Light-Analysis 出结论包之后、
-> Light-Write 开工之前。设计依据：`08-journal-select/LEARNING.md`
+> Light-Science 子技能：light-write 前置扩展位（拍板 E1，进主仓与
+> 十件套并列，不改号）。位于 light-analysis 出结论包之后、
+> light-write 开工之前。设计依据：`08-journal-select/LEARNING.md`
 > （硬约束 JS-01 起）与 `REDESIGN-DRAFT.md` v0.1（含拍板附录 E1–E5）。
 >
 > **版本：v1.0（2026-10-20 封版）**。§1–§9 为已实现规程

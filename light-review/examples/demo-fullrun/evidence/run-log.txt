@@ -1,4 +1,4 @@
-=== Light-Review v1 demo-fullrun 运行日志 ===
+=== light-review v1 demo-fullrun 运行日志 ===
 上游输入：
   稿件包：light-write/examples/demo-fullrun/manuscript-pkg（在）
   结论包：light-analysis/examples/demo-synthetic/analysis-pkg（在）

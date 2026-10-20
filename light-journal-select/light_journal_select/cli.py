@@ -1,4 +1,4 @@
-"""Light-Journal-Select CLI：init / fingerprint / precedent /
+"""light-journal-select CLI：init / fingerprint / precedent /
 add-candidate / verify / gate / report / validate / status /
 decide / handoff。
 
@@ -97,7 +97,7 @@ def _status(root) -> dict:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
-        prog="light-journal-select", description="Light-Journal-Select 选刊包工具")
+        prog="light-journal-select", description="light-journal-select 选刊包工具")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="新建选刊包骨架")
@@ -165,7 +165,7 @@ def main(argv=None) -> int:
                         "local_path?}]，无 local_path 或文件不存在 = "
                         "pending_download")
     p.add_argument("--write-root", default=None,
-                   help="Light-Write 包路径：给出则以子进程调其 "
+                   help="light-write 包路径：给出则以子进程调其 "
                         "check_template_record 做外部自检")
     p.add_argument("--guideline-version", default=None,
                    help="指南版本子目录名（缺省用交接日期）")

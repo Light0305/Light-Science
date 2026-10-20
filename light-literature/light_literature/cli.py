@@ -48,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
         argv = sys.argv[1:]
     parser = argparse.ArgumentParser(
         prog="light-literature",
-        description="Light-Literature：论文四件套生产线（v1.0）")
+        description="light-literature：论文四件套生产线（v1.0）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_init = sub.add_parser("init", help="创建项目级 Literature 结构")
