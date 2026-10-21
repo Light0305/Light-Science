@@ -124,6 +124,49 @@ def test_bayes_diagnostics_gate_allows_undetermined_with_note(pkg):
     assert not any("诊断" in e for e in errors), errors
 
 
+def test_bayes_missing_diagnostics_undetermined_with_status_passes(pkg):
+    # D-ANA-1 回归：诊断整组缺失 + undetermined + 现状登记齐全 → 放行
+    row = valid_row(pkg, "L-OK", "undetermined", bayes=True,
+                    interval={"kind": "hdi", "level": 0.95, "lo": 1.0, "hi": 9.4},
+                    diagnostics=None, diagnostics_status="missing",
+                    note="贝叶斯诊断未过门：诊断缺失，只许落 undetermined")
+    write_verdicts(pkg, existing_rows(pkg) + [row])
+    errors = errors_of(pkg)
+    assert not any("诊断" in e for e in errors), errors
+
+
+def test_bayes_missing_diagnostics_undetermined_without_status_rejected(pkg):
+    # 现状未登记者仍拒（终态放行以登记为条件，不是无条件放行）
+    row = valid_row(pkg, "L-OK", "undetermined", bayes=True,
+                    interval={"kind": "hdi", "level": 0.95, "lo": 1.0, "hi": 9.4},
+                    diagnostics=None,
+                    note="贝叶斯诊断未过门：诊断缺失，只许落 undetermined")
+    write_verdicts(pkg, existing_rows(pkg) + [row])
+    assert has(errors_of(pkg), "登记诊断字段现状")
+
+
+def test_bayes_partial_diagnostics_undetermined_with_note_passes(pkg):
+    # 字段残缺（如 mcse 缺）+ undetermined + note 点名 → 放行
+    diag = {"r_hat": 1.002, "ess_bulk": 500, "ess_tail": 500, "mcse": None}
+    row = valid_row(pkg, "L-OK", "undetermined", bayes=True,
+                    interval={"kind": "hdi", "level": 0.95, "lo": 1.0, "hi": 9.4},
+                    diagnostics=diag, diagnostics_status="partial",
+                    note="贝叶斯诊断未过门：诊断字段残缺，停判")
+    write_verdicts(pkg, existing_rows(pkg) + [row])
+    errors = errors_of(pkg)
+    assert not any("诊断" in e for e in errors), errors
+
+
+def test_bayes_partial_diagnostics_blocks_directional(pkg):
+    # 字段残缺落方向性判定 → 仍逐键拒
+    diag = {"r_hat": 1.002, "ess_bulk": 500, "ess_tail": 500, "mcse": None}
+    row = valid_row(pkg, "L-OK", "positive", bayes=True,
+                    interval={"kind": "hdi", "level": 0.95, "lo": 1.0, "hi": 9.4},
+                    diagnostics=diag, diagnostics_status="partial")
+    write_verdicts(pkg, existing_rows(pkg) + [row])
+    assert has(errors_of(pkg), "diagnostics 缺 mcse")
+
+
 def test_forbidden_word_in_note_rejected(pkg):
     row = valid_row(pkg, "L-OK", "undetermined",
                     note="两组差异显著，待补材料")

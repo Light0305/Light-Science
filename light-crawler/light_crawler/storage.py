@@ -17,6 +17,7 @@ import uuid
 from html.parser import HTMLParser
 from pathlib import Path
 
+from . import extractors as _extractors
 from . import transport as _transport
 from .util import append_jsonl, read_jsonl, sha256_bytes, sha256_file, utcnow
 
@@ -82,9 +83,9 @@ def record_seen(root, row: dict) -> None:
 # ---------------------------------------------------------------- 清洗（C3）
 
 class _TextExtractor(HTMLParser):
-    """最小正文抽取：标题 + meta + 可见文本。清洗规则按目标登记的
-    clean_profile 选档，v1 内置 html_text_v1 一档；复杂抽取
-    （trafilatura 谱系）留作后续适配器，接口形态即本函数签名。"""
+    """最小正文抽取（轻档 html_text_v1）：标题 + meta + 可见文本。
+    清洗规则按目标登记的 clean_profile 选档：轻档即本类；深档
+    trafilatura_v1 走 extractors.extract_deep（见该模块登记表）。"""
 
     SKIP = {"script", "style", "noscript", "template"}
 
@@ -163,9 +164,25 @@ def clean_content(data: bytes, content_type: str, profile: str = "html_text_v1",
         parser = _TextExtractor()
         parser.feed(decoded)
         out["kind"] = "html"
-        out["title"] = parser.title
-        out["metadata"] = parser.meta
-        text = parser.text()
+        if profile == _extractors.DEEP_PROFILE:
+            deep = _extractors.extract_deep(decoded)
+            out["extractor"] = _extractors.registration(profile, deep)
+            if deep["degraded"]:
+                # 登记降级：回轻档标题/meta/文本，extractor 段已点名
+                # 降级与原因，不冒充深档产物（见 extractors 模块纪律）。
+                out["title"] = parser.title
+                out["metadata"] = parser.meta
+                text = parser.text()
+            else:
+                out["title"] = deep["title"] or parser.title
+                merged = dict(parser.meta)
+                merged.update(deep["metadata"])
+                out["metadata"] = merged
+                text = deep["text"]
+        else:
+            out["title"] = parser.title
+            out["metadata"] = parser.meta
+            text = parser.text()
     else:
         out["kind"] = "text"
         text = decoded

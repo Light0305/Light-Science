@@ -154,6 +154,21 @@ def test_judge_positive_end_to_end(checked_pkg, tmp_path):
     assert advance_package(checked_pkg) == "judged"
 
 
+def test_judge_bayes_missing_diagnostics_terminal_state(checked_pkg, tmp_path):
+    # D-ANA-1 回归：贝叶斯行诊断整组缺失 → judge 落 undetermined 终态
+    # 并登记 diagnostics_status=missing，整包 validate 零错误、门可推进
+    bayes_line = dict(STRONG_POS, bayes=True)
+    do_judge(checked_pkg, tmp_path,
+             lines={"L-OK": bayes_line, "L-PART": NEAR_ZERO_PART})
+    row = _current(checked_pkg)["L-OK"]
+    assert row["verdict"] == "undetermined"
+    assert row["diagnostics"] is None
+    assert row["diagnostics_status"] == "missing"
+    assert "贝叶斯诊断未过门" in row["note"]
+    assert validate_package(checked_pkg) == []
+    assert advance_package(checked_pkg) == "judged"
+
+
 def test_judge_significant_but_equivalent(checked_pkg, tmp_path):
     small_real = {"treatment": [66.4, 66.6, 66.5, 66.4, 66.6, 66.5],
                   "reference": [65.0, 65.1, 64.9, 65.0, 65.1, 64.9]}

@@ -29,7 +29,7 @@ light-crawler --root . validate                        # 登记自洽 + 哈希�
 light-crawler --root . refusals [--type <拒绝类>]     # 拒绝留痕清单（可按类计数）
 ```
 
-依赖只有 PyYAML（传输与渲染编排走标准库；浏览器通道另需系统 Chromium，经 CDP 驱动）；在共享 venv 中从包根运行测试：`../.venv-lit/bin/python -m pytest`（88 项，含强化夹具对照与决策落地验收）。
+依赖只有 PyYAML（传输与渲染编排走标准库；浏览器通道另需系统 Chromium，经 CDP 驱动）；在共享 venv 中从包根运行测试：`../.venv-lit/bin/python -m pytest`（94 项，含强化夹具对照、决策落地验收与深档抽取回归）。
 
 ## 演示
 
@@ -37,7 +37,7 @@ examples/demo-fullrun/：本地夹具站点上的全链演示（登记 → 预�
 
 ## 已知局限
 
-WARC 全记录档未做（ISO 28500）、清洗只有 html_text_v1 一档、定时调度不在包内、回环/内网目标的浏览器渲染走传输桥接模式（Chrome 的 Local Network Access 检查所致，engine 字段如实标注）——详见 SKILL.md 第 12 节。
+WARC 全记录档未做（ISO 28500）、定时调度不在包内、回环/内网目标的浏览器渲染走传输桥接模式（Chrome 的 Local Network Access 检查所致，engine 字段如实标注）——详见 SKILL.md 第 12 节。清洗现为两档：html_text_v1 轻档与 trafilatura_v1 深档（v1.2 增，深档为可选依赖，缺席/失败如实降级回轻档并留痕；带标注页面回归集见 eval/，双档要点召回同为 29/29、噪声泄漏轻档 20/20 对深档 1/20）。
 
 ## 许可
 

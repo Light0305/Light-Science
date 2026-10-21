@@ -128,14 +128,86 @@ def test_acceptance_table_tamper_detected(baseline_pkg):
 
 
 def test_result_leaf_pass_beyond_tolerance_flagged(baseline_pkg):
+    # D-EXP-1 后 record_leaf 已拒收超容差冒判，本状态只能经落盘篡改
+    # 构造（模拟历史/外部写入）；validate 仍须点名检出（事后防线不撤）
     root, exec_id = baseline_pkg
     init_acceptance(root, exec_id)
     cold = _cold_rerun(root, exec_id)
     record_leaf(root, exec_id, "R02:result", verdict="pass",
-                evidence_run=cold, observed_value=90.0, expected_value=100.0)
+                evidence_run=cold, observed_value=99.0, expected_value=100.0)
+    acc = load_acceptance(root, exec_id)
+    leaf = next(l for l in acc["leaves"] if l["leaf_id"] == "R02:result")
+    leaf["observed_value"] = 90.0
+    leaf["deviation_abs"] = 10.0
+    leaf["deviation_pct"] = 10.0
+    save_acceptance(root, exec_id, acc)
     from light_experiment.schema import validate_package
     errs = validate_package(load_package(root, exec_id))
     assert any("超过" in e and "容差" in e for e in errs)
+
+
+def test_record_leaf_rejects_pass_beyond_tolerance(baseline_pkg):
+    # D-EXP-1：3.0% 偏差（超 2% 容差）、无报告方差 → 登记环节即拒收
+    root, exec_id = baseline_pkg
+    init_acceptance(root, exec_id)
+    cold = _cold_rerun(root, exec_id)
+    with pytest.raises(ValueError, match="拒收 pass"):
+        record_leaf(root, exec_id, "R02:result", verdict="pass",
+                    evidence_run=cold, observed_value=97.0,
+                    expected_value=100.0)
+    acc = load_acceptance(root, exec_id)
+    leaf = next(l for l in acc["leaves"] if l["leaf_id"] == "R02:result")
+    assert leaf["verdict"] is None  # 拒收后落盘状态未被污染
+
+
+def test_record_leaf_fail_beyond_tolerance_allowed(baseline_pkg):
+    # 诚实判 fail 不受容差门拦截
+    root, exec_id = baseline_pkg
+    init_acceptance(root, exec_id)
+    cold = _cold_rerun(root, exec_id)
+    record_leaf(root, exec_id, "R02:result", verdict="fail",
+                evidence_run=cold, observed_value=97.0, expected_value=100.0)
+    acc = load_acceptance(root, exec_id)
+    leaf = next(l for l in acc["leaves"] if l["leaf_id"] == "R02:result")
+    assert leaf["verdict"] == "fail"
+    assert leaf["deviation_pct"] == 3.0
+
+
+def test_record_leaf_pass_within_reported_variance_allowed(baseline_pkg):
+    # 偏差 3.0% 超容差，但偏差绝对值 3 落在报告方差 5 内 → 与
+    # validate 同口径放行
+    root, exec_id = baseline_pkg
+    init_acceptance(root, exec_id)
+    cold = _cold_rerun(root, exec_id)
+    record_leaf(root, exec_id, "R02:result", verdict="pass",
+                evidence_run=cold, observed_value=97.0, expected_value=100.0,
+                reported_variance=5.0)
+    acc = load_acceptance(root, exec_id)
+    leaf = next(l for l in acc["leaves"] if l["leaf_id"] == "R02:result")
+    assert leaf["verdict"] == "pass"
+
+
+def test_advance_rechecks_leaf_tolerance(baseline_pkg):
+    # D-EXP-1：落盘验收表 verdict=passed 但结果叶藏超容差冒判（篡改
+    # 构造）→ advance 到 executing 仍被叶级容差门拦下
+    root, exec_id = baseline_pkg
+    _advance(root, exec_id, "sanity")
+    init_acceptance(root, exec_id)
+    cold = _cold_rerun(root, exec_id)
+    for leaf in ("R02:implementation", "R02:execution"):
+        record_leaf(root, exec_id, leaf, verdict="pass", evidence_run=cold)
+    record_leaf(root, exec_id, "R02:result", verdict="pass",
+                evidence_run=cold, observed_value=99.0, expected_value=100.0)
+    acc = load_acceptance(root, exec_id)
+    assert acc["verdict"] == "passed"
+    leaf = next(l for l in acc["leaves"] if l["leaf_id"] == "R02:result")
+    leaf["observed_value"] = 97.0
+    leaf["deviation_abs"] = 3.0
+    leaf["deviation_pct"] = 3.0
+    save_acceptance(root, exec_id, acc)
+    pkg = load_package(root, exec_id)
+    with pytest.raises(GateError, match="容差"):
+        advance_package(pkg, "executing", date=DATE)
 
 
 def test_acceptance_init_requires_baseline(exec_pkg):

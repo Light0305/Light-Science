@@ -1,7 +1,7 @@
 ---
 name: light-crawler
 description: Use when 需要为 Light-Science 科研项目从外部来源批量获取数据（数据集、文献线索批、整刊 OA 全文批、基准或排行榜页面快照），或登记新数据源、查询某目标的合规预检结论与熔断状态时。
-version: "1.1"
+version: "1.2"
 author: light-crawler contributors
 license: MIT
 ---
@@ -128,7 +128,7 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 ## §12 已知局限（v1.1）
 
 1. 浏览器执行器已随包（CDP 主通道），但环境依赖真实存在：本机无 Chromium 时如实拒绝并指路；回环/内网目标在 Chrome 152 的 Local Network Access 检查下走传输桥接渲染（engine 标注 cdp+fetch-bridge，渲染的是目标站真实响应字节）；dump-dom 降级在个别 Chromium 构建上无输出（实测本机 build 对 about:blank 亦无输出），此时以 RenderError 如实呈现、不冒充渲染成功。
-2. 清洗层内置 html_text_v1 一档（标题/meta/可见文本 + JSON 透传），trafilatura 谱系的深度抽取未接适配器；clean_profile 接口形态已留。
+2. 清洗层两档（2026-10-21 第三批快修落地）：轻档 html_text_v1（标题/meta/可见文本 + JSON 透传）与深档 trafilatura_v1（extractors.py 注册表：trafilatura 深度抽取 + 元数据，按 clean_profile 选档）。深档是可选依赖：未安装或抽取失败时如实降级回轻档并在清洗件 extractor 段留痕，不冒充深档产物。抽取质量由自有标注页回归集钉住（eval/：6 页 fixture + 人工标注 + 双档对照报表）；登记外档位名按轻档路径处理（profile 字段回显登记值）。
 3. WARC 全记录档（ISO 28500）未做（S3 定版）；高价值易变源的现场级留存在当前只有原始字节 + 哈希。
 4. 增量靠已见集 + 条件请求 + crawl 任务续跑，rhythm 字段只登记节奏口径，定时调度不在本包（由项目侧调度或 leader 编排）。
 5. crawl 任务内失败条目（5xx/传输错误）不自动重试：状态落 failed 并留痕，续跑只处理 pending；恢复靠 fresh 新任务或人工处置——防重试风暴与速率失控，是有意口径不是缺失。

@@ -3,7 +3,8 @@
 注记：第 3 步施工期本文件以 version "1.0" 钉住 frontmatter 不动；
 第 6 步封版按封版口径将版本行升至 "1.1"，本钉随之更新为 "1.1"
 （phase6-seal.md 留痕），断言的守护目的（防 frontmatter 被无意改动）
-不变。
+不变。第三批快修封版升至 "1.2"，本钉随之更新为 "1.2"
+（patch-seal-2026-10-21-e.md 留痕）。
 """
 
 from pathlib import Path
@@ -30,7 +31,7 @@ def test_frontmatter_unchanged():
     head = text.split("---", 2)[1]
     assert "name: light-write" in head
     assert "description: Use when 需要把分析结论包写成可投稿的稿件" in head
-    assert 'version: "1.1"' in head
+    assert 'version: "1.2"' in head
     assert "author: light-write contributors" in head
     assert "license: MIT" in head
 

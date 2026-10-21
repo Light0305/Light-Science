@@ -1,0 +1,329 @@
+{
+ "tag": "2026-10-21",
+ "set": "light-crawler 抽取标注页回归集 v1",
+ "trafilatura_version": "2.3.1",
+ "profiles": {
+  "html_text_v1": {
+   "pages": {
+    "news-article.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Maria Chen",
+      "2026-10-18"
+     ],
+     "metadata_total": 2,
+     "key_found": [
+      "voted eight to one on Tuesday",
+      "240 million dollar programme",
+      "Construction will begin in March 2027",
+      "1,900 metres of new cycling paths",
+      "public market hall with space for sixty local vendors",
+      "forty-one neighbourhood meetings"
+     ],
+     "key_total": 6,
+     "noise_leaked": [
+      "Local bakery wins national prize for sourdough",
+      "Subscribe today and save fifty percent",
+      "Bus drivers announce weekend strike dates",
+      "Privacy policy"
+     ],
+     "noise_total": 4,
+     "text_chars": 1236,
+     "extractor": null
+    },
+    "blog-post.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Jonas Petersen"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "I bought the Keychron K3 in April",
+      "battery still lasts about 34 hours",
+      "low-profile switches reduced my wrist strain",
+      "the keyboard weighs 396 grams",
+      "no longer pack the laptop stand"
+     ],
+     "key_total": 5,
+     "noise_leaked": [
+      "Great post, totally agree with you",
+      "I prefer membrane keyboards for travel",
+      "My other blog about trains",
+      "Leave a comment below"
+     ],
+     "noise_total": 4,
+     "text_chars": 1098,
+     "extractor": null
+    },
+    "docs-page.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Streamline API"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "at most 600 requests per minute",
+      "returns HTTP 429 with a Retry-After header",
+      "X-RateLimit-Remaining header",
+      "for at most five consecutive seconds"
+     ],
+     "key_total": 4,
+     "noise_leaked": [
+      "Edit this page on GitHub",
+      "SDK downloads",
+      "Webhooks"
+     ],
+     "noise_total": 3,
+     "text_chars": 867,
+     "extractor": null
+    },
+    "data-table.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "harvest season field trial",
+      "twelve plots"
+     ],
+     "metadata_total": 2,
+     "key_found": [
+      "three mulching treatments across twelve field plots",
+      "Straw mulch",
+      "6.42",
+      "Plastic film",
+      "6.87",
+      "Bare soil",
+      "5.13",
+      "highest yield in this trial"
+     ],
+     "key_total": 8,
+     "noise_leaked": [
+      "Contact the team",
+      "Trials Archive"
+     ],
+     "noise_total": 2,
+     "text_chars": 586,
+     "extractor": null
+    },
+    "chinese-article.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "OsHKT7"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "华南农业大学的研究团队",
+      "鉴定出一个名为 OsHKT7 的耐盐基因",
+      "水稻存活率提高了百分之四十二",
+      "广东省台山市的海水稻试验基地",
+      "共设置六个重复小区"
+     ],
+     "key_total": 5,
+     "noise_leaked": [
+      "秋粮收购进度过八成",
+      "智慧农机亮相农博会",
+      "订阅每日农业资讯简报",
+      "联系我们"
+     ],
+     "noise_total": 4,
+     "text_chars": 348,
+     "extractor": null
+    },
+    "sparse-page.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "reopening date"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "The museum will reopen on 14 February 2027 after the roof repairs"
+     ],
+     "key_total": 1,
+     "noise_leaked": [
+      "We use cookies to improve your experience",
+      "Venue hire",
+      "daily object photos"
+     ],
+     "noise_total": 3,
+     "text_chars": 334,
+     "extractor": null
+    }
+   },
+   "aggregate": {
+    "key_found": 29,
+    "key_total": 29,
+    "noise_leaked": 20,
+    "noise_total": 20,
+    "metadata_found": 8,
+    "metadata_total": 8,
+    "title_ok": 6,
+    "pages": 6
+   }
+  },
+  "trafilatura_v1": {
+   "pages": {
+    "news-article.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Maria Chen",
+      "2026-10-18"
+     ],
+     "metadata_total": 2,
+     "key_found": [
+      "voted eight to one on Tuesday",
+      "240 million dollar programme",
+      "Construction will begin in March 2027",
+      "1,900 metres of new cycling paths",
+      "public market hall with space for sixty local vendors",
+      "forty-one neighbourhood meetings"
+     ],
+     "key_total": 6,
+     "noise_leaked": [],
+     "noise_total": 4,
+     "text_chars": 863,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    },
+    "blog-post.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Jonas Petersen"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "I bought the Keychron K3 in April",
+      "battery still lasts about 34 hours",
+      "low-profile switches reduced my wrist strain",
+      "the keyboard weighs 396 grams",
+      "no longer pack the laptop stand"
+     ],
+     "key_total": 5,
+     "noise_leaked": [],
+     "noise_total": 4,
+     "text_chars": 719,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    },
+    "docs-page.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "Streamline API"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "at most 600 requests per minute",
+      "returns HTTP 429 with a Retry-After header",
+      "X-RateLimit-Remaining header",
+      "for at most five consecutive seconds"
+     ],
+     "key_total": 4,
+     "noise_leaked": [],
+     "noise_total": 3,
+     "text_chars": 747,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    },
+    "data-table.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "harvest season field trial",
+      "twelve plots"
+     ],
+     "metadata_total": 2,
+     "key_found": [
+      "three mulching treatments across twelve field plots",
+      "Straw mulch",
+      "6.42",
+      "Plastic film",
+      "6.87",
+      "Bare soil",
+      "5.13",
+      "highest yield in this trial"
+     ],
+     "key_total": 8,
+     "noise_leaked": [],
+     "noise_total": 2,
+     "text_chars": 532,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    },
+    "chinese-article.html": {
+     "title_ok": true,
+     "metadata_found": [
+      "OsHKT7"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "华南农业大学的研究团队",
+      "鉴定出一个名为 OsHKT7 的耐盐基因",
+      "水稻存活率提高了百分之四十二",
+      "广东省台山市的海水稻试验基地",
+      "共设置六个重复小区"
+     ],
+     "key_total": 5,
+     "noise_leaked": [],
+     "noise_total": 4,
+     "text_chars": 257,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    },
+    "sparse-page.html": {
+     "title_ok": false,
+     "metadata_found": [
+      "reopening date"
+     ],
+     "metadata_total": 1,
+     "key_found": [
+      "The museum will reopen on 14 February 2027 after the roof repairs"
+     ],
+     "key_total": 1,
+     "noise_leaked": [
+      "We use cookies to improve your experience"
+     ],
+     "noise_total": 3,
+     "text_chars": 171,
+     "extractor": {
+      "profile_requested": "trafilatura_v1",
+      "backend": "trafilatura",
+      "backend_version": "2.3.1",
+      "degraded": false,
+      "degrade_reason": null
+     }
+    }
+   },
+   "aggregate": {
+    "key_found": 29,
+    "key_total": 29,
+    "noise_leaked": 1,
+    "noise_total": 20,
+    "metadata_found": 8,
+    "metadata_total": 8,
+    "title_ok": 5,
+    "pages": 6
+   }
+  }
+ }
+}

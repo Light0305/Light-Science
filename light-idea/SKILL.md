@@ -1,7 +1,7 @@
 ---
 name: light-idea
 description: Use when 需要从研究方向、种子文献或缺口出发产生可证伪的研究想法：做查新、给想法卡定版、做候选对决排序，或向设计阶段交接定版想法时。
-version: "1.1"
+version: "1.2"
 author: light-idea contributors
 license: MIT
 ---

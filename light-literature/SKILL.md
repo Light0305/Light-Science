@@ -1,7 +1,7 @@
 ---
 name: light-literature
 description: Use when 需要为科研项目查找、获取并精读论文，或为下游阶段提供带锚点的文献证据：按主题检索文献、把论文 PDF 变成原文 MD 与中文翻译、写图文阅读笔记、核查撤稿状态时。
-version: "1.1"
+version: "1.2"
 author: light-literature contributors
 license: MIT
 ---
@@ -122,7 +122,7 @@ verify_report.json
 - **Doc2X 适配器（轨一后端）**（`engines/doc2x.py`）：整篇解析（无页范围选项、按整篇页数计费，`pages` 只过滤输出）。流程：preupload → PUT 预签名地址 → status 轮询（间隔 2s / 上限 600s / HTTP 超时 60s）→ convert 导出 md（zip 落盘）→ 转统一 middle_json（v3-2026 的 layout 块优先、逐页 MD 兜底）。冻结参数：model=`v3-2026`、formula_mode=`dollar`、formula_level=`0`、论文类默认开 `merge_cross_page_forms`，全部写入 `doc2x/run_record.json`；**uid 在 submit 后立即落盘**，后段任何失败凭 uid 续查，**不许无记录地重复 submit（重复计费）**；结果云端只存 24 小时，success 后立即取回落盘到 `<paper_dir>/doc2x/`；调用前按页数估算费用（¥0.01–0.02/页）并记账。Key 只经连接器凭据 surrogate 注入（连接名 `custom.doc2x`），**不许落盘到项目文件、不许出现在日志/命令行/异常信息里**（适配器异常全脱敏）。REST 端点与枚举以 Doc2X 官方 API 文档为准（开发期已逐项核实）。`parse` 命令以本适配器为后端做锚点化（见上「解析双轨制」轨一）。
 - **元数据回填**（v1.1 新增，LIT-D03，`light_literature/metadata.py`）：`metadata-backfill <paper_dir> [--online] [--confirm]`——向 `paper.yaml` 的 `metadata` 区回填 authors/venue/year，**逐字段记 value + source + verified**；来源优先级：Crossref 按 DOI 权威记录（须 `--online` 显式联网）> PDF 首页文本层/PDF 元数据 > source_map 首页块。**自动回填的 verified 恒为 false**（有出处的候选不冒充已核实），只有用户逐字核对原文首页后 `--confirm` 才置 true；抽不到留空并把试过的源记进 `attempted_sources`，不许猜。`ingest` 入库时自动跑本地源回填（不联网、失败不阻断入库；`--backfill-online` 才联网）。`notes` 文件头优先读 metadata 区（有值显示值 + 来源 + 核实状态），无值保持原「待填」行。
 - **claim-support 命令面**（v1.1 新增，LIT-D04，`light_literature/claimcheck.py`，硬规则 8 第三档的产物形态）：`claim-locate <project_dir> --claim … [--paper …]` 在已入库语料 source_map 做块级机械定位（词项/数字匹配 + 证据强度门，见下），输出候选锚点与命中信号，**全语料无命中如实回 `not_mentioned`，不许推断补齐**；`claim-check <project_dir> --paper … --claim … --verdict supports|contradicts|not_mentioned [--anchors …] [--note …]` 在 agent 读块判定后落账 `Literature/claim_support.jsonl`（只增）。机械校验（代码强制）：锚点必须真实存在；**verdict=supports 时主张中每个数字必须逐字出现在所引块中，缺一拒绝写入**；contradicts 须至少一个锚点；not_mentioned 允许零锚点并以 signals.reason 区分无块提及/所引块不提及/上下文不足。
-- **问语料 ask 模式**（v1.1 新增，LIT-D01，`light_literature/ask.py`）：`ask <project_dir> --question … [--answer … --cite paper_id#S001 …] [--max-citations N]`——对已入库语料的 source_map 块（S/C 正文、T 表格）做块级检索，命中块与分数全留痕，产物落 `Literature/问答记录/<日期>-<序号>.md`。纪律：**引用白名单**——答案引用只能取自本次命中块、须真实存在、数量不超上限（默认 5），越界拒绝落盘；**证据强度门**——块命中须 ≥1 个数字命中或 ≥2 个不同词项命中，单个泛词碰撞不算证据；**固定拒答**——无块命中时产物只写固定拒答句，传入答案也报错拒绝；**证据资格门**——paper.yaml 顶层标 `identity_status` 非 verified 或 `retraction_status=retracted` 的论文，其块不进命中集（硬规则 1 在问答面的落点）。
+- **问语料 ask 模式**（v1.1 新增，LIT-D01，`light_literature/ask.py`）：`ask <project_dir> --question … [--answer … --cite paper_id#S001 …] [--max-citations N]`——对已入库语料的 source_map 块（S/C 正文、T 表格、E 公式、F 图内文字）做块级 IDF 加权检索，命中块与分数全留痕，产物落 `Literature/问答记录/<日期>-<序号>.md`。纪律：**引用白名单**——答案引用只能取自本次命中块、须真实存在、数量不超上限（默认 5），越界拒绝落盘；**证据单元门**（2026-10-21 检索升级，`ask._is_evidence`，常量在 ask.py 内并注明标定来源）——分数 = 词项 IDF 和 + 2 x 数字 IDF 和；拉丁侧成证须 ≥3 词项且 IDF 过线，或数字命中 + 词项锚定且总分过线，或恰 2 词项 IDF 过高线；高区分度数字可独立成证（公式块通道）；纯 CJK 双字组证据只认子语料池内相对门槛，混合证据两侧不许互相搭便车；另有两条问题级拒答——词表概念 ≥2 个在语料双缺席（硬缺席），或问题中的命名实体在语料零命中（实体缺席）；**跨语言扩展**——中文问题的术语经 `textmatch.CROSS_LINGUAL_GLOSSARY` 并入英文对应词参与匹配（查询侧单向扩展，块侧不改）；**固定拒答**——无块命中时产物只写固定拒答句，传入答案也报错拒绝；**证据资格门**——paper.yaml 顶层标 `identity_status` 非 verified 或 `retraction_status=retracted` 的论文，其块不进命中集（硬规则 1 在问答面的落点）。
 
 ## 6. 接口契约（只写边界，不展开对方实现）
 
@@ -209,4 +209,4 @@ verify_report.json
 13. **Find 某源整源无结果** → OpenAlex / Semantic Scholar 免 Key 限流 429（第三增量真实冒烟两源均被挡）。→ 单源失败只记入检索报告「失败源」一节，不中断全程、不拿别源结果冒充该源；给 OpenAlex 配 `--mailto` 礼貌池，Semantic Scholar 无 Key 配置位是已知局限（如实报告召回缺口）。
 14. **公式密集论文的 E 块碎片淹没清单（研究线）** → 文本层公式候选判定把行内数学逐片标 E（Adam 实测约 400 个，多为单字符碎片），notes S4 被淹没。→ 产品轨不经文本层，无此问题；研究线产物引用时只盘点 F/T 与关键公式，碎片 E 只作定位计数，不逐条进笔记。
 15. **Doc2X 图注碎片拆分（轨一）** → layout 把一条表注拆成「标签块 + 正文块」（如 "Table 1" 与 "Video lengths ..." 两块 caption_of 同指一表），宿主 caption_id 只认领其一：正文块成孤儿、正文里的数字（如 2.5-minute）被编号兜底误当图号、附录 Table A.1 型编号与正文编号混查撞号（CEA 110856 首跑实测：12 孤儿 + 编号重复报错）。→ 转换层已修：`parse.build_source_map` 按 caption_of 合并同宿主图注碎片（merged_from 留痕），附录编号单列 caption_series=appendix、verify 按 series 分组查序列；再现时先查合并逻辑，不要手动硬配或改 verify 迁就。已付费结果凭 doc2x_result.json 离线重建，不许重提。
-16. **问语料单词泛词假命中（v1.1 实测）** → ask 首跑时语料外问题（光合作用）被火鸡语料里一个含 energy 的无关块以单泛词命中放行成「待答」。→ 已立证据强度门：块命中须 ≥1 个数字命中或 ≥2 个不同词项命中（`textmatch.is_evidence`，claim-locate 共用）；再现时先查强度门与停用词表，不要调低门槛迁就单例。
+16. **问语料单词泛词假命中（v1.1 实测）** → ask 首跑时语料外问题（光合作用）被火鸡语料里一个含 energy 的无关块以单泛词命中放行成「待答」。→ 已立证据强度门：块命中须 ≥1 个数字命中或 ≥2 个不同词项命中（`textmatch.is_evidence`，claim-locate 共用）；再现时先查强度门与停用词表，不要调低门槛迁就单例。**（2026-10-21 检索升级后 ask 已改用自有证据单元门 `ask._is_evidence` 并脱离 `textmatch.is_evidence` 共用——后者仍为 claim-locate 的门；五条根因（跨语言漏检 / CJK 单字洪泛 / 无 IDF 排序 / 公式块不在检索面 / 拒答只守零命中）的修法与标定见 ask.py 模块头。ask 假命中再现时先查 ask 侧的门与两条问题级拒答（硬缺席 / 实体缺席），不要回头调 textmatch 的门。）**

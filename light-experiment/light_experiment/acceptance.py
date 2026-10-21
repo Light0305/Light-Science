@@ -36,6 +36,7 @@ from .schema import (
     DEFAULT_ACCEPTANCE_THRESHOLD,
     DEFAULT_RESULT_TOLERANCE_PCT,
     cold_start_ok,
+    result_leaf_tolerance_problem,
 )
 from .util import component_hash, today
 
@@ -208,6 +209,12 @@ def record_leaf(root: Path, exec_id: str, leaf_id: str, *, verdict: str,
         obs, exp = leaf["observed_value"], leaf["expected_value"]
         leaf["deviation_abs"] = abs(obs - exp)
         leaf["deviation_pct"] = round(abs(obs - exp) / abs(exp) * 100, 4)
+    prob = result_leaf_tolerance_problem(leaf, acc.get("tolerance_pct"))
+    if prob:
+        raise ValueError(
+            f"验收叶 {leaf_id} 拒收 pass：{prob}——容差纪律在登记环节"
+            "即生效（D-EXP-1），不许先落 pass 再等校验器事后反对；"
+            "如实判 fail，或补报与偏差相称的报告方差后重判")
     if note:
         leaf["note"] = note
     leaf["recorded_by"] = by or "light-experiment acceptance record"

@@ -1,7 +1,7 @@
 ---
 name: light-write
 description: Use when 需要把分析结论包写成可投稿的稿件：按登记的主张、数字与引用成稿，过审计门，或处理审稿返修意见时。
-version: "1.1"
+version: "1.2"
 author: light-write contributors
 license: MIT
 ---
@@ -73,7 +73,7 @@ license: MIT
 
 措辞上限（wording_ceiling）同步由强度档导出：conclusive→demonstrative、strong→assertive、suggestive→hedged、insufficient→minimal；禁用词表全档生效——中文版含「证明了 / 显著 / 不显著 / 无影响」类，英文版含 proves / no effect / not significant 类。**正文措辞永远 ≤ 上游强度档**（约束 12）；上限在登记期落到每条主张，措辞门在审计期逐条比对（§11 门三）。
 
-词表「冻结」口径（WRT-D02 实测定版）：冻结的是**版本与变更纪律**，不是经验内容本身——每条词条在 `schema.WORDING_EVIDENCE` 带证据指针与处置依据（无证据指针的条目校验报错）；词条内容可经实测修订，修订须附测量报告（首测：`06-write/WORDING-MEASUREMENT-v1.1.md`，复测脚本 `06-write/measure_wording.py`），被推翻的口径存档于报告、不静默删。首测已落地的口径修订：英文禁用词按**词界**匹配（子串口径下 proves/proved 的命中全为 improves/improved 误报，已证伪）；中文「显著」维持全形匹配（设想的「显著性」切分未被首测触发，结论存档于测量报告）。
+词表「冻结」口径（WRT-D02 实测定版）：冻结的是**版本与变更纪律**，不是经验内容本身——每条词条在 `schema.WORDING_EVIDENCE` 带证据指针与处置依据（无证据指针的条目校验报错）；词条内容可经实测修订，修订须附测量报告（首测：`06-write/WORDING-MEASUREMENT-v1.1.md`，复测脚本 `06-write/measure_wording.py`），被推翻的口径存档于报告、不静默删。首测已落地的口径修订：英文禁用词按**词界**匹配（子串口径下 proves/proved 的命中全为 improves/improved 误报，已证伪）；中文「显著」维持全形匹配（设想的「显著性」切分未被首测触发，结论存档于测量报告）。快修批新增口径（heldout 实测驱动，phase4-eval-report §8.1）：英文 significant 族禁用词（not significant / highly significant）匹配前做**变体归一**——首词与 significant 之间插入副词（statistically 等）或 at all 仍判命中；间隙成分是封闭清单，聚焦副词（only/just/also/simply/merely）不入间隙，防误杀 "not only significant" 类正向断言。
 
 ## §4 五段门规程卡（细则见分册，正向合同形态）
 

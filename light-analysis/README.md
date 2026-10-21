@@ -170,3 +170,8 @@ skip，其余全过。）
 - 演示终点如实：结论包停在 graded → blocked（REVIEW_UNAVAILABLE），
   非 delivered；真实链路（Design 真冻结 → Experiment 真执行 →
   Analysis 判定 → 异家族复核放行）待多模型环境补完后走通。
+- v1.2（2026-10-21 快修批）：D-ANA-1 贝叶斯诊断缺失行整包死锁
+  修复——judge 恒落机器可读 `diagnostics_status`、validate 同
+  口径放行「诊断缺失/残缺 + undetermined + note 点名诊断」合法
+  终态，方向性判定拦截不松。冻结真值集 v2 主张级 5/6 → 6/6、
+  行级 39/39 不退化；测试 144 → 149 passed。SKILL 升 v1.2。

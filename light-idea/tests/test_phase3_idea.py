@@ -244,9 +244,36 @@ def test_seed_cases_cover_three_verdicts_and_validate():
         assert casebook.validate_case(c) == []
         assert c["origin"] == "seed" and c["source"]
     abandon = [c for c in seeds if c["verdict"] == "ABANDON"][0]
-    assert abandon["named_paper"]["doi"] == "10.1109/CVPR52688.2022.01639"
+    # D1 订正（快修批）：MAE 的正确 DOI 为 ...01553；原 ...01639 经
+    # Crossref 核验指向另一篇论文（弱监督语义分割），订正留痕在
+    # named_paper.identifier_check
+    assert abandon["named_paper"]["doi"] == "10.1109/CVPR52688.2022.01553"
+    chk = abandon["named_paper"]["identifier_check"]
+    assert chk["result"] == "corrected"
+    assert chk["was"] == "10.1109/CVPR52688.2022.01639"
     real = [c for c in seeds if "REVIEW_UNAVAILABLE" == c["review_status"]]
     assert len(real) == 1  # 演示 C1 的真实降级判定，原样标注
+
+
+def test_seed_identifiers_all_checked():
+    # 快修批种子标识符全量复核的钉位：每条 closest/named 的 DOI 都须
+    # 带 identifier_check 留痕（Crossref 核验日期与结论）
+    seeds = casebook.load_seed_cases()
+    checked = 0
+    for c in seeds:
+        refs = list(c.get("closest_works") or [])
+        if c.get("named_paper"):
+            refs.append(c["named_paper"])
+        for w in refs:
+            if not w.get("doi"):
+                continue
+            chk = w.get("identifier_check") or {}
+            assert chk.get("via") == "Crossref", (c["case_id"], w["doi"])
+            assert chk.get("checked_at") == "2026-10-21"
+            assert chk.get("result") in (
+                "title_match", "corrected", "not_found_fixture")
+            checked += 1
+    assert checked == 7  # 4 种子共 7 处 DOI 引用（5 closest + 1 named + 1 重复引用）
 
 
 def test_init_seeds_casebook_and_reseed_idempotent(project):

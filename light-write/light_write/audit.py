@@ -620,6 +620,28 @@ def gate_numbers(pkg) -> GateResult:
 
 _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?。！？])\s+|\n+")
 
+# significant 族禁用词的变体归一（快修批，缺陷登记 phase4-eval §8.1）：
+# 精确短语匹配被 "not statistically significant" 绕开——否定/程度词
+# 与 significant 之间插入修饰成分仍是同一个二分标签。归一口径：
+# 词条首词与 significant 之间允许至多两个「间隙成分」，间隙成分只许
+# 副词（-ly 形态）或固定短语 "at all"；聚焦副词 only/just/also/
+# simply/merely 除外（"not only significant" 是正向断言的让步结构，
+# 误杀即伤合法学术表述）。间隙类是封闭清单，扩类须附语料证据。
+_SIGNIFICANCE_GAP = (
+    r"(?:\s+(?:(?!only\b|just\b|also\b|simply\b|merely\b)"
+    r"[a-z]+ly|at\s+all)){0,2}")
+
+
+def _en_banned_hit(banned: str, hay_lower: str) -> bool:
+    """英文禁用词命中判定：significant 族走变体归一，其余词界精确。"""
+    words = banned.lower().split()
+    if len(words) >= 2 and words[-1] == "significant":
+        head = r"\s+".join(re.escape(w) for w in words[:-1])
+        pat = r"\b" + head + _SIGNIFICANCE_GAP + r"\s+significant\b"
+        return re.search(pat, hay_lower) is not None
+    return re.search(r"\b" + re.escape(banned.lower()) + r"\b",
+                     hay_lower) is not None
+
 
 def _sentences(text):
     out = []
@@ -677,9 +699,9 @@ def gate_wording(pkg) -> GateResult:
                     if language == "en":
                         # 英文禁用词按词界匹配（WRT-D02 实测证伪：
                         # 子串口径下 proves/proved 在已发表语料的 23 处
-                        # 命中全为 improves/improved 误报，词界命中为 0）
-                        hit = re.search(r"\b" + re.escape(banned.lower())
-                                        + r"\b", hay.lower()) is not None
+                        # 命中全为 improves/improved 误报，词界命中为 0）；
+                        # significant 族另走变体归一（见 _en_banned_hit）
+                        hit = _en_banned_hit(banned, hay.lower())
                     else:
                         hit = banned in hay
                     if hit:

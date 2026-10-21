@@ -139,9 +139,9 @@ WORDING_EVIDENCE = {
             "proof that": {"evidence": _NORM, "disposition": "同 proves（名词形态）"},
             "no effect": {"evidence": _NORM + "；实测见 " + _MEAS,
                           "disposition": "零效应断言与「未检出」混同，二分标签式表述全档禁；合法形态是报告效应量与区间"},
-            "not significant": {"evidence": _NORM + "；实测见 " + _MEAS,
-                                "disposition": "显著性二分标签全档禁（与 Analysis 词表同口径）；结果报告走精确 p 值与区间，不以标签替代"},
-            "highly significant": {"evidence": _NORM, "disposition": "显著性分级标签，同 not significant 口径全档禁"},
+            "not significant": {"evidence": _NORM + "；实测见 " + _MEAS + "；变体命中形态见 20-build/phase4-eval-report.md §8.1（heldout 实测）",
+                                "disposition": "显著性二分标签全档禁（与 Analysis 词表同口径）；结果报告走精确 p 值与区间，不以标签替代。匹配口径：词界精确 + 变体归一——首词与 significant 间插入副词（statistically 等）或 at all 仍判命中（快修批修复 heldout 绕过）；聚焦副词 only/just/also/simply/merely 不入间隙（防误杀 not only significant 类正向断言）"},
+            "highly significant": {"evidence": _NORM, "disposition": "显著性分级标签，同 not significant 口径全档禁（含同一变体归一匹配）"},
         },
         "grades": {
             "conclusive": {

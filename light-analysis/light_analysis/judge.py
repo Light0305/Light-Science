@@ -870,6 +870,15 @@ def run_judge(root, data_path, decided_by=None) -> dict:
             row["bayes"] = True
             diag = c["entry"].get("diagnostics")
             row["diagnostics"] = diag
+            # 诊断现状落字（D-ANA-1）：缺失/残缺是 undetermined 的合法
+            # 终态依据，须机器可读地登记，validate 据此放行终态行。
+            if not diag:
+                row["diagnostics_status"] = "missing"
+            elif any(diag.get(k) is None for k in
+                     ("r_hat", "ess_bulk", "ess_tail", "mcse")):
+                row["diagnostics_status"] = "partial"
+            else:
+                row["diagnostics_status"] = "present"
             diag_fail = (not diag) or any(diag.get(k) is None for k in
                                           ("r_hat", "ess_bulk", "ess_tail", "mcse")) \
                 or diag.get("r_hat", 0) >= schema.R_HAT_MAX \
@@ -883,6 +892,10 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                 row["note"] = ("贝叶斯诊断未过门（rank-normalized R̂<1.01、"
                                "ESS_bulk/ESS_tail 均 >400 为硬字段门）："
                                "诊断未过，只许落 undetermined")
+            elif diag_fail and "贝叶斯诊断未过门" not in row["note"]:
+                row["note"] = (row["note"] + "；贝叶斯诊断未过门"
+                               "（诊断缺失/残缺或未过硬字段门）："
+                               "只许落 undetermined")
         new_rows.append(row)
 
     # ---- spec_results 账平：终态行落显式 not_judged 行

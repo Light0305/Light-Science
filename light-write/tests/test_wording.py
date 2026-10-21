@@ -53,6 +53,65 @@ def test_wording_passes_on_fixture(drafted_pkg):
     assert gate.details["claim_sentences_checked"] == 2
 
 
+# ------------------------------------------------ 变体归一（快修批）
+
+def _variant_gate(drafted_pkg, replacement):
+    _edit_section(drafted_pkg["root"], "01-introduction.md",
+                  "Method A shows a clear improvement", replacement)
+    return gate_wording(load_package(drafted_pkg["root"]))
+
+
+def test_wording_en_variant_not_statistically_significant(drafted_pkg):
+    # heldout 实测命中形态（phase4-eval §8.1）：插入 statistically 绕
+    # 精确短语的旧口径必须已被变体归一堵住
+    gate = _variant_gate(
+        drafted_pkg, "The gain of Method A was not statistically significant")
+    assert gate.status == "fail"
+    assert "wording.banned_term" in _codes(gate)
+
+
+def test_wording_en_variant_not_at_all_significant(drafted_pkg):
+    gate = _variant_gate(
+        drafted_pkg, "The gain of Method A was not at all significant")
+    assert "wording.banned_term" in _codes(gate)
+
+
+def test_wording_en_variant_highly_statistically_significant(drafted_pkg):
+    gate = _variant_gate(
+        drafted_pkg, "The gain of Method A was highly statistically significant")
+    assert "wording.banned_term" in _codes(gate)
+
+
+def test_wording_en_variant_not_clinically_significant(drafted_pkg):
+    gate = _variant_gate(
+        drafted_pkg, "The gain of Method A was not clinically significant")
+    assert "wording.banned_term" in _codes(gate)
+
+
+def test_wording_en_not_only_significant_not_flagged(drafted_pkg):
+    # 阴性对照：not only significant 是正向断言的让步结构，不许误杀
+    gate = _variant_gate(
+        drafted_pkg,
+        "The gain of Method A was not only significant but consistent")
+    assert "wording.banned_term" not in _codes(gate), gate.findings
+
+
+def test_wording_en_improves_not_flagged_as_proves(drafted_pkg):
+    # 阴性对照：词界口径存量行为——improves 不许误判 proves
+    gate = _variant_gate(
+        drafted_pkg, "Method A improves on the fixed-threshold baseline")
+    assert "wording.banned_term" not in _codes(gate), gate.findings
+
+
+def test_wording_en_exact_interval_reporting_not_flagged(drafted_pkg):
+    # 阴性对照：走精确区间报告的合规句（词表处置依据的推荐形态）
+    gate = _variant_gate(
+        drafted_pkg,
+        "Method A yielded an effect estimate with a 95% interval "
+        "from 4.1 to 6.3")
+    assert "wording.banned_term" not in _codes(gate), gate.findings
+
+
 # ---------------------------------------------------------------- 中文稿
 
 def _zh_pkg(tmp_path, upstreams):

@@ -1,7 +1,7 @@
 ---
 name: light-analysis
 description: Use when 需要对已交付的实验执行包下正式判定：逐登记行回写判定、做稳健性复判与结论强度分级，或向写作阶段交付结论包时。
-version: "1.1"
+version: "1.2"
 author: light-analysis contributors
 license: MIT
 ---
@@ -34,7 +34,7 @@ light-design 冻结登记行（方向/阈值/SESOI/重复层级）。分析期�
 | 文件 | 内容 |
 |---|---|
 | `analysis.yaml` | 登记头：承接区（execution_card 哈希 + design content_hash + 登记行集哈希，intake 时冻结）、分析规格版本、校正族声明、状态与状态历史、复核记录、counts（**只许工具从 verdicts 机械汇总，不许手填**） |
-| `verdicts.jsonl` | 逐登记行一行、只增。字段组：判定组（verdict/象限/basis_spec_id/criteria_ref/direction）、量组（effect_size/interval/p_ab/双 n）、校准组（type_sm 三元组）、等价组（tost）、诊断组（diagnostics）、校正组（family/p_raw/p_adj）、结构组（structure：mode/assumption/key/source/n_units/warnings，ANA-D03）、稳健性覆盖组（robustness_scope：computed/trace_only/trace_only_fraction，ANA-D04）、强度组（grade + cap_reason）。改判走新行 + `supersedes` 链 + `row_ref`（`<line>#v<n>`），不许回改旧行 |
+| `verdicts.jsonl` | 逐登记行一行、只增。字段组：判定组（verdict/象限/basis_spec_id/criteria_ref/direction）、量组（effect_size/interval/p_ab/双 n）、校准组（type_sm 三元组）、等价组（tost）、诊断组（diagnostics/diagnostics_status）、校正组（family/p_raw/p_adj）、结构组（structure：mode/assumption/key/source/n_units/warnings，ANA-D03）、稳健性覆盖组（robustness_scope：computed/trace_only/trace_only_fraction，ANA-D04）、强度组（grade + cap_reason）。改判走新行 + `supersedes` 链 + `row_ref`（`<line>#v<n>`），不许回改旧行 |
 | `spec_ledger.yaml` | 规格集账本：决策点（逐点落字理论正当理由）× 选项、约束、可达组合展开、逐规格三门（理论/统计/非冗余）、冻结哈希、自由度账本 expansions（只增） |
 | `spec_results.jsonl` | 规格 × 登记行结果矩阵（judged 门要求账平：每格有结果或显式失败行） |
 | `exploratory/exploratory.yaml` | 探索区登记：条目带 `exploratory: true`，只许叙述性 finding |
@@ -115,8 +115,12 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
    不在 {sesoi_frozen, prior_external} → 拒；type_sm 整组出现
    observed/posthoc 字样 → 拒（事后功效禁令的字段形态）。
 5. 贝叶斯行（bayes=true 或区间 kind 为 hdi/eti）缺诊断字段 → 拒落
-   判定；r_hat ≥1.01 或 ess_bulk/ess_tail ≤400 → 只许 undetermined
-   且 note 须注明诊断未过。
+   方向性判定；落 undetermined 终态须登记诊断现状：diagnostics
+   整组缺失时行内 diagnostics_status=missing 且 note 点名诊断
+   缺失，字段残缺（partial）时 note 点名诊断现状，未登记者拒。
+   r_hat ≥1.01 或 ess_bulk/ess_tail ≤400 → 只许 undetermined
+   且 note 须注明诊断未过。judge 落贝叶斯行恒写
+   diagnostics_status（missing/partial/present）。
 6. 三向行缺 basis_spec_id / effect_size / interval / 校正组 / 双 n
    → 逐项拒；basis_spec_id 必须在账本 included 规格内。
 7. 校正组 family_id 未声明、method 与族声明不一致、p_adj < p_raw → 拒。

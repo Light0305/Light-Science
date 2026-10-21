@@ -3,7 +3,7 @@
 Light-Science 的选题子技能：把领域缺口变成经得起查新的**定版想法卡**。
 技能规范见 [SKILL.md](SKILL.md)。
 
-**当前版本：v1.1（封版）**。七环全落地：I0 趋势与缺口感知 → I1 想法
+**当前版本：v1.2（封版）**。七环全落地：I0 趋势与缺口感知 → I1 想法
 生成（演进链 + 远域碰撞两算子）→ I2 想法结构化（想法卡 + 状态机）→
 I3 facet 查新（七源实查取证 + 判定落卡）→ I4 两两对决排序 → I5 打磨
 迭代（pre-mortem 独立关）→ I6 交接三件套导出。质量纪律三条写死：
@@ -140,6 +140,11 @@ finalized_executable / finalized_conceptual`；旁路 `killed / parked`
   想法卡增能力匹配维度（blocking 只拦可执行级定版）。测试
   101 → 124 passed；演示 C1 回填能力匹配后终点仍
   pre_mortem_passed，只剩 REVIEW_UNAVAILABLE 一拦。
+- v1.2（快修批）：D1 种子标识符订正——种子 CB-3c3e80c688 的
+  MAE DOI 经 Crossref 逐条核验由 10.1109/CVPR52688.2022.01639
+  （实为他文）订正为 10.1109/CVPR52688.2022.01553，原错值保留
+  在 identifier_check 留痕中；种子全部 7 处 DOI 引用同批复核
+  并逐条落 identifier_check。测试 124 → 125 passed。
 
 ## v1.0 封版记录（2026-10-20）
 

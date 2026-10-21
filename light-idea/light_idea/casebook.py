@@ -14,6 +14,10 @@
 - **种子逐条标源**：冷启动种子随包发布（casebook_seeds.jsonl），每条
   origin=seed 且 source 写明出处类别（真实演示判定 / 测试夹具场景 /
   构建期构造），构造判例不许冒充真实判定；
+- **种子标识符核验**：种子内 DOI 逐条经 Crossref 核验题名一致性，
+  结果以 identifier_check（via/checked_at/result）随条留痕；错标
+  订正保留原值于 result=corrected 的 was 字段（D1 教训：verified
+  为 true 也须有标识符级核验支撑，不许只凭题名印象）；
 - **只增与幂等**：追加按 case_id 去重，同一判定重复落卡不重复入集；
   历史判例不回改——判定被新收据覆盖时，新判定另成一例。
 """

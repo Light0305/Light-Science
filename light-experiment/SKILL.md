@@ -1,7 +1,7 @@
 ---
 name: light-experiment
 description: Use when 需要按已冻结的设计书真正执行实验：逐 run 留痕、登记偏离与失败、与预期登记对账，或向分析阶段交付执行包时。
-version: "1.1"
+version: "1.2"
 author: light-experiment contributors
 license: MIT
 ---
@@ -173,8 +173,10 @@ run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
    spec 带 `cold_start: true`）——验收证据只取后者。
 3. 逐叶 `acceptance record`：判定二值、证据指向冷启动 run；结果层叶
    带 --observed/--expected（与报告方差），偏差超容差（默认 2%）且
-   不在报告方差内判 pass，校验器不认。
-4. verdict=passed 才许 advance 到 executing；未过先走 E5 诊断归因
+   不在报告方差内判 pass，登记环节即拒收（D-EXP-1）；校验器对落盘
+   状态同口径点名。
+4. verdict=passed 才许 advance 到 executing，且 advance 前复跑叶级
+   容差校验（与校验器同口径，落盘冒判不作数）；未过先走 E5 诊断归因
    （种子 / 数据版本 / 未报告技巧三项清单），修实现重试或回 Design
    报告基线不可复现——不许带病开跑主实验后在结论里解释。
 

@@ -2,7 +2,7 @@
 
 承接 light-analysis 结论包的稿件包工具：**先登记后使用、成稿门逐项对账**。主张、数字、引用、图表、声明全部先登记进稿件包，正文只许引用登记过的东西；引用只来自 light-literature 的 verified 集，数字只来自 Analysis 溯源表，措辞永不超过 Analysis 强度档。
 
-当前版本：**v1.1（封版，2026-10-21）**。v1.1 增补：intake 卡内一致性校验（WRT-D05）、贡献确认回执（WRT-D04）、程式化核查 advisory 层（WRT-D01）、措辞词表实测与证据登记（WRT-D02）、溯源键三元组（WRT-D13）、模板记录校验小账清零（WRT-D08）、SKILL 分册化（WRT-D06，细则见 `references/`）。端到端演示见 `examples/demo-fullrun/`（合成链：承 Analysis 演示结论卡走完 intake → outlined → drafted → 披露 → 审计四门 → audited，跨模型复核 REVIEW_UNAVAILABLE 如实拦停，另含 W7 返修全环；v1.1 复跑附记在 demo-report 末尾）；Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
+当前版本：**v1.2（封版，2026-10-21）**。v1.1 增补：intake 卡内一致性校验（WRT-D05）、贡献确认回执（WRT-D04）、程式化核查 advisory 层（WRT-D01）、措辞词表实测与证据登记（WRT-D02）、溯源键三元组（WRT-D13）、模板记录校验小账清零（WRT-D08）、SKILL 分册化（WRT-D06，细则见 `references/`）。端到端演示见 `examples/demo-fullrun/`（合成链：承 Analysis 演示结论卡走完 intake → outlined → drafted → 披露 → 审计四门 → audited，跨模型复核 REVIEW_UNAVAILABLE 如实拦停，另含 W7 返修全环；v1.1 复跑附记在 demo-report 末尾）；Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
 
 ## 能力
 
@@ -63,7 +63,7 @@ light-write advance ./my-manuscript   # → submission_ready
 ## 测试
 
 ```bash
-python -m pytest   # 176 个测试（v1.0 的 129 + v1.1 新增 47）
+python -m pytest   # 183 个测试（v1.0 的 129 + v1.1 新增 47 + v1.2 快修新增 7）
 ```
 
 ## 已知局限（v1.0）
@@ -84,3 +84,4 @@ python -m pytest   # 176 个测试（v1.0 的 129 + v1.1 新增 47）
 
 - **v1.0（2026-10-20）**：SKILL 定版（§1–§19：文件群/承接/规则表/提纲/合同/模板消费/登记纪律/核查口径/CLI/逐节规程/审计四门/披露/复核门/W7 返修/图表对账/成稿自检 16 项/失败模式 F1–F16/补课 D 采纳规程/LEARNING 16 条对应表）；129 测试全绿；端到端演示 `examples/demo-fullrun/`（合成链）终点 audited + REVIEW_UNAVAILABLE 拦停、四门终审全过、W7 返修双向对账全过。
 - **v1.1（2026-10-21 夜班构建，待全套统一封版）**：七个必做项落地（构建单 `../20-build/phase3-write.md`）；176 测试全绿（129 基线零变红 + 新增 47）；演示复跑终点 audited、四门全过、卡内一致性 0 gap（附记见 demo-report 末尾）。
+- **v1.2（2026-10-21 快修批）**：冻结措辞表变体绕过修复——significant 族禁用词（not significant / highly significant）匹配前做变体归一（间隙只许 -ly 副词或 at all、至多 2 个成分，聚焦副词 only/just/also/simply/merely 排除，防误杀 "not only significant" 让步结构）；183 测试全绿（新增 7，含阴性对照）。开放类变体（wasn't significant 等）未覆盖、只登记待语料证据。

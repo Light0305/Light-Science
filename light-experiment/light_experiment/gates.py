@@ -86,7 +86,19 @@ def _acceptance_errors(pkg: dict) -> list[str]:
         return [f"基线复现验收未通过（verdict={acc.get('verdict')!r}）："
                 "复现分未达阈值不开主清单——先走 E5 诊断归因（种子/数据版本/"
                 "未报告技巧三项清单），或回 Design 报告基线不可复现（草案 §5）"]
-    return []
+    # D-EXP-1：verdict 落字 passed 不够——advance 前复跑叶级容差校验
+    # （与 validate 同口径），防落盘状态里藏着超容差冒判 pass 的结果叶
+    from .schema import result_leaf_tolerance_problem
+    tol_errs = []
+    for leaf in acc.get("leaves") or []:
+        if not isinstance(leaf, dict):
+            continue
+        prob = result_leaf_tolerance_problem(leaf, acc.get("tolerance_pct"))
+        if prob:
+            tol_errs.append(f"验收叶 {leaf.get('leaf_id')} 判 pass 但{prob}："
+                            "该叶 pass 不成立，验收结论 passed 不作数，"
+                            "不许开主清单")
+    return tol_errs
 
 
 def _delivered_errors(pkg: dict) -> list[str]:

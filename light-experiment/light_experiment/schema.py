@@ -720,6 +720,28 @@ def reconciliation_problems(pkg: dict, *, pending_blocks: bool) -> list[str]:
     return errs
 
 
+def result_leaf_tolerance_problem(leaf: dict, tolerance_pct) -> str | None:
+    """结果叶判 pass 的容差口径（草案 §5 闸门）：主指标偏差超容差且
+    偏差绝对值不在报告方差内 → 返回问题描述，否则 None。validate /
+    record_leaf / advance 门共用此单一口径（D-EXP-1：三处同判，
+    不许只有事后校验认、登记与推进不认）。"""
+    if leaf.get("layer") != "result" or leaf.get("verdict") != "pass":
+        return None
+    dev = leaf.get("deviation_pct")
+    if not isinstance(dev, (int, float)):
+        return None
+    tol = tolerance_pct if isinstance(tolerance_pct, (int, float)) \
+        else DEFAULT_RESULT_TOLERANCE_PCT
+    var = leaf.get("reported_variance")
+    within_var = isinstance(var, (int, float)) and \
+        isinstance(leaf.get("deviation_abs"), (int, float)) and \
+        leaf["deviation_abs"] <= var
+    if dev > tol and not within_var:
+        return (f"主指标偏差 {dev}% 超过容差 {tol}% 且不在报告方差内"
+                "（草案 §5 闸门口径）")
+    return None
+
+
 def _validate_acceptance(pkg: dict) -> list[str]:
     errs: list[str] = []
     acc = pkg.get("acceptance")
@@ -763,18 +785,9 @@ def _validate_acceptance(pkg: dict) -> list[str]:
                 errs.append(f"验收叶 {lid} 的证据 run {ev_run_id} 无冷启动标记"
                             "（执行期产物冒充验收证据被拒：证据只认干净环境"
                             "冷启动重跑，拍板 ③）")
-        if leaf.get("layer") == "result" and verdict == "pass":
-            dev = leaf.get("deviation_pct")
-            if isinstance(dev, (int, float)):
-                tol = acc.get("tolerance_pct")
-                tol = tol if isinstance(tol, (int, float)) else DEFAULT_RESULT_TOLERANCE_PCT
-                var = leaf.get("reported_variance")
-                within_var = isinstance(var, (int, float)) and \
-                    isinstance(leaf.get("deviation_abs"), (int, float)) and \
-                    leaf["deviation_abs"] <= var
-                if dev > tol and not within_var:
-                    errs.append(f"验收叶 {lid} 判 pass 但主指标偏差 {dev}% 超过"
-                                f"容差 {tol}% 且不在报告方差内（草案 §5 闸门口径）")
+        prob = result_leaf_tolerance_problem(leaf, acc.get("tolerance_pct"))
+        if prob:
+            errs.append(f"验收叶 {lid} 判 pass 但{prob}")
     score = (pass_w / total_w) if total_w else 0.0
     threshold = acc.get("threshold")
     threshold = threshold if isinstance(threshold, (int, float)) \

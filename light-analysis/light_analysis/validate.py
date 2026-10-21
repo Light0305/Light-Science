@@ -138,13 +138,26 @@ def _validate_verdict_row(errors, row, snap_line, families_by_id, spec_ids):
                 errors.append(
                     f"{where}：贝叶斯行缺诊断硬字段（r_hat/ess_bulk/ess_tail/mcse），"
                     "不许落判定")
-            else:
+            elif row.get("diagnostics_status") != "missing" \
+                    or "诊断" not in (row.get("note") or ""):
+                # D-ANA-1：诊断缺失 + undetermined 是合法终态，但必须
+                # 机器可读地登记缺失现状且 note 点名，否则无处落脚即死锁
                 errors.append(
-                    f"{where}：贝叶斯行落 undetermined 也须登记诊断字段现状")
+                    f"{where}：贝叶斯行落 undetermined 也须登记诊断字段现状"
+                    "（diagnostics_status=missing 且 note 点名诊断缺失）")
         else:
-            for key in ("r_hat", "ess_bulk", "ess_tail", "mcse"):
-                if diag.get(key) is None:
+            missing_keys = [key for key in
+                            ("r_hat", "ess_bulk", "ess_tail", "mcse")
+                            if diag.get(key) is None]
+            if missing_keys and verdict != "undetermined":
+                for key in missing_keys:
                     errors.append(f"{where}：diagnostics 缺 {key}")
+            if missing_keys and verdict == "undetermined" \
+                    and "诊断" not in (row.get("note") or ""):
+                errors.append(
+                    f"{where}：diagnostics 残缺（缺 "
+                    f"{'/'.join(missing_keys)}）落 undetermined 须在 note "
+                    "点名诊断现状")
             gate_fail = (
                 (diag.get("r_hat") is not None and diag["r_hat"] >= schema.R_HAT_MAX)
                 or (diag.get("ess_bulk") is not None and diag["ess_bulk"] <= schema.ESS_MIN)
