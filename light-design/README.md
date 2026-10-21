@@ -3,10 +3,11 @@
 Light-Science 的研究设计子技能：把定版想法卡变成**可直接开工且
 可被证伪的研究设计书**。技能规范见 [SKILL.md](SKILL.md)。
 
-**当前版本：v1.1（封版）**。能力环 D0–D7 全落地：D0 入口承接与
+**当前版本：v1.2（封版）**。能力环 D0–D7 全落地：D0 入口承接与
 打回（交接六项逐项承接、缺项打回不许临场发明）→ D1 变量与方案
 → D2 对照与消融（对照先行）→ D3 评估协议（判读三向见结果前
-写死）→ D4 效度四分法登记 → D5 功效替代口径与双货币预算 →
+写死）→ D4 效度四分法登记 → D5 功效核算（经典分组设计走包内
+精确解求解器、余走替代口径）与双货币预算 →
 D6 定版评审（异家族硬门 + REVIEW_UNAVAILABLE 降级通道）与冻结
 （amendment 分级签核）→ D7 交接四件套导出。质量纪律写死：主张
 先行（≤2 + anti-claim）、判读见结果前冻结、冻结后正文永不回改。
@@ -67,7 +68,7 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
 | | `sesoi` | 结构化 SESOI 登记块（v1.1 DES-D01）{value, unit, direction, bounds, basis, estimand_ref, summary_measure}：全设计单一事实源，确认性设计必登记；登记行只许携带逐字段一致的派生副本；命门字段（amendment 须用户签） |
 | 效度 `validity` | `threats[]` | 四分法（conclusion / internal / construct / external）逐项三态 {status: na/mitigated/residual, note} |
 | | `structural_checks[]` | 结构错误清单逐项自查 |
-| 资源 `resources` | `power` | {sesoi, sensitivity_range, derived{seeds/repetitions/eval_set_size}, sufficient}；不足则须下调声称 |
+| 资源 `resources` | `power` | {sesoi, sensitivity_range, derived{seeds/repetitions/eval_set_size}, sufficient}；不足则须下调声称。分组经典设计另落 `design_size` 求解器落格（v1.2）{form, route, raw_n, per_group_n, groups, total_n, achieved_power, …} + 结构化 `sensitivity_table`，校验器做实际功效拦截与复算拦截，借 derived.repetitions 落每组 n 给警告 |
 | | `budget` / `stages[]` / `circuit_breakers[]` | 双货币预算、阶段转移条件、量化熔断线 |
 | 冻结 `freeze` | `review` / `frozen_at` / `content_hash` | Stage 1 五条评审记录、冻结时间戳、正文哈希 |
 | | `amendments[]` | 只追加 {date, fields, reason, results_seen, user_signed, new_hash} |
@@ -122,8 +123,18 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
   amendment 增量评审命令化（类别分流、待审拦导出）；
   DES-D04 intake 跨区实体核查。测试 119 → 161 passed，
   演示复跑 validate 0 错误、终点仍 reviewed（如实）。
+- v1.2：功效真计算模块——新增 `light_design/power.py`（纯标准库
+  非中心 t/F 精确解）与 `power` 命令：经典分组设计（双臂 t /
+  配对 t / 单因素 ANOVA，等分配）的样本量只认精确解，落
+  `resources.power.design_size` 原生落格 + 结构化敏感性表；
+  校验器做实际功效拦截与登记值复算拦截，z 口径只作速查参照、
+  不许充当产出。冻结验收四案全过（P1 每臂 100 / P2 逐点
+  394·100·45 / P3 每组 53 / P4 20 对；与 statsmodels 同题
+  同数，原值相对误差 1e-6 量级内；旧解析口径在低样本量下
+  系统性少算并已被取代，沿革见 SKILL D3/D5 规程第 9 条）。
+  测试 161 → 188 passed。
 
-## 已知局限总表（v1.1 封版口径）
+## 已知局限总表（v1.2 封版口径）
 
 1. 真实定版（frozen + 交接四件套导出）尚未在多模型环境走通：
    演示终点止于 reviewed + REVIEW_UNAVAILABLE——与上游卡的跨
@@ -154,3 +165,8 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
    本技能范围；本技能只保证登记表可对账。
 10. 校验器覆盖可机械验项；抉择质量（基线强度、消融对准度、
     构念映射是否成立）靠规程 + 评审，不假装可验（拍板 ④）。
+11. 功效求解器（v1.2）只覆盖等分配双臂 t / 配对 t / 单因素
+    ANOVA：不等分配、ANCOVA、多重比较校正、生存/计数结局与
+    混合模型的功效未供给，这类设计仍走替代口径并在
+    power.method 落字理由；求解前提（正态/等方差/σ 与 f 的
+    取值依据）不由求解器验证，靠 basis 落字 + 敏感性表对冲。

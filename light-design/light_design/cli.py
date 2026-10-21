@@ -4,7 +4,12 @@
   init     建项目骨架（design-stage/ + designs/ + exports/ + review/ + 索引）
   new      建一份 draft 设计书（可 --from-handoff 导入 Idea 交接件承接区，
            缺项即列打回清单）
-  validate 校验设计书（结构 + 硬规则 + 冻结哈希，逐条报错）
+  validate 校验设计书（结构 + 硬规则 + 冻结哈希，逐条报错；
+           另点名功效借位警告 power_warnings，不拦截）
+  power    功效真计算（v1.2）：精确解求解器（非中心 t/F）——SESOI 只
+           读 evaluation.sesoi 登记块，σ/f 为设计前提参数；--apply 把
+           design_size 落格写回设计书（仅 draft），--simulate 附蒙特
+           卡洛交叉验证（口径同 measured-round1）
   advance  按状态机验门推进（draft → reviewed → frozen；旁路 returned/blocked）
   amend    frozen 后唯一修订通道：amendment 追加（命门字段须 --user-signed）
   review   定版评审子流程（二期）：prepare 生成自包含评审包 /
@@ -46,7 +51,14 @@ from .review import (
     record_review_unavailable,
     review_dir,
 )
-from .schema import ALL_STATES, AMD_CATEGORIES, TIERS, validate_design
+from .power import solve_from_design
+from .schema import (
+    ALL_STATES,
+    AMD_CATEGORIES,
+    TIERS,
+    power_warnings,
+    validate_design,
+)
 from .util import today
 
 
@@ -96,12 +108,84 @@ def cmd_validate(args) -> int:
     except FileNotFoundError as e:
         return _fail(str(e))
     errors = validate_design(design)
+    for w in power_warnings(design):
+        print(f"  ! 警告：{w}")
     if errors:
         print(f"{args.design_id} 不合法（{len(errors)} 条）：")
         for e in errors:
             print(f"  - {e}")
         return 1
     print(f"{args.design_id} 合法（status={design.get('status')}，tier={design.get('tier')}）")
+    return 0
+
+
+def cmd_power(args) -> int:
+    root = Path(args.project)
+    try:
+        design = load_design(root, args.design_id)
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    points = None
+    if args.sesoi_points:
+        try:
+            points = [float(x) for x in args.sesoi_points.split(",")
+                      if x.strip()]
+        except ValueError:
+            return _fail("--sesoi-points 须为逗号分隔的数字")
+    try:
+        out = solve_from_design(
+            design, args.form, sigma=args.sigma,
+            sigma_diff=args.sigma_diff, cohen_f=args.cohen_f,
+            k_groups=args.groups, sesoi_points=points,
+            simulate=args.simulate, reps=args.reps, seed=args.seed)
+    except ValueError as e:
+        return _fail(str(e))
+    ds = out["design_size"]
+    spread = ""
+    if ds["form"] == "two_arm":
+        spread = f"σ={ds['sigma']}"
+    elif ds["form"] == "paired":
+        spread = f"σ_diff={ds['sigma_diff']}"
+    else:
+        spread = f"Cohen f={ds['cohen_f']}"
+    print(f"功效精确解（route={ds['route']}，唯一产出口径）："
+          f"SESOI={ds['sesoi_value']}（evaluation.sesoi 登记值）｜"
+          f"{spread}｜alpha={ds['alpha']}｜target_power={ds['target_power']}")
+    if ds["form"] == "anova":
+        print(f"  总 N 原值={ds['raw_n']:.4f} → 每组 {ds['per_group_n']}"
+              f"（总 N={ds['total_n']}），实际功效 {ds['achieved_power']:.6f}")
+    else:
+        unit = "对" if ds["form"] == "paired" else "每臂"
+        print(f"  原值 n={ds['raw_n']:.4f} → {unit} {ds['per_group_n']}"
+              f"（总 {ds['total_n']}），实际功效 {ds['achieved_power']:.6f}")
+    zr = ds.get("z_reference")
+    if zr:
+        print(f"  z 近似速查（{zr['route']}，不作产出）：每单位 "
+              f"{zr['per_group_n']}")
+    sim = ds.get("sim_check")
+    if sim:
+        print(f"  模拟交叉验证：n={sim['n']} 处估计 {sim['estimate']:.4f} "
+              f"± {sim['mc_se']:.4f}（{sim['reps']} 次，种子 {sim['seed']}）")
+    if ds.get("route_note"):
+        print(f"  {ds['route_note']}")
+    for row in out.get("sensitivity_table") or []:
+        print(f"  敏感性 SESOI={row['sesoi_value']} → 原值 "
+              f"{row['raw_n']:.4f} → 每单位 {row['per_group_n']}，"
+              f"实际功效 {row['achieved_power']:.6f}")
+    if args.apply:
+        if design.get("status") != "draft":
+            return _fail("--apply 只许 draft 设计书（已推进状态的设计书"
+                         "请走 amend 修订 resources.power.design_size）")
+        res = design.setdefault("resources", {})
+        power_block = res.get("power")
+        if not isinstance(power_block, dict):
+            power_block = {}
+            res["power"] = power_block
+        power_block["design_size"] = ds
+        if out.get("sensitivity_table"):
+            power_block["sensitivity_table"] = out["sensitivity_table"]
+        save_design(root, design)
+        print("已落格：resources.power.design_size 已写入设计书（draft）")
     return 0
 
 
@@ -463,6 +547,29 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("project")
     p.add_argument("design_id")
     p.set_defaults(func=cmd_render)
+
+    p = sub.add_parser("power", help="功效真计算：精确解求解器（非中心 t/F）；"
+                                     "SESOI 读 evaluation.sesoi 登记块")
+    p.add_argument("project")
+    p.add_argument("design_id")
+    p.add_argument("--form", required=True,
+                   choices=("two_arm", "paired", "anova"))
+    p.add_argument("--sigma", type=float, default=None,
+                   help="two_arm：组内标准差（设计前提，依据须在 power.basis 落字）")
+    p.add_argument("--sigma-diff", type=float, default=None,
+                   help="paired：配对差标准差（设计前提）")
+    p.add_argument("--cohen-f", type=float, default=None,
+                   help="anova：Cohen f（设计前提）")
+    p.add_argument("--groups", type=int, default=None, help="anova：组数")
+    p.add_argument("--sesoi-points", default=None,
+                   help="敏感性表 SESOI 点，逗号分隔（如 1,2,3）")
+    p.add_argument("--simulate", action="store_true",
+                   help="附蒙特卡洛交叉验证（种子 20261021 / 2000 次口径）")
+    p.add_argument("--reps", type=int, default=2000)
+    p.add_argument("--seed", type=int, default=20261021)
+    p.add_argument("--apply", action="store_true",
+                   help="把 design_size 落格写回设计书（仅 draft）")
+    p.set_defaults(func=cmd_power)
 
     return parser
 

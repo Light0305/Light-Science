@@ -9,7 +9,7 @@
 | [light-leader](light-leader/) | 总控：项目骨架、只读状态扫描、阶段路由与硬门点名、对象注册统一视图消费；v1.1 增状态规范化映射与门字段族统一登记，并纳管三个扩展位 | **v1.1 已发布** |
 | [light-literature](light-literature/) | 文献：检索核实、双轨解析、四件套、精读卡与证据行；v1.1 增共享检索适配层、元数据自动回填、claim-support 主张核查与 ask 问语料 | **v1.1 已发布** |
 | [light-idea](light-idea/) | 想法：基于证据矩阵与笔记生成、查新并筛选研究想法；v1.1 查新扩至七源、判例集冷启动、能力匹配维度 | **v1.1 已发布** |
-| [light-design](light-design/) | 设计：把想法落成可执行的研究/实验设计；v1.1 增结构化 SESOI 字段、跨区实体核对、amendment 增量评审 | **v1.1 已发布** |
+| [light-design](light-design/) | 设计：把想法落成可执行的研究/实验设计；v1.1 增结构化 SESOI 字段、跨区实体核对、amendment 增量评审；v1.2 增功效真计算模块（非中心 t/F 精确解求解器 + design_size 落格与实际功效拦截） | **v1.2 已发布** |
 | [light-experiment](light-experiment/) | 实验：执行设计、记录过程与原始产物；v1.1 增干预机械核验、承接三查与 stale 清单 | **v1.1 已发布** |
 | [light-analysis](light-analysis/) | 分析：按冻结登记行逐行回写正式判定，产出可审计的分析结论包；v1.1 增 SESOI 注册快照消费、配对/区组结构建模与稳健性口径落字 | **v1.1 已发布** |
 | [light-write](light-write/) | 写作：基于证据行成稿，引用只走核实过的文献；v1.1 增 AI 味核查层（advisory）、卡内一致性常开、贡献确认回执与追溯键三元组 | **v1.1 已发布** |
@@ -25,7 +25,7 @@
 
 ## v1.1 说明（2026-10-21）
 
-第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,697 项（1,696 passed + 1 skipped，各包见其 README），发布树测试 1,665 项全过。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
+第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,724 项（1,723 passed + 1 skipped，各包见其 README），发布树测试 1,692 项全过。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
 
 ## light-literature（已发布）
 

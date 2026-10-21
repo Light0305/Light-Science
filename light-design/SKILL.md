@@ -1,7 +1,7 @@
 ---
 name: light-design
 description: Use when 已有定版想法卡、需要把它变成可直接开工且可被证伪的研究设计书，或需要冻结设计、修订已冻结设计并向实验阶段交接时。
-version: "1.1"
+version: "1.2"
 author: light-design contributors
 license: MIT
 ---
@@ -17,7 +17,12 @@ license: MIT
 frozen）+ amendment 追加协议。二期：定版评审子流程（review prepare/
 record，REVIEW_UNAVAILABLE 正式通道）、交接四件套导出（D7）、
 DESIGN_REPORT 刷新、D0–D7 逐环规程。三期：真实想法卡端到端演示
-（见文末「三期演示小结」）与本定版。
+（见文末「三期演示小结」）与本定版。**v1.2（2026-10-21）：功效真
+计算模块**——经典分组设计（双臂/配对/单因素 ANOVA）的样本量改走
+包内精确解求解器（非中心 t/F，`light-design power` 命令），落
+resources.power.design_size 原生落格，校验器做实际功效拦截与复算
+拦截；立项与验收口径见 `03-design/power-module-acceptance.md`
+（实测背景：21-benchmark/measured-round1.md §三）。
 
 ## 定位与边界
 
@@ -40,7 +45,7 @@ DESIGN_REPORT 刷新、D0–D7 逐环规程。三期：真实想法卡端到端�
 | D2 对照与消融设计 | status quo 一等对照、消融矩阵（what_it_tests / expected_if 先行）、不必要消融登记、对照先行依赖 | contract 区 + 校验器 |
 | D3 评估协议与指标 | 主指标唯一 + 护栏、判读三向结构化、调参对等条款、种子/重复预先定明 | evaluation 区 + 校验器 |
 | D4 效度威胁与稳健性 | 四分法逐类三态登记、结构错误清单、失败模式预案 | validity 区 + 校验器 |
-| D5 资源与可行性核算 | 功效核算（SESOI→种子/重复/评估集规模 + 敏感性范围）、双货币预算、阶段表与转移条件、量化熔断 | resources 区 + 校验器 |
+| D5 资源与可行性核算 | 功效核算（SESOI→种子/重复/评估集规模 + 敏感性范围；经典分组设计走精确解求解器 + design_size 落格）、双货币预算、阶段表与转移条件、量化熔断 | resources 区 + 校验器 + power 求解器 |
 | D6 设计定版与预注册 | 静态校验全过 → Stage 1 五条评审（异家族）→ 登记头落字 → 冻结（哈希）；修订只走 amendment | 状态机 + freeze 区 + review 子流程 |
 | D7 向 Experiment 交接 | 运行清单（拓扑序）、预期登记表、复现字段、检查点 → 四件套导出 | handoff 区 + export 命令 |
 
@@ -118,7 +123,9 @@ light-design render <project> <design_id>
 
 ## D3/D5 规程：评估协议与功效核算操作口径（拍板 ②）
 
-功效核算强制，但计算实验不用经典样本量口径，用**替代口径**：
+功效核算强制，但计算实验不用经典样本量口径，用**替代口径**（经典
+分组设计——双臂独立样本 / 配对 / 单因素 ANOVA——不走替代口径，
+走第 8 条真计算口径）：
 
 1. **效应量优先序**：SESOI（最小有意义效应，如「MOTA 2 个百分点」）
    > 收缩后的先行估计（先行结果按乐观偏差打折后取值）> 明说用了
@@ -149,6 +156,53 @@ light-design render <project> <design_id>
    的**派生副本**并逐字段一致，不许登记行单独填（校验器与 export
    双重拦截）。evaluation.sesoi 是命门字段：冻结后变更只能走
    amendment + 用户签，派生副本在同一 amendment 内机械刷新。
+8. **经典分组设计走真计算（v1.2，验收规格
+   `03-design/power-module-acceptance.md`）**：设计形态为双臂独立
+   样本 t / 配对 t / 单因素 ANOVA（等分配）时，样本量**只许**由包内
+   求解器产出——`light-design power <项目> <design_id> --form
+   two_arm|paired|anova --sigma/--sigma-diff/--cohen-f [--groups k]
+   [--sesoi-points 1,2,3] [--simulate] [--apply]`（实现
+   `light_design/power.py`，纯标准库非中心 t/F 精确解，与
+   statsmodels 同题对拍至 1e-6 量级）。口径钉死如下：
+   - **SESOI 消费路径**：求解器只读 `evaluation.sesoi` 登记块的
+     value（DES-D01 单一事实源），命令不接受外部 SESOI 覆盖登记
+     值；alpha / target_power 承 resources.power 登记值。σ /
+     σ_diff / Cohen f 是设计前提（方差/效应尺度假设），其依据必须
+     在 resources.power.basis 落字（先行估计收缩、文献或惯例），
+     不许裸给一个数无出处。
+   - **路线裁决**：最终 n 只认精确解（route = nct_exact /
+     ncf_exact）；z 近似只作合理性速查、落 z_reference 并标注
+     reference_only，**不许以 z 数充当达成功效的样本量**（校验器对
+     z route 落格直接报错）；蒙特卡洛模拟只作交叉验证（口径：种子
+     20261021、2000 次/点、双侧 alpha，落 sim_check 并登记 MC
+     标准误）。精确解与模拟取整不一致时**以精确解为准**，分歧与
+     MC 标准误写入 design_size.route_note，不许执行者自选路线。
+   - **原生落格**：产出落 `resources.power.design_size`
+     {form, route, alpha, target_power, sesoi_value, sigma/
+     sigma_diff/cohen_f, raw_n（精确解原值）, per_group_n（取整）,
+     groups, total_n, achieved_power（取整 n 的实际功效）,
+     z_reference?, sim_check?, route_note?}，敏感性多点落结构化
+     `resources.power.sensitivity_table` 逐行 {sesoi_value, raw_n,
+     per_group_n, total_n, achieved_power}——交付物仍是敏感性
+     范围，但每点都是精确解数字，不许只给文本范围。分组设计的
+     每组 n **不许**再借 derived.repetitions 解释性落位（旧写法
+     兼容读取，但校验器给警告点名；声明 caliber=grouped 而无
+     design_size 直接报错）。
+   - **实际功效拦截**：achieved_power < target_power 时校验器
+     报错（不许 sufficient=true 静默通过）；校验器还按登记参数
+     当场复算 achieved_power，落字与复算差 > 1e-6 报错——功效
+     数字只许求解器产出，不许手填。给不起（预算内达不到取整 n）
+     仍走第 4 条三选一（下调声称 / 缩范围 / 扩预算重算）。
+9. **旧口径产出被取代标注**：v1.2 前按「模拟/解析」旧规程产出的
+   经典设计样本量一律视为被精确解口径取代，引用时必须标注。
+   已知两处：(a) measured-round1 中执行者按旧规程 z 公式产出的
+   每臂 99（P1/P2）、18 对（P4）——实际功效 0.78/0.74，未达自设
+   目标，已被精确解 100/20 取代；(b) 演示设计
+   zero-tuning-tracker-thresholds_979ee7 的 power 块（段级配对差
+   旧解析口径：SESOI 1/2/3 点 → 11/6/4 段、「6 段达 0.8」）——按
+   配对 t 精确解（σ_diff=1.5）复算为 20/7/5 段，6 段实际功效约
+   0.743 未达 0.80；演示 YAML 保留原字作历史记录，其 design.md
+   已加被取代横幅，后续引用以本条复算为准。
 
 ## D4 规程：效度登记填法
 
@@ -302,6 +356,9 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
 - [ ] status_quo 对照在场；处理组 depends_on 含其对照；拓扑序可排
 - [ ] 功效：SESOI 有据、derived 与 seeds/repetitions 对账、敏感性范围已写；
       sufficient=false 时声称已下调并落字
+- [ ] 功效（分组设计）：design_size 落格为精确解产出（route=nct_exact/
+      ncf_exact）、achieved_power ≥ target_power、sensitivity_table 逐行
+      达标；无 z 口径 n 冒充产出；σ/f 前提依据已在 power.basis 落字
 - [ ] SESOI 结构化登记：evaluation.sesoi 七字段齐全、direction 与主指标
       一致；登记行派生副本逐字段一致（确认性设计缺一不可）
 - [ ] 效度四类齐全、逐项三态 + note；结构错误清单逐项自查完
@@ -356,6 +413,12 @@ draft ──→ reviewed ──→ frozen（终态；修订只走 amendment）
   同界）。
 - 功效替代口径中的方差前提（如段间 SD 估计）设计期无法验证，
   只能以敏感性范围 + 熔断线对冲，执行期须按实测复核。
+- 功效求解器（v1.2）的覆盖面是等分配的双臂 t / 配对 t / 单因素
+  ANOVA 三形态 + 结构化敏感性表；不等分配、协变量调整（ANCOVA）、
+  多重比较校正后的功效、生存/计数结局与混合模型的功效未供给，
+  这类设计仍走替代口径并在 power.method 落字说明不用求解器的
+  理由。求解前提（正态、等方差、σ/f 取值）本身不被求解器验证，
+  前提依据与敏感性对冲仍按 D3/D5 规程第 1/3 条办。
 - 对账回填（Experiment 执行结果、Analysis 按登记表判定）不在
   本技能范围；本技能只保证登记表可对账（readout 三向 + 现行
   哈希）。

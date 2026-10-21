@@ -28,6 +28,13 @@
   的 expected_registry）只许携带与登记块逐字段一致的派生副本，不许
   单独填；evaluation.sesoi 列入命门字段，冻结后变更走 amendment +
   用户签，登记行副本在同一 amendment 内机械刷新。
+- 功效真计算落格（v1.2，验收规格 03-design/power-module-acceptance.md）：
+  分组经典设计（双臂/配对/ANOVA）的样本量只认 light_design.power 的
+  精确解（非中心 t/F），落 resources.power.design_size 原生落格；
+  校验器对落格做实际功效拦截（achieved < target 报错）与复算拦截
+  （登记 achieved 与求解器按登记参数复算差 > 1e-6 报错），z 近似
+  route 直接拒；分组设计借 derived.repetitions 落位由 power_warnings
+  点名警告（兼容读取、不沉默）。
 - intake 跨区实体核查（v1.1 DES-D04）：spec_intake 中标 expanded 的
   六项逐项按 INTAKE_ENTITY_MAP 到对应区查实体存在性——只改状态字、
   不落实体的承接造假，校验器点名报错；accepted 不触发本核查。
@@ -42,6 +49,14 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
+
+from .power import (
+    EXACT_ROUTES as POWER_EXACT_ROUTES,
+    power_anova as _solver_power_anova,
+    power_paired_t as _solver_power_paired,
+    power_two_sample_t as _solver_power_two,
+)
 
 # ---------- 枚举 ----------
 
@@ -349,6 +364,195 @@ def sesoi_diff_fields(a, b) -> list[str]:
     if ca is None or cb is None:
         return ["<登记块不是映射>"]
     return [k for k in SESOI_FIELDS if ca.get(k) != cb.get(k)]
+
+
+# ---------- 功效 design_size 原生落格校验（v1.2 真计算模块） ----------
+
+# 分组经典设计的原生落格 resources.power.design_size（验收规格 §3）：
+# {form, route, alpha, target_power, sesoi_value, sigma|sigma_diff|
+# cohen_f, raw_n, per_group_n, groups, total_n, achieved_power,
+# z_reference?, sim_check?}。旧 derived.repetitions 借位写法保留兼容
+# 读取，但分组设计借位由 power_warnings 点名警告，不再沉默。
+POWER_FORMS = ("two_arm", "paired", "anova")
+
+
+def _is_num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _is_pos_int(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool) and v >= 1
+
+
+def _power_design_size_errors(power: dict) -> list[str]:
+    """校验 resources.power 的求解器落格（design_size / sensitivity_table）。
+
+    硬规则（03-design/power-module-acceptance.md §2/§3）：
+    - 最终 n 只认精确解路线（nct_exact / ncf_exact）；route 为 z 近似
+      直接报错——z 数不许充当达成功效的样本量；
+    - 取整 n 的实际功效 achieved_power 必须落字且 ≥ target_power，
+      未达标报错（不许 sufficient=true 静默通过）；
+    - 登记的 achieved_power 由校验器按登记参数（形态/SESOI/σ 或 f/
+      每组 n）当场复算，比对容差 1e-6——落字数字与求解器不一致即
+      报错（防手填造假）；结构化敏感性表逐行同规。
+    无 design_size 且未声明 caliber=grouped 的旧设计书不触发本校验
+    （兼容读），借位写法走 power_warnings。"""
+    errs: list[str] = []
+    where = "resources.power.design_size"
+    ds = power.get("design_size")
+    if power.get("caliber") == "grouped" and ds is None:
+        errs.append("resources.power.caliber=grouped（分组经典设计）但缺 "
+                    "design_size 原生落格（每组 n / 总 N / 设计形态须落 "
+                    "design_size，不许再借 derived.repetitions 解释性落位，"
+                    "验收规格 §3）")
+    if ds is not None:
+        if not isinstance(ds, dict):
+            errs.append(f"{where} 不是映射（求解器落格须为映射）")
+            ds = None
+    if isinstance(ds, dict):
+        form = ds.get("form")
+        if form not in POWER_FORMS:
+            errs.append(f"{where}.form 非法：{form!r}（须为 {POWER_FORMS} 之一）")
+        route = ds.get("route")
+        if route not in POWER_EXACT_ROUTES:
+            if isinstance(route, str) and route.startswith("z"):
+                errs.append(f"{where}.route={route!r}：z 近似路线只许作"
+                            "合理性速查（z_reference），不许作最终产出"
+                            "（验收规格 §2：最终 n 只认精确解 "
+                            "nct_exact / ncf_exact）")
+            else:
+                errs.append(f"{where}.route 非法：{route!r}（须为精确解路线 "
+                            f"{POWER_EXACT_ROUTES} 之一）")
+        groups, per, total = ds.get("groups"), ds.get("per_group_n"), \
+            ds.get("total_n")
+        for k, v in (("groups", groups), ("per_group_n", per),
+                     ("total_n", total)):
+            if not _is_pos_int(v):
+                errs.append(f"{where}.{k} 非法：{v!r}（须为正整数）")
+        if _is_pos_int(groups) and _is_pos_int(per) and _is_pos_int(total) \
+                and total != per * groups:
+            errs.append(f"{where}.total_n={total} 与 per_group_n×groups="
+                        f"{per}×{groups}={per * groups} 不一致")
+        if form == "two_arm" and _is_pos_int(groups) and groups != 2:
+            errs.append(f"{where}.groups={groups}（two_arm 形态须为 2）")
+        if form == "paired" and _is_pos_int(groups) and groups != 1:
+            errs.append(f"{where}.groups={groups}（paired 形态以对为单位，"
+                        "groups 须为 1、per_group_n 即对数）")
+        if form == "anova" and _is_pos_int(groups) and groups < 2:
+            errs.append(f"{where}.groups={groups}（anova 形态须 ≥ 2）")
+        tp = ds.get("target_power", power.get("target_power"))
+        if _is_num(ds.get("target_power")) and _is_num(power.get("target_power")) \
+                and float(ds["target_power"]) != float(power["target_power"]):
+            errs.append(f"{where}.target_power={ds['target_power']} 与 "
+                        f"resources.power.target_power={power['target_power']} "
+                        "不一致（目标功效只许一处口径）")
+        ach = ds.get("achieved_power")
+        if not _is_num(ach):
+            errs.append(f"{where}.achieved_power 缺失或非数值（取整 n 的"
+                        "实际功效必须落字，验收规格 §2）")
+        elif _is_num(tp) and float(ach) < float(tp) - 1e-9:
+            errs.append(f"{where}.achieved_power={ach} < target_power={tp}："
+                        "取整 n 的实际功效未达目标——不许 sufficient=true "
+                        "静默通过（验收规格 §2）：按精确解增大 n，或下调"
+                        "声称/目标并落字")
+        raw = ds.get("raw_n")
+        if _is_num(raw) and _is_pos_int(per):
+            raw_per = float(raw) / groups if form == "anova" \
+                and _is_pos_int(groups) else float(raw)
+            if not (per - 1 < raw_per <= per + 1e-9):
+                errs.append(f"{where}.raw_n={raw} 与 per_group_n={per} 的"
+                            "取整关系不符（per_group_n 须为精确解原值的"
+                            "向上取整）")
+        # 复算拦截：按登记参数当场重算实际功效，与落字比对
+        if _is_num(ach) and _is_pos_int(per):
+            recomputed = None
+            try:
+                if form == "two_arm" and _is_num(ds.get("sigma")) \
+                        and _is_num(ds.get("sesoi_value")):
+                    recomputed = _solver_power_two(
+                        per, float(ds["sesoi_value"]) / float(ds["sigma"]),
+                        float(ds.get("alpha", power.get("alpha") or 0.05)))
+                elif form == "paired" and _is_num(ds.get("sigma_diff")) \
+                        and _is_num(ds.get("sesoi_value")):
+                    recomputed = _solver_power_paired(
+                        per, float(ds["sesoi_value"]) / float(ds["sigma_diff"]),
+                        float(ds.get("alpha", power.get("alpha") or 0.05)))
+                elif form == "anova" and _is_num(ds.get("cohen_f")) \
+                        and _is_pos_int(groups) and _is_pos_int(total):
+                    recomputed = _solver_power_anova(
+                        total, groups, float(ds["cohen_f"]),
+                        float(ds.get("alpha", power.get("alpha") or 0.05)))
+            except ValueError:
+                recomputed = None
+            if recomputed is not None:
+                if abs(recomputed - float(ach)) > 1e-6:
+                    errs.append(f"{where}.achieved_power 登记值 {ach} 与"
+                                f"求解器按登记参数复算 {recomputed:.6f} "
+                                "不一致（容差 1e-6）：功效数字只许由求解器"
+                                "产出，不许手填")
+                elif _is_num(tp) and recomputed < float(tp) - 1e-9:
+                    errs.append(f"{where} 求解器复算实际功效 "
+                                f"{recomputed:.6f} < target_power={tp}："
+                                "取整 n 未达目标（验收规格 §2 拦截）")
+        sim = ds.get("sim_check")
+        if sim is not None:
+            if not isinstance(sim, dict) or not _is_num(sim.get("estimate")) \
+                    or not _is_num(sim.get("mc_se")):
+                errs.append(f"{where}.sim_check 结构非法（模拟交叉验证落格"
+                            "须含 estimate 与 mc_se 数值；模拟只作交叉"
+                            "验证，不作产出口径）")
+    rows = power.get("sensitivity_table")
+    if rows is not None:
+        if not isinstance(rows, list):
+            errs.append("resources.power.sensitivity_table 不是列表")
+        else:
+            tp2 = power.get("target_power")
+            form2 = ds.get("form") if isinstance(ds, dict) else None
+            for i, row in enumerate(rows):
+                if not isinstance(row, dict):
+                    errs.append(f"resources.power.sensitivity_table[{i}] 不是映射")
+                    continue
+                rach = row.get("achieved_power")
+                if not _is_num(rach):
+                    errs.append(f"resources.power.sensitivity_table[{i}]"
+                                ".achieved_power 缺失或非数值（敏感性表逐点"
+                                "须给实际功效，验收规格 §1.4）")
+                elif _is_num(tp2) and float(rach) < float(tp2) - 1e-9:
+                    errs.append(f"resources.power.sensitivity_table[{i}]"
+                                f".achieved_power={rach} < target_power={tp2}"
+                                "（敏感性表逐点实际功效须达标）")
+                rraw, rper = row.get("raw_n"), row.get("per_group_n")
+                if form2 in ("two_arm", "paired") and _is_num(rraw) \
+                        and _is_pos_int(rper) \
+                        and math.ceil(float(rraw) - 1e-9) != rper:
+                    errs.append(f"resources.power.sensitivity_table[{i}]"
+                                f".per_group_n={rper} 不是 raw_n={rraw} 的"
+                                "向上取整")
+    return errs
+
+
+def power_warnings(design: dict) -> list[str]:
+    """功效落位警告（不拦截，只点名）：分组设计借 derived.repetitions
+    落每组 n 的旧写法（验收规格 §3：兼容读取但给警告而非沉默）。"""
+    warns: list[str] = []
+    res = design.get("resources") or {}
+    power = res.get("power")
+    if not isinstance(power, dict) or not power:
+        return warns
+    if power.get("design_size") is not None:
+        return warns
+    groups = (design.get("contract") or {}).get("groups")
+    derived = power.get("derived")
+    if isinstance(groups, list) and groups and isinstance(derived, dict) \
+            and _is_num(derived.get("repetitions")):
+        warns.append(
+            "resources.power 未登记 design_size 原生落格，但 contract.groups "
+            "已声明分组设计且 derived.repetitions 在场：每组 n 若借 "
+            "repetitions 解释性落位属借位写法——分组设计请用 "
+            "resources.power.design_size（form/per_group_n/total_n/"
+            "achieved_power，求解器 light-design power）原生登记"
+            "（v1.2 警告，不拦截；计算实验替代口径不受此限）")
+    return warns
 
 
 # ---------- 冻结哈希 ----------
@@ -756,6 +960,8 @@ def validate_design(design: dict) -> list[str]:
     if isinstance(power, dict) and power.get("sufficient") is False and has_confirmatory:
         errs.append("resources.power.sufficient=false（功效核算给不起所需重复）"
                     "但仍保留确认性主张（拍板 ②：给不起须下调声称为探索性）")
+    if isinstance(power, dict) and power:
+        errs.extend(_power_design_size_errors(power))
 
     # ---- 冻结区 freeze ----
     fr = design.get("freeze")
@@ -892,7 +1098,7 @@ def empty_design(design_id: str, idea_id: str, title: str, tier: str, today: str
             "failure_modes": [],
         },
         "resources": {
-            "power": None,            # {sesoi, basis, alpha, target_power, method, derived, sensitivity_range, sufficient}
+            "power": None,            # {sesoi, basis, alpha, target_power, method, derived, sensitivity_range, sufficient}；分组经典设计另落 design_size 求解器落格 + sensitivity_table 结构化敏感性表（v1.2，见 power.py 与 _power_design_size_errors）
             "budget": {"compute": "", "time": "", "human": ""},
             "attempt_budget": None,
             "stages": [],             # {name, goal, entry_condition, exit_condition}
