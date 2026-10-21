@@ -34,8 +34,15 @@ RESERVED_RETENTION_TIERS = ("warc_full",)
 #: 个人数据风险（HC-5：high 登记即拒；low 须最小必要范围说明）
 PERSONAL_DATA_RISKS = ("none", "low", "high")
 
-#: 登录态（S2：v1 只许 none）
-LOGIN_STATES = ("none",)
+#: 登录态。v1 只许 none（S2）；能力强化批新增凭据访问通道
+#: （用户 2026-10-21 口径变更）：user_account（用户本人账号）与
+#: institutional（机构授予权限）两态开放，但凭据只许以 vault
+#: 引用登记、会话只许由浏览器通道承载（见 validate_target）。
+LOGIN_STATES = ("none", "user_account", "institutional")
+
+#: 凭据引用格式：只许 Secure Vault 引用（vault:<名目>），拒绝任何
+#: 形似明文凭据的写法落盘——登记文件里永远不出现凭据本体。
+CREDENTIAL_REF_PREFIX = "vault:"
 
 #: 增量节奏
 RHYTHMS = ("manual", "daily", "weekly")
@@ -95,12 +102,28 @@ EVENT_TYPES = (
     "duplicate_skipped",       # 请求指纹已见，跳过
     "manual_import",           # 人工导出后登记导入（S2 正当替代）
     "lock_applied",            # 项目锁覆盖了登记/预检的放松尝试
+    # ---- 能力强化批新增 ----
+    "fetch_error",             # 传输层失败（超时/断连/重定向环），单 URL 记账不停 run
+    "js_shell_detected",       # 静态产物疑似 JS 壳（内容靠脚本注入）
+    "render_blocked",          # 拒绝类：渲染命中人机校验强标记
+    "render_escalation_blocked",  # 拒绝类：需要渲染升级但登记未授权
+    "credential_session_invalid",  # 拒绝类：凭据会话失效（落到登录墙/被拒）
+    "discovery_completed",     # 一次发现 pass 完成（端点/链接/sitemap）
+    "strategy_selected",       # 回退链选定起始策略
+    "strategy_escalated",      # 回退链升级（如静态 -> 渲染）
+    "download_resumed",        # 大文件断点续传接续成功
+    "adaptive_backoff",        # 自适应限速加严（服务器错误/网络错误触发）
+    "crawl_job_started",       # frontier 任务开始/新建
+    "crawl_job_resumed",       # frontier 任务断点续跑
+    "crawl_job_finished",      # frontier 任务结束（finished/partial/refused）
 )
 
 #: refusals 命令认的拒绝类事件。
 REFUSAL_EVENT_TYPES = (
     "precheck_blocked", "fetch_refused", "http_refused", "circuit_broken",
     "redirect_out_of_scope", "volume_cap_hit",
+    "render_blocked", "render_escalation_blocked",
+    "credential_session_invalid",
 )
 
 # ---------------------------------------------------------------- 登记校验
@@ -135,8 +158,50 @@ def validate_target(reg: dict) -> list:
     login = reg.get("login_state", "none")
     if login not in LOGIN_STATES:
         problems.append(
-            f"login_state {login!r} 在 v1 全关（S2）：登录态抓取不开放；"
-            "正当替代为人工导出后用 import 命令登记导入")
+            f"login_state {login!r} 不在词表 {list(LOGIN_STATES)}"
+            "（S2 沿革：v1 全关；2026-10-21 口径变更后只开放凭据"
+            "通道两态）：任意 cookie/token 字串不构成登录态登记；"
+            "凭据访问走 user_account / institutional 两态")
+    elif login != "none":
+        # 凭据访问通道（用户 2026-10-21 口径变更后新增）：权限依据
+        # 逐目标声明、凭据只许 vault 引用、会话只许浏览器承载。
+        if not (reg.get("entitlement_basis") or "").strip():
+            problems.append(
+                "凭据访问通道须逐目标声明 entitlement_basis（权限依据："
+                "本人账号 / 机构订阅等），无依据不许登记登录态目标")
+        ref = reg.get("credential_ref") or ""
+        if not ref.startswith(CREDENTIAL_REF_PREFIX) \
+                or any(c.isspace() for c in ref) \
+                or len(ref) <= len(CREDENTIAL_REF_PREFIX):
+            problems.append(
+                "credential_ref 须为 Secure Vault 引用（vault:<名目>）："
+                "凭据本体永不落盘、永不进登记文件")
+        if channel != "browser":
+            problems.append(
+                "凭据会话只许由浏览器通道承载（channel 须为 browser）："
+                "静态通道不持有登录会话")
+
+    esc = reg.get("allow_render_escalation")
+    if esc is not None and not isinstance(esc, bool):
+        problems.append("allow_render_escalation 须为布尔值")
+    if reg.get("large_files") is not None \
+            and not isinstance(reg.get("large_files"), bool):
+        problems.append("large_files 须为布尔值")
+    endpoints = reg.get("api_endpoints")
+    if endpoints is not None:
+        if not isinstance(endpoints, list) \
+                or not all(isinstance(u, str) and u.startswith(("http://", "https://"))
+                           for u in endpoints):
+            problems.append("api_endpoints 须为 http(s) URL 字符串列表")
+    disc = reg.get("discovery")
+    if disc is not None:
+        if not isinstance(disc, dict):
+            problems.append("discovery 须为映射（max_depth / max_pages）")
+        else:
+            for key in ("max_depth", "max_pages"):
+                v = disc.get(key)
+                if v is not None and (not isinstance(v, int) or v <= 0):
+                    problems.append(f"discovery.{key} 须为正整数")
 
     conc = reg.get("concurrency", REQUIRED_CONCURRENCY)
     if conc != REQUIRED_CONCURRENCY:

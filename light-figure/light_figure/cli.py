@@ -1,6 +1,7 @@
 """light-figure CLI：init / intake / validate / advance / report /
 style build / produce / prompt build|select / reference add|accept /
-redraw init|install|build|extract / pptx init|install|build|extract /
+redraw init|install|build|extract / redraw post extract|text|fill|diff /
+pptx init|install|build|extract /
 pptx com-script|com-verify / ai init|install|build|extract /
 recheck / svg-check / audit run|audit-status|audit note /
 provenance set|show / deliver。
@@ -36,6 +37,8 @@ from .redraw import RedrawError, build_vsdx, extract_and_reconcile, \
 from .reference import ReferenceError, ACCEPTANCE_CHECKS, \
     accept_reference, register_reference
 from .svgbridge import SvgBridgeError, validate_svg_subset
+from .vsdxpost import PostError, post_diff, post_extract, \
+    post_replace_text, post_set_fill
 from .report import build_report
 from .style import StyleError, build_style
 from .validate import validate_package
@@ -43,7 +46,7 @@ from .validate import validate_package
 _ERRORS = (IntakeError, GateError, FileExistsError, StyleError,
            ProduceError, PromptError, ReferenceError, RedrawError,
            AuditError, ProvenanceError, DeliveryError, PptxError,
-           RecheckError, SvgBridgeError, AiError)
+           RecheckError, SvgBridgeError, AiError, PostError)
 
 
 def _print(obj):
@@ -154,6 +157,33 @@ def main(argv=None) -> int:
     sp = redraw_sub.add_parser("extract", help="成品反抽清单并与 manifest 对账")
     sp.add_argument("root")
     sp.add_argument("fig_id")
+    sp = redraw_sub.add_parser("post", help="文件级后处理（vsdx vendored："
+                                            "改字/改色/抽取/diff，不承担重建）")
+    post_sub = sp.add_subparsers(dest="post_cmd", required=True)
+    sp = post_sub.add_parser("extract", help="vsdx 抽取成品形状清单"
+                                             "（名/文本/填充/描边/几何）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp = post_sub.add_parser("text", help="批量改字（写回后强制 extract 对账）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--find", required=True)
+    sp.add_argument("--replace", required=True)
+    sp.add_argument("--regex", action="store_true")
+    sp.add_argument("--by", default=None)
+    sp = post_sub.add_parser("fill", help="单形状改填充/描边色"
+                                          "（写回后强制 extract 对账）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--shape", default=None, help="语义 ID（形状 NameU）")
+    sp.add_argument("--text", default=None, help="逐字文本定位")
+    sp.add_argument("--fill", default=None, help="#RRGGBB")
+    sp.add_argument("--line", default=None, help="#RRGGBB")
+    sp.add_argument("--by", default=None)
+    sp = post_sub.add_parser("diff", help="成品与另一 .vsdx 逐成员比对")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--other", required=True)
 
     p = sub.add_parser("pptx", help="PowerPoint 文件层路线（FIG-D02）")
     pptx_sub = p.add_subparsers(dest="pptx_cmd", required=True)
@@ -330,8 +360,22 @@ def main(argv=None) -> int:
                         "shapes": len(manifest.get("shapes") or [])})
             elif args.redraw_cmd == "build":
                 _print(build_vsdx(args.root, args.fig_id, by=args.by))
-            else:
+            elif args.redraw_cmd == "extract":
                 _print(extract_and_reconcile(args.root, args.fig_id))
+            else:  # post 命令组（vsdx vendored 后处理格）
+                if args.post_cmd == "extract":
+                    _print(post_extract(args.root, args.fig_id))
+                elif args.post_cmd == "text":
+                    _print(post_replace_text(
+                        args.root, args.fig_id, args.find, args.replace,
+                        regex=args.regex, by=args.by))
+                elif args.post_cmd == "fill":
+                    _print(post_set_fill(
+                        args.root, args.fig_id, shape_id=args.shape,
+                        text=args.text, fill=args.fill, line=args.line,
+                        by=args.by))
+                else:
+                    _print(post_diff(args.root, args.fig_id, args.other))
         elif args.cmd == "pptx":
             if args.pptx_cmd == "init":
                 manifest = init_pptx_manifest(args.root, args.fig_id)
@@ -368,7 +412,8 @@ def main(argv=None) -> int:
                                                args.manifest)
                 _print({"fig_id": args.fig_id,
                         "status": manifest["status"],
-                        "shapes": len(manifest.get("shapes") or [])})
+                        "shapes": len(manifest.get("shapes") or []),
+                        "derived_from": manifest.get("derived_from")})
             elif args.ai_cmd == "build":
                 _print(generate_build_scripts(args.root, args.fig_id,
                                               by=args.by))

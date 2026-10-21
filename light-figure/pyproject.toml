@@ -27,7 +27,12 @@ test = ["pytest>=8.0"]
 light-figure = "light_figure.cli:main"
 
 [tool.setuptools]
-packages = ["light_figure"]
+packages = ["light_figure", "light_figure.vendor",
+            "light_figure.vendor.vsdx"]
+
+# vendored vsdx 的非代码工件随包分发（母版文件 + 许可 + 收编记录）
+[tool.setuptools.package-data]
+"light_figure.vendor.vsdx" = ["media/*.vsdx", "LICENSE", "VENDOR.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -17,6 +17,7 @@ import uuid
 from html.parser import HTMLParser
 from pathlib import Path
 
+from . import transport as _transport
 from .util import append_jsonl, read_jsonl, sha256_bytes, sha256_file, utcnow
 
 RETENTION_TIER = "lightweight_raw_plus_hash"
@@ -144,26 +145,30 @@ def clean_content(data: bytes, content_type: str, profile: str = "html_text_v1",
     """
     ctype = (content_type or "").lower()
     out = {"profile": profile, "content_type": ctype}
+    # 解码统一走 transport.decode_text 的 charset 判定链（响应头
+    # charset -> meta -> utf-8 -> gb18030 兜底）：v1 写死 utf-8
+    # 宽容解码会把 GBK 中文站解成花屏，强化批在此收口。
+    decoded = _transport.decode_text(data, {"Content-Type": content_type})
     if "json" in ctype:
         try:
-            parsed = json.loads(data.decode("utf-8", errors="replace"))
+            parsed = json.loads(decoded)
             out["kind"] = "json"
             out["json"] = parsed
             text = json.dumps(parsed, ensure_ascii=False, sort_keys=True)
         except json.JSONDecodeError:
             out["kind"] = "text"
-            text = data.decode("utf-8", errors="replace")
+            text = decoded
     elif "html" in ctype or data.lstrip()[:15].lower().startswith(b"<!doctype html") \
             or b"<html" in data[:512].lower():
         parser = _TextExtractor()
-        parser.feed(data.decode("utf-8", errors="replace"))
+        parser.feed(decoded)
         out["kind"] = "html"
         out["title"] = parser.title
         out["metadata"] = parser.meta
         text = parser.text()
     else:
         out["kind"] = "text"
-        text = data.decode("utf-8", errors="replace")
+        text = decoded
     out["text"] = text
     out["text_sha256"] = sha256_bytes(text.encode("utf-8"))
     mine = _shingles(text)

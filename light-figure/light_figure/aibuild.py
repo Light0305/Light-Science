@@ -22,6 +22,15 @@ false 至登记纪律满足（schema.AI_EVIDENCE_LEVELS 与构建单 J3）。
 单一变换（英寸、pin 中心、Y 自页面底部量起）；.jsx 在脚本内以
 place 换算为 ExtendScript 文档坐标（pt、Y 向上），回读脚本按
 同一口径反算回英寸落 JSON，Python 侧只消费英寸口径。
+
+构建账按后端隔离（user-delegated 主会话裁决 2026-10-21）：
+redraw manifest 的内容（形状、文本、语义 ID）跨路线继承，
+rounds/build 构建记录不跨后端继承——每条路线自己的构建账独立
+起账，round_noop 纪律只在本路线账内生效。从 visio / powerpoint
+路线的 manifest 派生 ai manifest（ai install 登记外来 manifest）
+时，derive_ai_manifest 剥离外来构建账并在 derived_from 段留痕；
+规划期实测的故障形态（继承 file_build 的 rounds 账导致首轮
+ai build 被 round_noop 误拦）由回归测试钉住，不许复发。
 """
 
 from __future__ import annotations
@@ -37,9 +46,24 @@ from .redraw import (
     shape_geometry,
 )
 from .style import role_hex
-from .util import component_hash, dump_json, load_structured, sha256_file
+from .util import component_hash, dump_json, load_structured, sha256_file, utcnow
 
 AI_DIR = "schematic/redraw"
+AI_BACKEND = "illustrator_extendscript"
+DERIVATION_RULING = (
+    "构建账按后端隔离：redraw manifest 的内容（形状/文本/语义 ID）"
+    "跨路线继承，rounds/build 构建记录不跨后端继承，每条路线自己的"
+    "构建账独立起账，round_noop 纪律只在本路线账内生效"
+    "（user-delegated 主会话裁决 2026-10-21）")
+# 跨路线继承的内容字段（清单本体：形状/文本/语义 ID 的载体）
+_AI_CONTENT_KEYS = ("fig_id", "version", "reference", "canvas",
+                    "role_palette", "panels", "shapes", "bitmap_residue",
+                    "arrow_plan", "renderer_effective_fields")
+# 本路线构建账字段：派生时一律不继承、外来值剥离
+_AI_LEDGER_KEYS = ("rounds", "build", "dom_readback", "preflight",
+                   "extracted_shapes_hash", "reconciliation")
+# 外来路线私有键：对 ai manifest 无义，派生时摘除（留痕）
+_AI_FOREIGN_KEYS = ("route", "trace_layer", "label_check")
 AI_SHAPE_KINDS = ["rect", "rounded_rect", "ellipse", "diamond",
                   "parallelogram", "line", "text", "image_residue"]
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -202,6 +226,102 @@ def validate_ai_manifest(manifest, root=None) -> list:
     return gaps
 
 
+# ---------------------------------------------------------------- 跨路线派生
+
+def _foreign_route(manifest) -> str | None:
+    """判定源 manifest 是否属于另一条路线，返回其路线标识。
+
+    判定顺序即路线身份的证据强度（裁决见 DERIVATION_RULING）：
+    1. backend 字段自证身份：非本路线值即外来（pptx 线形态）；
+       值 = illustrator_extendscript 即本路线——其 rounds/build
+       皆自家账，顶层 route 残留键（三路共用骨架的默认键）不
+       构成外来证据，直接判本路线；
+    2. build 记录自证身份：带外来 backend 即外来；
+    3. 只剩 backend 缺失的 manifest（redraw 线形态：顶层落
+       route、build 记录落 route 无 backend）：以 build 记录的
+       route、或顶层 route 与任一账面证据并存为外来依据；
+       单独一个 route 键且无账可剥（未构建骨架）不算派生。
+    """
+    backend = manifest.get("backend")
+    if backend not in (None, AI_BACKEND):
+        return str(backend)
+    build = manifest.get("build") or {}
+    build_backend = build.get("backend")
+    if build_backend not in (None, AI_BACKEND):
+        return str(build_backend)
+    if backend == AI_BACKEND:
+        return None
+    if build.get("route") in schema.VISIO_ROUTES:
+        return f"visio/{build.get('route')}"
+    route = manifest.get("route")
+    has_ledger = bool(manifest.get("rounds")) or bool(build) \
+        or bool(manifest.get("dom_readback")) \
+        or bool(manifest.get("reconciliation"))
+    if route in schema.VISIO_ROUTES and has_ledger:
+        return f"visio/{route}"
+    return None
+
+
+def derive_ai_manifest(manifest):
+    """把外来路线的 manifest 派生为 ai manifest：内容继承、
+    构建账隔离（DERIVATION_RULING）。
+
+    - 内容字段（_AI_CONTENT_KEYS：形状/文本/语义 ID/标定/计划）
+      原样继承——同一张图换路线重产，清单本体不重编；
+    - 构建账字段（_AI_LEDGER_KEYS：rounds/build/dom_readback/
+      preflight/extracted_shapes_hash/reconciliation）一律剥离
+      归零，本路线独立起账——外来 rounds 的 projection_hash 不许
+      进本路线的 round_noop 比对（规划期 P5 实测故障），外来
+      reconciliation 的 ok 结论更不许冒充本路线已对账；
+    - 外来路线私有键（_AI_FOREIGN_KEYS）摘除，backend 归一为
+      illustrator_extendscript；
+    - 剥离与归一全数记进 derived_from 留痕（源路线、被剥轮次
+      数、被剥 build 记录摘要、裁决出处）。
+
+    源 manifest 本就是本路线的（重登记自家 ai manifest）时原样
+    返回、trace 为 None——自家账不许被派生逻辑误剥。
+    返回 (manifest, trace|None)。
+    """
+    foreign = _foreign_route(manifest)
+    if foreign is None:
+        return manifest, None
+    build = manifest.get("build") or {}
+    stripped = {
+        "rounds": len(manifest.get("rounds") or []),
+        "build": ({
+            "builder": build.get("builder"),
+            "backend": build.get("backend"),
+            "route": build.get("route"),
+            "artifact": build.get("artifact"),
+            "artifact_sha256": build.get("artifact_sha256"),
+        } if build else None),
+        "had_dom_readback": bool(manifest.get("dom_readback")),
+        "had_preflight": bool(manifest.get("preflight")),
+        "had_reconciliation": bool(manifest.get("reconciliation")),
+        "had_extracted_shapes_hash":
+            bool(manifest.get("extracted_shapes_hash")),
+    }
+    dropped_keys = [k for k in _AI_FOREIGN_KEYS if k in manifest]
+    backend_from = manifest.get("backend")
+    manifest["backend"] = AI_BACKEND
+    for key in _AI_FOREIGN_KEYS:
+        manifest.pop(key, None)
+    for key in _AI_LEDGER_KEYS:
+        manifest[key] = [] if key == "rounds" else None
+    trace = {
+        "source_route": foreign,
+        "derived_at": utcnow(),
+        "ruling": DERIVATION_RULING,
+        "stripped_build_ledger": stripped,
+        "dropped_foreign_keys": dropped_keys,
+        "backend_from": backend_from,
+        "inherited_content": [k for k in _AI_CONTENT_KEYS
+                              if k in manifest],
+    }
+    manifest["derived_from"] = trace
+    return manifest, trace
+
+
 # ---------------------------------------------------------------- 登记
 
 def init_ai_manifest(root, fig_id: str) -> dict:
@@ -248,6 +368,7 @@ def init_ai_manifest(root, fig_id: str) -> dict:
         "renderer_effective_fields": default_effective_fields(),
         "rounds": [],
         "build": None,
+        "derived_from": None,
         "dom_readback": None,
         "preflight": None,
         "extracted_shapes_hash": None,
@@ -268,6 +389,10 @@ def install_ai_manifest(root, fig_id: str, source) -> dict:
         raise AiError([f"ai manifest 的 fig_id "
                        f"{manifest.get('fig_id')!r} 与目标图 {fig_id} "
                        "不一致"])
+    # 跨路线派生先行：源 manifest 若属 visio / powerpoint 路线，
+    # 内容继承、构建账按后端隔离剥离并留痕（DERIVATION_RULING），
+    # 再走本路线契约校验——外来 backend/route 不许漏进校验与账面。
+    manifest, _derivation = derive_ai_manifest(manifest)
     gaps = validate_ai_manifest(manifest, root=root)
     pkg = load_package(root)
     entry = provenance_row(pkg["provenance"], fig_id) or {}

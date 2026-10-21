@@ -26,17 +26,28 @@
                   出分项报表（只报数不判线，通过线待用户定版）
   promote         Phase 2 晋升通道：propose / confirm / withdraw /
                   list（候选 → 确认 → 复制入全局层，撤回对账）
+  vault           工具层 T1 Obsidian 文件层控制层：probe / list /
+                  read / create / append / patch / delete / fm /
+                  links / backlinks / unresolved / orphans /
+                  rename / search / canvas / base / daily / lint
+                  （只操作 vault 视图文件，不新开入账路径）
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from datetime import date
 from pathlib import Path
 
+from . import basesio as basesio_mod
 from . import bench as bench_mod
 from . import candidates as cand_mod
+from . import canvasio as canvasio_mod
+from . import linkgraph as linkgraph_mod
 from . import obsidian as obsidian_mod
+from . import vaultio as vaultio_mod
 from . import profile as profile_mod
 from . import promote as promote_mod
 from . import retrieve as retrieve_mod
@@ -46,7 +57,7 @@ from .project import drop_phase2_pending, init_package, load_package
 from .registry import export_registry_view
 from .supersede import VerdictError, apply_nominations, facts_as_of, \
     resolve_dispute
-from .util import load_structured
+from .util import load_structured, sha256_file, utcnow
 from .validate import validate_package
 
 
@@ -447,6 +458,250 @@ def cmd_readback(args) -> int:
     return 0
 
 
+# ---------------------------------------------------------------- vault 控制层（T1）
+
+def _emit(args, payload, lines) -> int:
+    if getattr(args, "json", False):
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        for line in lines:
+            print(line)
+    return 0
+
+
+def _register_artifact(vault, rel: str, sha: str) -> None:
+    """把控制层产物登记进 .projection.json 的 vault_artifacts 段
+    （与投影 notes 分开记，不扰动投影的 orphan 口径）。"""
+    manifest = vault / obsidian_mod.MANIFEST_FILE
+    if not manifest.exists():
+        return
+    data = load_structured(manifest) or {}
+    artifacts = data.setdefault("vault_artifacts", {})
+    artifacts[rel] = {"sha256": sha, "origin": "vault-control",
+                      "registered_at": utcnow()}
+    from .util import dump_json
+    dump_json(manifest, data)
+
+
+def _typed_value(args):
+    raw = args.value
+    kind = args.type
+    if kind == "null":
+        return None
+    if kind == "number":
+        try:
+            return int(raw)
+        except ValueError:
+            return float(raw)
+    if kind == "bool":
+        if raw not in ("true", "false"):
+            raise vaultio_mod.VaultError(
+                [f"--type bool 只许 true/false：{raw}"])
+        return raw == "true"
+    if kind == "list":
+        return [item.strip() for item in raw.split(",") if item.strip()]
+    return raw
+
+
+def cmd_vault(args) -> int:
+    vault = vaultio_mod.resolve_vault(args.path)
+    act = args.vaction
+    try:
+        if act == "probe":
+            payload = vaultio_mod.probe_vault(vault)
+            return _emit(args, payload, [
+                f"vault：{payload['vault']}（存在 {payload['exists']}，"
+                f"笔记 {payload['notes']}）",
+                "文件层：可用",
+                f"obsidian_live_verified："
+                f"{payload['obsidian_live_verified']}",
+                f"活面：{payload['live_surfaces']}"])
+        if act == "list":
+            notes = vaultio_mod.list_notes(vault)
+            return _emit(args, {"notes": notes},
+                         [f"笔记 {len(notes)} 篇："] +
+                         [f"  {n}" for n in notes])
+        if act == "read":
+            text = vaultio_mod.read_note(vault, args.note)
+            if args.json:
+                return _emit(args, {"path": args.note, "text": text},
+                             [])
+            print(text, end="")
+            return 0
+        if act == "create":
+            content = args.content or ""
+            if args.content_file:
+                content = Path(args.content_file).read_text(
+                    encoding="utf-8")
+            fm = json.loads(args.fm_json) if args.fm_json else None
+            r = vaultio_mod.create_note(
+                vault, args.note, content=content, frontmatter=fm,
+                template=args.template, overwrite=args.overwrite)
+            return _emit(args, r, [f"已建笔记：{r['path']}"])
+        if act == "append":
+            addition = args.text or ""
+            if args.content_file:
+                addition = Path(args.content_file).read_text(
+                    encoding="utf-8")
+            r = vaultio_mod.append_note(vault, args.note, addition)
+            return _emit(args, r, [f"已追加：{r['path']}"])
+        if act == "patch":
+            body = args.text or ""
+            if args.content_file:
+                body = Path(args.content_file).read_text(
+                    encoding="utf-8")
+            r = vaultio_mod.patch_section(vault, args.note,
+                                          args.heading, body,
+                                          mode=args.mode)
+            return _emit(args, r, [
+                f"已补丁段落 {r['heading']}（{r['mode']}）：{r['path']}"])
+        if act == "delete":
+            r = vaultio_mod.delete_note(vault, args.note)
+            return _emit(args, r, [
+                f"已移入 .trash：{r['path']} → {r['trashed_to']}"])
+        if act == "fm":
+            if args.fm_action == "get":
+                text = vaultio_mod.read_note(vault, args.note)
+                found, value = vaultio_mod.fm_get(text, args.key)
+                payload = {"path": args.note, "key": args.key,
+                           "found": found, "value": value}
+                return _emit(args, payload, [
+                    f"{args.key}：{value}" if found
+                    else f"键不存在：{args.key}"])
+            r = vaultio_mod.fm_set_note(vault, args.note, args.key,
+                                        _typed_value(args))
+            return _emit(args, r, [
+                f"已行级补丁 {args.key}：{r['path']}"])
+        if act == "links":
+            g = linkgraph_mod.build_graph(vault)
+            if args.note:
+                targets = g["outlinks"].get(args.note, [])
+                return _emit(args, {"note": args.note,
+                                    "outlinks": targets},
+                             [f"{args.note} 出边 {len(targets)}："] +
+                             [f"  → {t}" for t in targets])
+            lines = [f"图谱：笔记 {len(g['notes'])}、边 "
+                     f"{len(g['edges'])}、未解 "
+                     f"{len(g['unresolved'])}、孤儿 "
+                     f"{len(g['orphans'])}"]
+            return _emit(args, g, lines)
+        if act == "backlinks":
+            g = linkgraph_mod.build_graph(vault)
+            sources = g["backlinks"].get(args.note, [])
+            return _emit(args, {"note": args.note,
+                                "backlinks": sources},
+                         [f"{args.note} 入边 {len(sources)}："] +
+                         [f"  ← {s}" for s in sources])
+        if act == "unresolved":
+            g = linkgraph_mod.build_graph(vault)
+            rows = g["unresolved"]
+            return _emit(args, {"unresolved": rows},
+                         [f"未解链接 {len(rows)} 条："] +
+                         [f"  {r['from']}:{r['line']} → "
+                          f"{r['target_raw']}（{r['reason']}）"
+                          for r in rows])
+        if act == "orphans":
+            g = linkgraph_mod.build_graph(vault)
+            rows = g["orphans"]
+            return _emit(args, {"orphans": rows},
+                         [f"孤儿笔记 {len(rows)} 篇："] +
+                         [f"  {r}" for r in rows])
+        if act == "rename":
+            plan = linkgraph_mod.rename_note(
+                vault, args.from_rel, args.to_rel, apply=args.apply)
+            lines = [f"改名 {args.from_rel} → {args.to_rel}"
+                     f"（{'已落字' if plan['applied'] else 'dry-run'}）：",
+                     f"  笔记改链 {len(plan['note_changes'])} 个文件、"
+                     f"canvas {len(plan['canvas_changes'])}、"
+                     f"base {len(plan['base_changes'])}"]
+            for c in plan["note_changes"]:
+                for rep in c["replacements"]:
+                    lines.append(f"  {c['file']}:{rep['line']} "
+                                 f"{rep['old']} → {rep['new']}")
+            if plan["applied"]:
+                lines.append(f"  落字后新增未解："
+                             f"{plan['new_unresolved'] or '无'}")
+            return _emit(args, plan, lines)
+        if act == "search":
+            r = vaultio_mod.search_vault(vault, args.query,
+                                         field=args.field)
+            return _emit(args, r,
+                         [f"命中 {r['count']} 条"
+                          f"（截断 {r['truncated']}）："] +
+                         [f"  {h['path']}"
+                          f"{(':' + str(h['line'])) if h['line'] else ''}"
+                          f" {h['text']}" for h in r["hits"]])
+        if act == "canvas":
+            g = linkgraph_mod.build_graph(vault)
+            nodes = [{"type": "file", "file": rel}
+                     for rel in g["notes"]]
+            edges, seen = [], set()
+            for e in g["edges"]:
+                if e["to"] is None:
+                    continue
+                label = e["field"] if e["kind"] == "inline_field" \
+                    else None
+                key = (e["from"], e["to"], label)
+                if key in seen:
+                    continue
+                seen.add(key)
+                edges.append({"from_key": ("file", e["from"]),
+                              "to_key": ("file", e["to"]),
+                              "label": label})
+            out_path = vault / args.out
+            r = canvasio_mod.build_canvas_file(out_path, nodes, edges)
+            _register_artifact(vault, args.out,
+                               sha256_file(out_path))
+            return _emit(args, r, [
+                f"canvas 已生成/更新：{args.out}（节点 {r['nodes']}、"
+                f"边 {r['edges']}；保坐标沿用 {r['nodes_kept']}、"
+                f"新增 {r['nodes_added']}、删除 {r['nodes_removed']}）"])
+        if act == "base":
+            if args.base_action == "build":
+                spec = load_structured(args.spec_from)
+                out_path = vault / args.out
+                r = basesio_mod.write_base(out_path, spec)
+                _register_artifact(vault, args.out, r["sha256"])
+                return _emit(args, r, [
+                    f".base 已生成：{args.out}（视图 {r['views']}）"])
+            r = basesio_mod.eval_base(vault, args.file)
+            return _emit(args, r, [
+                f"离线求值（{r['label']}）：命中 {r['count']} 篇"] +
+                [f"  {m}" for m in r["matched"]] +
+                ([f"  公式字段不离线算：{r['skipped_formulas']}"]
+                 if r["skipped_formulas"] else []))
+        if act == "daily":
+            on = date.fromisoformat(args.date) if args.date else None
+            r = vaultio_mod.daily_note(vault, on=on)
+            return _emit(args, r, [
+                f"日记：{r['path']}（新建 {r['created']}，格式 "
+                f"{r['format']}，配置来源 {r['config_source']}）"])
+        if act == "lint":
+            findings = []
+            pkg = load_package(args.path)
+            if pkg.get("memory") is not None and \
+                    (Path(args.path) / obsidian_mod.VAULT_DIR).exists():
+                findings += obsidian_mod.view_lint(args.path)
+            if vault.exists():
+                g = linkgraph_mod.build_graph(vault)
+                for u in g["unresolved"]:
+                    findings.append({
+                        "category": "vault_unresolved",
+                        "note": u["from"],
+                        "detail": f"未解链接 {u['target_raw']}"
+                                  f"（{u['reason']}）"})
+            return _emit(args, {"findings": findings},
+                         [f"vault 体检（只报不改）：{len(findings)} 条"]
+                         + [f"  · [{f['category']}] {f['detail']}"
+                            f"（{f['note']}）" if f.get("note") else
+                            f"  · [{f['category']}] {f['detail']}"
+                            for f in findings])
+    except (vaultio_mod.VaultError, linkgraph_mod.LinkGraphError,
+            canvasio_mod.CanvasError, basesio_mod.BaseError) as exc:
+        return _gaps_fail(exc)
+    return _fail(f"未知 vault 动作：{act}")
+
+
 def cmd_profile(args) -> int:
     if args.action == "build":
         try:
@@ -698,6 +953,89 @@ def main(argv=None) -> int:
     p.add_argument("--path", default=None,
                    help="run 时顺带摘除该包的 eval 待办登记")
     p.set_defaults(fn=cmd_bench)
+
+    pv = sub.add_parser(
+        "vault",
+        help="Obsidian 文件层控制层（T1：vaultio/linkgraph/"
+             "canvasio/basesio；活面适配器归 T3）")
+    pv.add_argument("path", help="记忆项目根或 vault 目录")
+    vsub = pv.add_subparsers(dest="vaction", required=True)
+
+    def _leaf(name, help_text):
+        leaf = vsub.add_parser(name, help=help_text)
+        leaf.add_argument("--json", action="store_true")
+        return leaf
+
+    _leaf("probe", "探测：文件层可用性与 live 登记状态")
+    _leaf("list", "列 vault 内笔记")
+    p = _leaf("read", "读笔记全文")
+    p.add_argument("--note", required=True)
+    p = _leaf("create", "建笔记（可带模板/ frontmatter）")
+    p.add_argument("--note", required=True)
+    p.add_argument("--content", default="")
+    p.add_argument("--content-file", default=None)
+    p.add_argument("--template", default=None)
+    p.add_argument("--fm-json", default=None,
+                   help="frontmatter 初值（JSON 对象）")
+    p.add_argument("--overwrite", action="store_true")
+    p = _leaf("append", "追加内容（投影笔记进标注区）")
+    p.add_argument("--note", required=True)
+    p.add_argument("--text", default="")
+    p.add_argument("--content-file", default=None)
+    p = _leaf("patch", "按标题路径补丁段落")
+    p.add_argument("--note", required=True)
+    p.add_argument("--heading", required=True)
+    p.add_argument("--text", default="")
+    p.add_argument("--content-file", default=None)
+    p.add_argument("--mode", default="replace",
+                   choices=["replace", "append"])
+    p = _leaf("delete", "留痕删除（移入 .trash）")
+    p.add_argument("--note", required=True)
+    pfm = vsub.add_parser("fm", help="frontmatter 行级补丁")
+    fsub = pfm.add_subparsers(dest="fm_action", required=True)
+    p = fsub.add_parser("get", help="读 frontmatter 键")
+    p.add_argument("--note", required=True)
+    p.add_argument("--key", required=True)
+    p.add_argument("--json", action="store_true")
+    p = fsub.add_parser("set", help="行级设置 frontmatter 键")
+    p.add_argument("--note", required=True)
+    p.add_argument("--key", required=True)
+    p.add_argument("--value", default="")
+    p.add_argument("--type", default="string",
+                   choices=["string", "number", "bool", "date",
+                            "list", "null"])
+    p.add_argument("--json", action="store_true")
+    p = _leaf("links", "出边（或全图谱概览）")
+    p.add_argument("--note", default=None)
+    p = _leaf("backlinks", "入边")
+    p.add_argument("--note", required=True)
+    _leaf("unresolved", "未解链接清单")
+    _leaf("orphans", "孤儿笔记清单")
+    p = _leaf("rename", "改名重写（默认 dry-run，--apply 落字）")
+    p.add_argument("--from", dest="from_rel", required=True)
+    p.add_argument("--to", dest="to_rel", required=True)
+    p.add_argument("--apply", action="store_true")
+    p = _leaf("search", "全文/字段检索")
+    p.add_argument("query")
+    p.add_argument("--field", default=None)
+    pcan = vsub.add_parser("canvas", help="JSON Canvas 著述")
+    csub = pcan.add_subparsers(dest="canvas_action", required=True)
+    p = csub.add_parser("build", help="由链接图谱生成/保坐标更新")
+    p.add_argument("--out", required=True)
+    p.add_argument("--json", action="store_true")
+    pbase = vsub.add_parser("base", help="Bases 著述与离线求值")
+    bsub = pbase.add_subparsers(dest="base_action", required=True)
+    p = bsub.add_parser("build", help="按视图定义文件生成 .base")
+    p.add_argument("--from", dest="spec_from", required=True)
+    p.add_argument("--out", required=True)
+    p.add_argument("--json", action="store_true")
+    p = bsub.add_parser("eval", help="离线求值（filters 子集）")
+    p.add_argument("--file", required=True)
+    p.add_argument("--json", action="store_true")
+    p = _leaf("daily", "按 daily-notes 配置定位/建当日笔记")
+    p.add_argument("--date", default=None)
+    _leaf("lint", "体检：view_lint + 图谱未解（只报不改）")
+    pv.set_defaults(fn=cmd_vault)
 
     p = sub.add_parser("promote", help="Phase 2 跨项目晋升通道")
     p.add_argument("path", help="全局层记忆包路径")

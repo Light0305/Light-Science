@@ -64,7 +64,22 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
             chan["browser_reason"] = reg["browser_reason"]
     else:
         chan["ok"] = True
+    chan["render_escalation_authorized"] = bool(
+        reg.get("allow_render_escalation"))
     checks["channel"] = chan
+
+    # ---- 凭据访问通道（登记面由 schema 校验；预检只落记录行）
+    login = reg.get("login_state", "none")
+    cred = {"login_state": login, "ok": True}
+    if login != "none":
+        cred.update({
+            "entitlement_basis": reg.get("entitlement_basis"),
+            "credential_ref": reg.get("credential_ref"),
+            "validity": "not_verified_at_precheck",
+            "note": "预检不验证凭据真实有效性、不发起登录；会话失效"
+                    "在 fetch 期按被拒口径熔断留痕",
+        })
+    checks["credentials"] = cred
 
     # ---- 个人数据（项目锁只能收紧）
     risk = reg.get("personal_data_risk", "none")

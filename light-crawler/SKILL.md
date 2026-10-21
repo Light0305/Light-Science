@@ -1,16 +1,17 @@
 ---
 name: light-crawler
 description: Use when 需要为 Light-Science 科研项目从外部来源批量获取数据（数据集、文献线索批、整刊 OA 全文批、基准或排行榜页面快照），或登记新数据源、查询某目标的合规预检结论与熔断状态时。
-version: "1.0"
+version: "1.1"
 author: light-crawler contributors
 license: MIT
 ---
 
-# light-crawler SKILL（v1.0 定版）
+# light-crawler SKILL（v1.1）
 
 > 定位：Light-Science 的项目数据采集**通道层**（LD-02 通道层扩展位，不进十阶段主流水线）。给 light-literature 供文献线索批与批量全文获取批、给 light-experiment 供数据集获取批与基准页面快照。生态现状是「有合规件、无合规门」（Scrapy 的 ROBOTSTXT_OBEY 默认 False 为缩影），本包的差异化就是把合规件全部反着定成默认开的**代码硬门**：无登记不抓取、robots 失败关闭、预检分级生效、速率只按公式、被拒即停、一切拒绝留痕。
 > 位置：工作区落项目根 `data-sources/`（LD-02 目录规范）；接入模型在任何取数动作前先读本文件并跑 guard 链，不许绕开 CLI 直接发请求。
 > v1.0 定版（2026-10-21）：坐标 C0–C6 + 硬约束 HC-1 至 HC-8 + S1–S7 拍板落点；演示见 examples/demo-fullrun/demo-report.md（本地夹具站点全链 + 两例被拒留痕 + 一次真实官方 API 试跑如实记录）。
+> v1.1 能力强化（2026-10-21，用户点名「爬虫太弱、遇到点啥就撞」后立项）：传输 v2、浏览器执行器随包、接口发现、frontier 断点续爬、回退策略链、自适应限速、凭据访问通道，详见第 14 节；S2 口径沿革见第 4 节，待用户拍板的默认口径清单在工作区 20-build/crawler-decision-list.md。
 
 ---
 
@@ -18,8 +19,8 @@ license: MIT
 
 - **只做批量与非文献数据**（S5）：单篇文献全文获取归 light-literature 的 Doc2X 与模型直读双轨，不进本包目标类型（登记层即拒 single_fulltext）。
 - **不做通用爬虫教程、不做平台运营数据生意**：目标只能是为具体科研项目登记的数据源，产物只供已登记的消费方（consumer 字段点名到包与环节）。
-- **登录态 v1 全关**（S2）：任何 login_state 非 none 的登记直接拒收。正当出口只有三个：官方 API、机构授权通道、人工导出后用 import 登记导入。「本人账号 + 条款不禁 + 自有数据」的窄口子登记为 v1.1 再议事项，本版不留任何配置面。
-- **不绕任何访问控制**（HC-7）：不提供绕过付费墙、登录墙、验证码、反机器人措施的规程与配置；隐身、指纹模拟、代理轮换类机制不进本包工具箱（学习期实读的 Scrapling stealth、curl-impersonate 谱系一律排除）。平台技术措施一旦针对抓取设置（令牌、签名、指纹校验），即视为访问控制信号：命中即停，转人工或官方通道，不做适配对抗（yt-dlp 与平台对抗史的合规定性，见 14-crawler 深读单元 B8）。
+- **登录态走凭据访问通道**（S2，口径沿革见第 4 节）：以用户本人账号或机构授予的权限访问的，逐目标登记 login_state（user_account / institutional）+ entitlement_basis + credential_ref（只许 vault 引用），会话由浏览器通道承载；凭据本体只经接入运行环境注入，永不落盘。正当出口另有：官方 API、机构授权通道、人工导出后用 import 登记导入。
+- **权限外不绕**（HC-7，构建方边界）：不提供以技术手段突破付费墙、登录墙、验证码去获取**无权限**内容的规程与配置；隐身、指纹模拟、代理轮换、验证码代解、假账号、凭据共享、盗版镜像一律不进本包工具箱。此界是构建方（Muse）的线、非用户口径（用户 2026-10-21 表态为可以绕、沿革见第 4 节 S2 行与决策清单），落字时不许混淆。平台技术措施一旦针对抓取设置（令牌、签名、指纹校验），即视为访问控制信号：命中即停，转人工或官方通道，不做适配对抗（yt-dlp 与平台对抗史的合规定性，见 14-crawler 深读单元 B8）。
 - **合规是代码门不是文档提醒**：MediaCrawler 式「声明免责、机制不设防」是无效合规，本包不学；预检不过，执行层在发出第一个请求之前就拒绝。
 
 ## §2 坐标（C0–C6）
@@ -28,7 +29,7 @@ license: MIT
 |---|---|---|
 | C0 | 目标登记 | 每个数据源先登记再抓取：源名、base_url、URL 模式、所属项目、用途（purpose_kind）、消费方（consumer）、通道类型、条款依据指针。无登记的目标执行层拒绝访问（形态学 reverse-skill 的 scope 硬门） |
 | C1 | 合规预检 | 对登记目标逐项产出预检记录：robots 结论（失败关闭口径）、条款依据、通道合法性、速率裁决、个人数据标记、登录态。ready_to_fetch 是代码计算值，不靠任何人声明 |
-| C2 | 获取 | 按 C1 裁决执行（通道优先级在登记/预检层已定，见 §4）：节流按 §6 公式；断点与增量靠已见集，被拒即停 |
+| C2 | 获取 | 按 C1 裁决执行（通道优先级在登记/预检层已定，见 §4）：节流按 §6 公式加自适应（只加严或回落裁决值）；断点与增量靠已见集与 frontier 任务（crawl：策略链播种 + 发现扩展 + job 落盘续跑），被拒即停 |
 | C3 | 清洗 | 原始响应留存 + 清洗件双存；清洗规则按目标登记的 clean_profile 选档，不散装在代码里；近重复只标记不删除 |
 | C4 | 落盘与 provenance | 每条产物带 provenance：源 URL、获取时间、通道、run 配置哈希、原始响应哈希、预检记录指针、留存档位；版本链以 supersedes 指针管理，旧版保留 |
 | C5 | 增量更新 | 已见集（请求指纹）+ 条件请求（ETag/Last-Modified，304 不落新版）；节奏按登记 rhythm（manual/daily/weekly），变更只产新版本与事件，不自动改写下游已消费的数据 |
@@ -42,15 +43,15 @@ license: MIT
 4. **HC-4 速率与总量成文**：速率只按 §6 公式，总量上限（单 run、单目标单日）入登记并由执行层硬停。
 5. **HC-5 个人数据禁区**：personal_data_risk=high 登记即拒；low 须 scope_note 写明最小必要范围（只限已公开的学术元数据类）。禁区实证：案件集三类案由——非法获取计算机信息系统数据、破坏技术措施、侵犯公民个人信息（刑法第 285、286、253 条之一；案件集汇编止于 2021 年前，只作案由实证，条文以现行法为准）。速率失控本身独立成罪（快鸽案），与抓什么无关。
 6. **HC-6 provenance 不可关**：provenance 是产物的一部分，不是可选日志；validate 重算原始哈希，缺失或不符逐项点名；缺 provenance 的产物下游有权拒收。
-7. **HC-7 付费墙与访问控制不绕**：见 §1；重定向跳出登记域名即停、响应不落盘并落事件。
+7. **HC-7 权限外不绕（构建方边界）**：见 §1；凭据通道内的会话访问按 §4 S2 现行口径执行；重定向跳出登记域名即停、响应不落盘并落事件。
 8. **HC-8 被拒即停**：收到 401/403/429 即停本 run 并落事件（429 的 Retry-After 只记录供后续参考，不当场重试绕过）；同一目标连续 2 个 run 被拒即熔断，guard 拒绝一切 fetch，须具名 unblock 并给理由、留痕后才恢复。不许换 IP/换 UA/换姿势继续。
 
 ## §4 拍板口径落点（S1–S7）
 
 | 拍板 | 落点 |
 |---|---|
-| S1 浏览器默认关 | 登记 channel=browser 时，预检须 browser_enabled=true 且 browser_reason 非空才继续裁决；且项目锁 allow_browser=false 时直接 blocked；浏览器属高危通道另须人工确认。执行器不随包提供：预检门齐备后由登记在案的外部浏览器工具在本预检记录下执行，或走人工导入（fetch 会如实以此理由拒绝并留痕，不假装能跑） |
-| S2 登录态全关 | 登记校验拒收一切非 none 的 login_state；替代通道 import（来源说明 + 经手人必填，同 provenance 口径落盘） |
+| S1 浏览器默认关 | 登记 channel=browser 时，预检须 browser_enabled=true 且 browser_reason 非空才继续裁决；且项目锁 allow_browser=false 时直接 blocked；浏览器属高危通道另须人工确认。执行器随包提供（v1.1）：Chromium CDP 渲染器经 CLI fetch 与 crawl 注入；库层 fetch_run 仍走 browser_fetcher 注入契约，未注入时如实拒绝并留痕（不假装能跑） |
+| S2 登录态（口径沿革） | v1 全关出自第二轮 S1–S7 整批批准；用户 2026-10-21 指出该条款其本人从未单独注意、现立场为可以绕。现行口径 = 凭据访问通道：login_state 可取 user_account / institutional，逐目标必填 entitlement_basis（权限依据）与 credential_ref（只许 vault: 引用、凭据本体永不落盘）、channel 须为 browser（会话由浏览器承载）；预检落 credentials 检查行（不验真实有效性）；执行须由接入运行环境注入 credential_provider，会话失效落 credential_session_invalid 并按 HC-8 熔断记账；provenance 只记权限依据、引用与脱敏账号标识。替代通道 import 保留（来源说明 + 经手人必填）。无权限绕越不建——此为构建方（Muse）边界，非用户口径 |
 | S3 轻量留存 | v1 只做原始响应文件 + 哈希，provenance 明示 retention_tier=lightweight_raw_plus_hash；WARC 全记录档（WARC 为 ISO 28500 标准，非 W3C）登记即拒并指向 v1.1 |
 | S4 预检分级 | 低危通道（official_api、open_data）预检全过自动生效；高危通道（web_page、browser）须具名 confirm 才生效，确认动作落预检账留痕 |
 | S5 文献边界 | purpose_kind 词表只有批量与非文献五类；single_fulltext 登记即拒 |
@@ -107,7 +108,7 @@ license: MIT
 
 ## §10 命令面
 
-init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ refusals / events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
+init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ discover（--target：发现 pass，端点/链接/sitemap 登记进发现账）/ crawl（--target，--max-pages，--no-discover，--fresh：frontier 任务，断点自动续跑）/ sources（--target：发现账清单）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ refusals / events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
 
 ## §11 失败模式（接入模型自查）
 
@@ -121,14 +122,15 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 | 数据在登录墙后 | 三个合法出口之外无路：官方 API、机构授权、人工导出后 import |
 | 下游嫌 provenance 麻烦想关 | HC-6 不可关；缺 provenance 的产物下游有权拒收，问题在本包一侧 |
 
-## §12 已知局限（v1.0）
+## §12 已知局限（v1.1）
 
-1. 浏览器通道只有预检门与执行契约，执行器不随包提供（S1 窄口径）：登记在案的外部浏览器工具接入点为 fetch 的 browser_fetcher 参数，CLI fetch 对 browser 通道如实拒绝并指路人工导入。
+1. 浏览器执行器已随包（CDP 主通道），但环境依赖真实存在：本机无 Chromium 时如实拒绝并指路；回环/内网目标在 Chrome 152 的 Local Network Access 检查下走传输桥接渲染（engine 标注 cdp+fetch-bridge，渲染的是目标站真实响应字节）；dump-dom 降级在个别 Chromium 构建上无输出（实测本机 build 对 about:blank 亦无输出），此时以 RenderError 如实呈现、不冒充渲染成功。
 2. 清洗层内置 html_text_v1 一档（标题/meta/可见文本 + JSON 透传），trafilatura 谱系的深度抽取未接适配器；clean_profile 接口形态已留。
-3. WARC 全记录档（ISO 28500）未做（S3 定版进 v1.1）；高价值易变源的现场级留存在 v1 只有原始字节 + 哈希。
-4. 增量只有已见集 + 条件请求 + 手动重跑，rhythm 字段只登记节奏口径，定时调度不在本包（由项目侧调度或 leader 编排）。
-5. 登录态窄口子（本人账号 + 条款不禁 + 自有数据）按 S2 登记 v1.1 再议，v1 无任何实现与配置面。
-6. 条款阅读是模型工作：预检只校验 terms_basis 指针在册与确认留痕，不自动判定条款语义；条款结论的对错由登记与确认的具名者负责。
+3. WARC 全记录档（ISO 28500）未做（S3 定版）；高价值易变源的现场级留存在当前只有原始字节 + 哈希。
+4. 增量靠已见集 + 条件请求 + crawl 任务续跑，rhythm 字段只登记节奏口径，定时调度不在本包（由项目侧调度或 leader 编排）。
+5. crawl 任务内失败条目（5xx/传输错误）不自动重试：状态落 failed 并留痕，续跑只处理 pending；恢复靠 fresh 新任务或人工处置——防重试风暴与速率失控，是有意口径不是缺失。
+6. 凭据通道的 CLI 形态不持有凭据：credential_provider 只能由接入运行环境（Secure Vault）注入，CLI 直跑凭据目标会如实拒绝并点名注入路径；预检不验证凭据真实有效性，有效性由执行期会话成败与熔断记账兜底。
+7. 条款阅读是模型工作：预检只校验 terms_basis 指针在册与确认留痕，不自动判定条款语义；条款结论的对错由登记与确认的具名者负责。
 
 ## §13 交付收尾格式（全套通用，v1.1 X-10）
 
@@ -140,3 +142,15 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 - **风险**：用户须知的残余风险与后续触发条件（什么情况下需要回头处理、由谁裁决）。
 
 口径：四行是全套交付的最低披露线。把跳过项写进完成项、把未验项写成已验证，均按造假论。
+
+## §14 能力强化批（v1.1，2026-10-21）
+
+用户点名「目前爬虫太弱、遇到点啥就撞」后施工。验收口径 = 本地夹具站点集逐场景强化前后对照（tests/fixture_sites.py + tests/test_strengthen.py，22 项），全量 77 项全绿（55 基线零变红）。
+
+- **传输 v2**（transport.py）：重定向逐跳手动跟随（链进 provenance、成环/超限显式报错，不再把 3xx 空 body 当内容）；gzip/deflate 解压（含误标魔数兜底）；charset 判定链解码（响应头 -> meta -> utf-8 -> gb18030 兜底，GBK 站不再花屏）；大文件流式断点续传（.part + sidecar，Range 续传、服务器不支持时整件重下并如实记录，登记 large_files=true 启用）；慢站超时按 TransportError 分类点名（timeout/network/http_stream）。
+- **浏览器渲染通道**（browser.py）：随包 Chromium 执行器正式入列——CDP 导航 + 网络事件采集（真实状态码、资源清单、重定向链）+ 滚动收割（无限滚动逐屏滚至 DOM 稳定）；以本包声明 UA 覆盖默认串（身份一致、不伪装真人）；渲染命中人机校验强标记返回 blocked 并按回绝熔断留痕（render_blocked），不代解验证码；回环/内网目标走传输桥接模式（见 §12.1）。
+- **前端接口发现**（discover.py）：链接/分页（rel=next）抽取、内嵌数据岛（__NEXT_DATA__/__NUXT__/JSON-LD）抽取、同源脚本端点挖掘（fetch/axios/XHR/url 字段五形态，含模板占位单列）、sitemap 解析（urlset/sitemapindex 两形态）；发现结果登记进 targets/<id>/discovered.jsonl 发现账（去重、只增），sources 命令可查。
+- **frontier 任务与回退链**（crawl.py）：job 落盘（targets/<id>/job.json，原子写、逐条目检查点），中断自动续跑（inflight 回滚、done/skipped 不重抓、已见集增量）；策略链逐级留痕：登记 api_endpoints（strategy_selected: api）-> sitemap -> 静态抓取 + 发现扩展 -> 逐页渲染升级；渲染升级须登记 allow_render_escalation=true 且预检确认，未授权落 render_escalation_blocked 并存壳标注（js_shell 信号在清洗件与事件双落）。
+- **自适应限速**（throttle.py）：在预检裁决间隔之上自适应——5xx/网络错误乘性加严（上限 300s），连续成功 3 次逐步回落，永不低于裁决值；每次调整落 adaptive_backoff 事件。Retry-After 口径与 §6 公式不变。
+- **凭据访问通道**：见 §4 S2 现行口径。会话由浏览器通道承载（cookie 经 CDP 在导航前注入），provenance 记 entitlement（basis / credential_ref / 脱敏 account_label）与 cookie 名，凭据值全程不落盘（测试以全工作区扫描断言）。
+- **未动的默认**：浏览器默认关（S1）、通道优先级（HC-3）、并发 1、429 即停不重试、模板间隔下限、robots 失败关闭——均照旧；认为它们限制能力的条目连同风险与建议写入工作区 20-build/crawler-decision-list.md 交用户拍板，本批未自行放开任何一条。

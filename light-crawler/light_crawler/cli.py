@@ -8,6 +8,9 @@
   confirm     高危通道预检的人工确认（--by 具名，S4）
   gate-check  对外预检门接口的命令行形态（--json；供其他包调用）
   fetch       guard 全过才执行的采集 run（无任何绕过旗标）
+  discover    发现 pass：种子页/脚本端点/sitemap 登记进发现账
+  crawl       frontier 任务：策略链播种 + 发现扩展 + 断点续跑
+  sources     列某目标的发现账（可枚举数据源清单）
   import      人工导出后登记导入（S2 正当替代；--note/--by 必填）
   unblock     熔断恢复（--by 具名 + --reason）
   refusals    拒绝留痕清单（可查询，含原因与规则出处）
@@ -24,6 +27,8 @@ import json
 import sys
 from pathlib import Path
 
+from . import crawl as crawl_mod
+from . import discover as discover_mod
 from . import fetch as fetch_mod
 from . import precheck as precheck_mod
 from . import project, render, schema
@@ -64,6 +69,16 @@ def main(argv=None) -> int:
     p.add_argument("--url", action="append", default=[])
     p.add_argument("--refetch-seen", action="store_true",
                    help="重取已见指纹（只影响增量跳过，不绕任何合规门）")
+    p = sub.add_parser("discover"); p.add_argument("--target", required=True)
+    p = sub.add_parser("crawl")
+    p.add_argument("--target", required=True)
+    p.add_argument("--max-pages", type=int, default=None,
+                   help="本会话请求上限（缺省取预检裁决的单 run 上限）")
+    p.add_argument("--no-discover", action="store_true",
+                   help="关发现扩展（只抓种子与策略链条目）")
+    p.add_argument("--fresh", action="store_true",
+                   help="弃旧 job 重新播种（旧 job 文件被覆盖，事件账保留）")
+    p = sub.add_parser("sources"); p.add_argument("--target", required=True)
     p = sub.add_parser("import")
     p.add_argument("--target", required=True); p.add_argument("--file", required=True)
     p.add_argument("--note", required=True); p.add_argument("--by", required=True)
@@ -128,9 +143,16 @@ def main(argv=None) -> int:
                     print(f"  {r}")
             return 0 if verdict["ready"] else 2
         elif args.cmd == "fetch":
+            fetcher = None
+            try:
+                if project.load_target(root, args.target).get(
+                        "channel") == "browser":
+                    fetcher = fetch_mod.make_builtin_browser_fetcher()
+            except project.WorkspaceError:
+                pass  # 未登记等错误由 fetch_run 的 guard 点名
             rec = fetch_mod.fetch_run(
                 root, args.target, urls=args.url or None,
-                refetch_seen=args.refetch_seen)
+                refetch_seen=args.refetch_seen, browser_fetcher=fetcher)
             print(f"run {rec['run_id']}：{rec['status']}（请求 "
                   f"{rec['requested']}、落盘 {rec['stored']}、未变更 "
                   f"{rec['not_modified']}、重复 {rec['duplicates']}）")
@@ -138,6 +160,26 @@ def main(argv=None) -> int:
                 print(f"  {e}")
             if rec["refused"]:
                 return 2
+        elif args.cmd == "discover":
+            summary = crawl_mod.discover_pass(root, args.target)
+            print(f"发现 pass 完成：发现账 {summary['by_kind']}"
+                  f"（本次新增 {summary['registered_new']}）")
+        elif args.cmd == "crawl":
+            summary = crawl_mod.crawl_run(
+                root, args.target, max_pages=args.max_pages,
+                discover_enabled=not args.no_discover, fresh=args.fresh)
+            print(f"job {summary['job_id']}：{summary['status']}"
+                  f"（策略 {summary['strategy']}、请求 "
+                  f"{summary['requested']}、落盘 {summary['stored']}、"
+                  f"条目 {summary.get('counts')}）")
+            if summary["status"] == "refused":
+                return 2
+        elif args.cmd == "sources":
+            rows = discover_mod.list_discovered(root, args.target)
+            for r in rows:
+                print(f"{r.get('kind')}\t{r.get('url')}\t"
+                      f"自 {r.get('discovered_from')}（{r.get('via')}）")
+            print(f"共 {len(rows)} 条发现源")
         elif args.cmd == "import":
             prov = fetch_mod.import_file(
                 root, args.target, args.file, args.note, args.by)

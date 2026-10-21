@@ -2,7 +2,7 @@
 
 承接 light-write 图表清单的图包工具：**图合同先行、双线生成、审计与账目先行登记**。每张图先落五点合同再动手：数据图走代码线（Python 默认 / R 条件启用），方法图走「图库匹配 → GPT Image 提示词 → 用户供参考图 → Visio 原生重绘」线；交付只产 `delivery.yaml` 供 Write 回填对账。
 
-当前版本：**v1.1（第二轮升级）+ 2026-10-21 复刻三路平权补丁**。v1.0 全部能力保留：图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→文件级 .vsdx 重绘）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：`delivery.yaml` 生成 + 账行逐行复验 + 编号冻结配合）；端到端双线演示走完 intake → contracted → produced → audited → delivered（`examples/demo-fullrun/`）。v1.1 新增：PowerPoint 文件层生产路线、manifest 三件（语义 ID 钉扎 / 生效字段对账 / 箭头计划 + 无效轮次门）、合同调色板决定、图库六维拆解、交付前本地复核、Illustrator 精修入口（SVG 桥）、交付对应件清单。**平权补丁（用户裁决推翻 FIG-D03）**：方法图复刻三路对等——合同 `schematic_backend` 扩为 visio / powerpoint / illustrator 三值、共用同一 redraw manifest 契约；PowerPoint COM 升为实现形态（manifest 生成 COM 构建脚本 + export-to-verify + `com-verify` 登记对账）；Illustrator 升为第三条生产路线（manifest 生成 ExtendScript 构建/回读脚本、DOM 枚举回读对账、印前五项降为交付前终检、SVG 桥降为导入备选）；门/审计/复核/交付三后端分流，verified 三路同纪律（只认实机证据登记）。
+当前版本：**v1.1（第二轮升级）+ 2026-10-21 复刻三路平权补丁**。v1.0 全部能力保留：图包数据模型与确定性校验器、样式编译、双线生产（数据图 matplotlib 执行 / 方法图提示词→参考图登记验收→文件级 .vsdx 重绘）、provenance append-only 一本账、审计引擎七门、五段状态机全门（含 delivered 交付段：`delivery.yaml` 生成 + 账行逐行复验 + 编号冻结配合）；端到端双线演示走完 intake → contracted → produced → audited → delivered（`examples/demo-fullrun/`）。v1.1 新增：PowerPoint 文件层生产路线、manifest 三件（语义 ID 钉扎 / 生效字段对账 / 箭头计划 + 无效轮次门）、合同调色板决定、图库六维拆解、交付前本地复核、Illustrator 精修入口（SVG 桥）、交付对应件清单。**平权补丁（用户裁决推翻 FIG-D03）**：方法图复刻三路对等——合同 `schematic_backend` 扩为 visio / powerpoint / illustrator 三值、共用同一 redraw manifest 契约；PowerPoint COM 升为实现形态（manifest 生成 COM 构建脚本 + export-to-verify + `com-verify` 登记对账）；Illustrator 升为第三条生产路线（manifest 生成 ExtendScript 构建/回读脚本、DOM 枚举回读对账、印前五项降为交付前终检、SVG 桥降为导入备选）；门/审计/复核/交付三后端分流，verified 三路同纪律（只认实机证据登记）。**工具层 T2 补丁（2026-10-21）**：vsdx 0.6.1 vendored 进包 + `redraw post` 后处理命令组；ai manifest 构建账按后端隔离（派生剥离外来 rounds/build 并留痕）。
 
 ## 能力
 
@@ -14,7 +14,7 @@
 - **数据图生产**（`produce`）：脚本头登记块（样式哈希 / 面板 / 坐标轴口径 / 宽高比 / 面积编码 / 色板）源级预检（禁用彩虹色标、脚本自带 figsize、登记缺项逐项落 gap）→ matplotlib 执行 → 最终 PDF + 300 dpi 预览 + plot-area 量测清单，并回填账面（运行时版本、脚本/源数据/样式哈希）。后端非 Python 或未决定时如实停住不兜底。
 - **提示词产物**（`prompt build`）：六段结构（全局 / 分区 / 全局标注 / 风格规格 / 负面约束 / 政策段）+ YAML 文件头登记（图库三元组引用、风格规则、角色色板指针、配色确认、政策快照指针）；正文只引角色名不落 hex，标签含度量字面量生成前拦截；改版递增 version 并归档旧版。`--variants compact,spacious,layered` 可在同一三元组与色板下并行产多版变体（只在构图/密度/布局流向三维区分，各自独立文件与 version），`prompt select` 选定后参考图登记/验收须指明所据变体且与选定一致。
 - **参考图登记与验收**（`reference add/accept`）：入包复制 + SHA-256 钉账 + 生成模型同账登记（重复登记拒绝，防静默换图）；验收三项清单（逐标签逐字 / 逐结构对事实 / 公式数值算对）须核对人逐项落字。
-- **重绘 manifest 与文件级构建**（`redraw init/install/build/extract`）：manifest 单一真相源（面板四角标定、逐形状局部坐标/文本/样式角色/连接语义、位图残留预声明六类）；文件级路线手写 OPC 从零构建 .vsdx（确定性打包），构建后反抽形状清单与 manifest 对账（容差 0.02 in），`visio_verified: false` 如实落字；COM 路线只立规程、调用即落 gap。v1.1 manifest 三件：构建出的形状写入 ShapeSheet User 段语义 ID（`User.SemanticId` 等），extract 回读逐个核对；`renderer_effective_fields` 声明与渲染实际消费逐项对账（声明了没生效点名）；v1.1 起箭头先行登记 `arrow_plan` 并逐条绑定 connect，内容零变化的重复构建被 round_noop 门拒绝（轮次账 `rounds` 落盘）。
+- **重绘 manifest 与文件级构建**（`redraw init/install/build/extract`）：manifest 单一真相源（面板四角标定、逐形状局部坐标/文本/样式角色/连接语义、位图残留预声明六类）；文件级路线手写 OPC 从零构建 .vsdx（确定性打包），构建后反抽形状清单与 manifest 对账（容差 0.02 in），`visio_verified: false` 如实落字；COM 路线只立规程、调用即落 gap。v1.1 manifest 三件：构建出的形状写入 ShapeSheet User 段语义 ID（`User.SemanticId` 等），extract 回读逐个核对；`renderer_effective_fields` 声明与渲染实际消费逐项对账（声明了没生效点名）；v1.1 起箭头先行登记 `arrow_plan` 并逐条绑定 connect，内容零变化的重复构建被 round_noop 门拒绝（轮次账 `rounds` 落盘；轮次账按后端隔离，跨路线派生不继承——见 ai 线的 `derived_from` 留痕）。文件级构建的成品另有后处理格：`redraw post` 命令组（vendored vsdx 0.6.1：抽取/改字/改色/diff，不承担重建；变更写回后强制 extract 对账并落 `post_processing` 账）。
 - **PowerPoint 路线**（`pptx init/install/build/extract` + `com-script/com-verify`）：合同 `schematic_backend: visio | powerpoint | illustrator` 逐图分流；文件层由 python-pptx 从同构 manifest 生成原生形状 .pptx（幻灯片尺寸 = 图尺寸、一页一图），对象语义 ID 双写（形状名 + descr 标记），反抽对账与原生性审计（OPC 口径）齐备，产物恒标 `powerpoint_verified: false`（文件层证据级）。COM 路线为实现形态（平权补丁）：manifest 生成 PowerShell + COM 构建脚本（COM 直建形状、真连接器绑定、导出 PNG/PDF 做 export-to-verify、枚举写 JSON），`pptx com-verify` 登记对账后才许 `com_route.powerpoint_verified` 置真；COM 产物 .pptx 落回标准路径续走文件层 extract。
 - **Illustrator 生产路线**（`ai init/install/build/extract`，平权补丁）：与另两路同一 manifest 契约；`ai build` 生成 ExtendScript 构建脚本（驱动 DOM 从零重建原生对象：路径/区域文本框/连接线与箭头头/登记残留置入项，语义 ID 以对象名 + `PageItem.note` 标记双写钉扎）与回读脚本（DOM 枚举：对象/逐字文本/锚点几何/置入项/印前事实）；`ai extract` 登记回读并逐项对账，印前五项由回读事实机械计算为交付前终检；证据级 script → dom_readback 两档，`illustrator_verified` 只认合格登记（对账 ok + 应用版本 + 执行者落字 + .ai 存回）。
 - **合同调色板决定**（v1.1）：两线合同落 `palette_decision`（来源三值词表 journal_contract / gallery_anchor / user_specified + 依据 + 确认人/时点），缺失过不了 contracted 门；数据图 produce 把决定快照落账、审计与复核核对实际用色。
@@ -49,6 +49,11 @@ light-figure redraw init ./my-figures fig-2   # 补齐标定后 install
 light-figure redraw install ./my-figures fig-2 --manifest manifest.json
 light-figure redraw build ./my-figures fig-2
 light-figure redraw extract ./my-figures fig-2
+# 文件级后处理（vendored vsdx 0.6.1，不承担重建；变更写回后强制 extract 对账）：
+# light-figure redraw post text ./my-figures fig-2 --find "旧标签" --replace "新标签" --by author
+# light-figure redraw post fill ./my-figures fig-2 --shape predictor --fill "#d55e00"
+# light-figure redraw post extract ./my-figures fig-2   # 抽取形状清单
+# light-figure redraw post diff ./my-figures fig-2 --other base.vsdx
 # 方法图也可走 PowerPoint（合同 schematic_backend: powerpoint 时，文件层或 COM 实现形态）：
 # light-figure pptx install/build/extract ./my-figures fig-2
 # light-figure pptx com-script ./my-figures fig-2   # 生成 COM 构建脚本，Windows + PowerPoint 实机执行后：
@@ -74,7 +79,7 @@ light-figure report ./my-figures     # 刷新 FIGURE_REPORT.md
 ## 测试
 
 ```bash
-python -m pytest   # 188 项（见 tests/）
+python -m pytest   # 201 项（见 tests/）
 ```
 
 依赖：`pyyaml` + `PyMuPDF`（最终 PDF 实测审计：文字/描边/图像抽取与内容流字号量测、嵌入位图真实像素尺寸）+ `matplotlib`（默认 Python 数据图执行后端）+ `python-pptx`（PowerPoint 文件层生成与反读）。R 侧只产 theme 文本产物、不执行。
@@ -96,6 +101,7 @@ python -m pytest   # 188 项（见 tests/）
 
 ## 封版记录
 
+- **工具层 T2 补丁（2026-10-21）**：vsdx 后处理库 vendored 化——dave-howard/vsdx 0.6.1（BSD 3-Clause）逐字节收编进 `light_figure/vendor/vsdx/`（许可全文与逐文件 SHA-256 在该目录 LICENSE 与 VENDOR.md，版本钉死），新 `redraw post` 命令组（extract 抽取 / text 改字 / fill 改色 / diff 比对）接上 manifest 后处理环节：写前备份、临时目录副本操作、写回后落 `post_processing` 账并强制重跑 extract 对账、provenance 哈希与修正日志指针同步刷新。ai manifest 构建账按后端隔离（user-delegated 主会话裁决 2026-10-21）：从 visio/powerpoint manifest 派生时内容继承、外来 rounds/build 剥离归零并在 `derived_from` 留痕，round_noop 只在本路线账内生效——修复工具规划 P5 实测的「继承 file_build 账导致首轮 ai build 被误拦」。新增测试 13 项（201 项全过，基线 188 零变红）。发布树同步另行封版。
 - **复刻三路平权补丁（2026-10-21，用户裁决推翻 FIG-D03）**：合同后端集扩为三值且三路共用同一 manifest 契约与语义 ID 纪律（Illustrator 以对象名 + note 标记 + DOM 回读实现等价钉扎）；PowerPoint COM 由只立规程升为实现形态（`pptx com-script` 生成 COM 构建脚本 + export-to-verify，`pptx com-verify` 登记枚举/导出对账，verified 置真三件套）；Illustrator 升为第三条生产路线（`ai` 命令族：ExtendScript 从零重建 + DOM 枚举回读审计 + 印前五项终检段，SVG 桥降为导入备选）；produced 门、合同门、原生性门、recheck、delivery 全部补 illustrator 分流（三后端对称，参考图位图混入照旧硬拦）。新增测试 14 项（188 项全过，基线 174 零变红；含一条既有测试的样本值调整：后端词表测试的非法样本由 illustrator 改为 photoshop，断言不变）。COM 与 Illustrator 实机执行仍为用户机器 gap，如实登记未验。
 - **v1.1（2026-10-21，第二轮拍板 FIG-D02–D11）**：PowerPoint 文件层全链（合同后端分流 + pptx manifest/build/extract + OPC 原生性审计 + `powerpoint_verified: false` 口径）；manifest 三件（User.* 语义 ID 钉扎、renderer-effective-fields 对账、arrow_plan + round_noop 门）；合同 `palette_decision` 与图库六维拆解入提示词；交付前本地复核 `recheck`；Illustrator 精修的 SVG 桥受限子集校验 + 合同回读段；政策口径修订条文落字（AI 参考图经原生重绘的成品不算 AI 生图：只拦参考图本体、provenance 留痕、逐刊按当期指南原文核对）；交付 `correspondence` 对应件清单（REV-D09 同批）。演示复跑至 delivered：双图七门 PASS、recheck 双 PASS，新增 round-noop 与 pptx-chain 两变体（后者三门 PASS 后塞整页图片被 native 拦下）。测试 151 项（v1.0 的 116 项零变红 + 新增 35 项）。COM（Visio/PowerPoint）与 Illustrator 实机项为环境依赖 gap，如实登记未验。
 - **v1.0（2026-10-20）**：五段状态机全门落地；双线端到端演示（`examples/demo-fullrun/`）走完 delivered，七门审计全 PASS，两个拦截变体（反转轴、整图嵌入）均被对应门拦下且不进交付。演示期间变体抓出并修复一个真实缺陷：原生性门的嵌入位图尺寸量测曾用图像文档点数冒充像素数（无 DPI 元数据时漏检整幅嵌入），已改用真实像素尺寸并加回归测试。测试 116 项（工作树与干净导出树双跑）。姊妹仓（数据图库 / 组件库 / 方法图库）按拍板 D7 在本封版后另行启动，本包只定接口。

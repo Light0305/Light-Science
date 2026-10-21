@@ -18,7 +18,9 @@ official_alternative:    # 若本目标其实有官方 API/开放数据替代，
   available: false       # available=true 时 web_page/browser 通道预检直接出局（HC-3）
   channel_ref: ""
   note: ""
-login_state: none        # v1 只许 none（S2 全关）；登录墙后数据走人工导出 + import
+login_state: none        # none | user_account | institutional（凭据通道：后两态须 entitlement_basis + credential_ref 且 channel=browser）
+entitlement_basis: ""    # 凭据通道必填：权限依据（本人账号 / 机构订阅等）
+credential_ref: ""       # 凭据通道必填：只许 vault:<名目> 引用，凭据本体永不落盘
 personal_data_risk: none # none | low（low 须 scope_note）；high 拒收（HC-5）
 scope_note: ""           # risk=low 时必填：最小必要范围说明
 browser_enabled: false   # channel=browser 才有意义（S1）：逐目标开启

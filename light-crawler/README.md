@@ -6,7 +6,7 @@ Light-Science 的项目数据采集通道层（LD-02 通道层扩展位）：为
 
 - **无登记不抓取**：fetch 前 guard 逐项点名校验，本包不设任何绕过旗标。
 - **robots 失败关闭**：5xx 或网络不可达即全面禁止（RFC 9309 第 2.3.1.4 节 MUST）；4xx 才放行（第 2.3.1.3 节）。
-- **预检分级生效**：官方 API/开放数据自动生效；网页/浏览器须具名人工确认（S4）。浏览器默认关（S1），登录态全关（S2，正当替代 = 人工导出 + 登记导入）。
+- **预检分级生效**：官方 API/开放数据自动生效；网页/浏览器须具名人工确认（S4）。浏览器默认关（S1）；登录态经凭据访问通道开放（S2 口径沿革见 SKILL 第 4 节）：逐目标声明权限依据、凭据只经 vault 引用注入、会话只由浏览器通道承载，人工导出 + 登记导入仍是正当替代。
 - **速率只按公式**：max（登记值， robots crawl-delay， 模板下限， 项目锁下限），并发固定 1；crawl-delay 不是 RFC 内容，依据是站点公示意愿与本包自律。
 - **被拒即停、全程留痕**：403/429 即停，连续两 run 被拒熔断；一切拒绝进可查询的留痕清单。
 - **provenance 不可关**：原始响应内容寻址留存 + 哈希，版本链 supersedes 指针，validate 重算点名。
@@ -20,11 +20,14 @@ light-crawler --root . register --file <登记.yaml>     # 模板见 examples/te
 light-crawler --root . precheck --target <target_id>   # 低危自动生效 / 高危待确认
 light-crawler --root . confirm --target <target_id> --by <姓名> --note <依据>
 light-crawler --root . fetch --target <target_id> [--url <url> ...]
+light-crawler --root . discover --target <target_id>   # 发现 pass：端点/链接/sitemap 入发现账
+light-crawler --root . crawl --target <target_id>      # frontier 任务：策略链 + 发现扩展 + 断点续跑
+light-crawler --root . sources --target <target_id>    # 发现账（可枚举数据源）
 light-crawler --root . validate                        # 登记自洽 + 哈希重算
 light-crawler --root . refusals                        # 拒绝留痕清单
 ```
 
-依赖只有 PyYAML（抓取传输走标准库 urllib）；在共享 venv 中从包根运行测试：`../.venv-lit/bin/python -m pytest`。
+依赖只有 PyYAML（传输与渲染编排走标准库；浏览器通道另需系统 Chromium，经 CDP 驱动）；在共享 venv 中从包根运行测试：`../.venv-lit/bin/python -m pytest`（77 项，含强化夹具对照）。
 
 ## 演示
 
@@ -32,7 +35,7 @@ examples/demo-fullrun/：本地夹具站点上的全链演示（登记 → 预�
 
 ## 已知局限
 
-浏览器执行器不随包（只有预检门与接入契约）、WARC 全记录档未做（ISO 28500，v1.1）、清洗只有 html_text_v1 一档、定时调度不在包内——详见 SKILL.md 第 12 节。
+WARC 全记录档未做（ISO 28500）、清洗只有 html_text_v1 一档、定时调度不在包内、回环/内网目标的浏览器渲染走传输桥接模式（Chrome 的 Local Network Access 检查所致，engine 字段如实标注）——详见 SKILL.md 第 12 节。
 
 ## 许可
 
