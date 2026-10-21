@@ -77,6 +77,28 @@ def _add_item(job, url, kind, depth, discovered_from) -> bool:
     return True
 
 
+def _resolve_robots(root, target_id, base, record, run_id=None):
+    """crawl/discover 的 robots 取用（D8）：与 fetch 同口径走预检
+    24h 缓存（robots.resolve_robots），复用与作废各落一条事件。"""
+    fetched, src = robots.resolve_robots(root, base, record=record)
+    data = {"precheck_id": src["precheck_id"]}
+    if run_id:
+        data["run_id"] = run_id
+    if src["source"] == "precheck_cache":
+        data["body_sha256"] = src.get("body_sha256")
+        project.append_event(
+            root, "robots_cache_reused", target_id=target_id,
+            detail="执行期复用预检 robots 缓存（24h 内、原文哈希相符，"
+                   "本次未再请求 robots.txt，D8）", data=data)
+    elif src.get("cache_invalidated"):
+        data["reason"] = src["cache_invalidated"]
+        project.append_event(
+            root, "robots_cache_invalidated", target_id=target_id,
+            detail=f"预检 robots 缓存作废（{src['cache_invalidated']}），"
+                   "执行期已回落实时取用（D8）", data=data)
+    return fetched
+
+
 def _counts(job) -> dict:
     counts = {}
     for item in job["items"].values():
@@ -97,7 +119,7 @@ def discover_pass(root, target_id, transport=None, sleep=None) -> dict:
     interval = rate.get("effective_interval_sec") or \
         schema.TEMPLATE_MIN_INTERVAL_SEC[reg["channel"]]
     throttler = Throttler(interval, sleep=sleep or time.sleep)
-    robots_fetch = robots.fetch_robots(base)
+    robots_fetch = _resolve_robots(root, target_id, base, ctx["record"])
     if robots_fetch.outcome == "unreachable":
         raise fetch_mod.Refusal([
             "robots 不可达，失败关闭（RFC 9309 第 2.3.1.4 节）："
@@ -268,7 +290,8 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
         1 for r in storage.read_provenance(root)
         if r.get("kind") == "fetch" and r.get("target_id") == target_id
         and (r.get("at") or "").startswith(today()))
-    robots_fetch = robots.fetch_robots(base)
+    robots_fetch = _resolve_robots(root, target_id, base, ctx["record"],
+                                   run_id=run_id)
     summary = {"job_id": job["job_id"], "run_id": run_id,
                "target_id": target_id, "resumed": resumed,
                "strategy": job.get("strategy"), "requested": 0,

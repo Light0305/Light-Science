@@ -37,6 +37,7 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
 
     # ---- 通道合法性
     chan = {"channel": channel}
+    preauth_entry = None
     alt = reg.get("official_alternative") or {}
     if alt.get("available") and channel in ("web_page", "browser"):
         chan["ok"] = False
@@ -50,18 +51,31 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
             blocked_reasons.append(
                 "项目锁已关闭浏览器通道（lock.allow_browser=false），"
                 "单目标预检不得放松项目锁")
-        elif not reg.get("browser_enabled"):
-            chan["ok"] = False
-            blocked_reasons.append(
-                "浏览器通道默认关（S1）：登记须置 browser_enabled=true 并在"
-                "预检中登记开启理由")
-        elif not (reg.get("browser_reason") or "").strip():
-            chan["ok"] = False
-            blocked_reasons.append(
-                "浏览器通道开启缺理由（S1）：browser_reason 必填")
         else:
-            chan["ok"] = True
-            chan["browser_reason"] = reg["browser_reason"]
+            # D1 预授权名单（决策清单 D1 选项 a，2026-10-21 批准）：
+            # 名单内目标以名单层具名与理由替代逐目标开启手续。
+            preauth_entry = project.find_browser_preauthorization(
+                header, target_id)
+            if preauth_entry is not None:
+                chan["ok"] = True
+                chan["browser_preauthorized"] = {
+                    "listed_by": preauth_entry.get("listed_by"),
+                    "reason": preauth_entry.get("reason"),
+                    "listed_at": preauth_entry.get("listed_at"),
+                }
+                chan["browser_reason"] = preauth_entry.get("reason")
+            elif not reg.get("browser_enabled"):
+                chan["ok"] = False
+                blocked_reasons.append(
+                    "浏览器通道默认关（S1）：登记须置 browser_enabled=true 并在"
+                    "预检中登记开启理由，或由具名者列入项目级预授权名单（D1）")
+            elif not (reg.get("browser_reason") or "").strip():
+                chan["ok"] = False
+                blocked_reasons.append(
+                    "浏览器通道开启缺理由（S1）：browser_reason 必填")
+            else:
+                chan["ok"] = True
+                chan["browser_reason"] = reg["browser_reason"]
     else:
         chan["ok"] = True
     chan["render_escalation_authorized"] = bool(
@@ -122,6 +136,11 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
         "crawl_delay_note": ("crawl-delay 为常见扩展，不在 RFC 9309 内；"
                              "只作公示意愿事实参与速率取严"),
     }
+    # D8：robots 原文按哈希落缓存，执行期 24h 内凭记录哈希复用
+    # （robots.resolve_robots）；缓存路径只作定位，复用时重算哈希比对。
+    cache_rel = robots.store_cached_body(root, fetched)
+    if cache_rel:
+        checks["robots"]["body_cache_path"] = cache_rel
 
     # ---- 速率裁决（公式取严；项目锁下限参与且只抬不降）
     lock_min = lock.get("min_interval_sec")
@@ -149,6 +168,18 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
         status = "pending_confirmation"
     else:
         status = "effective"
+    # D1：名单内 browser 目标免逐个确认——pending 直接转 effective，
+    # 豁免依据（名单条目）落进预检记录，另落 applied 事件（见下）。
+    confirmation_waiver = None
+    if status == "pending_confirmation" and preauth_entry is not None:
+        status = "effective"
+        confirmation_waiver = {
+            "waived_via": "browser_preauthorized_list",
+            "listed_by": preauth_entry.get("listed_by"),
+            "reason": preauth_entry.get("reason"),
+            "listed_at": preauth_entry.get("listed_at"),
+            "decision_ref": "crawler-decision-list.md D1（2026-10-21 批准）",
+        }
 
     now = parse_ts(utcnow())
     record = {
@@ -158,6 +189,7 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
         "target_id": target_id,
         "status": status,
         "ready_to_fetch": status == "effective",
+        "confirmation_waiver": confirmation_waiver,
         "channel": channel,
         "checks": checks,
         "blocked_reasons": blocked_reasons,
@@ -188,6 +220,14 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
             detail=f"项目锁下限 {lock_min}s 抬高了有效间隔至 "
                    f"{decision['effective_interval_sec']}s（只紧不松）",
             data={"precheck_id": record["precheck_id"]})
+    if confirmation_waiver is not None:
+        project.append_event(
+            root, "browser_preauthorization_applied", target_id=target_id,
+            detail=f"目标在浏览器预授权名单内（{confirmation_waiver['listed_by']} "
+                   f"列入：{confirmation_waiver['reason']}），预检免逐个确认"
+                   "直接生效（D1）",
+            data={"precheck_id": record["precheck_id"],
+                  "listed_by": confirmation_waiver["listed_by"]})
     return record
 
 

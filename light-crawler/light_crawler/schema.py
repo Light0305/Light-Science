@@ -116,6 +116,12 @@ EVENT_TYPES = (
     "crawl_job_started",       # frontier 任务开始/新建
     "crawl_job_resumed",       # frontier 任务断点续跑
     "crawl_job_finished",      # frontier 任务结束（finished/partial/refused）
+    # ---- 决策落地批新增（D1–D10 批准后施工，2026-10-21） ----
+    "browser_preauthorization_added",    # D1：目标列入项目级浏览器预授权名单
+    "browser_preauthorization_removed",  # D1：目标移出预授权名单
+    "browser_preauthorization_applied",  # D1：预检命中名单、免逐个确认生效
+    "robots_cache_reused",     # D8：执行期复用预检 24h 内 robots 缓存
+    "robots_cache_invalidated",  # D8：缓存哈希不符/本体缺失，作废后重取
 )
 
 #: refusals 命令认的拒绝类事件。

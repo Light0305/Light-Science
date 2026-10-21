@@ -13,7 +13,8 @@
   sources     列某目标的发现账（可枚举数据源清单）
   import      人工导出后登记导入（S2 正当替代；--note/--by 必填）
   unblock     熔断恢复（--by 具名 + --reason）
-  refusals    拒绝留痕清单（可查询，含原因与规则出处）
+  browser-preauth  浏览器预授权名单（D1：list / add / remove，具名留痕）
+  refusals    拒绝留痕清单（可查询，含原因与规则出处；--type 按类计数）
   events      事件账（可按目标过滤）
   status      工作区状态一行摘要
   validate    登记自洽 + provenance 哈希重算校验
@@ -85,7 +86,19 @@ def main(argv=None) -> int:
     p = sub.add_parser("unblock")
     p.add_argument("--target", required=True); p.add_argument("--by", required=True)
     p.add_argument("--reason", required=True)
-    sub.add_parser("refusals")
+    p = sub.add_parser("browser-preauth")
+    psub = p.add_subparsers(dest="preauth_cmd", required=True)
+    psub.add_parser("list")
+    pp = psub.add_parser("add")
+    pp.add_argument("--target", required=True)
+    pp.add_argument("--by", required=True); pp.add_argument("--reason", required=True)
+    pp = psub.add_parser("remove")
+    pp.add_argument("--target", required=True)
+    pp.add_argument("--by", required=True); pp.add_argument("--reason", required=True)
+    p = sub.add_parser("refusals")
+    p.add_argument("--type", default=None,
+                   help="只列某一类拒绝事件（如 render_escalation_blocked），"
+                        "行末给出该类计数")
     p = sub.add_parser("events"); p.add_argument("--target", default=None)
     sub.add_parser("status")
     sub.add_parser("validate")
@@ -126,6 +139,10 @@ def main(argv=None) -> int:
                   f"{schema.REQUIRED_CONCURRENCY}）")
             if rec["status"] == "pending_confirmation":
                 print("  高危通道：须具名 confirm 后才生效（S4）")
+            if rec.get("confirmation_waiver"):
+                w = rec["confirmation_waiver"]
+                print(f"  浏览器预授权名单命中（{w['listed_by']} 列入），"
+                      "免逐个确认直接生效（D1）")
             if rec["status"] == "blocked":
                 return 2
         elif args.cmd == "confirm":
@@ -187,13 +204,35 @@ def main(argv=None) -> int:
         elif args.cmd == "unblock":
             fetch_mod.unblock_target(root, args.target, args.by, args.reason)
             print(f"已解除熔断：{args.target}（{args.by}）")
+        elif args.cmd == "browser-preauth":
+            if args.preauth_cmd == "list":
+                entries = project.list_browser_preauthorizations(root)
+                for e in entries:
+                    print(f"{e.get('target_id')}\t{e.get('listed_by')}\t"
+                          f"{e.get('listed_at')}\t{e.get('reason')}")
+                print(f"共 {len(entries)} 条预授权（D1 名单）")
+            elif args.preauth_cmd == "add":
+                project.add_browser_preauthorization(
+                    root, args.target, args.by, args.reason)
+                print(f"已列入预授权名单：{args.target}（{args.by}）")
+            elif args.preauth_cmd == "remove":
+                project.remove_browser_preauthorization(
+                    root, args.target, args.by, args.reason)
+                print(f"已移出预授权名单：{args.target}（{args.by}）")
         elif args.cmd == "refusals":
             rows = [e for e in project.read_events(root)
                     if e["type"] in schema.REFUSAL_EVENT_TYPES]
+            if args.type is not None:
+                if args.type not in schema.REFUSAL_EVENT_TYPES:
+                    print(f"错误：{args.type} 不在拒绝类事件词表内"
+                          f"（{list(schema.REFUSAL_EVENT_TYPES)}）")
+                    return 2
+                rows = [e for e in rows if e["type"] == args.type]
             for e in rows:
                 print(f"[{e['at']}] {e['type']}\t{e.get('target_id') or '-'}\t"
                       f"{e.get('detail')}")
-            print(f"共 {len(rows)} 条拒绝留痕")
+            print(f"共 {len(rows)} 条拒绝留痕"
+                  + (f"（类型 {args.type}）" if args.type else ""))
         elif args.cmd == "events":
             rows = project.read_events(root)
             if args.target:

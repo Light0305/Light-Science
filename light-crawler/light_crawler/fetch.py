@@ -379,8 +379,26 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
         and (r.get("at") or "").startswith(today()))
 
     url_list = list(urls) if urls else [reg["base_url"]]
-    # fetch 期 robots 复核（逐 URL；不可达即整 run 失败关闭）
-    robots_fetch = robots.fetch_robots(reg["base_url"])
+    # fetch 期 robots 复核（逐 URL；不可达即整 run 失败关闭）。
+    # D8：取用先走预检 24h 缓存（哈希比对），命中零额外请求；
+    # 缓存损坏作废后回落实时取，两条路径都落事件可查。
+    robots_fetch, robots_src = robots.resolve_robots(
+        root, reg["base_url"], record=ctx["record"])
+    if robots_src["source"] == "precheck_cache":
+        project.append_event(
+            root, "robots_cache_reused", target_id=target_id,
+            detail="fetch 期复用预检 robots 缓存（24h 内、原文哈希相符，"
+                   "本次未再请求 robots.txt，D8）",
+            data={"run_id": run_id, "precheck_id": robots_src["precheck_id"],
+                  "body_sha256": robots_src.get("body_sha256")})
+    elif robots_src.get("cache_invalidated"):
+        project.append_event(
+            root, "robots_cache_invalidated", target_id=target_id,
+            detail=f"预检 robots 缓存作废（{robots_src['cache_invalidated']}），"
+                   "fetch 期已回落实时取用（D8）",
+            data={"run_id": run_id,
+                  "precheck_id": robots_src["precheck_id"],
+                  "reason": robots_src["cache_invalidated"]})
     try:
         for url in url_list:
             if run_rec["requested"] >= max_run:

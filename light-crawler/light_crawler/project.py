@@ -52,7 +52,95 @@ def default_lock() -> dict:
         "min_interval_sec": None,        # 项目可设下限；None 表示不另加锁值
         "allow_browser": True,           # 项目可整锁关掉浏览器通道
         "max_personal_data_risk": "low",  # 锁内最高可登记风险（high 本就拒收）
+        # D1 浏览器预授权名单（决策清单 D1 选项 a，用户 2026-10-21
+        # 批准）：具名维护的条目列表，每条含 target_id / listed_by /
+        # reason / listed_at；名单内 browser 目标免逐个确认（见 precheck）。
+        "browser_preauthorized": [],
     }
+
+
+# ------------------------------------------------ 浏览器预授权名单（D1）
+
+def _preauth_entries(header: dict) -> list:
+    lock = header.get("lock") or {}
+    entries = lock.get("browser_preauthorized") or []
+    return entries if isinstance(entries, list) else []
+
+
+def find_browser_preauthorization(header: dict, target_id) -> dict | None:
+    """查某目标是否在预授权名单内且条目完整（具名 + 理由齐备）。
+
+    条目残缺（手改登记头所致）视为未列入：宁可回到逐目标三段手续，
+    不许残缺条目产生放行效果（失败关闭口径与全包一致）。
+    """
+    for entry in _preauth_entries(header):
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("target_id") != target_id:
+            continue
+        if (entry.get("listed_by") or "").strip() \
+                and (entry.get("reason") or "").strip():
+            return entry
+        return None
+    return None
+
+
+def list_browser_preauthorizations(root) -> list:
+    return list(_preauth_entries(load_header(root)))
+
+
+def add_browser_preauthorization(root, target_id, by: str,
+                                 reason: str) -> dict:
+    """把一个已登记目标列入预授权名单（须具名 + 理由，落事件留痕）。"""
+    if not (by or "").strip():
+        raise WorkspaceError(["列入预授权名单须具名（--by）：名单是"
+                              "责任登记，不许匿名"])
+    if not (reason or "").strip():
+        raise WorkspaceError(["列入预授权名单须填理由（--reason）：理由"
+                              "在名单层一次写清，替代逐目标 browser_reason"])
+    load_target(root, target_id)  # 未登记目标不许列入（HC-1 同口径）
+    header = load_header(root)
+    if find_browser_preauthorization(header, target_id) is not None:
+        raise WorkspaceError([
+            f"目标 {target_id} 已在预授权名单内；变更理由须先 remove "
+            "再 add，两次变更各自留痕"])
+    entry = {"target_id": target_id, "listed_by": by, "reason": reason,
+             "listed_at": utcnow()}
+    lock = header.setdefault("lock", default_lock())
+    entries = lock.get("browser_preauthorized")
+    if not isinstance(entries, list):
+        entries = []
+        lock["browser_preauthorized"] = entries
+    entries.append(entry)
+    save_header(root, header)
+    append_event(root, "browser_preauthorization_added",
+                 target_id=target_id,
+                 detail=f"{by} 将目标列入浏览器预授权名单：{reason}",
+                 data={"listed_by": by, "reason": reason})
+    return entry
+
+
+def remove_browser_preauthorization(root, target_id, by: str,
+                                    reason: str) -> dict:
+    """把目标移出预授权名单（须具名 + 理由，落事件留痕）。"""
+    if not (by or "").strip():
+        raise WorkspaceError(["移出预授权名单须具名（--by）"])
+    if not (reason or "").strip():
+        raise WorkspaceError(["移出预授权名单须填理由（--reason）"])
+    header = load_header(root)
+    entries = _preauth_entries(header)
+    kept = [e for e in entries
+            if not (isinstance(e, dict)
+                    and e.get("target_id") == target_id)]
+    if len(kept) == len(entries):
+        raise WorkspaceError([f"目标 {target_id} 不在预授权名单内，无可移出"])
+    header["lock"]["browser_preauthorized"] = kept
+    save_header(root, header)
+    append_event(root, "browser_preauthorization_removed",
+                 target_id=target_id,
+                 detail=f"{by} 将目标移出浏览器预授权名单：{reason}",
+                 data={"removed_by": by, "reason": reason})
+    return {"target_id": target_id, "removed_by": by, "reason": reason}
 
 
 def init_workspace(root, project: str) -> dict:

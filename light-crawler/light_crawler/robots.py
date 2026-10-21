@@ -20,9 +20,12 @@ from __future__ import annotations
 import re
 import urllib.error
 import urllib.request
+from datetime import timedelta
+from pathlib import Path
 from urllib.parse import urlparse
 
 from . import schema
+from .util import parse_ts, sha256_bytes, utcnow
 
 MAX_ROBOTS_BYTES = 500 * 1024  # 第 2.5 节下限口径：至少解析 500 KiB
 
@@ -66,6 +69,76 @@ def fetch_robots(base_url: str, timeout: float = 10.0) -> RobotsFetch:
         return RobotsFetch("unreachable", status=None,
                            final_url=robots_url,
                            error=f"{type(e).__name__}: {e}")
+
+
+# ------------------------------------------------ 预检缓存（D8，2026-10-21 批准落地）
+
+def cache_body_relpath(body_sha256: str) -> str:
+    """预检 robots 原文的缓存落点（按内容哈希寻址，与 store 同理）。"""
+    return f"prechecks/robots-cache/{body_sha256[:2]}/{body_sha256}"
+
+
+def store_cached_body(root, fetch: RobotsFetch) -> str | None:
+    """预检侧调用：把取到的 robots 原文按哈希落进缓存，返回相对路径。
+
+    只有 outcome=ok 且有原文时才落；4xx（unavailable）无原文，其
+    结论本身（状态码）随预检记录即可复用，不需要本体文件。
+    """
+    if fetch.outcome != "ok" or not fetch.body:
+        return None
+    digest = sha256_bytes(fetch.body)
+    rel = cache_body_relpath(digest)
+    dest = Path(root) / rel
+    if not dest.exists():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(fetch.body)
+    return rel
+
+
+def resolve_robots(root, base_url: str, record: dict | None = None,
+                   timeout: float = 10.0):
+    """执行期 robots 的统一取用口（D8）：先预检缓存，后实时取。
+
+    返回 (RobotsFetch, info)。info["source"] 为 "precheck_cache"
+    （命中复用、本次零网络请求）或 "fresh"；复用落空且属缓存损坏
+    时 info["cache_invalidated"] 给出原因（hash_mismatch /
+    body_missing），调用方据此落 robots_cache_invalidated 事件。
+
+    复用条件（三者齐备）：预检记录在册、robots 取回时刻未超
+    24 小时（RFC 9309 第 2.4 节，与预检 expires_at 同口径）、
+    缓存原文哈希与预检记录 body_sha256 逐字相符。过期不算损坏
+    （预检层会先以 expired 挡住执行），这里静默回落实时取。
+    """
+    info = {"source": "fresh", "cache_invalidated": None,
+            "precheck_id": (record or {}).get("precheck_id")}
+    if record:
+        rob = ((record.get("checks") or {}).get("robots")) or {}
+        fetched_at = record.get("robots_fetched_at") or rob.get("fetched_at")
+        ts = parse_ts(fetched_at) if fetched_at else None
+        fresh = (ts is not None and parse_ts(utcnow()) <= ts + timedelta(
+            hours=schema.ROBOTS_CACHE_MAX_HOURS))
+        if fresh:
+            outcome = rob.get("outcome")
+            if outcome == "unavailable":
+                info["source"] = "precheck_cache"
+                return RobotsFetch("unavailable", status=rob.get(
+                    "http_status"), final_url=base_url), info
+            sha = rob.get("body_sha256")
+            if outcome == "ok" and sha:
+                dest = Path(root) / cache_body_relpath(sha)
+                if not dest.exists():
+                    info["cache_invalidated"] = "body_missing"
+                else:
+                    body = dest.read_bytes()
+                    if sha256_bytes(body) != sha:
+                        info["cache_invalidated"] = "hash_mismatch"
+                    else:
+                        info.update({"source": "precheck_cache",
+                                     "body_sha256": sha})
+                        return RobotsFetch(
+                            "ok", status=rob.get("http_status"), body=body,
+                            final_url=base_url), info
+    return fetch_robots(base_url, timeout=timeout), info
 
 
 class RobotsRules:

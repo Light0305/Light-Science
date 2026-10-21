@@ -25,7 +25,7 @@
 
 ## v1.1 说明（2026-10-21）
 
-第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,686 项（1,685 passed + 1 skipped，各包见其 README），发布树测试 1,654 项全过。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
+第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,697 项（1,696 passed + 1 skipped，各包见其 README），发布树测试 1,665 项全过。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
 
 ## light-literature（已发布）
 

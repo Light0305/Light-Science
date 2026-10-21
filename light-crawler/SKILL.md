@@ -11,7 +11,8 @@ license: MIT
 > 定位：Light-Science 的项目数据采集**通道层**（LD-02 通道层扩展位，不进十阶段主流水线）。给 light-literature 供文献线索批与批量全文获取批、给 light-experiment 供数据集获取批与基准页面快照。生态现状是「有合规件、无合规门」（Scrapy 的 ROBOTSTXT_OBEY 默认 False 为缩影），本包的差异化就是把合规件全部反着定成默认开的**代码硬门**：无登记不抓取、robots 失败关闭、预检分级生效、速率只按公式、被拒即停、一切拒绝留痕。
 > 位置：工作区落项目根 `data-sources/`（LD-02 目录规范）；接入模型在任何取数动作前先读本文件并跑 guard 链，不许绕开 CLI 直接发请求。
 > v1.0 定版（2026-10-21）：坐标 C0–C6 + 硬约束 HC-1 至 HC-8 + S1–S7 拍板落点；演示见 examples/demo-fullrun/demo-report.md（本地夹具站点全链 + 两例被拒留痕 + 一次真实官方 API 试跑如实记录）。
-> v1.1 能力强化（2026-10-21，用户点名「爬虫太弱、遇到点啥就撞」后立项）：传输 v2、浏览器执行器随包、接口发现、frontier 断点续爬、回退策略链、自适应限速、凭据访问通道，详见第 14 节；S2 口径沿革见第 4 节，待用户拍板的默认口径清单在工作区 20-build/crawler-decision-list.md。
+> v1.1 能力强化（2026-10-21，用户点名「爬虫太弱、遇到点啥就撞」后立项）：传输 v2、浏览器执行器随包、接口发现、frontier 断点续爬、回退策略链、自适应限速、凭据访问通道，详见第 14 节；S2 口径沿革见第 4 节，默认口径清单在工作区 20-build/crawler-decision-list.md。
+> 决策落地（2026-10-21，用户对决策清单 D1–D10 全按推荐批准后施工）：D1 浏览器预授权名单、D8 robots 预检缓存复用已落码；D3/D6 以计数查询与示例措辞落地；其余各条按批准维持现状。施工记录见 20-build/crawler-decisions-impl.md。
 
 ---
 
@@ -50,10 +51,10 @@ license: MIT
 
 | 拍板 | 落点 |
 |---|---|
-| S1 浏览器默认关 | 登记 channel=browser 时，预检须 browser_enabled=true 且 browser_reason 非空才继续裁决；且项目锁 allow_browser=false 时直接 blocked；浏览器属高危通道另须人工确认。执行器随包提供（v1.1）：Chromium CDP 渲染器经 CLI fetch 与 crawl 注入；库层 fetch_run 仍走 browser_fetcher 注入契约，未注入时如实拒绝并留痕（不假装能跑） |
+| S1 浏览器默认关 | 登记 channel=browser 时，预检须 browser_enabled=true 且 browser_reason 非空才继续裁决；且项目锁 allow_browser=false 时直接 blocked；浏览器属高危通道另须人工确认。**D1 预授权名单（2026-10-21 批准）**：具名者可把已登记目标列入项目锁 lock.browser_preauthorized（条目含 target_id / listed_by / reason / listed_at，增删各落一条事件），名单内目标以名单层理由替代逐目标开启手续、预检免逐个 confirm 直接 effective（豁免依据落预检记录 confirmation_waiver + browser_preauthorization_applied 事件）；名单外目标维持三段手续原样，allow_browser=false 对名单内同样 blocked（锁只紧不松）。这不是全局默认开：名单之外默认关不变。执行器随包提供（v1.1）：Chromium CDP 渲染器经 CLI fetch 与 crawl 注入；库层 fetch_run 仍走 browser_fetcher 注入契约，未注入时如实拒绝并留痕（不假装能跑） |
 | S2 登录态（口径沿革） | v1 全关出自第二轮 S1–S7 整批批准；用户 2026-10-21 指出该条款其本人从未单独注意、现立场为可以绕。现行口径 = 凭据访问通道：login_state 可取 user_account / institutional，逐目标必填 entitlement_basis（权限依据）与 credential_ref（只许 vault: 引用、凭据本体永不落盘）、channel 须为 browser（会话由浏览器承载）；预检落 credentials 检查行（不验真实有效性）；执行须由接入运行环境注入 credential_provider，会话失效落 credential_session_invalid 并按 HC-8 熔断记账；provenance 只记权限依据、引用与脱敏账号标识。替代通道 import 保留（来源说明 + 经手人必填）。无权限绕越不建——此为构建方（Muse）边界，非用户口径 |
 | S3 轻量留存 | v1 只做原始响应文件 + 哈希，provenance 明示 retention_tier=lightweight_raw_plus_hash；WARC 全记录档（WARC 为 ISO 28500 标准，非 W3C）登记即拒并指向 v1.1 |
-| S4 预检分级 | 低危通道（official_api、open_data）预检全过自动生效；高危通道（web_page、browser）须具名 confirm 才生效，确认动作落预检账留痕 |
+| S4 预检分级 | 低危通道（official_api、open_data）预检全过自动生效；高危通道（web_page、browser）须具名 confirm 才生效，确认动作落预检账留痕；唯一豁免 = D1 预授权名单内的 browser 目标（名单层具名登记即确认依据，豁免逐条落账，见 S1 行） |
 | S5 文献边界 | purpose_kind 词表只有批量与非文献五类；single_fulltext 登记即拒 |
 | S6 速率公式 | 见 §6 定版表；并发固定 1，登记其他值即拒 |
 | S7 产物公开性 | 随包发布的只有空白登记模板与脱敏范例（本地夹具演示），不预置任何真实抓取目标清单 |
@@ -66,7 +67,7 @@ license: MIT
 | robots 4xx | 视为不可用，即无 robots 限制，可以访问 | 第 2.3.1.3 节（MAY） |
 | robots 5xx 或网络不可达 | 视为未定义，**必须假定全面禁止**（失败关闭），预检 blocked、fetch 期复核同样整 run 停 | 第 2.3.1.4 节（MUST） |
 | 重定向 | 至少跟随 5 次（传输层默认行为满足下限） | 第 2.3.1.2 节 |
-| 缓存 | robots 结论缓存不超过 24 小时：预检记录以 robots 取回时刻 +24h 为 expires_at，过期即失效、须重跑预检 | 第 2.4 节口径 |
+| 缓存 | robots 结论缓存不超过 24 小时：预检记录以 robots 取回时刻 +24h 为 expires_at，过期即失效、须重跑预检。**D8 复用（2026-10-21 批准）**：预检把 robots 原文按哈希落 prechecks/robots-cache/，fetch/crawl/discover 执行期经 robots.resolve_robots 先查缓存——24h 内且重算哈希与预检记录 body_sha256 相符即复用（零额外 robots 请求，落 robots_cache_reused 事件）；哈希不符或本体缺失即作废回落实时取（落 robots_cache_invalidated 事件点名原因）；4xx 结论无原文，凭记录状态直接复用 | 第 2.4 节口径 |
 | 解析体积 | 至少解析 500 KiB | 第 2.5 节 |
 
 注意两条不可混引：其一，robots 规则不是访问授权体系（RFC 第 1 节），遵守 robots 不等于获得抓取授权，授权回到条款与法律；其二，crawl-delay 与 request-rate **不在 RFC 9309 内**，是 Protego/Google 谱系的常见扩展——本包只把 crawl-delay 作为站点公示意愿的事实参与速率取严，依据写条款与本包自律，绝不冒充标准要求。另：Disallow 路径本身公开可发现，预检记录（含目标清单）是项目内部文件，不对外发布（RFC 第 3 节安全考虑的同构提醒）。
@@ -84,10 +85,12 @@ license: MIT
 
 包级硬下限 0.5 秒：任何登记与依据都不许更快。登记值低于模板下限须填 rate_basis（许可该速率的条款依据指针，如官方 API 条款明示的速率上限），无依据的放松被模板下限挡住（构建判断 J2，见 phase5-crawler.md）。总量上限默认：单 run 200 请求、单目标单日 1000 请求，登记可调小，调高同样须 rate_basis（校验在登记层，执行层硬停并落 volume_cap_hit 事件）。
 
+**rate_basis 用法示例（D6，2026-10-21 批准落字；流程说明、非口径变更）**：模板下限是缺省档，不是天花板——确有条款依据时，在登记层一次写清即可，不必另设机制。例一：某官方 API 条款明示「每 API key 每秒至多 2 次请求」，登记写 registered_interval_sec: 0.5 并在 rate_basis 填该条款的指针（文档 URL 或条款编号），预检按公式取严后即以 0.5 秒生效；例二：自有站点或已签授权的合作站点，rate_basis 填授权文件指针，web_page 的 5 秒模板下限同样可据此下调；例三：总量上限要从默认 200/1000 上调，同样在 rate_basis 写明依据（如官方配额页）。反面：拿不出指针的「应该没问题」不构成 rate_basis，登记层直接拒收回到模板下限；rate_basis 只认条款/授权文本，不认口头判断。
+
 ## §7 预检三件与项目锁
 
 1. **目标级检查**：登记自洽、通道合法性（含官方替代点名、浏览器开启与理由）、个人数据与项目锁上限、条款依据、robots 逐 URL 结论、速率裁决分解——每一项的结论与依据都落进预检记录（prechecks/<target_id>.jsonl，只增不改），不是只落一个总分。
-2. **项目锁**：(a) 合规档位锁——登记头 lock 段（min_interval_sec、allow_browser、max_personal_data_risk），单目标预检只能比锁更严，放松尝试被锁值覆盖并落 lock_applied 事件（形态学 firecrawl 的组织级 Safe Mode：档位可锁定、单次请求参数不得降档）；(b) 目标运行锁——同一目标同时只许一个在飞 run，残锁只点名不自动夺锁，人工核对删锁的动作应另行留痕于项目记录。
+2. **项目锁**：(a) 合规档位锁——登记头 lock 段（min_interval_sec、allow_browser、max_personal_data_risk、browser_preauthorized 预授权名单），单目标预检只能比锁更严，放松尝试被锁值覆盖并落 lock_applied 事件（形态学 firecrawl 的组织级 Safe Mode：档位可锁定、单次请求参数不得降档）；预授权名单是锁内唯一的「放行登记」：它不放松任何档位数值，只把 browser 目标的逐个确认改为名单层一次具名登记，增删与命中全部落事件（见 §4 S1 行）；(b) 目标运行锁——同一目标同时只许一个在飞 run，残锁只点名不自动夺锁，人工核对删锁的动作应另行留痕于项目记录。
 3. **拒绝留痕**：预检 blocked、guard 拒绝、HTTP 被拒、熔断、越域重定向、量上限全部落 events.jsonl，refusals 命令成清单（含原因与规则出处）——学 firecrawl 的 robotsBlocked 清单形态：被拒要可见、可查，不是日志里的一行字。
 
 预检状态机：blocked（硬不通过，解决点名项后重跑）/ incomplete（缺项，补齐后重跑）/ pending_confirmation（高危待具名确认）/ effective（生效）/ expired（超 24h 自动失效）。guard 只认 effective。
@@ -108,7 +111,7 @@ license: MIT
 
 ## §10 命令面
 
-init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ discover（--target：发现 pass，端点/链接/sitemap 登记进发现账）/ crawl（--target，--max-pages，--no-discover，--fresh：frontier 任务，断点自动续跑）/ sources（--target：发现账清单）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ refusals / events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
+init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ discover（--target：发现 pass，端点/链接/sitemap 登记进发现账）/ crawl（--target，--max-pages，--no-discover，--fresh：frontier 任务，断点自动续跑）/ sources（--target：发现账清单）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ browser-preauth（list / add --target --by --reason / remove --target --by --reason：D1 预授权名单维护，增删均具名留痕）/ refusals（--type 可按拒绝类过滤并给出该类计数，如 render_escalation_blocked）/ events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
 
 ## §11 失败模式（接入模型自查）
 
@@ -154,3 +157,4 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 - **自适应限速**（throttle.py）：在预检裁决间隔之上自适应——5xx/网络错误乘性加严（上限 300s），连续成功 3 次逐步回落，永不低于裁决值；每次调整落 adaptive_backoff 事件。Retry-After 口径与 §6 公式不变。
 - **凭据访问通道**：见 §4 S2 现行口径。会话由浏览器通道承载（cookie 经 CDP 在导航前注入），provenance 记 entitlement（basis / credential_ref / 脱敏 account_label）与 cookie 名，凭据值全程不落盘（测试以全工作区扫描断言）。
 - **未动的默认**：浏览器默认关（S1）、通道优先级（HC-3）、并发 1、429 即停不重试、模板间隔下限、robots 失败关闭——均照旧；认为它们限制能力的条目连同风险与建议写入工作区 20-build/crawler-decision-list.md 交用户拍板，本批未自行放开任何一条。
+- **决策落地批（同日续批，用户全按推荐批准）**：D1 浏览器预授权名单落码（project 名单管理 + precheck 豁免合成 + CLI browser-preauth，名单外三段手续原样）；D8 robots 缓存对齐落码（预检落原文哈希缓存、执行期 resolve_robots 统一复用，清偿 phase5 遗留问题 (1)）；D3 维持逐目标确认，render_escalation_blocked 计数以 refusals --type 钉死可查；D6 维持公式与下限，rate_basis 用法示例已写入 §6。其余 D2/D4/D5/D7/D9/D10 按批准维持现状，无代码变更。验收 = tests/test_decisions_impl.py 11 项，全量 88 项全绿。
