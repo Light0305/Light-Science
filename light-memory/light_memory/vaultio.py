@@ -157,6 +157,36 @@ def register_live_smoke(vault, evidence: dict) -> dict:
     return state
 
 
+def _probe_live_surfaces() -> dict:
+    """三面探测（工具层 T3）：文件层之外的三增强面各自探活。
+
+    探测永不抛错、永不阻塞文件层结论：CLI 面无二进制即点名
+    不可用；REST 面无密钥即点名禁用（不发请求）；URI 面是纯
+    铸造恒可用（导航专用）。三面 verified 恒 False——适配器
+    验证等级为夹具/桩契约级，实机未验；obsidian_live_verified
+    只许 register_live_smoke 凭用户机冒烟证据置真。
+    """
+    surfaces = {}
+    try:
+        from . import livecli
+        surfaces[livecli.SURFACE] = livecli.probe_cli()
+    except Exception as exc:  # 探测自身故障也要收敛为点名
+        surfaces["official-cli"] = {
+            "status": "error", "reason": f"CLI 探测异常：{exc}",
+            "fallback": "file-layer", "verified": False}
+    try:
+        from . import restapi
+        surfaces[restapi.SURFACE] = restapi.probe_rest()
+    except Exception as exc:
+        surfaces["local-rest-api"] = {
+            "status": "error", "reason": f"REST 探测异常：{exc}",
+            "fallback": "file-layer", "verified": False}
+    surfaces["uri"] = {
+        "status": "available", "scope": "navigation-only"
+        "（只铸导航链接、不执行、无回执）", "verified": False}
+    return surfaces
+
+
 def probe_vault(vault) -> dict:
     vault = Path(vault)
     state = load_control_state(vault)
@@ -165,8 +195,7 @@ def probe_vault(vault) -> dict:
         "file_layer": "available", "notes": len(list_notes(vault)),
         "obsidian_live_verified":
             bool(state.get("obsidian_live_verified")),
-        "live_surfaces": "not-implemented（T3 批：livecli / restapi / "
-                         "uri 适配器未施工，本批不探测活面）",
+        "live_surfaces": _probe_live_surfaces(),
     }
 
 

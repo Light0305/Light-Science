@@ -15,7 +15,7 @@ Light-Science 的研究记忆层：沉淀前序八包 + 选刊的结构化产物
 
 **v1.1 增量（118 测试，待全套统一封版）**：epilogue 会话沉淀规程（对话决策/死胡同六类清单扫描、只产候选）；真实嵌入接入（local ONNX / api 登记制）+ 正式题集 50 题重跑 39/50（报表 `bench_report_v11.json` 与首测并列存档；通过线状态仍以 SKILL.md §8 第 5 条为准，本文件不另行表述）；Obsidian 投影升级（frontmatter 可查询面、关系类型边双写、validate 视图层体检）；桥类与排除项封口；`candidate list` 默认值修复。
 
-**工具层 T1 增量（Obsidian 文件层控制层，本包 160 测试）**：在单向投影之外旁建 `vault` 命令组——frontmatter 行级外科补丁（日期不加引号、注释不漂移）、笔记建改与段落补丁（投影笔记守机器区/标注区纪律）、链接图谱自算四表与自研改名重写器、JSON Canvas 坐标保全著述、.base 著述与离线求值子集；只操作 vault 视图文件，入账仍只走 readback 候选通道。活面适配器（官方 CLI / Local REST API / URI）归 T3 未施工，`obsidian_live_verified` 恒 false，置真条件见 SKILL.md §8 第 7 条。
+**工具层 T1 增量（Obsidian 文件层控制层，本包 160 测试）**：在单向投影之外旁建 `vault` 命令组——frontmatter 行级外科补丁（日期不加引号、注释不漂移）、笔记建改与段落补丁（投影笔记守机器区/标注区纪律）、链接图谱自算四表与自研改名重写器、JSON Canvas 坐标保全著述、.base 著述与离线求值子集；只操作 vault 视图文件，入账仍只走 readback 候选通道。**工具层 T3 增量（活面适配器，本包 196 测试）**：`livecli.py`（官方 CLI 适配，探测/降级/回执）、`restapi.py`（Local REST API v5.5.2 适配，ETag 条件写、密钥只走环境变量）、`uri.py`（导航链接铸造）三件已实现，`vault probe` 三面探测已落地；验证等级为夹具/桩契约级、实机未验，`obsidian_live_verified` 恒 false，置真条件见 SKILL.md §8 第 7 条。
 
 **v1.1 集成步增量（MM2-13）**：M0 承接面补新三包适配器——light-patent（案件即对象、状态流转/期限即事件、查新与 worth-it 判断即事实）、light-software-copyright（案件即对象、确认与工具留痕即事件、登记事实与源码冻结快照即事实）、light-crawler（工作区/目标即对象、批次/预检/变更即事件、留存凭据即事实）；适配器版本登记、水位线幂等与溯源五字段纪律与既有适配器同口径。
 
@@ -43,7 +43,7 @@ light-memory candidate <项目>/memory accept --id <候选ID> --by <确认人>  
 light-memory recall <项目>/memory "MOTA 提升" --recipe default --depth 1  # 三路回供 + 渐进披露
 light-memory project-obsidian <项目>/memory                   # 精选笔记单向投影入 vault
 light-memory readback <项目>/memory                           # 视图标注回读为候选
-light-memory vault <项目>/memory probe                        # 工具层 T1：文件层探测与 live 登记状态
+light-memory vault <项目>/memory probe                        # 工具层 T1/T3：文件层 + 活面三面探测与 live 登记状态
 light-memory vault <项目>/memory fm set --note <笔记> --key <键> --value <值>   # 行级 frontmatter 补丁
 light-memory vault <项目>/memory links                        # 链接图谱自算（出/入/未解/孤儿四表）
 light-memory vault <项目>/memory rename --from <旧名> --to <新名>             # 改名重写（默认 dry-run，--apply 落字）

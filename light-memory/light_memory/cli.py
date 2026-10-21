@@ -26,11 +26,13 @@
                   出分项报表（只报数不判线，通过线待用户定版）
   promote         Phase 2 晋升通道：propose / confirm / withdraw /
                   list（候选 → 确认 → 复制入全局层，撤回对账）
-  vault           工具层 T1 Obsidian 文件层控制层：probe / list /
-                  read / create / append / patch / delete / fm /
-                  links / backlinks / unresolved / orphans /
+  vault           工具层 T1/T3 Obsidian 控制层：probe（三面探测）/
+                  list / read / create / append / patch / delete /
+                  fm / links / backlinks / unresolved / orphans /
                   rename / search / canvas / base / daily / lint
-                  （只操作 vault 视图文件，不新开入账路径）
+                  （只操作 vault 视图文件，不新开入账路径；活面
+                  适配器 livecli/restapi/uri 为可选增强、默认主路
+                  仍是文件层）
 """
 
 from __future__ import annotations
@@ -509,13 +511,19 @@ def cmd_vault(args) -> int:
     try:
         if act == "probe":
             payload = vaultio_mod.probe_vault(vault)
-            return _emit(args, payload, [
+            lines = [
                 f"vault：{payload['vault']}（存在 {payload['exists']}，"
                 f"笔记 {payload['notes']}）",
-                "文件层：可用",
+                "文件层：可用（默认主路）",
                 f"obsidian_live_verified："
-                f"{payload['obsidian_live_verified']}",
-                f"活面：{payload['live_surfaces']}"])
+                f"{payload['obsidian_live_verified']}"]
+            for name, surf in payload["live_surfaces"].items():
+                detail = surf.get("reason") or surf.get("scope") or ""
+                lines.append(
+                    f"活面 {name}：{surf.get('status')}"
+                    f"{('（' + detail + '）') if detail else ''}"
+                    "（增强面，未验实机）")
+            return _emit(args, payload, lines)
         if act == "list":
             notes = vaultio_mod.list_notes(vault)
             return _emit(args, {"notes": notes},
@@ -956,8 +964,9 @@ def main(argv=None) -> int:
 
     pv = sub.add_parser(
         "vault",
-        help="Obsidian 文件层控制层（T1：vaultio/linkgraph/"
-             "canvasio/basesio；活面适配器归 T3）")
+        help="Obsidian 控制层（T1 文件层 vaultio/linkgraph/"
+             "canvasio/basesio；T3 活面适配器 livecli/restapi/"
+             "uri，probe 三面探测）")
     pv.add_argument("path", help="记忆项目根或 vault 目录")
     vsub = pv.add_subparsers(dest="vaction", required=True)
 
@@ -966,7 +975,7 @@ def main(argv=None) -> int:
         leaf.add_argument("--json", action="store_true")
         return leaf
 
-    _leaf("probe", "探测：文件层可用性与 live 登记状态")
+    _leaf("probe", "探测：文件层可用性 + 活面三面状态与 live 登记")
     _leaf("list", "列 vault 内笔记")
     p = _leaf("read", "读笔记全文")
     p.add_argument("--note", required=True)
