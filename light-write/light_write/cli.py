@@ -31,6 +31,9 @@ from .review import (
 from .revision import (
     RevisionError, add_comment, add_response, bind_revision, check_revision,
 )
+from .export import (
+    ExportError, check_export, default_profile, run_export,
+)
 from .template_reg import TemplateError, register_template
 from .util import load_structured
 from .validate import validate_package
@@ -189,6 +192,21 @@ def main(argv=None) -> int:
     fp.add_argument("root")
     fp.add_argument("--renumber", action="store_true")
 
+    p = sub.add_parser("export", help="投稿文件导出渲染链（pandoc）")
+    exp_sub = p.add_subparsers(dest="export_cmd", required=True)
+    ep = exp_sub.add_parser("run", help="组装 + 渲染 + 渲染后复核")
+    ep.add_argument("root")
+    ep.add_argument("--format", default="docx,tex,pdf",
+                    help="逗号分隔：docx,tex,pdf（缺省全出）")
+    ep.add_argument("--template", default=None,
+                    help="模板库条目 id（须同时给 --library）")
+    ep.add_argument("--library", default=None,
+                    help="模板库根目录（libraries/journal-templates）")
+    ep.add_argument("--generic", action="store_true",
+                    help="忽略包内模板记录与模板库，用内置通用配置")  
+    ep = exp_sub.add_parser("check", help="既有导出复核 + STALE 检出")
+    ep.add_argument("root")
+
     args = parser.parse_args(argv)
     try:
         if args.cmd == "init":
@@ -315,6 +333,27 @@ def main(argv=None) -> int:
                 added.append(spec["item_id"])
             save_checklist(args.root, {"items": items})
             _print({"added": added, "total_items": len(items)})
+        elif args.cmd == "export":
+            if args.export_cmd == "run":
+                record = run_export(
+                    args.root,
+                    formats=[s.strip() for s in args.format.split(",")
+                             if s.strip()],
+                    profile=(default_profile() if args.generic else None),
+                    template_id=args.template,
+                    library_root=args.library)
+                _print({"ok": record["overall"],
+                        "profile": record["profile"]["label"],
+                        "products": {
+                            k: (v.get("path") or v.get("status"))
+                            for k, v in record["products"].items()},
+                        "checks": record["checks"],
+                        "record_file": "export/"
+                                       f"{record['profile']['label']}/"
+                                       "export_record.json"})
+                return 0 if record["overall"] else 1
+            elif args.export_cmd == "check":
+                _print(check_export(args.root))
         elif args.cmd == "figures":
             if args.figures_cmd == "add":
                 _print(add_figure(args.root, args.id, kind=args.kind))
@@ -334,7 +373,7 @@ def main(argv=None) -> int:
                 _print(freeze_numbering(args.root, renumber=args.renumber))
     except (IntakeError, ContributionError, TemplateError, GateError,
             FileExistsError, AuditError, DiscloseError, ReviewError,
-            RevisionError, FigureError) as e:
+            RevisionError, FigureError, ExportError) as e:
         gaps = getattr(e, "gaps", None) or [str(e)]
         _print({"ok": False, "gaps": gaps})
         return 1

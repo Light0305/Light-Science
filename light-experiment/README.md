@@ -3,7 +3,7 @@
 按 light-design 的**冻结设计书**执行实验，产出与设计书逐项对账的**执行包**
 （Light-Science 子技能）。
 
-**当前版本：v1.2**。三条质量纪律：承接对不齐逐条打回、执行端不许
+**当前版本：v1.3**。三条质量纪律：承接对不齐逐条打回、执行端不许
 临场补设计；一切留痕只增不改（事件流 append-only、身份开跑冻结、
 作废只追加）；对账只做事实层，正式判定归 Analysis。设计依据
 （普查/深读/设计草案）属开发档案，不在本仓库内。
@@ -22,7 +22,11 @@ python -m venv .venv && .venv/bin/pip install -e ".[test]"
 .venv/bin/light-experiment run-start ./my-direction <exec_id> R01-a1 \
     --spec ./run-spec.yaml        # 身份下限全过才许开跑，开跑即冻结哈希
 .venv/bin/light-experiment run-finish ./my-direction <exec_id> R01-a1 \
-    --exit-status completed --metrics-file ./metrics.jsonl --gpu-hours 2
+    --exit-status completed --metrics-file ./metrics.jsonl --gpu-hours 2 \
+    [--stdout-file <文件>] [--stderr-file <文件>]
+# 第四批：产物池与无进展巡检（详见 SKILL.md 规程）：
+.venv/bin/light-experiment artifact verify ./my-direction <exec_id>
+.venv/bin/light-experiment watchdog scan ./my-direction <exec_id>
 .venv/bin/light-experiment validate ./my-direction <exec_id>
 .venv/bin/light-experiment advance ./my-direction <exec_id> --to sanity
 .venv/bin/light-experiment render ./my-direction <exec_id>
@@ -44,7 +48,10 @@ run 规格（`--spec`，JSON/YAML）字段：`config`（最终配置全文）、
 `code_snapshot{hash, git_commit, git_dirty}`、`data_version`、
 `environment{declaration, machine_tier}`、`root_seed`、
 `intervention_checks`（可选）、`cold_start`（可选：声明本 run 为
-干净环境冷启动重跑，开跑时钉进事件锚，作验收证据真伪凭据）。
+干净环境冷启动重跑，开跑时钉进事件锚，作验收证据真伪凭据）、
+`command`（可选，声明）与 `input_files`（可选，路径清单声明；
+文件 sha256 与字节数由工具在 run-start 时逐个实测落账，声明的
+输入不存在即拦开跑）。
 
 ## 执行包结构（executions/<exec_id>/）
 
@@ -59,7 +66,7 @@ run 规格（`--spec`，JSON/YAML）字段：`config`（最终配置全文）、
 | `failures.jsonl` | 失败只增账（classify 落双层分类，review/reflux_status 追加） |
 | `reflux/` | 回流条目：retry_queue.jsonl / design_inbox.jsonl / idea_dossiers/*.md |
 | `execution_card.json` | 给 Analysis 的结构化投影（export-card 导出） |
-| `artifacts/` | 内容寻址产物池目录（产物以路径 + sha256 登记在 run.yaml） |
+| `artifacts/` | 内容寻址产物池（`objects/<sha256[:2]>/<sha256>`；run 记录以 sha256 + `pool_ref` 引用，validate 主动巡检池对象） |
 | `EXECUTION_REPORT.md` | 渲染报告（摘要视图）：状态/退出分布、预算总账、验收/对账/偏离/失败分布、事件摘要 |
 
 ### run.yaml 四区 + 注释区
@@ -132,8 +139,16 @@ run 级：`planned → running → completed / failed / deviated → reconciled`
   超容差冒判、advance 落门后逐叶复跑拦截，validate 事后防线
   不变。对照集复跑：X2 由「部分达成」升「达成」，其余逐项
   不退化。测试 111 → 115 passed。
+- v1.3（第四批·渲染与执行）：自动捕获（run-start 文件级探针
+  直读 .git + 环境指纹 + 执行者实测落账，逐字段 provenance，
+  捕获块哈希钉事件锚，与 identity_hash 并存对读）、内容寻址
+  产物池（入池去重 + validate 主动巡检 + `artifact` 命令组）、
+  无进展巡检（`watchdog scan` 扫描式判定落事件 + 候选、工具
+  不代杀，心跳反例钉住误报控制）。对照集 v1 镜像复跑逐项
+  对读不退化（X12 检测代码一条按预期翻转，定性更新为工具层
+  已建、实时守护仍不在）。测试 115 → 135 passed。
 
-## 已知局限总表（v1.1 封版口径，如实标注）
+## 已知局限总表（v1.3 封版口径，如实标注）
 
 1. 对账只做事实层：readout 三向正式判定归 Analysis 回写；本包
    status=filled 只表示事实材料齐备可判。
@@ -143,14 +158,24 @@ run 级：`planned → running → completed / failed / deviated → reconciled`
    实际值只认文件来源，非文件型证据只能登记为存档式核查点
    如实报 not_verified。另 v1.1 新增 stale 事前预检命令
    （EXP-D02，只读三态清单）。
-3. 产物池仍为登记制：salvage/metrics/验收证据以路径 + sha256
-   登记，内容寻址拷贝入 artifacts/ 池未做；登记文件事后被改，
-   哈希可复核但工具不主动巡检。
-4. 自动捕获未做：git/环境等系统标签仍由 spec 声明；冷启动标记
-   亦为 spec 声明 + 事件锚钉住——锚保证声明在开跑时作出且事后
-   不可改，但「环境是否真的干净」验不了，靠规程与抽验；开发期
-   演示的冷启动以新进程 + 空目录 + 仅提交物近似，未做容器
-   /VM 级隔离，且模拟为确定性种子（读数逐字一致是构造性质）。
+3. 产物池已落地内容寻址（v1.3）：run 产物（metrics / salvage /
+   stdout / stderr / artifact add 补登）按内容哈希入包内
+   artifacts/objects 池、去重存储，validate 主动巡检、
+   artifact verify 全池体检。残留：池为包内池（跨执行包不
+   共享去重）；验收证据文件仍为路径 + sha256 登记制未入池；
+   无 pool_ref 的旧登记条只有哈希登记、非恒定巡检面。
+4. 自动捕获已落地（v1.3）：run-start 实测 git 状态（文件级
+   探针：commit / 分支 / 仓库 URL / index v2 口径 dirty）、
+   环境指纹与执行者身份，捕获块哈希钉事件锚，与 spec 声明
+   并存对读。残留：git dirty 只认 index v2 且只比跟踪文件，
+   未跟踪文件不计、非 git 目录如实缺席；stdout/stderr 为
+   执行端交文件入池的交接式捕获（工具不托管子进程，无 fd 级
+   拦截，未交落 not_provided）；GPU 无通用实测探针仍走声明；
+   冷启动标记亦为 spec 声明 + 事件锚钉住——锚保证声明在开跑
+   时作出且事后不可改，但「环境是否真的干净」验不了，靠规程
+   与抽验；开发期演示的冷启动以新进程 + 空目录 + 仅提交物
+   近似，未做容器/VM 级隔离，且模拟为确定性种子（读数逐字
+   一致是构造性质）。
 5. 闭包口径为条目级依赖图 + 锚匹配：brief depends_on 只到条目
    粒度；条目内 attempt 间经中间产物的数据流污染不在图内。
    另：input 与 data 两类触发器在本工具出生证明里同属
@@ -159,9 +184,12 @@ run 级：`planned → running → completed / failed / deviated → reconciled`
    工具只验词表与附带字段；分类质量靠人工抽验。交付门要求
    一切非 completed 终止都落分类（含 killed_external 外部
    中断——分类指向恢复路径而非追责）。
-7. 预算账为登记制：GPU 时/墙钟由 run-finish 登记，工具不实测；
-   无进展检测（StuckDetector 式）未做，killed_no_progress 与
-   心跳/DEAD 判据均为规程 + 事件留痕，工具不内置守护巡检。
+7. 预算账为登记制：GPU 时/墙钟由 run-finish 登记，工具不实测。
+   无进展检测已落地为包内轻量巡检（v1.3）：watchdog scan
+   按需扫描、超时未进展机械判定落事件 + 候选，工具不代杀，
+   killed_no_progress 终止仍靠执行者按规程落字；残留是巡检
+   非实时守护（实时性取决于扫描调用频率）、只做超时判定、
+   不做动作重复/打转的语义检测。
 8. 承接校验已补齐草案 §4 全集（v1.1 EXP-D04）：零占位符扫描
    （模式清单冻结在 schema.PLACEHOLDER_PATTERNS，清单外新写法
    扫不出，靠修订清单补入）、干预核查点齐备检查（只验声明

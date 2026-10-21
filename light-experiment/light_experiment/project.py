@@ -31,6 +31,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from .capture import build_start_capture, pool_entry_for
 from .events import append_event, read_events
 from .gates import BUDGET_KEYS, GateError
 from .interventions import verify_intervention_checks
@@ -243,6 +244,7 @@ def load_package(root: Path, exec_id: str) -> dict:
     d = exec_dir(root, exec_id)
     return {
         "execution": execution,
+        "exec_dir": str(d),
         "runs": runs,
         "events": events,
         "event_errors": event_errors,
@@ -528,6 +530,14 @@ def _apply_spec(run: dict, spec: dict) -> None:
         ident["seeds"]["root_seed"] = spec["root_seed"]
     if spec.get("intervention_checks") is not None:
         ident["intervention_checks"] = spec["intervention_checks"]
+    if spec.get("command") is not None:
+        # 命令行文本（第四批捕获）：工具不托管子进程，命令只能由
+        # 执行端声明、开跑时随捕获块锚定（provenance=declared）
+        ident["command"] = spec["command"]
+    if spec.get("input_files") is not None:
+        # 输入文件路径清单（第四批捕获）：路径由 spec 声明，哈希
+        # 由工具在 run-start 时逐个实测落账（provenance=captured）
+        ident["input_files"] = [str(p) for p in spec["input_files"]]
     if spec.get("cold_start") is not None:
         # 冷启动重跑标记（E1 验收证据的真伪锚）：声明本 run 是在干净
         # 环境只凭提交物 + 单一入口冷启动跑的——开跑时钉进 run_started
@@ -554,6 +564,11 @@ def _create_run(root: Path, execution: dict, brief_row: dict,
         # run 上仍须受同样的机械核验，v1.0 继承清单漏此项）
         run["identity"]["intervention_checks"] = copy.deepcopy(
             oident.get("intervention_checks") or [])
+        # 捕获声明同理继承（第四批）：同一条命令、同一批输入在
+        # 替代 run 上仍是声明面，spec 显式给了则以 spec 为准
+        for key in ("command", "input_files"):
+            if oident.get(key) is not None:
+                run["identity"][key] = copy.deepcopy(oident[key])
         run["identity"]["seeds"]["root_seed"] = \
             (oident.get("seeds") or {}).get("root_seed")
         lineage = run["identity"]["lineage"]
@@ -633,8 +648,17 @@ def start_run(root: Path, exec_id: str, run_id: str, *,
     ident["birth_certificate"] = build_birth_certificate(ident, utcnow())
     seeds = ident["seeds"]
     seeds["derived_seed"] = derive_seed(seeds["root_seed"], run_id)
-    run["observation"]["timeline"]["started_at"] = utcnow()
-    run["observation"]["attempts_budget"]["attempts_used"] += 1
+    # 自动捕获（第四批）：身份冻结后、开跑落字前由工具实测落账
+    # （git 文件级探针 / 环境指纹 / 执行者 / 声明输入的实测哈希）；
+    # 声明的输入文件缺失在此拦下（GateError），不许带病开跑。
+    # 捕获块哈希随 run_started 事件锚钉住，与 identity_hash 分工：
+    # 身份 = spec 声明（复现判据），捕获 = 工具实测（环境证据）。
+    cap_start, cap_hash = build_start_capture(root, run)
+    obs = run["observation"]
+    obs["capture"] = {"start": cap_start, "start_hash": cap_hash,
+                      "finish": None}
+    obs["timeline"]["started_at"] = utcnow()
+    obs["attempts_budget"]["attempts_used"] += 1
     _transition(run, "running", by, date, "开跑（身份哈希与出生证明已冻结）")
     save_run(root, exec_id, run)
     d = exec_dir(root, exec_id)
@@ -643,6 +667,7 @@ def start_run(root: Path, exec_id: str, run_id: str, *,
     append_event(d, "run_started", run_id=run_id,
                  payload={"identity_hash": ident["identity_hash"],
                           "params_hash": ident["params_hash"],
+                          "capture_hash": cap_hash,
                           "cold_start": bool(ident.get("cold_start"))})
     return run
 
@@ -657,6 +682,8 @@ def _file_fingerprint(path: Path) -> dict:
 def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
                metrics_file: Path | None = None,
                salvage_files: tuple[Path, ...] = (),
+               stdout_file: Path | None = None,
+               stderr_file: Path | None = None,
                salvage_note: str = "", no_salvage: bool = False,
                failure_ref: str | None = None, mark_deviated: bool = False,
                wall_clock_s: float = 0, gpu_hours: float = 0,
@@ -664,7 +691,11 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
                date: str | None = None) -> dict:
     """running → completed / failed / deviated：落 exit_status（终止分类
     词表）、指标文件登记、抢救产物登记、预算入账。失败终止必须有抢救
-    产物或显式「无可抢救」声明（约束 4）。"""
+    产物或显式「无可抢救」声明（约束 4）。
+    第四批：metrics / salvage / stdout / stderr 在登记同时按内容
+    哈希拷入 artifacts/ 内容寻址池，登记条带 pool_ref；stdout /
+    stderr 由执行端交文件入池（工具不托管子进程，无 fd 级拦截，
+    未交时终止捕获如实落 not_provided）。"""
     date = date or today()
     if exit_status not in EXIT_STATUSES:
         raise ValueError(f"exit_status={exit_status!r} 不在终止分类词表内"
@@ -675,7 +706,12 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
     target = "deviated" if mark_deviated else (
         "completed" if exit_status == "completed" else "failed")
     conc = run["conclusion"]
-    salvage = [_file_fingerprint(p) for p in salvage_files]
+    d = exec_dir(root, exec_id)
+    salvage = [pool_entry_for(d, p, "salvage") for p in salvage_files]
+    output_entries = []
+    for kind, p in (("stdout", stdout_file), ("stderr", stderr_file)):
+        if p is not None:
+            output_entries.append(pool_entry_for(d, p, kind))
     if target == "failed" and not salvage and not salvage_note and not no_salvage:
         raise GateError(["失败终止必须登记抢救产物（--salvage）或显式声明"
                          "无可抢救（--no-salvage / --salvage-note）——"
@@ -699,10 +735,18 @@ def finish_run(root: Path, exec_id: str, run_id: str, *, exit_status: str,
     conc["salvage"] = salvage
     conc["salvage_note"] = salvage_note
     for entry in salvage:
-        run["observation"]["artifacts"].append({**entry, "kind": "salvage"})
+        run["observation"]["artifacts"].append(dict(entry))
+    run["observation"]["artifacts"].extend(output_entries)
     if metrics_file is not None:
-        run["observation"]["metrics_ref"] = _file_fingerprint(metrics_file)
+        run["observation"]["metrics_ref"] = pool_entry_for(
+            d, metrics_file, "metrics")
     obs = run["observation"]
+    cap = obs.setdefault("capture", {"start": None, "start_hash": None,
+                                     "finish": None})
+    cap["finish"] = {
+        "captured_at": utcnow(),
+        "outputs": "captured" if output_entries else "not_provided",
+    }
     obs["timeline"]["ended_at"] = utcnow()
     spent = {"wall_clock_s": wall_clock_s, "gpu_hours": gpu_hours, "api_cost": api_cost}
     for k in BUDGET_KEYS:

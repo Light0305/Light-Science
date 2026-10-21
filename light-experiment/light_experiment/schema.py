@@ -21,7 +21,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
+from pathlib import Path
 
 from .events import validate_events
 from .util import canonical_json, component_hash, sha256_text
@@ -189,6 +191,16 @@ INTERVENTION_VERDICTS = ("passed", "failed", "unverifiable",
 # deviated 候选（失败类终止本就不被消费，保留原状态只落记录）。
 INTERVENTION_BLOCKING_VERDICTS = ("failed", "unverifiable")
 
+# ---------- 第四批词表（自动捕获 / 内容寻址池） ----------
+
+# 内容寻址池对象相对路径口径（capture.pool_object_relpath 同口径）：
+# artifacts/objects/<sha256 前 2 位>/<sha256 全文>——内容即地址，
+# 登记条的 pool_ref 必须指向以其自身 sha256 为名的对象。
+POOL_REF_PATTERN = re.compile(r"^artifacts/objects/([0-9a-f]{2})/([0-9a-f]{64})$")
+# 终止捕获的输出落点状态：captured（stdout/stderr 至少一份入池）
+# / not_provided（执行端未交输出文件，如实落字不冒充已捕获）。
+CAPTURE_OUTPUT_STATES = ("captured", "not_provided")
+
 SEED_DERIVATION_RULE = (
     "derived_seed = int(sha256(f'{root_seed}|{run_id}'.encode()).hexdigest()[:8], 16)"
 )
@@ -326,6 +338,10 @@ def empty_run(run_id: str, design_run_id: str, attempt: int, design_ref: dict,
                                 "wall_clock_s": 0, "gpu_hours": 0, "api_cost": 0},
             "metrics_ref": None,
             "artifacts": [],
+            # 自动捕获（第四批）：start = 开跑时工具实测捕获块 +
+            # start_hash 自洽哈希（另钉 run_started 事件锚）；
+            # finish = 终止时输出捕获落点。旧包无此键 = 存档形态。
+            "capture": {"start": None, "start_hash": None, "finish": None},
         },
         # 结论区（终态落字后不可改；对账指针除外）
         "conclusion": {
@@ -559,6 +575,9 @@ def _validate_run(run: dict, pkg: dict) -> list[str]:
                                 "事件锚不一致（结论区核验记录终态后回改即"
                                 "在此暴露）")
 
+    # —— 自动捕获 + 内容寻址池（第四批）：捕获锚对账 + 池主动巡检 ——
+    errs.extend(_capture_pool_errors(run, pkg))
+
     # —— 对账指针 ——
     recon = pkg.get("reconciliation")
     if isinstance(recon, dict):
@@ -567,6 +586,99 @@ def _validate_run(run: dict, pkg: dict) -> list[str]:
         row = (conc.get("reconciliation") or {}).get("row")
         if row is not None and row not in row_ids:
             errs.append(f"{label} 对账指针 row={row!r} 不在对账表行内")
+    return errs
+
+
+def _capture_pool_errors(run: dict, pkg: dict) -> list[str]:
+    """自动捕获与内容寻址池的校验（第四批）。
+
+    - 捕获块在场时严验：start_hash 与块内容重算一致、run_started
+      事件锚的 capture_hash 与之对齐、来源标记 captured 在位；
+      捕获块缺席 = 旧包存档形态（如实放行，与干预 not_verified
+      同哲学：不拿新口径追溯判旧包死刑）。
+    - 池主动巡检：凡登记条带 pool_ref，其形态必须是内容地址
+      （artifacts/objects/<前缀>/<自身 sha256>）；pkg 带 exec_dir
+      时进一步落盘巡检——池对象必须存在且字节重哈希与地址一致
+      （登记文件事后被改在此暴露，不再靠人想起才复核）。"""
+    errs: list[str] = []
+    rid = run.get("run_id")
+    label = f"run {rid}"
+    obs = run.get("observation") or {}
+    conc = run.get("conclusion") or {}
+    status = run.get("status")
+    events = pkg.get("events") or []
+
+    capture = obs.get("capture") or {}
+    start = capture.get("start")
+    if isinstance(start, dict):
+        if component_hash(start) != capture.get("start_hash"):
+            errs.append(f"{label} 捕获块 start_hash 与块内容重算不一致"
+                        "（开跑捕获记录被改动）")
+        if start.get("provenance") != "captured":
+            errs.append(f"{label} 捕获块 provenance 非 captured"
+                        "（捕获块只能是工具实测落账，声明内容不许"
+                        "冒充捕获）")
+        cmd = start.get("command")
+        if isinstance(cmd, dict) and cmd.get("provenance") != "declared":
+            errs.append(f"{label} 捕获块 command 来源标记非 declared"
+                        "（命令文本由执行端声明、工具只锚定不代测）")
+        if status != "planned":
+            started = [e for e in events if e.get("type") == "run_started"
+                       and e.get("run_id") == rid]
+            if started:
+                anchor = (started[-1].get("payload") or {}).get("capture_hash")
+                if anchor is None:
+                    errs.append(f"{label} 有捕获块但 run_started 事件锚缺 "
+                                "capture_hash（捕获无锚，事后补录不作数）")
+                elif anchor != capture.get("start_hash"):
+                    errs.append(f"{label} 捕获块与 run_started 事件锚的 "
+                                "capture_hash 不一致（开跑捕获记录终态后"
+                                "回改即在此暴露）")
+    finish = capture.get("finish")
+    if isinstance(finish, dict) and \
+            finish.get("outputs") not in CAPTURE_OUTPUT_STATES:
+        errs.append(f"{label} 终止捕获 outputs 非法：{finish.get('outputs')!r}"
+                    f"（须属 {CAPTURE_OUTPUT_STATES}）")
+
+    entries: list[tuple[str, dict]] = []
+    for e in obs.get("artifacts") or []:
+        if isinstance(e, dict):
+            entries.append(("观测区 artifacts", e))
+    mr = obs.get("metrics_ref")
+    if isinstance(mr, dict):
+        entries.append(("metrics_ref", mr))
+    for e in conc.get("salvage") or []:
+        if isinstance(e, dict):
+            entries.append(("结论区 salvage", e))
+    exec_dir = pkg.get("exec_dir")
+    for where, e in entries:
+        ref = e.get("pool_ref")
+        if not ref:
+            continue  # 无 pool_ref = 登记制存档条（旧形态），只验哈希登记
+        m = POOL_REF_PATTERN.match(str(ref))
+        if not m:
+            errs.append(f"{label} {where} 条目 {e.get('name')!r} 的 pool_ref"
+                        f" 形态非法：{ref!r}（须为 artifacts/objects/"
+                        "<sha256 前 2 位>/<sha256>）")
+            continue
+        if m.group(2) != e.get("sha256"):
+            errs.append(f"{label} {where} 条目 {e.get('name')!r} 的 pool_ref"
+                        " 地址与登记 sha256 不符（内容寻址：地址即内容哈希）")
+            continue
+        if m.group(1) != m.group(2)[:2]:
+            errs.append(f"{label} {where} 条目 {e.get('name')!r} 的 pool_ref"
+                        " 扇出目录与地址前缀不符")
+            continue
+        if exec_dir:
+            obj = Path(exec_dir) / str(ref)
+            if not obj.is_file():
+                errs.append(f"{label} {where} 条目 {e.get('name')!r} 的池对象"
+                            f"缺失：{ref}（产物已登记入池但池内无此对象，"
+                            "池被动过手脚）")
+            elif hashlib.sha256(obj.read_bytes()).hexdigest() != e.get("sha256"):
+                errs.append(f"{label} {where} 条目 {e.get('name')!r} 的池对象"
+                            "字节重哈希与登记 sha256 不符（池对象内容已被"
+                            "改动，主动巡检检出）")
     return errs
 
 

@@ -14,7 +14,8 @@ import json
 import sys
 from pathlib import Path
 
-from . import channels, check, draft, intake, ledger, novelty, oa, radar
+from . import (channels, check, draft, execsearch, intake, ledger,
+               novelty, oa, radar, render)
 from .project import PatentError, init_package, load_case
 from .util import load_structured
 from .validate import validate_package
@@ -53,6 +54,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("query"); p.add_argument("root"); p.add_argument("--payload")
 
     p = sub.add_parser("search"); p.add_argument("root"); p.add_argument("--payload")
+    p = sub.add_parser("search-exec"); p.add_argument("root"); p.add_argument("--payload")
     p = sub.add_parser("d1"); p.add_argument("root"); p.add_argument("--payload")
 
     p = sub.add_parser("claims"); p.add_argument("root"); p.add_argument("--payload")
@@ -62,6 +64,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("numerals"); p.add_argument("root"); p.add_argument("--payload")
     p = sub.add_parser("gaps"); p.add_argument("root"); p.add_argument("--payload")
     p = sub.add_parser("strip"); p.add_argument("root")
+    p = sub.add_parser("render-docx"); p.add_argument("root")
 
     p = sub.add_parser("check"); p.add_argument("root")
     p = sub.add_parser("redteam"); p.add_argument("root"); p.add_argument("--payload")
@@ -117,6 +120,8 @@ def _dispatch(args) -> int:
             means_phrases=payload.get("means_phrases"))})
     elif cmd == "search":
         _print(novelty.register_search(args.root, _payload(args)))
+    elif cmd == "search-exec":
+        _print(execsearch.execute_search(args.root, _payload(args)))
     elif cmd == "d1":
         _print(novelty.lock_d1(args.root, _payload(args)))
     elif cmd == "claims":
@@ -129,6 +134,8 @@ def _dispatch(args) -> int:
         _print(draft.register_gaps(args.root, _payload(args)))
     elif cmd == "strip":
         _print(draft.strip_filing(args.root))
+    elif cmd == "render-docx":
+        _print(render.render_docx(args.root))
     elif cmd == "check":
         _print(check.run_check(args.root))
     elif cmd == "redteam":

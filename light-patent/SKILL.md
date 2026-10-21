@@ -1,7 +1,7 @@
 ---
 name: light-patent
 description: Use when 需要把已成型的科研成果（论文、代码仓、实验记录、口头交底）转成中国发明专利申请：做公开状态审计、交底挖掘、检索查新、权利要求与说明书撰写、成稿审核、审查意见答复或案件台账管理时。
-version: "1.0"
+version: "1.1"
 author: light-patent contributors
 license: MIT
 ---
@@ -19,6 +19,10 @@ license: MIT
 > **版本：v1.0（2026-10-21 夜班新建）**。§1–§13 为已实现规程；
 > 演示见 `examples/demo-fullrun/`（终点 responded，含模拟递交与
 > 模拟审查意见，报告内逐项标注）。
+>
+> **v1.1 增量（2026-10-21 第四批）**：P2 检索执行通道落地
+> （search-exec，见 §6）；P3 申报副本 DOCX 渲染落地
+> （render-docx，见 §7）。两处实测状态如实记于各节。
 
 ## §1 定位与边界
 
@@ -147,6 +151,23 @@ LD-04 blocked_gate 字段族同形，供 leader status/route 只读点名）；
   crawler 的预检门；PSS 需登录，只作人工复核登记，禁止自动化；
   智慧芽等厂商 API 只登记为可选渠道，启用前须登记披露考量
   确认；EPO OPS 为欧洲侧官方 API 通道，v1 只登记。
+- 检索执行（v1.1，search-exec 命令）：两个可执行渠道。epub
+  自动化渠道经 light-crawler 驱动全链（工作区/目标登记/预检/
+  具名确认/gate-check/fetch 全走 crawler 自己的门，本包只回读
+  其账目）；预检落 pending_confirmation 且 payload 未给
+  confirmer 时停在预检后点名（awaiting_confirmation），不代签、
+  不发请求、不留检索日志行。OPS 渠道走官方 API 口径：凭据只
+  从环境变量 EPO_OPS_CONSUMER_KEY/_SECRET 读、永不落盘；缺失
+  时返回 credential_gap（不写检索日志）；单次执行只发一条
+  search 请求（Range 1-25），429/403 即停不重试。执行轨迹逐次
+  落 novelty/exec/；查全/查准不自报数字，轨迹只记
+  precision_assessment=pending_human，须人工同题对拍后落字。
+  **实测状态（2026-10-21）**：epub 链的门已实连验通（预检真实
+  跑过；当日出口网络下 robots 不可达、预检按 RFC 9309 失败
+  关闭，两次执行均如实落 channel_failure）；检索结果页的端点
+  形态与解析器未经真实页面验证（站点不可达），只由自造
+  fixture 钉测，网络恢复后须按冒烟案复跑再宣称可用。OPS 适配
+  器与解析由 fixture 钉测，凭据缺口待用户注册后实连。
 - 最小披露构造（query 命令）：检索式只能由分类号 + 手段短语
   构成；构造器拒绝案件标题、整句技术方案、超长短语入查询。
 - D1 与三态门：精排池中锁定 D1（须已核验 + 选定理由 + 证据
@@ -177,6 +198,15 @@ LD-04 blocked_gate 字段族同形，供 leader status/route 只读点名）；
 - 申报副本：strip 命令由工作副本机械剥离 HTML 批注、撰写
   说明/查新过程段与源锚点令牌，生成 draft/filing/ 并做洁净
   检查（过程词表零命中）与哈希 diff 留痕。
+- DOCX 渲染（v1.1，render-docx 命令）：申报副本三件（权利
+  要求书/说明书/说明书摘要）按包内渲染规程（A4、页边距、
+  页眉文件名称、页脚页码域、宋体 14pt/1.5 倍行距）渲染为
+  同名 .docx 落 draft/filing/；渲染前对源 MD 复跑过程词扫描，
+  命中即拒渲染（不许绕过洁净门）；渲染后回读核验（段落清单
+  全等、权要编号集、过程词零命中、页面设置）并落
+  render_report.yaml（源/产物哈希 + 逐件核验）。MD 仍是文本
+  真相，DOCX 只是渲染产物；渲染规程为本包定版而非官方逐字
+  规范，递交前仍须按当期电子申请客户端口径复核。
 
 ## §8 P4 审核（双层）
 

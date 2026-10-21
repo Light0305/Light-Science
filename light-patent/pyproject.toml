@@ -13,6 +13,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
+render = ["python-docx>=1.0"]
 
 [project.scripts]
 light-patent = "light_patent.cli:main"

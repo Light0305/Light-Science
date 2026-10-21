@@ -2,7 +2,7 @@
 
 承接 light-analysis 结论包的稿件包工具：**先登记后使用、成稿门逐项对账**。主张、数字、引用、图表、声明全部先登记进稿件包，正文只许引用登记过的东西；引用只来自 light-literature 的 verified 集，数字只来自 Analysis 溯源表，措辞永不超过 Analysis 强度档。
 
-当前版本：**v1.2（封版，2026-10-21）**。v1.1 增补：intake 卡内一致性校验（WRT-D05）、贡献确认回执（WRT-D04）、程式化核查 advisory 层（WRT-D01）、措辞词表实测与证据登记（WRT-D02）、溯源键三元组（WRT-D13）、模板记录校验小账清零（WRT-D08）、SKILL 分册化（WRT-D06，细则见 `references/`）。端到端演示见 `examples/demo-fullrun/`（合成链：承 Analysis 演示结论卡走完 intake → outlined → drafted → 披露 → 审计四门 → audited，跨模型复核 REVIEW_UNAVAILABLE 如实拦停，另含 W7 返修全环；v1.1 复跑附记在 demo-report 末尾）；Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
+当前版本：**v1.3（封版，2026-10-21）**。v1.3 增补：pandoc 渲染链落地（`export run/check`：机械组装投稿源 + 渲染 DOCX/LaTeX/PDF + 渲染后六项复核，产物绑稿件哈希）；模板实物线按新口径本地重建（逐家登记 + 规程 + 自制 pandoc 模板，禁再分发者只登记不收物）。v1.1 增补：intake 卡内一致性校验（WRT-D05）、贡献确认回执（WRT-D04）、程式化核查 advisory 层（WRT-D01）、措辞词表实测与证据登记（WRT-D02）、溯源键三元组（WRT-D13）、模板记录校验小账清零（WRT-D08）、SKILL 分册化（WRT-D06，细则见 `references/`）。端到端演示见 `examples/demo-fullrun/`（合成链：承 Analysis 演示结论卡走完 intake → outlined → drafted → 披露 → 审计四门 → audited，跨模型复核 REVIEW_UNAVAILABLE 如实拦停，另含 W7 返修全环；v1.1 复跑附记在 demo-report 末尾）；Phase 1 承接骨架演示见 `examples/demo-synthetic/`。
 
 ## 能力
 
@@ -27,6 +27,7 @@
 - **复核门与 submission_ready**：跨模型复核子流程（`review prepare/record/import/unavailable`，收据 `RV-<sha256[:10]>`，同族拒、带异议不落收据），与 Idea/Design/Analysis 同构；ready 门 = 四门新鲜全过 + 落点底线层全 addressed + 披露齐备 + 声明无 absent + 合同非 contested + 复核收据哈希对齐；REVIEW_UNAVAILABLE 停 audited 并落 blocked 原因。
 - **W7 返修子包**（`revision/`）：审稿意见逐条登记（原文）→ 逐条回复（决策+理由+改动锚点）→ 双向对账（意见全覆盖 × 正文 `[rev:]` 改动全回指）→ 回复信绑稿件哈希，稿改信未更即 STALE。
 - **W5 图表回填三方对账**（`figures`）：清单 ↔ 正文 `[fig:]` 实位 ↔ 图注（哈希对齐 + 同位出现）；编号冻结后只许追加编号或全量重编，均落变更日志。
+- **导出渲染链**（`export run/check`，v1.3）：稿件包 → 单一投稿源 `combined.md`（只变换不改写：`[num:]` 剥离并逐个与数字账比对、`[claim:]` 剥离、`[@lit:]` 按 lock 归一、独行 `[fig:]` 按 figures_manifest 落位、摘要节提升为元数据，未决占位/未交付图件点名拦停）→ pandoc → `manuscript.docx/.tex` → LaTeX 引擎 → `manuscript.pdf`；模板变量映射三路（包内模板核查记录 / 模板库登记条目 / 内置通用配置），产物与 `export_record.json` 绑 `manuscript_hash`，稿改后 `export check` 报 STALE。渲染后机械复核六项（数字在场 / 引用键集一致 / 禁用词重扫 / 占位符零残留 / 节标题齐全 / 图件在场）；工具缺失如实落 `PANDOC_MISSING` / `ENGINE_MISSING` / `SVG_CONVERTER_MISSING`，不假渲染。
 - **补课 D 账本**（nature-skills 生态簇，采纳 16 条 D-W01–D-W16）：正文分配纪律（位置图 + 结果功能八分类 + 删除日志）、术语账（锁定后变体入稿即 error）、AI 使用风险分级（evaluative_interpretive 须 human_verified 落字、prohibited 硬拦）、数据集访问路径七路映射、清单 stage/readiness、承重陈述保护、草稿标记纪律、统计报告底稿条目（`checklist add-stats`）。
 
 ## 快速开始
@@ -49,6 +50,8 @@ light-write advance ./my-manuscript   # → audited（四门全过）
 light-write review prepare ./my-manuscript
 light-write review record ./my-manuscript --reviewer "GPT Reviewer" --family openai
 light-write advance ./my-manuscript   # → submission_ready
+light-write export run ./my-manuscript --generic   # 或 --template <模板库条目id> --library <模板库根>
+light-write export check ./my-manuscript  # 既有导出复核重跑 + STALE 检出
 ```
 
 投中文期刊时 `--language zh`，模板记录的期刊语言同为 zh；逐节规程与措辞词表双语同构（见 SKILL.md §3/§4）。
@@ -63,7 +66,7 @@ light-write advance ./my-manuscript   # → submission_ready
 ## 测试
 
 ```bash
-python -m pytest   # 183 个测试（v1.0 的 129 + v1.1 新增 47 + v1.2 快修新增 7）
+python -m pytest   # 199 个测试（v1.0 的 129 + v1.1 新增 47 + v1.2 快修新增 7 + v1.3 渲染链新增 16）
 ```
 
 ## 已知局限（v1.0）
@@ -71,8 +74,8 @@ python -m pytest   # 183 个测试（v1.0 的 129 + v1.1 新增 47 + v1.2 快修
 1. **在线权威记录为注入接口，v1 不内嵌网络调用**：门一的在线核对靠 `--online-records` 注入操作者自备的权威记录（如 Crossref 拉取）；演示中的注入记录是构建时现拉的真实记录（原始响应存档），但工具本身不联网、不缓存、不自动刷新。
 2. **同一稿件不支持双语双版**：language 按目标期刊登记 en/zh 二选一，同稿不维护双语平行版本（拍板①修正版口径）。
 3. **D-W17（组织形态重构）已由 WRT-D06 落地**：SKILL 主文件只留路由表、规则表与段门规程卡（156 行），细则下沉 `references/` 五册，结构 lint 进测试。
-4. **导出渲染层不在 v1**：v1 只出 MD 稿件包 + 模板登记；pandoc/LaTeX/Word 导出排 v1.1（拍板⑤）。
-5. **模板库姊妹仓未建**：模板核查记录须人工按期刊官方原文逐项登记（工具只校验形态与时效）；姊妹仓 v0（元数据登记 + 官方渠道 + 条款、不打包模板文件）排在 Write v1 封版后启动。
+4. **导出渲染层（第四批已落地，原 v1 局限关闭）**：`export run` 以 pandoc 把稿件包渲成 DOCX / LaTeX / PDF（机械变换 + 渲染后复核六项 + 产物绑稿件哈希）；模板变量映射来自包内模板核查记录或模板库登记。残留限：elsarticle 等自定义类的作者单位未映射（见模板库自制 pandoc-elsarticle 模板头注）；acmart 强制单位带国家字段而稿件包作者记录无此字段，该类 PDF 编译被类报错拦停（数据缺口已登记，不在模板层猜拆）；PDF 编译依赖本机 TeX 宏包齐备度，缺包时点名失败不假渲染；中文稿 PDF 需 xelatex，未装时只出 tex/docx 并落 ENGINE 口径注记。
+5. **模板库已按新口径本地重建（原姊妹仓口径关闭）**：模板库（登记 + 逐家规程 + 自制模板为公开形态；实物按 redistribution 三档落盘，MDPI 禁再分发只登记不收物）为本地库，不随本仓发布。模板核查记录仍须人工按期刊官方原文逐项登记，工具只校验形态与时效；是否再建公开姊妹仓由用户拍板。
 6. **溯源表共键遮蔽已由 WRT-D13 关闭**：溯源键细化为（判定行，登记行，量名）三元组，同行多量各自独立锚定；裸键只在单量时兼容解析，多量落 ambiguous 点名须显式迁移。
 7. **措辞门是词表级机械比对**：抓得到标记句内的越档词，抓不到无标记断言与语义级夸大；未标记的事实断言仍须人工补审（约束 11 的诚实边界）。词表实测的语料面有限（两篇同领域已发表论文 + 本包演示稿，无中文自家稿），后续真实项目稿应按同一脚本扩样复测。
 8. **相关性/支撑判定只验机械面**：工具校验判定词表合法、逐字句在场、双角色落名，不判语义真伪；判定本身由人/模型按对抗协议给出，工具不代判。
@@ -85,3 +88,4 @@ python -m pytest   # 183 个测试（v1.0 的 129 + v1.1 新增 47 + v1.2 快修
 - **v1.0（2026-10-20）**：SKILL 定版（§1–§19：文件群/承接/规则表/提纲/合同/模板消费/登记纪律/核查口径/CLI/逐节规程/审计四门/披露/复核门/W7 返修/图表对账/成稿自检 16 项/失败模式 F1–F16/补课 D 采纳规程/LEARNING 16 条对应表）；129 测试全绿；端到端演示 `examples/demo-fullrun/`（合成链）终点 audited + REVIEW_UNAVAILABLE 拦停、四门终审全过、W7 返修双向对账全过。
 - **v1.1（2026-10-21 夜班构建，待全套统一封版）**：七个必做项落地（构建单 `../20-build/phase3-write.md`）；176 测试全绿（129 基线零变红 + 新增 47）；演示复跑终点 audited、四门全过、卡内一致性 0 gap（附记见 demo-report 末尾）。
 - **v1.2（2026-10-21 快修批）**：冻结措辞表变体绕过修复——significant 族禁用词（not significant / highly significant）匹配前做变体归一（间隙只许 -ly 副词或 at all、至多 2 个成分，聚焦副词 only/just/also/simply/merely 排除，防误杀 "not only significant" 让步结构）；183 测试全绿（新增 7，含阴性对照）。开放类变体（wasn't significant 等）未覆盖、只登记待语料证据。
+- **v1.3（2026-10-21 第四批·渲染与执行）**：pandoc 渲染链（`export.py` + CLI `export run|check`）与模板实物线落地；同稿实测六个期刊类配置（generic/elsarticle/IEEEtran/achemso/Frontiers 编译通过且六项复核全过；acmart 因作者记录缺国家字段被类报错拦停，如实登记）；构建期冒烟抓到图件在同段标记下整图丢失的真缺陷，已修并新增 `figures_in_render` 机械门；199 测试全绿（新增 16）。

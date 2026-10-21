@@ -1,7 +1,7 @@
 ---
 name: light-write
 description: Use when 需要把分析结论包写成可投稿的稿件：按登记的主张、数字与引用成稿，过审计门，或处理审稿返修意见时。
-version: "1.2"
+version: "1.3"
 author: light-write contributors
 license: MIT
 ---
@@ -28,6 +28,7 @@ license: MIT
 | 查失败形态与处置 | `references/failure-modes.md`（原 §17，F1–F16） |
 | 补课 D 规程（分配/术语/风险分级/支撑量表等）、约束对应表 | `references/supplement-d.md`（原 §18/§19） |
 | 投稿前逐项自检 | 本文件 §16 清单 |
+| 导出投稿文件（DOCX / LaTeX / PDF） | 本文件 §9 `export` 命令；模板变量映射与实物见模板库登记（`libraries/journal-templates/registry.jsonl`，逐家规程在其 procedures/） |
 
 ## §1 稿件包文件群
 
@@ -46,6 +47,7 @@ license: MIT
 | `audit/` | 审计四门产物（audit_report.json + 逐门 MD + 总判定，绑稿件哈希）+ 程式化核查产物（tone_report.json + gate-tone.md，advisory） |
 | `revision/` | W7 返修子包（comments.yaml / responses.yaml / response_letter.md） |
 | `review_packet.md` | 跨模型复核包（review prepare 生成，自包含） |
+| `export/<配置名>/` | 导出产物（pandoc 渲染链）：`combined.md` 组装源（机械变换留痕）、`manuscript.docx/.tex/.pdf`、`export_record.json`（工具版本/模板映射/变换日志/复核五项，绑稿件哈希——稿改即 STALE，`export check` 检出） |
 
 ## §2 承接规程（W0，intake）
 
@@ -129,7 +131,11 @@ light-write revision add-comment|respond|check|bind <root> ...
 light-write figures add|sync|caption|delivered|check|freeze <root> ...
 light-write terms <root> / allocation <root>     # 补课 D 两账校验（分册 supplement-d §18.1/§18.2）
 light-write checklist add-stats <root>          # 统计报告底稿条目（分册 supplement-d §18.6）
+light-write export run <root> [--format docx,tex,pdf] [--template <模板库条目id> --library <模板库根> | --generic]
+light-write export check <root>                 # 既有导出复核重跑 + STALE 检出
 ```
+
+导出纪律（渲染链）：源稿是权威，导出只做机械变换（`[num:]` 剥离留呈现值、`[claim:]` 剥离、`[@lit:]` 按 lock 归一、独行 `[fig:]` 落位、摘要节提升为元数据），逐项留痕于 export_record；渲染后复核六项与审计门口径同源（数字账值在场 / 引用键集合一致 / 禁用词重扫 / 占位符零残留 / 节标题齐全 / 图件在场），任一失败点名报错。工具缺失（pandoc / LaTeX 引擎 / SVG 转换器）如实落 PANDOC_MISSING / ENGINE_MISSING / SVG_CONVERTER_MISSING，不许假渲染。模板实物按模板库登记的 redistribution 档位取用：prohibited（如 MDPI）永不入导出实物。
 
 ## §16 成稿自检清单（submission_ready 前逐项勾）
 

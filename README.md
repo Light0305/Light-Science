@@ -10,14 +10,14 @@
 | [light-literature](light-literature/) | 文献：检索核实、双轨解析、四件套、精读卡与证据行；v1.1 增共享检索适配层、元数据自动回填、claim-support 主张核查与 ask 问语料；v1.2 ask 检索升级（IDF 加权排序、跨语言扩展、证据单元门，冻结问答集全召回 57.1% → 95.2%） | **v1.2 已发布** |
 | [light-idea](light-idea/) | 想法：基于证据矩阵与笔记生成、查新并筛选研究想法；v1.1 查新扩至七源、判例集冷启动、能力匹配维度；v1.2 种子标识符全量复核与订正（D1） | **v1.2 已发布** |
 | [light-design](light-design/) | 设计：把想法落成可执行的研究/实验设计；v1.1 增结构化 SESOI 字段、跨区实体核对、amendment 增量评审；v1.2 增功效真计算模块（非中心 t/F 精确解求解器 + design_size 落格与实际功效拦截） | **v1.2 已发布** |
-| [light-experiment](light-experiment/) | 实验：执行设计、记录过程与原始产物；v1.1 增干预机械核验、承接三查与 stale 清单；v1.2 容差纪律与 advance 门对齐（D-EXP-1） | **v1.2 已发布** |
+| [light-experiment](light-experiment/) | 实验：执行设计、记录过程与原始产物；v1.1 增干预机械核验、承接三查与 stale 清单；v1.2 容差纪律与 advance 门对齐（D-EXP-1）；v1.3 自动捕获、内容寻址产物池与无进展巡检 | **v1.3 已发布** |
 | [light-analysis](light-analysis/) | 分析：按冻结登记行逐行回写正式判定，产出可审计的分析结论包；v1.1 增 SESOI 注册快照消费、配对/区组结构建模与稳健性口径落字；v1.2 贝叶斯诊断缺失行死锁修复（D-ANA-1，冻结真值集主张级 6/6） | **v1.2 已发布** |
-| [light-write](light-write/) | 写作：基于证据行成稿，引用只走核实过的文献；v1.1 增 AI 味核查层（advisory）、卡内一致性常开、贡献确认回执与追溯键三元组；v1.2 冻结措辞表 significant 族变体归一 | **v1.2 已发布** |
+| [light-write](light-write/) | 写作：基于证据行成稿，引用只走核实过的文献；v1.1 增 AI 味核查层（advisory）、卡内一致性常开、贡献确认回执与追溯键三元组；v1.2 冻结措辞表 significant 族变体归一；v1.3 pandoc 渲染链（DOCX/LaTeX/PDF）与模板实物线 | **v1.3 已发布** |
 | [light-journal-select](light-journal-select/) | 选刊（**Write 前置扩展位**，不占十件套编号）：先例路统计 + 逐刊核验 + 风险门出证据卡，用户定刊后备齐模板与九组检查记录再交 Write 开工；v1.1 增复合排序、官网回填、仓储源过滤与证据构成段 | **v1.1 已发布** |
 | [light-figure](light-figure/) | 作图：图合同先行、双线生成（数据图代码线 / 方法图提示词→原生重绘线）、七门实测审计与交付；v1.1 增 PowerPoint 文件层全链、语义 ID 入图、箭头计划与空转门、Illustrator 精修路线 | **v1.1 已发布** |
 | [light-review](light-review/) | 评审：投稿前内部评审（法医式四方对账 + GRIM/GRIMMER、模拟审稿人组与共识门、校准门决定建议、自审门、concern 回填清单）；v1.1 增义务账、范式层与三查升格门 | **v1.1 已发布** |
 | [light-memory](light-memory/) | 记忆：跨阶段沉淀与 Obsidian 图谱——收编各阶段产物为对象/事件/事实/关系四账，双时间取代链、候选沉淀门、三路检索回供与 Obsidian 单向投影；v1.1 增会话沉淀协议、真实嵌入接入（bench 复测 0.78，临时通过线沿用 v1.0 线待用户定版）与三新包承接 | **v1.1 已发布** |
-| [light-patent](light-patent/) | 专利（**出口层扩展位**，v1.1 新增）：发明专利自查、查新与草案级交底/申请文件辅助，全程分级声明「需专利代理师复核」，只中国、只发明 | **v1.0 已发布** |
+| [light-patent](light-patent/) | 专利（**出口层扩展位**，v1.1 新增）：发明专利自查、查新与草案级交底/申请文件辅助，全程分级声明「需专利代理师复核」，只中国、只发明；v1.1 增检索执行通道（epub 经爬虫驱动 / OPS API）与 DOCX 渲染 | **v1.1 已发布** |
 | [light-software-copyright](light-software-copyright/) | 软件著作权（**出口层扩展位**，v1.1 新增）：软著登记材料包辅助——工具起草、用户逐段确认留痕，递交前逐字核对当期声明原文（硬门） | **v1.0 已发布** |
 | [light-crawler](light-crawler/) | 爬虫（**通道层扩展位**，v1.1 新增）：项目数据采集的合规通道——目标级预检 + 项目锁 + 拒绝留痕，robots 不可达一律 fail-closed（RFC 9309），登录态 v1 全关；v1.1 能力强化与决策落地；v1.2 增 trafilatura 深档抽取与带标注页面回归集 | **v1.2 已发布** |
 
@@ -25,7 +25,7 @@
 
 ## v1.1 说明（2026-10-21）
 
-第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,747 项（1,746 passed + 1 skipped，各包见其 README），发布树测试 1,715 项（1,713 passed + 2 skipped）。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
+第二轮全套升级：逐包按诊断清单完成必做项，横切引入技能行为评测（X-01 试点：总控路由 / 写作措辞门 / 评审席位隔离，含 gold 与 heldout 双集双臂实测）、frontmatter 规范、双树漂移门与全套 lint。开发树测试总计 1,800 项（1,799 passed + 1 skipped，各包见其 README），发布树测试 1,768 项（1,766 passed + 2 skipped）。已知环境缺口如实登记于各包 README 已知局限：dblp 在部分网络环境被机器人校验拦截（适配器已就位、失败如实记盲区）；Visio / PowerPoint COM 与 Illustrator 实机冒烟需 Windows / Adobe 环境，本版以规程 + 文件层落地；软著 AI 声明当期原文未取得，包内只建核对硬门、不写死任何声明措辞。
 
 ## light-literature（已发布）
 

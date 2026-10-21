@@ -146,6 +146,52 @@ def render_report(root: Path, exec_id: str, *, date: str | None = None) -> dict:
     else:
         L.append("（无失败分类记录）")
     L.append("")
+    # —— 第四批版面：自动捕获 / 内容寻址池 / 无进展判定 ——
+    L.append("## 自动捕获与产物池（第四批）")
+    L.append("")
+    captured = [r for r in runs
+                if ((r.get("observation") or {}).get("capture") or {})
+                .get("start")]
+    pooled_entries = 0
+    for r in runs:
+        obs = r.get("observation") or {}
+        pooled_entries += sum(
+            1 for e in obs.get("artifacts") or []
+            if isinstance(e, dict) and e.get("pool_ref"))
+        mr = obs.get("metrics_ref")
+        if isinstance(mr, dict) and mr.get("pool_ref"):
+            pooled_entries += 1
+    L.append(f"- 开跑捕获在位的 run：{len(captured)}/{len(runs)}"
+             "（git 探针 / 环境指纹 / 执行者由工具实测落账，"
+             "capture_hash 钉 run_started 事件锚；无捕获块的为旧包"
+             "存档形态）")
+    for r in sorted(captured, key=lambda x: x["run_id"]):
+        cap = (r.get("observation") or {}).get("capture") or {}
+        start = cap.get("start") or {}
+        git = start.get("git") or {}
+        git_desc = (f"commit {str(git.get('commit'))[:12]}…，"
+                    f"dirty {git.get('dirty')}"
+                    if git else
+                    f"无（{start.get('git_unavailable_reason') or '—'}）")
+        fin = cap.get("finish") or {}
+        L.append(f"  - {r['run_id']}：git {git_desc}；声明输入实测 "
+                 f"{len(start.get('inputs') or [])} 个；终止输出 "
+                 f"{fin.get('outputs') or '（未终止）'}")
+    from .capture import verify_pool
+    pool = verify_pool(root / "executions" / exec_id)
+    L.append(f"- 内容寻址池：对象 {pool['objects']} 个 / {pool['bytes']} "
+             f"字节，带池引用的登记条 {pooled_entries} 条"
+             f"（损坏 {len(pool['corrupt'])} 个；validate 逐条巡检"
+             "池对象，artifact verify 给全池体检）")
+    for c in pool["corrupt"]:
+        L.append(f"  - 🔴 池对象损坏：{c['pool_ref']}——{c['reason']}")
+    verdicts = [e for e in events if e.get("type") == "no_progress_verdict"]
+    if verdicts:
+        L.append(f"- 无进展判定（watchdog 巡检留痕）：{len(verdicts)} 条，"
+                 f"涉及 run "
+                 f"{'、'.join(sorted({e.get('run_id') or '' for e in verdicts}))}"
+                 "（候选留痕，终止处置见 run 的 exit_status）")
+    L.append("")
     tripped = (ledger.get("last_check") or {}).get("tripped") or []
     if tripped:
         L.append("## 熔断状态")

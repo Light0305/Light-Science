@@ -1,7 +1,7 @@
 ---
 name: light-experiment
 description: Use when 需要按已冻结的设计书真正执行实验：逐 run 留痕、登记偏离与失败、与预期登记对账，或向分析阶段交付执行包时。
-version: "1.2"
+version: "1.3"
 author: light-experiment contributors
 license: MIT
 ---
@@ -41,7 +41,7 @@ Analysis 可直接消费的**执行包**。
 | E0 执行承接与对齐校验 | 消费四件套、冻结哈希与 amendment 链核对、缺项打回 | `intake` + intake_report + 打回门（v1.1 EXP-D04 补齐草案 §4 全集：零占位符扫描 + 干预核查点齐备检查 + 依赖计划产出 execution_plan.md） |
 | E1 基线复现 | 照复现入口跑基线、rubric 对账、冷启动重跑验收（拍板 ③ 硬要求） | `acceptance init/record`：三层叶子验收表冻结、证据只认冷启动重跑、验收门挂 sanity → executing |
 | E2 编排与预算 | 拓扑序调度、三层预算闸、熔断只许停不许改（拍板 ⑤）、恢复 = 新 run + 血缘（拍板 ②） | attempts 预算账 + budget_ledger 总账 + `budget check`（触发落事件 + killed_budget 候选；无放宽命令）+ run-new --retry-of 血缘 |
-| E3 留痕与轨迹 | run 记录字段下限、事件只增、产物内容寻址登记 | run.yaml 四区 + events.jsonl + Sacred 下限校验 |
+| E3 留痕与轨迹 | run 记录字段下限、事件只增、产物内容寻址登记 | run.yaml 四区 + events.jsonl + Sacred 下限校验 + 开跑自动捕获 / 内容寻址产物池 / 无进展巡检（第四批：capture.py 入池与实测落账、watchdog.py 扫描式巡检，validate 主动巡检池对象） |
 | E4 偏离与异常 | 偏离登记、闭包作废（拍板 ④ 自动算 + 公示 + 显式覆写口）、处置 | `deviation raise/publish/apply/override`：出生证明逐维比对 + 依赖图传递闭包、生效清单公示、作废只追加；干预核查点机械核验（v1.1 EXP-D03：run-finish 时三类核验器比对声称 vs 实际生效值，不符自动转 deviated 候选）；`stale` 开工前预检视图（v1.1 EXP-D02：现行哈希链逐维比对出三态清单，只读） |
 | E5 失败诊断与回流 | exit_status 分类学、MAST × IVE 双层分类、自动回流条目（拍板 ⑥）、失败预算制 | `failure classify/review` + `reflux list/update`：分类落定自动生成回流条目、同签名 2 补丁 + 2 重写上限报警 |
 | E6 封装与交接 | 对账表逐行回填、三层事实判定、未清零不交付、向 Analysis 交付 | `reconcile fill/check`（只收分布不收单点）+ delivered 门 + `export-card` 投影 |
@@ -54,7 +54,8 @@ light-experiment intake <project> --from-export <Design exports/<design_id> 目�
 light-experiment run-new <project> <exec_id> <design_run_id> [--spec <规格.yaml>] [--retry-of <run_id>]
 light-experiment run-start <project> <exec_id> <run_id> [--spec <规格.yaml>]
 light-experiment run-finish <project> <exec_id> <run_id> --exit-status <终止分类> \
-    [--metrics-file <文件>] [--salvage <抢救产物> ...] [--no-salvage] [--mark-deviated] \
+    [--metrics-file <文件>] [--stdout-file <文件>] [--stderr-file <文件>] \
+    [--salvage <抢救产物> ...] [--no-salvage] [--mark-deviated] \
     [--wall-clock-s N] [--gpu-hours N] [--api-cost N]
 light-experiment event <project> <exec_id> --type <事件类型> [--run-id <run_id>] [--payload <JSON>]
 light-experiment validate <project> <exec_id>
@@ -88,11 +89,22 @@ light-experiment export-card <project> <exec_id> [--out <路径>]
 # 三期（v1.1）
 light-experiment stale <project> <exec_id> [--spec <现行状态声明文件>] \
     [--out-json <路径>] [--out-md <路径>]
+# 第四批（捕获 / 产物池 / 无进展巡检）
+light-experiment artifact add <project> <exec_id> --run <run_id> --file <文件> [--kind <类别>]
+light-experiment artifact verify <project> <exec_id>
+light-experiment artifact list <project> <exec_id>
+light-experiment watchdog scan <project> <exec_id> [--threshold-s <秒数>] [--now <ISO 时刻>]
 ```
 
 run 规格（`--spec`）在身份下限五项之外可带 `cold_start: true`：声明本
 run 是干净环境冷启动重跑——开跑时钉进 run_started 事件锚，作 E1 验收
 证据的真伪凭据（事后回填冒充，锚不一致即被校验器检出）。
+
+run 规格另可带 `command`（命令行文本）与 `input_files`（输入文件
+路径清单）供开跑捕获（第四批）：路径与命令文本由 spec 声明
+（provenance=declared），输入文件的 sha256 与字节数由工具在
+run-start 时逐个实测落账（provenance=captured）；声明的输入
+文件不存在即拦开跑，不许带病开跑。
 
 run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
 `claimed`（声称值）之外应带 `verify`（v1.1 EXP-D03）：`verify.kind`
@@ -161,6 +173,27 @@ run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
     自动转 deviated 候选并点名——工具没有手工标 pass 的入口，
     执行者自述的实际值一律不作数。校验器以事件锚对账核验记录，
     结论区回改即暴露。
+16. **字段来源分开落字**（第四批）：开跑时工具实测落账的捕获字段
+    （git 状态、环境指纹、执行者、声明输入的实测哈希）标
+    provenance=captured，捕获块整体哈希钉进 run_started 事件锚，
+    改捕获记录即锚不符；spec 声明字段（身份区、命令文本、冷启动
+    标记）标 declared 或以身份锚钉住——声明不许冒充实测，实测
+    不许覆盖声明。identity_hash 仍是声明身份（复现判据），捕获
+    块是实测环境证据，两者并存对读，分工不混。
+17. **产物入池、池可巡检**（第四批）：run-finish 的 metrics /
+    salvage / stdout / stderr 与 artifact add 的产物一律按内容
+    哈希拷入 executions/<exec_id>/artifacts/ 内容寻址池，run 记录
+    以 sha256 + pool_ref 引用（同内容只存一份）；validate 主动
+    巡检池对象（缺失 / 字节重哈希与地址不符逐条点名），登记在
+    账、池里没货或货被改都不许静默过关。无 pool_ref 的旧登记条
+    是存档形态，只验哈希登记本身。
+18. **无进展判定只留痕不代杀**（第四批）：watchdog scan 对
+    running 的 run 按最近进展事件（step / observation /
+    heartbeat / 干预核验 / 人工检查点等）计时，闲置 ≥ 阈值（默认
+    3600 秒，可配）判 no_progress——判定落 no_progress_verdict
+    事件 + 列候选，同一进展状态只落一条；正式终止仍走
+    run-finish --exit-status killed_no_progress，工具不代杀、
+    不自动改 run 状态（与预算熔断候选同纪律）。
 
 ## 操作规程
 
@@ -239,6 +272,25 @@ run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
    层补齐 verify 再开跑；报告中如实呈现未核验条数，不许把
    not_verified 写成「已核验」。
 
+### 捕获、产物池与无进展巡检规程（第四批）
+
+1. 开跑不用另行登记系统标签：run-start 自动捕获 git 状态
+   （文件级探针直读 .git，不起子进程）、环境指纹与执行者身份；
+   要留命令与输入证据，在 spec 里给 command 与 input_files
+   （输入开跑时实测哈希，缺失即拦）。捕获块与身份区对读：
+   声明环境与实测指纹不符（如声明的机器档位与实测主机/CPU
+   对不上）本身就是要上报的事实，不许改捕获块去迁就声明。
+2. 产物随手入池：run-finish 带 --metrics-file / --stdout-file /
+   --stderr-file / --salvage，终止后补产的用 artifact add 入池
+   登记（planned 与 reconciled 拒收）；交付前跑 artifact verify
+   全池体检（损坏 / 登记悬空必须清零），validate 已含逐条巡检。
+3. 长 run 保活纪律：运行中周期性落进展事件（`event --type
+   heartbeat` 或 step / observation），间隔须短于巡检阈值；
+   每批 run 结束后（或定时）跑 watchdog scan——命中判定的 run
+   二选一：确认仍在跑则补进展事件续命（新进展状态可再判），
+   确认已死则 run-finish --exit-status killed_no_progress
+   正规终止 + 按 E5 分类，不许对判定置之不理。
+
 ### 开工前 stale 预检规程（v1.1 EXP-D02）
 
 1. 每批开跑前（尤其上游刚出新结果、设计刚 amendment、代码/数据
@@ -262,6 +314,9 @@ run 规格的 `intervention_checks` 每条在 `point`（核查点名）与
 - [ ] 每条 run 身份下限齐全、哈希与事件锚一致；失败 run 均有抢救登记
 - [ ] 干预核查结论已落字：带 verify 的核查点全 pass（不符已转
       deviated 并按偏离规程处置），not_verified 条数如实入报告
+- [ ] 产物池体检过（artifact verify 无损坏、无登记悬空）；命中
+      无进展判定的 run 已处置（补进展事件续命或以
+      killed_no_progress 正规终止并落分类）
 - [ ] 基线验收表已冻结且 verdict=passed（有基线条目时），证据全是冷启动 run
 - [ ] 偏离全登记、全公示、全处置；override 均留名留理由
 - [ ] 失败全分类（MAST × IVE），回流条目已生成且状态如实
@@ -317,14 +372,26 @@ a2 均 passed，a2 的核查点经 --retry-of 继承）；stale 预检
    只认文件来源（JSON/JSONL 取键、文件哈希）；非文件型证据
    （人工观察读数、外部系统界面值）无从机械读取，只能登记为无
    verify 的存档式核查点、如实报 not_verified。
-3. 产物池仍为登记制：salvage/metrics/证据以外部路径 + sha256 登记，
-   内容寻址拷贝入 artifacts/ 池未做；登记文件事后被改，哈希可复核
-   但工具不主动巡检。
-4. 自动捕获未做：git/环境/执行者等系统标签仍由 spec 声明；
-   冷启动标记同为 spec 声明 + 事件锚钉住——锚保证「声明在开跑时
-   作出、事后不可改」，但声明本身是否属实（环境是否真的干净）
-   靠规程与抽验，工具验不了；演示的冷启动以新进程 + 空目录
-   近似，未做容器/VM 级隔离。
+3. 产物池已落地内容寻址（第四批）：run 产物（metrics / salvage /
+   stdout / stderr / artifact add 补登）按内容哈希拷入包内
+   artifacts/objects 池、去重存储，validate 主动巡检、artifact
+   verify 全池体检。残留边界：池是**包内**池——跨执行包同内容
+   不共享去重；验收证据文件（acceptance record --evidence）仍为
+   路径 + sha256 登记制未入池；无 pool_ref 的旧登记条只有哈希
+   登记、原文件被改只能在有人复核时发现（池内对象才是工具
+   恒定巡检面）。
+4. 自动捕获已落地（第四批）：run-start 工具实测 git 状态
+   （文件级探针：commit / 分支 / 仓库 URL / index v2 口径的
+   dirty）、环境指纹（OS/Python/主机/CPU）与执行者身份，捕获
+   块哈希钉事件锚，与 spec 声明身份并存对读。残留边界：
+   ①git dirty 只认 index v2 且只比跟踪文件，未跟踪文件不计、
+   非 git 目录如实缺席；②stdout/stderr 是执行端交文件入池的
+   交接式捕获——工具不托管子进程，无 Sacred 式 fd 级拦截，
+   执行端不交即落 not_provided，不冒充；③GPU 无通用实测探针，
+   仍走环境声明；④冷启动标记同为 spec 声明 + 事件锚钉住——
+   锚保证「声明在开跑时作出、事后不可改」，但声明本身是否
+   属实（环境是否真的干净）靠规程与抽验，工具验不了；演示
+   的冷启动以新进程 + 空目录近似，未做容器/VM 级隔离。
 5. 闭包口径为条目级依赖图：brief 的 depends_on 只到条目粒度，
    同条目内 attempt 间的先后污染靠锚匹配覆盖，条目内细粒度数据流
    （某 attempt 的中间产物喂给另一 attempt）不在图内。
@@ -336,9 +403,12 @@ a2 均 passed，a2 的核查点经 --retry-of 继承）；stale 预检
    交付门前都须落分类（含外部中断，分类指向恢复路径）。
 7. 执行为规程执行（拍板 ① = C）：工具不托管子进程/容器，run
    记录预留 backend 字段；预算账的 GPU 时/墙钟由 run-finish
-   登记，工具不实测；无进展检测（StuckDetector 式）未做，
-   killed_no_progress 靠执行者按规程落终止分类。心跳/DEAD 判据
-   同理是规程 + 事件留痕，工具不内置守护进程巡检。
+   登记，工具不实测。无进展检测已落地为包内轻量巡检（第四批，
+   PLAN 二选一定版）：watchdog scan 按需扫描、超时未进展机械
+   判定落事件 + 列候选，工具不代杀（PLAN 的外部看门狗契约形态
+   未取）；残留边界是巡检非实时守护——实时性取决于扫描调用
+   频率，且只做超时判定、不做 StuckDetector 式的动作重复/
+   打转语义检测；killed_no_progress 终止仍靠执行者按规程落字。
 8. 篡改修复纪律（三期演示实测）：被篡改的 run 记录只许外科式
    改回锚定字段；整文件回滚会把 voided_by 等只追加记一并抹掉，
    终局校验以「作废标记未落字」检出——修复本身必须留痕

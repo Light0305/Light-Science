@@ -16,6 +16,9 @@ human_checkpoint / run_finished / failure_classified / reflux_emitted /
 resume / void_marked / intake_done / intake_rejected / package_advanced /
 note。一期实际产生的子集见各命令；词表外类型校验器直接报错——
 词表修订须走留痕（改本常量 + SKILL 同步），不许静默扩词（约束 11）。
+第四批增补三型（留痕同上）：heartbeat（无进展巡检的心跳进展信号）、
+artifact_registered（产物入内容寻址池登记）、no_progress_verdict
+（watchdog 巡检判定，候选留痕不代杀）。
 """
 
 from __future__ import annotations
@@ -38,12 +41,14 @@ EVENT_TYPES = (
     "run_started",
     "step",
     "observation",
+    "heartbeat",
     "intervention_check",
     "deviation_raised",
     "deviation_decided",
     "deviation_voided",
     "budget_event",
     "breaker_tripped",
+    "no_progress_verdict",
     "human_checkpoint",
     "run_finished",
     "failure_classified",
@@ -53,6 +58,7 @@ EVENT_TYPES = (
     "reconciliation_filled",
     "resume",
     "void_marked",
+    "artifact_registered",
     "note",
 )
 

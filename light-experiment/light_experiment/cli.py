@@ -32,6 +32,17 @@
               （机读 JSON + 人读 MD 两份）；只读，不改包状态。
   （run-finish 内置 EXP-D03 干预机械核验：声称 vs 实际生效值由工具
    按登记的核验方式机械比对，不符自动转 deviated 候选。）
+
+四期命令（总纲三第四批）：
+  artifact    内容寻址产物池（add 产物入池登记 / verify 全池体检：
+              逐对象重哈希验地址 + 未引用清单 / list 池对象清单）
+  watchdog    无进展巡检（scan：包内轻量巡检——对 running 的 run
+              按最近进展事件计时，超时判 no_progress 落事件留痕 +
+              列候选，不代杀；终止仍走 run-finish killed_no_progress）
+  （run-start 内置自动捕获：git 文件级探针 / 环境指纹 / 执行者 /
+   声明输入实测哈希，捕获块哈希钉 run_started 事件锚；
+   run-finish 的 metrics/salvage/stdout/stderr 登记同时入池，
+   validate 主动巡检池对象。）
 """
 
 from __future__ import annotations
@@ -61,6 +72,7 @@ from .project import (
 )
 from .acceptance import init_acceptance, record_leaf
 from .budget import check_budget
+from .capture import iter_pool_objects, referenced_pool_shas, register_artifact, verify_pool
 from .deviations import (
     apply_deviation,
     override_deviation,
@@ -80,6 +92,7 @@ from .render import render_report
 from .schema import PKG_STATES, RUN_STATES, validate_package
 from .stale import compute_stale_report, write_stale_reports
 from .util import load_structured, today
+from .watchdog import DEFAULT_NO_PROGRESS_THRESHOLD_S, scan_no_progress
 
 
 def _fail(msg: str) -> int:
@@ -164,6 +177,18 @@ def cmd_run_start(args) -> int:
     ident = run["identity"]
     print(f"已开跑：{args.run_id}（identity_hash={ident['identity_hash'][:16]}…，"
           f"params_hash={ident['params_hash'][:16]}…，出生证明已冻结）")
+    cap = (run.get("observation") or {}).get("capture") or {}
+    start = cap.get("start") or {}
+    git = start.get("git") or {}
+    git_desc = (f"commit {str(git.get('commit'))[:12]}… / "
+                f"分支 {git.get('branch') or '—'} / dirty {git.get('dirty')}"
+                if git else
+                f"无（{start.get('git_unavailable_reason') or '未探到'}）")
+    print(f"  自动捕获：git {git_desc}；环境指纹 "
+          f"{(start.get('environment_fingerprint') or {}).get('os') or '—'} / "
+          f"执行者 {(start.get('executor') or {}).get('user') or '—'}；"
+          f"声明输入实测哈希 {len(start.get('inputs') or [])} 个"
+          f"（capture_hash 已钉 run_started 事件锚）")
     return 0
 
 
@@ -175,6 +200,8 @@ def cmd_run_finish(args) -> int:
             exit_status=args.exit_status,
             metrics_file=Path(args.metrics_file) if args.metrics_file else None,
             salvage_files=tuple(Path(p) for p in args.salvage or ()),
+            stdout_file=Path(args.stdout_file) if args.stdout_file else None,
+            stderr_file=Path(args.stderr_file) if args.stderr_file else None,
             salvage_note=args.salvage_note or "",
             no_salvage=args.no_salvage,
             failure_ref=args.failure_ref,
@@ -668,6 +695,117 @@ def cmd_stale(args) -> int:
     return 1 if s["stale"] else 0
 
 
+# ---------- 四期：artifact / watchdog ----------
+
+def cmd_artifact_add(args) -> int:
+    root = Path(args.project)
+    try:
+        entry = register_artifact(root, args.exec_id, args.run,
+                                   Path(args.file), kind=args.kind,
+                                   by=args.by)
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    except GateError as e:
+        return _gate_print("产物登记被拦", e.errors)
+    print(f"产物已入池登记：{entry['name']}（kind={entry['kind']}，"
+          f"sha256={entry['sha256'][:16]}…，pool_ref={entry['pool_ref']}，"
+          f"run {args.run}）")
+    return 0
+
+
+def cmd_artifact_verify(args) -> int:
+    root = Path(args.project)
+    try:
+        pkg = load_package(root, args.exec_id)
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    d = exec_dir(root, args.exec_id)
+    report = verify_pool(d)
+    referenced = referenced_pool_shas(pkg)
+    pooled = {p.name for p in iter_pool_objects(d)}
+    unreferenced = sorted(pooled - referenced)
+    dangling = sorted(referenced - pooled)
+    print(f"产物池体检：{args.exec_id}（对象 {report['objects']} 个，"
+          f"共 {report['bytes']} 字节，被引用 {len(referenced)} 个）")
+    for c in report["corrupt"]:
+        print(f"  🔴 损坏：{c['pool_ref']}——{c['reason']}")
+    for sha in dangling:
+        print(f"  🔴 登记悬空：run 记录引用 sha256={sha[:16]}… 但池内无此对象")
+    if unreferenced:
+        print(f"  未被引用的池对象 {len(unreferenced)} 个"
+              f"（{'、'.join(s[:12] + '…' for s in unreferenced[:5])}"
+              f"{' 等' if len(unreferenced) > 5 else ''}；"
+              "池为只增存储，未引用对象不自动删）")
+    if report["corrupt"] or dangling:
+        return 1
+    print("  池对象逐个重哈希与内容地址一致，无损坏、无登记悬空")
+    return 0
+
+
+def cmd_artifact_list(args) -> int:
+    root = Path(args.project)
+    try:
+        pkg = load_package(root, args.exec_id)
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    d = exec_dir(root, args.exec_id)
+    objects = iter_pool_objects(d)
+    if not objects:
+        print(f"{args.exec_id} 产物池为空（尚无产物入池）")
+        return 0
+    ref_by_sha: dict[str, list[str]] = {}
+    for run in pkg["runs"].values():
+        obs = run.get("observation") or {}
+        entries = list(obs.get("artifacts") or [])
+        mr = obs.get("metrics_ref")
+        if isinstance(mr, dict):
+            entries.append(mr)
+        entries.extend((run.get("conclusion") or {}).get("salvage") or [])
+        for e in entries:
+            if isinstance(e, dict) and e.get("pool_ref"):
+                ref_by_sha.setdefault(str(e.get("sha256")), []).append(
+                    f"{run['run_id']}:{e.get('kind') or 'artifact'}")
+    for p in objects:
+        rel = p.relative_to(d).as_posix()
+        refs = "、".join(ref_by_sha.get(p.name) or []) or "（未被引用）"
+        print(f"{rel}\t{p.stat().st_size} B\t引用：{refs}")
+    return 0
+
+
+def cmd_watchdog_scan(args) -> int:
+    root = Path(args.project)
+    now = None
+    if args.now:
+        from datetime import datetime
+        try:
+            now = datetime.fromisoformat(args.now)
+        except ValueError:
+            return _fail(f"--now 不是合法 ISO 时间戳：{args.now}")
+    try:
+        result = scan_no_progress(root, args.exec_id,
+                                  threshold_s=args.threshold_s,
+                                  now=now, by=args.by)
+    except FileNotFoundError as e:
+        return _fail(str(e))
+    running = result["running"]
+    print(f"无进展巡检：{args.exec_id}（阈值 {result['threshold_seconds']} 秒，"
+          f"running 的 run {len(running)} 个）")
+    if not result["verdicts"]:
+        print("  无 run 命中无进展判定（最近进展事件均在阈值内）")
+        return 0
+    new_ids = {v["run_id"] for v in result["newly_recorded"]}
+    for v in result["verdicts"]:
+        mark = "新判定，已落 no_progress_verdict 事件" \
+            if v["run_id"] in new_ids else "已判定过（同进展状态不重复落）"
+        print(f"  🔴 {v['run_id']}：闲置 {v['idle_seconds']} 秒 ≥ 阈值 "
+              f"{v['threshold_seconds']}（最近进展 "
+              f"{v['last_event_id']} {v['last_event_type']} "
+              f"@ {v['last_progress_at']}）——{mark}")
+    print("  判定为候选留痕，工具不代杀：处置走 run-finish "
+          "--exit-status killed_no_progress，或补 heartbeat/step 事件续跑")
+    return 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-experiment",
@@ -707,6 +845,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("run_id")
     p.add_argument("--exit-status", required=True, dest="exit_status")
     p.add_argument("--metrics-file", dest="metrics_file")
+    p.add_argument("--stdout-file", dest="stdout_file",
+                   help="本 run 的 stdout 全量文件（执行端交入，工具入池登记）")
+    p.add_argument("--stderr-file", dest="stderr_file",
+                   help="本 run 的 stderr 全量文件（执行端交入，工具入池登记）")
     p.add_argument("--salvage", action="append",
                    help="抢救产物文件（可多次给）")
     p.add_argument("--salvage-note", dest="salvage_note")
@@ -908,6 +1050,35 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out-md", dest="out_md",
                    help="人读报告路径（默认包目录内 STALE_REPORT.md）")
     p.set_defaults(func=cmd_stale)
+
+    # ---- 四期子命令组 ----
+    p = sub.add_parser("artifact", help="内容寻址产物池（入池登记 / 体检 / 清单）")
+    asub2 = p.add_subparsers(dest="artifact_command", required=True)
+    q = asub2.add_parser("add", help="把 run 产物文件入池并登记进该 run")
+    q.add_argument("project"); q.add_argument("exec_id")
+    q.add_argument("--run", required=True, help="产物所属 run 的 id")
+    q.add_argument("--file", required=True, help="产物文件路径")
+    q.add_argument("--kind", default="product", help="产物类别（默认 product）")
+    q.add_argument("--by", default="")
+    q.set_defaults(func=cmd_artifact_add)
+    q = asub2.add_parser("verify", help="全池体检：逐对象重哈希验地址 + 引用对账")
+    q.add_argument("project"); q.add_argument("exec_id")
+    q.set_defaults(func=cmd_artifact_verify)
+    q = asub2.add_parser("list", help="列池对象与引用方")
+    q.add_argument("project"); q.add_argument("exec_id")
+    q.set_defaults(func=cmd_artifact_list)
+
+    p = sub.add_parser("watchdog", help="无进展巡检（包内轻量巡检，判定留痕不代杀）")
+    wsub = p.add_subparsers(dest="watchdog_command", required=True)
+    q = wsub.add_parser("scan", help="扫描 running 的 run，超时无进展判 no_progress")
+    q.add_argument("project"); q.add_argument("exec_id")
+    q.add_argument("--threshold-s", type=float,
+                   default=DEFAULT_NO_PROGRESS_THRESHOLD_S, dest="threshold_s",
+                   help=f"无进展阈值秒数（默认 {DEFAULT_NO_PROGRESS_THRESHOLD_S:g}）")
+    q.add_argument("--now", help="扫描时刻（ISO 时间戳；缺省取当前时刻，"
+                                 "复盘/测试可显式给）")
+    q.add_argument("--by", default="")
+    q.set_defaults(func=cmd_watchdog_scan)
 
     args = parser.parse_args(argv)
     return args.func(args)
