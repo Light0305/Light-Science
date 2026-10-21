@@ -1,0 +1,46 @@
+# 漏斗统计（LD-06，只读汇总）
+
+口径：阶段状态以登记头规范态（LD-03）计数；门拦截只认已登记字段族（review_unavailable / blocked_gate / return_block）；返工 = milestone 事件中状态回退跃迁 除 可判序跃迁；停滞阈值 14 天；统计时刻 2026-10-21T12:18:57+00:00。
+事件账样本：88 条（坏行 0 条不入统计）。
+
+## 阶段分布与门拦截
+- literature（主流水线）：登记头 1，分布 已达终态x1；已达终态 1；门拦截 无命中
+    事件 0 条，最后事件 无，推进判定：已收官或未开工
+- idea（主流水线）：登记头 1，分布 进行中x1；已达终态 0；门拦截 review_unavailablex1
+    事件 0 条，最后事件 无，推进判定：不可判（事件账无该阶段记录）
+- design（主流水线）：登记头 1，分布 进行中x1；已达终态 0；门拦截 review_unavailablex1
+    事件 2 条，最后事件 2026-10-20T14:08:15+00:00，推进判定：活跃（距今 0.9 天）
+- experiment（主流水线）：登记头 2，分布 已达终态x1、进行中x1；已达终态 1；门拦截 无命中
+    事件 60 条，最后事件 2026-10-20T14:08:15+00:00，推进判定：活跃（距今 0.9 天）
+- analysis（主流水线）：登记头 1，分布 被门拦x1；已达终态 0；门拦截 review_unavailablex1
+    blocked 原因分布：判定复核不可用（REVIEW_UNAVAILABLE）x1
+    事件 4 条，最后事件 2026-10-20T14:08:17+00:00，推进判定：活跃（距今 0.9 天）
+- journal-select（主流水线）：登记头 1，分布 已达终态x1；已达终态 1；门拦截 无命中
+    事件 0 条，最后事件 无，推进判定：已收官或未开工
+- write（主流水线）：登记头 1，分布 进行中x1；已达终态 0；门拦截 review_unavailablex2
+    事件 7 条，最后事件 2026-10-20T14:08:17+00:00，推进判定：活跃（距今 0.9 天）
+- figure（主流水线）：登记头 1，分布 已达终态x1；已达终态 1；门拦截 无命中
+    事件 7 条，最后事件 2026-10-20T14:08:15+00:00，推进判定：已收官或未开工
+- review（主流水线）：登记头 1，分布 已达终态x1；已达终态 1；门拦截 无命中
+    事件 0 条，最后事件 无，推进判定：已收官或未开工
+- memory（横贯层）：对象 26、事件 88、事实 30、关系 16；registry-view 已导出
+- patent（出口层扩展位）：未建（无登记头）
+- software-copyright（出口层扩展位）：未建（无登记头）
+- crawler（通道层扩展位）：未建（无登记头）
+
+## 相邻阶段转化（下游已开工登记头 除 上游已达终态）
+- literature 到 idea：1 / 1 = 1.00
+- idea 到 design：不可计算（idea 已达终态数为 0，下游登记头 1）
+- design 到 experiment：不可计算（design 已达终态数为 0，下游登记头 2）
+- experiment 到 analysis：1 / 1 = 1.00
+- analysis 到 journal-select：不可计算（analysis 已达终态数为 0，下游登记头 1）
+- journal-select 到 write：1 / 1 = 1.00
+- write 到 figure：不可计算（write 已达终态数为 0，下游登记头 1）
+- figure 到 review：1 / 1 = 1.00
+注：一件上游产物可派生多件下游产物，比率可大于 1；本表只作漏斗形状读数，不作配对归因。
+
+## 返工（事件账状态跃迁）
+可判序跃迁 1 条，其中回退 0 条，返工率 0.00%；不可判序 0 条（from/to 缺失或不在该阶段状态序内，不入分母）。
+
+## 项目分布（registry-view 对象）
+- 项目 turkey-threshold-prediction：对象 26（类型 runx8、concernx6、claimx2、designx2、figurex2、analysis_packagex1、executionx1、journal_selectionx1、manuscriptx1、paperx1、review_packagex1；状态 activex24、referencedx2；阶段归属 experimentx9、reviewx8、analysisx3、figurex2、designx1、journal-selectx1、writex1、literaturex1；最后事件 2026-10-20T14:08:19+00:00）

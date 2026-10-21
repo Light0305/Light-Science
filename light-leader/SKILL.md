@@ -1,7 +1,7 @@
 ---
 name: light-leader
 description: Use when 需要总控一个 Light-Science 科研项目：建项目骨架、汇总各阶段状态、决定下一步推进哪个阶段，或查看对象注册统一视图时。
-version: "1.1"
+version: "1.2"
 author: light-leader contributors
 license: MIT
 ---
@@ -10,13 +10,13 @@ license: MIT
 
 > 定位：Light-Science 总控。只做编排，不做阶段内工作：建项目骨架、只读扫描各阶段包的登记头报告全项目状态、按规则表给下一步路由、只读消费 light-memory 的对象注册统一视图。各阶段的内部规程以各包 SKILL.md 为准，本文件只给全链规程与指针，接入模型照此执行总控动作即可。
 > 位置：科研流水线 literature → idea → design → experiment → analysis → journal-select（write 前置扩展位）→ write → figure → review，light-memory 横贯全程负责沉淀。总控在每个阶段的开工点与定版点出现，不介入阶段执行过程。
-> v1.0 定版（2026-10-20）：薄 CLI 四命令（init / status / route / registry）+ 本规程；演示见 examples/demo-fullrun/demo-report.md（对由各包真实 demo 登记头拼成的项目跑全链，三个 REVIEW_UNAVAILABLE 硬门被 route 逐一点名）。
+> v1.0 定版（2026-10-20）：薄 CLI 四命令（init / status / route / registry）+ 本规程；演示见 examples/demo-fullrun/demo-report.md（对由各包真实 demo 登记头拼成的项目跑全链，三个 REVIEW_UNAVAILABLE 硬门被 route 逐一点名）。其后增补：v1.1 LD-03/LD-04 与三包纳管（§8）；总纲三第六批增 funnel（漏斗统计，LD-06）与 synthesis（外环综合，LD-05）两只读命令（§11）。
 
 ---
 
 ## §1 定位与边界
 
-- **只编排**：总控不重实现任何阶段包的逻辑，不写任何阶段包的文件。status / route / registry 三命令全只读；init 只在空位建骨架且拒绝覆盖。
+- **只编排**：总控不重实现任何阶段包的逻辑，不写任何阶段包的文件。status / route / registry / funnel / synthesis 五命令全只读；init 只在空位建骨架且拒绝覆盖。
 - **状态只认登记头**：各包登记头的顶层 status 字段是阶段状态的唯一权威读数；总控不从文件存在性、目录新旧推断状态。读不到、解析失败、字段缺失一律逐项点名，不猜。
 - **路由是建议不是执行**：route 给下一步与理由、点名硬门与解法指针；真正开工由接入模型按对应包的 SKILL 执行，总控不代跑阶段命令。
 
@@ -120,6 +120,8 @@ license: MIT
 | light-leader status <项目> | 逐阶段报告登记头状态、硬门标记、memory 计数，并汇总三扩展位（patent 逐案、software-copyright 逐案、crawler 逐目标）；缺失逐项点名 | 只读 |
 | light-leader route <项目> | 硬门点名 + 下一步建议与理由 + 并行/memory 提示 + 收官判定 | 只读 |
 | light-leader registry <项目> | 定位并渲染 memory 的 registry-view.json（按类型分组、当前版本指针与状态）；缺失时点名并给生成方式指针 | 只读 |
+| light-leader funnel <项目> | 漏斗统计（LD-06，§11）：阶段规范态分布、门拦截构成与原因分布、相邻阶段转化、事件账返工率、阶段活动/停滞、registry-view 项目分布 | 只读 |
+| light-leader synthesis <项目> | 外环综合（LD-05，§11）：把 memory 事件账编译为决策时间线 + 模式发现（停滞/反复失败/门咬人/返工热点/跨项目复用）+ 方向调整建议，每条结论带账目证据 | 只读 |
 
 ## §7 状态读取口径
 
@@ -156,6 +158,7 @@ license: MIT
 - 演示（examples/demo-fullrun/）：init 建骨架后拼入各包真实 demo 的登记头（literature 索引与证据表、idea C1 卡、design 主设计、experiment 双 execution、analysis 结论包头、journal-select 选刊头、write 稿件头、figure 图包头、review 评审头、memory proj-a 四账复制自发布版演示世界），registry-view.json 由 light-memory 自家命令对副本导出后由总控消费。全链跑通：route 正确点名 idea / design / analysis / write 四处 REVIEW_UNAVAILABLE 硬门（证据均出登记头字段），下一步落在推进 idea 定版，并给出 memory 收编触发点提示。详见 demo-report.md。
 - v1.1 增补（2026-10-21）：LD-03 状态词规范化映射表（§7 成文表 + light_leader/statusmap.py，覆盖断言守护）与 LD-04 门字段族登记（§5 登记表 + layout.GATE_FIELD_FAMILIES；route 点名扩至 blocked_gate 统一字段与 design 打回/阻塞记录），测试增至 44 项；演示复跑四门点名不变、status/route 新增规范态标注（demo-report §6 增补）。LD-01 路由准确率评测集归第 4 步与 X-01 合流，本节不含。
 - v1.1 集成步增补（2026-10-21，LD-02）：三包纳管——layout 登记扩展位表（EXTENSIONS：patent / software-copyright 出口层、crawler 通道层），init 骨架含三落点目录与 project.yaml 的 extensions 段；status 汇总呈现三包状态（patent 逐案 status + blocked 门 + 台账期限，software-copyright 逐案 status + 补正信息，crawler 工作区状态 + 逐目标预检/熔断）；route 按 §4 规则 6 点名（patent 门与 90 日期限窗口、软著补正、出口层启动提示、爬虫预检与熔断），扩展位不进下一步与收官判定；§7 映射表补三包状态词（逐包对各包 schema 状态常量实核）。测试增至 58 项。
+- 总纲三第六批增补（2026-10-21，LD-05 / LD-06）：新增 light_leader/outer.py 与 funnel / synthesis 两只读命令——funnel 出漏斗统计面（阶段分布、门拦截与原因分布、相邻转化、返工率、停滞判定、项目分布），synthesis 把 memory 事件账编译为决策时间线并产出带证据的模式发现与方向调整建议（规程见 §11）；数据源只走 scan 汇总、registry-view 与 memory 事件/晋升两账，不直读各包内部文件。演示项目实产落 examples/demo-fullrun/evidence/07-funnel.txt 与 08-synthesis.txt，统计数字经独立抽核对读（demo-report §7）。测试增至 68 项。「只建议不执行」边界不变：两命令不代跑任何阶段命令、不写任何文件。
 
 ## §9 已知局限（v1.0）
 
@@ -175,3 +178,26 @@ license: MIT
 - **风险**：用户须知的残余风险与后续触发条件（什么情况下需要回头处理、由谁裁决）。
 
 口径：四行是全套交付的最低披露线。把跳过项写进完成项、把未验项写成已验证，均按造假论。新建的 demo-report 类文件由全套 lint 的收尾格式检查按登记清单强制（含本节标题与四行齐全）；存量报告只报告不拦，补齐与否随各包 v1.1 修订处理。
+
+## §11 外环综合与漏斗统计规程（LD-05 / LD-06，总纲三第六批新增）
+
+持有者为总控，两命令全只读，与 §1 边界同源：只汇总、只建议，不执行、不代跑、不写任何包文件。产物是给用户与接入模型看的统计面与综合简报，方向调整的决定权在用户。
+
+**数据源（封闭清单，不许扩读）**：
+1. 阶段状态走本包既有 status 汇总（scan 的登记头读数 + LD-03 规范态 + §5 已登记门字段族），与 status / route 同一口径；不直读各包内部文件另行拼凑。
+2. 对象与项目分布只消费 light-memory 的 registry-view.json（校验口径同 §2 既定接口 2：kind/版本不符点名、不自行重建）；视图不可用时该段落字说明，其余各段照常出。
+3. 事件与晋升只读 memory 记忆项目内的 events.jsonl 与 promotions.jsonl 两账（事件账是 memory 的存量本体，总控只读消费）；坏行计数点名、不入统计。项目内无 memory.yaml 时两命令点名失败并给建账指针，不许空跑出假统计面。
+
+**漏斗统计口径（funnel，常数在 light_leader/outer.py 写死）**：
+- 阶段分布：逐阶段（含扩展位）登记头按规范态计数；literature 按逐篇词汇计数，精读完成计终态；memory 行只报四账计数与视图导出与否。
+- 门拦截：逐阶段按字段族计命中数（review_unavailable 按字段命中计、blocked_gate 按 gate_id 出分布、return_block 计条数与 design 未回补缺项数），analysis 的 blocked.reason 另出原因分布——回答「哪道门最常咬人」只许引这张表。
+- 相邻转化：下游阶段已开工登记头数除以上游已达终态数；上游终态为 0 时写「不可计算」并给两原数。一件上游可派生多件下游，比率可大于 1，本表只作漏斗形状读数、不作配对归因。
+- 返工率：memory 事件账中 milestone 事件的 from/to 跃迁，两值都在该阶段状态序（LD-03 的 KNOWN_STATES）内才可判序；回退跃迁数除以可判序跃迁总数，不可判序的单独计数点名、不入分母。当前快照的 design 打回未回补缺项并列呈现，不与事件口径混算。
+- 活动与停滞：逐阶段最后一条归属事件的时间戳为据；阶段有进行中/被门拦登记头且最后事件距今超过 STALE_DAYS（14 天，常数）判「长期停滞」；无归属事件写「不可判（事件账无该阶段记录）」，不许以目录新旧或登记头时间推断。事件归属先认 provenance.source_package（去 light- 前缀对阶段表），后认 object_id 的类型前缀映射（outer.OBJECT_TYPE_STAGE）；两路都不中者计「未归属」，单独点名。
+- 项目分布：registry-view 对象按 project 分组，计对象数、类型、状态、阶段归属与最后事件；跨项目口径限于本 memory 登记在册的项目（全局记忆根的消费口径仍按 §9 局限 4 未定）。
+
+**外环综合口径（synthesis）**：
+- 决策时间线：事件账全量按 (ts, seq) 排序逐条呈现（阶段归属、类型、event_id、摘要），是 LD-05 的「单一可读时间线」产物形态；条数与事件账行数对账。
+- 模式发现只许五类，每类须带账目证据（event_id、计数或登记头指针）：长期停滞（同漏斗口径）；反复失败（failure 事件按 payload.failure_class 分组，同类达到 REPEAT_MIN = 2 才称反复，单次只记个案；回流去向 reflux_target 并列分布）；门咬人（当前快照任一阶段门命中，含构成与解法指针）；返工热点（回退跃迁逐阶段计数）；跨项目复用（promotions.jsonl 在账晋升 = 已晋升未撤回，及 registry-view 中同一 upstream_id 登记于两个以上项目的同源对象）。
+- 证据纪律：简报头先行样本量（事件数、坏行数、对象数、项目数、失败数、时间跨度）；事件账为空时只出样本量与缺证说明，不产出时间线与发现；样本不足以支撑某类发现时该类不出条目，不许拿空泛议论填充。注册视图不可用时复用判定受限，须在简报中落字。
+- 方向调整建议：每条由一条发现机械导出（停滞到优先处理、反复失败到按回流去向复盘、门到先解门、返工到核对开工条件、证据缺失到先补收编、复用到开工先 recall），并回指所据发现；无发现时明写「本周期未检出需调整的模式」。建议措辞不许超出所据发现的证据面。

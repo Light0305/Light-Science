@@ -1,15 +1,19 @@
-"""light-leader CLI：init / status / route / registry 四个子命令。
+"""light-leader CLI：init / status / route / registry / funnel /
+synthesis 六个子命令。
 
-纪律：status、route、registry 全只读（不写项目任何文件）；init 只在
-空位建骨架、拒绝覆盖。输出中文、缺失逐项点名；失败 exit 1。
+纪律：status、route、registry、funnel、synthesis 全只读（不写项目
+任何文件）；init 只在空位建骨架、拒绝覆盖。输出中文、缺失逐项点名；
+失败 exit 1。
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
+from . import outer as outer_mod
 from . import registry as registry_mod
 from . import route as route_mod
 from . import scan as scan_mod
@@ -198,10 +202,57 @@ def cmd_registry(args) -> int:
     return 0
 
 
+def _outer_stock(root: Path):
+    """funnel / synthesis 共同前置：读 memory 存量；无记忆项目点名失败。
+
+    两命令的事件/对象统计口径以 light-memory 存量为据；项目内无
+    memory.yaml 时不许空跑出一张假统计面，点名并给解法指针。
+    """
+    stock = outer_mod.load_stock(root)
+    if not stock["memory_dirs"]:
+        return None
+    return stock
+
+
+_OUTER_MISSING = (
+    "未找到 memory 记忆项目（memory.yaml）：本命令的事件与对象口径以 "
+    "light-memory 存量为据；先建 memory 并由 light-memory 对应适配器 "
+    "ingest 收编各阶段产物后重跑。")
+
+
+def cmd_funnel(args) -> int:
+    root = Path(args.path)
+    if not root.is_dir():
+        return _fail(f"项目目录不存在：{root}")
+    stock = _outer_stock(root)
+    if stock is None:
+        return _fail(_OUTER_MISSING)
+    now = datetime.now(timezone.utc)
+    scan = scan_mod.scan_project(root)
+    print(outer_mod.render_funnel(outer_mod.funnel(scan, stock, now),
+                                  stock))
+    return 0
+
+
+def cmd_synthesis(args) -> int:
+    root = Path(args.path)
+    if not root.is_dir():
+        return _fail(f"项目目录不存在：{root}")
+    stock = _outer_stock(root)
+    if stock is None:
+        return _fail(_OUTER_MISSING)
+    now = datetime.now(timezone.utc)
+    scan = scan_mod.scan_project(root)
+    fun = outer_mod.funnel(scan, stock, now)
+    print(outer_mod.render_synthesis(
+        outer_mod.synthesis(scan, stock, fun, now), stock))
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="light-leader",
-        description="light-leader：Light-Science 总控（薄编排：骨架/状态/路由/注册视图）")
+        description="light-leader：Light-Science 总控（薄编排：骨架/状态/路由/注册视图/漏斗统计/外环综合）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("init", help="生成标准项目骨架")
@@ -214,7 +265,9 @@ def main(argv=None) -> int:
     for name, fn, help_ in (
             ("status", cmd_status, "只读扫描逐阶段状态"),
             ("route", cmd_route, "按规则表给下一步建议与硬门点名"),
-            ("registry", cmd_registry, "渲染对象注册统一视图")):
+            ("registry", cmd_registry, "渲染对象注册统一视图"),
+            ("funnel", cmd_funnel, "漏斗统计：阶段分布/门拦截/转化/返工（LD-06，只读）"),
+            ("synthesis", cmd_synthesis, "外环综合：决策时间线/模式发现/方向建议（LD-05，只读）")):
         p = sub.add_parser(name, help=help_)
         p.add_argument("path")
         p.set_defaults(fn=fn)

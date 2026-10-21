@@ -96,3 +96,16 @@ route 的下一步理由同步带规范态标注。LD-04 的新门类点名（de
 returned 携缺项清单、blocked_gate 统一字段）由包内测试覆盖
 （tests/test_statusmap_gates.py），本演示登记头未携该类记录，故
 route 输出无新增点名行——缺字段不点名、不猜，属预期行为。
+
+## 7. 总纲三第六批增补（2026-10-21，LD-05 外环综合 / LD-06 漏斗统计）
+
+新增 light_leader/outer.py 与 funnel、synthesis 两只读命令，对本演示项目实跑，原始输出落 evidence/07-funnel.txt、08-synthesis.txt。统计数字经独立抽核（不经 outer 代码，原始账目文件直读直数）逐项对读，全对：
+
+- 事件账样本：直数 88 条，与漏斗头行一致；类型分布 failure 2 条（EV-000057、EV-000059），与综合简报「失败事件 2 条（均单次，未成模式）」及证据 id 一致；来源包分布 experiment 60 / design 2 / analysis 4 / write 7 / figure 7 / light-memory 8，与漏斗逐阶段事件计数一致，未归属 0 条。
+- 门拦截：idea / design / analysis 三登记头各 1 处 review_status 含 REVIEW_UNAVAILABLE，manuscript 同时命中 submission_blocked_reason 与 review_status 两字段（漏斗按字段命中计 review_unavailable x2）；analysis blocked 原因分布与登记头 reason 原文一致（判定复核不可用 REVIEW_UNAVAILABLE x1）。与 route 演示的四门点名同源同果。
+- 阶段分布：experiment 两登记头直读 b1 = intake（进行中）、b2 = delivered（已达终态），与漏斗「已达终态x1、进行中x1」一致；对象直数 26 个，类型与状态分布（run 8、concern 6，active 24 / referenced 2 等）与漏斗项目分布行逐项一致。
+- 返工：milestone 中 from/to 均为字符串者直数仅 1 条（EV-000002，draft 到 reviewed，前进），与漏斗「可判序跃迁 1 条、回退 0 条、返工率 0.00%」一致。
+- 停滞：各阶段最后事件距统计时刻约 0.9 天，未触发 14 天阈值，简报未报长期停滞（正确阴性）；idea 登记头进行中而事件账零归属，被判「不可判（事件账无该阶段记录）」并在综合中出「进行中但事件账无记录」发现——与 memory 演示收编范围（idea 无对应适配器事件）相符，属真实证据缺口而非漏检。
+- 跨项目复用：演示仅 1 个项目、promotions.jsonl 为空，简报未出复用条目（正确阴性）；复用判定的正例由 tests/test_outer.py 夹具覆盖（在账晋升 1 条 + 同源对象跨两项目）。
+
+「只建议不执行」边界不变：两命令只读不写，evidence 两文件为命令标准输出的人工重定向存档，非命令自写。

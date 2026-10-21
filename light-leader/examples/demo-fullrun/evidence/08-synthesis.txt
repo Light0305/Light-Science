@@ -1,0 +1,114 @@
+# 外环综合简报（LD-05，只读综合）
+
+样本量：事件 88 条（坏行 0 条不入）、注册对象 26 个、项目 1 个、失败事件 2 条；事件时间跨度 2026-10-20T14:08:15+00:00 ~ 2026-10-20T14:08:19+00:00。
+
+## 决策时间线（事件账全量，按时间序）
+- 2026-10-20T14:08:15+00:00 [design] milestone EV-000001：设计状态 None → draft
+- 2026-10-20T14:08:15+00:00 [design] milestone EV-000002：设计状态 draft → reviewed
+- 2026-10-20T14:08:15+00:00 [experiment] milestone EV-000003：执行包 video-threshold-predict_synth01-b2 收编：状态 delivered
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000004：intake_done EV-000001
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000005：run_created EV-000002 R-FIX-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000006：run_created EV-000003 R-ORA-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000007：run_created EV-000004 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000008：run_created EV-000005 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000009：run_created EV-000006 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000010：acceptance_initialized EV-000007
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000011：attempt_started EV-000008 R-FIX-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000012：run_started EV-000009 R-FIX-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000013：run_finished EV-000010 R-FIX-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000014：run_created EV-000011 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000015：attempt_started EV-000012 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000016：run_started EV-000013 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000017：run_finished EV-000014 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000018：acceptance_recorded EV-000015 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000019：acceptance_recorded EV-000016 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000020：acceptance_recorded EV-000017 R-FIX-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000021：attempt_started EV-000018 R-ORA-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000022：run_started EV-000019 R-ORA-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000023：run_finished EV-000020 R-ORA-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000024：attempt_started EV-000021 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000025：run_started EV-000022 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000026：run_finished EV-000023 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000027：observation EV-000024 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000028：deviation_raised EV-000025 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000029：deviation_decided EV-000026
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000030：void_marked EV-000027 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000031：deviation_voided EV-000028
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000032：note EV-000029 R-PRED-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000033：run_created EV-000030 R-PRED-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000034：attempt_started EV-000031 R-PRED-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000035：run_started EV-000032 R-PRED-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000036：run_finished EV-000033 R-PRED-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000037：attempt_started EV-000034 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000038：run_started EV-000035 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000039：run_finished EV-000036 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000040：failure_classified EV-000037 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000041：reflux_emitted EV-000038 R-NEG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000042：attempt_started EV-000039 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000043：run_started EV-000040 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000044：observation EV-000041 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000045：run_finished EV-000042 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000046：failure_classified EV-000043 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000047：reflux_emitted EV-000044 R-LONG-a1
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000048：run_created EV-000045 R-LONG-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000049：attempt_started EV-000046 R-LONG-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000050：run_started EV-000047 R-LONG-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000051：run_finished EV-000048 R-LONG-a2
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000052：reconciliation_filled EV-000049
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000053：reconciliation_filled EV-000050
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000054：reconciliation_filled EV-000051
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000055：reconciliation_filled EV-000052
+- 2026-10-20T14:08:15+00:00 [experiment] stage EV-000056：reconciliation_filled EV-000053
+- 2026-10-20T14:08:15+00:00 [experiment] failure EV-000057：失败 F-0001：FM-2.3 任务跑偏
+- 2026-10-20T14:08:15+00:00 [experiment] note EV-000058：失败复核 F-0001：同意=True
+- 2026-10-20T14:08:15+00:00 [experiment] failure EV-000059：失败 F-0002：FM-3.1 过早终止
+- 2026-10-20T14:08:15+00:00 [experiment] deviation EV-000060：偏离 DV-0001
+- 2026-10-20T14:08:15+00:00 [experiment] deviation EV-000061：偏离 DV-0001
+- 2026-10-20T14:08:15+00:00 [experiment] deviation EV-000062：偏离 DV-0001
+- 2026-10-20T14:08:15+00:00 [analysis] note EV-000063：结论包复核状态：REVIEW_UNAVAILABLE
+- 2026-10-20T14:08:15+00:00 [write] tool_use EV-000064：Claude（Claude Opus opus-4.5 (demo session)）用于 drafting assistance and language editing
+- 2026-10-20T14:08:15+00:00 [write] tool_use EV-000065：Claude（Claude Opus opus-4.5 (demo session)）用于 interpretation of analysis verdicts when drafting the limitations section
+- 2026-10-20T14:08:15+00:00 [write] milestone EV-000066：稿件状态 None → None
+- 2026-10-20T14:08:15+00:00 [write] milestone EV-000067：稿件状态 None → None
+- 2026-10-20T14:08:15+00:00 [write] milestone EV-000068：稿件状态 None → None
+- 2026-10-20T14:08:15+00:00 [write] milestone EV-000069：稿件状态 None → None
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000070：图 fig-1 修订（2026-10-20T10:52:49+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000071：图 fig-2 修订（2026-10-20T10:52:49+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000072：图 fig-2 修订（2026-10-20T10:52:50+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000073：图 fig-2 修订（2026-10-20T10:52:50+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000074：图 fig-2 修订（2026-10-20T10:52:52+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] figure_revision EV-000075：图 fig-2 修订（2026-10-20T10:52:52+00:00）
+- 2026-10-20T14:08:15+00:00 [figure] milestone EV-000076：图包 delivery 已收编
+- 2026-10-20T14:08:17+00:00 [write] verdict EV-000077：判定 store（提名：demo-driver（Write 表述口径登记））
+- 2026-10-20T14:08:17+00:00 [analysis] verdict EV-000078：判定 supersede（提名：demo-driver（构造第二代结论包））
+- 2026-10-20T14:08:17+00:00 [analysis] supersede EV-000079：事实 fact_48b4c288251c 被 fact_25989f2c29e5 取代
+- 2026-10-20T14:08:17+00:00 [analysis] propagation EV-000080：派生失效传播：1 条派生事实标 stale
+- 2026-10-20T14:08:17+00:00 [memory] candidate EV-000081：候选提名 cand_b96241dafbe9（fact，提名：demo-driver）
+- 2026-10-20T14:08:17+00:00 [memory] verdict EV-000082：判定 store（提名：demo-driver）
+- 2026-10-20T14:08:17+00:00 [memory] candidate EV-000083：候选 cand_b96241dafbe9 裁决：accepted（demo-user）
+- 2026-10-20T14:08:17+00:00 [memory] candidate EV-000084：候选提名 cand_1a6ff0e060a9（fact，提名：demo-driver）
+- 2026-10-20T14:08:17+00:00 [memory] candidate EV-000085：候选 cand_1a6ff0e060a9 裁决：rejected（demo-user）
+- 2026-10-20T14:08:19+00:00 [memory] candidate EV-000086：候选提名 cand_a2d6377faafd（annotation，提名：obsidian-readback）
+- 2026-10-20T14:08:19+00:00 [memory] annotation EV-000087：视图标注生效：（演示标注）第二代结论包生效后，本对象口径以第二代为准；边界条件——仅适用于数据版本完整交付的登记条目——组会已确认。—
+- 2026-10-20T14:08:19+00:00 [memory] candidate EV-000088：候选 cand_a2d6377faafd 裁决：accepted（demo-user）
+
+## 模式发现
+- 【阶段 idea 进行中但事件账无记录】停滞不可判：该阶段登记头显示进行中/被门拦，但 memory 事件账无一条归属该阶段
+  证据：事件账归属计数为 0
+- 【失败事件 2 条（均单次，未成模式）】分类分布：fundamentalx1、implementationx1；回流去向：designx1、experimentx1
+  证据：EV-000057、EV-000059
+- 【阶段 idea 当前被门拦截 1 处】构成：review_unavailablex1
+  证据：登记头 1 个（status 扫描）
+- 【阶段 design 当前被门拦截 1 处】构成：review_unavailablex1
+  证据：登记头 1 个（status 扫描）
+- 【阶段 analysis 当前被门拦截 1 处】构成：review_unavailablex1；blocked 原因：判定复核不可用（REVIEW_UNAVAILABLE）x1
+  证据：登记头 1 个（status 扫描）
+- 【阶段 write 当前被门拦截 2 处】构成：review_unavailablex2
+  证据：登记头 1 个（status 扫描）
+
+## 方向调整建议（建议非执行，总控不代跑）
+1. 补 idea 的收编：阶段已开工但 memory 事件账无记录，先跑 light-memory 对应适配器 ingest 对账（watermarks），否则后续综合持续缺该阶段证据。（据：阶段 idea 进行中但事件账无记录）
+2. 先解 idea 的门再谈推进：解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。（据：阶段 idea 当前被门拦截 1 处）
+3. 先解 design 的门再谈推进：解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。（据：阶段 design 当前被门拦截 1 处）
+4. 先解 analysis 的门再谈推进：解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。（据：阶段 analysis 当前被门拦截 1 处）
+5. 先解 write 的门再谈推进：解法：把该包的复核包（review packet）交异家族模型复核，判定经该包自带的回填命令落账；在复核不可用期间状态停在原地，不许伪造收据（见各包 SKILL 的 REVIEW_UNAVAILABLE 降级纪律）。（据：阶段 write 当前被门拦截 2 处）
