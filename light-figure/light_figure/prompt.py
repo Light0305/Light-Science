@@ -13,6 +13,15 @@
 十六进制色值）；会进图的文本不许含度量字面量（px/pt/% — 生图模型
 会把它们画进图里），检出即落 gap 停住；改版 = version 递增 + 旧版
 进 archive/ 留档，不许覆写历史版本。
+
+多版变体（2026-10-21 补丁）：build_prompt(variants=[...]) 在同一图库
+三元组与角色色板之下并行产多版变体（词表 schema.PROMPT_VARIANTS，
+只在构图 / 密度 / 布局流向三维上区分），每版独立文件
+schematic/prompts/<fig_id>.<variant>.md、各自六段完整、上述纪律逐版
+适用、独立 version 与归档。变体集合与选定登记于合同 prompt_variants
+与 provenance 账面；选定经 select_variant 落字，参考图登记/验收须
+指明所据变体且与选定一致（见 reference.py）。不带 variants 的构建
+行为与单版现状逐字兼容。
 """
 
 from __future__ import annotations
@@ -22,7 +31,8 @@ from pathlib import Path
 
 import yaml
 
-from .project import load_package, provenance_row
+from . import schema
+from .project import load_package, provenance_row, save_contract
 from .provenance import update_provenance_row
 from .style import PANEL_ROLE_TO_PALETTE_ROLE, role_palette
 from .util import today
@@ -49,6 +59,10 @@ class PromptError(Exception):
 
 def prompt_path(root, fig_id) -> Path:
     return Path(root) / PROMPTS_DIR / f"{fig_id}.md"
+
+
+def variant_prompt_path(root, fig_id, variant_id) -> Path:
+    return Path(root) / PROMPTS_DIR / f"{fig_id}.{variant_id}.md"
 
 
 def parse_front_matter(text: str):
@@ -87,8 +101,9 @@ def _panel_labels(panel) -> list:
     return [content] if content else []
 
 
-def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
-    root = Path(root)
+def _prompt_context(root, fig_id: str) -> dict:
+    """构建前置检查（单版与变体共用）：合同在场、方法图线、配色确认门、
+    角色色板指针、面板与标签度量拦截。任一不过逐项点名抛 PromptError。"""
     pkg = load_package(root)
     if pkg["head"] is None:
         raise PromptError(["图包不存在（先 init）"])
@@ -121,10 +136,40 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
                         f"等度量数字，约束 7）：{label!r}")
     if gaps:
         raise PromptError(gaps)
-
     gallery = (contract.get("sister_library_refs") or {}).get(
         "method_gallery") or {}
-    path = prompt_path(root, fig_id)
+    snapshot = ((pkg["head"].get("target_journal") or {})
+                .get("ai_policy_snapshot") or {})
+    return {
+        "pkg": pkg, "contract": contract, "gallery": gallery,
+        "snapshot": snapshot, "role_reg": role_reg, "panels": panels,
+        "labels_all": labels_all,
+    }
+
+
+def _render_prompt_file(root, fig_id: str, ctx: dict,
+                        variant_id: str | None = None) -> dict:
+    """渲染并落盘一版提示词（单版 variant_id=None / 变体各一版）。
+
+    version 语义与归档路径逐版独立：既有文件 → version+1 且旧版进
+    archive/；首版取图库条目绑定的提示词版本。变体只改构图 / 密度 /
+    布局流向的执行口径，三元组、色板与六段骨架与单版同源。
+    """
+    contract = ctx["contract"]
+    gallery = ctx["gallery"]
+    snapshot = ctx["snapshot"]
+    role_reg = ctx["role_reg"]
+    panels = ctx["panels"]
+    labels_all = ctx["labels_all"]
+    palette_conf = contract.get("palette_confirmation") or {}
+    role_ref = contract.get("role_palette_ref") or {}
+    variant = schema.PROMPT_VARIANTS.get(variant_id) \
+        if variant_id else None
+
+    if variant_id:
+        path = variant_prompt_path(root, fig_id, variant_id)
+    else:
+        path = prompt_path(root, fig_id)
     old_version = _existing_version(path)
     if old_version is not None:
         version = old_version + 1
@@ -133,10 +178,9 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
     else:
         version = 1
 
-    snapshot = ((pkg["head"].get("target_journal") or {})
-                .get("ai_policy_snapshot") or {})
     front = {
-        "prompt_id": f"{fig_id}-prompt",
+        "prompt_id": f"{fig_id}-prompt-{variant_id}" if variant_id
+                     else f"{fig_id}-prompt",
         "fig_id": fig_id,
         "version": version,
         "gallery": {
@@ -160,6 +204,14 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
         "generated_at": today(),
         "generator": "light-figure prompt build",
     }
+    if variant is not None:
+        front["variant"] = {
+            "id": variant_id,
+            "label": variant["label"],
+            "composition": variant["composition"],
+            "density": variant["density"],
+            "layout_flow": variant["layout_flow"],
+        }
 
     L: list[str] = []
     L.append("---")
@@ -167,7 +219,11 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
                             sort_keys=False).rstrip())
     L.append("---")
     L.append("")
-    L.append(f"# 提示词 · {fig_id}（v{version}）")
+    if variant is not None:
+        L.append(f"# 提示词 · {fig_id} · 变体 {variant_id}"
+                 f"（{variant['label']}）（v{version}）")
+    else:
+        L.append(f"# 提示词 · {fig_id}（v{version}）")
     L.append("")
     L.append("## 1 全局")
     L.append("")
@@ -176,6 +232,10 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
     L.append(f"- 图型（原型）：{contract.get('archetype')}")
     anchor = gallery.get("style_anchor") or "（未引图库条目：独立构图）"
     L.append(f"- 风格锚：{anchor}")
+    if variant is not None:
+        L.append(f"- 变体：{variant_id}（{variant['label']}）")
+        L.append(f"- 变体构图：{variant['composition']}")
+        L.append(f"- 变体布局流向：{variant['layout_flow']}")
     order = " → ".join(f"面板 {p.get('panel_id')}" for p in panels)
     L.append(f"- 阅读顺序：{order}")
     L.append("- 画面定位：投稿级科学示意图的构图草稿（内部参考），"
@@ -232,6 +292,11 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
                 L.append(f"  - {label}：{breakdown[dim]}")
         L.append("  - 配色：精确色值已登记于图库条目六维拆解的 "
                  "palette_hex（只供重绘阶段查表，不入提示词正文）")
+    if variant is not None:
+        L.append(f"- 变体执行口径（本版为准）：布局流向 = "
+                 f"{variant['layout_flow']}；信息密度 = "
+                 f"{variant['density']}。与图库拆解口径不一致处以本"
+                 "变体口径为准（图库三元组与角色色板不变）。")
     L.append("- 角色清单（正文只引角色名，色值由重绘阶段查登记表）：")
     for row_ in role_reg["roles"]:
         L.append(f"  - {row_['role']}：{row_['usage']}")
@@ -250,6 +315,9 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
     if stance.get("stance") == "density_first":
         L.append("- 密度优先但每个模块框仍须有子内容，"
                  "不许以密度为名堆叠无标签装饰元素")
+    if variant is not None:
+        L.append(f"- 变体红线（{variant['label']}）："
+                 f"{variant['extra_negative']}")
     L.append("")
     L.append("## 6 政策段")
     L.append("")
@@ -280,20 +348,120 @@ def build_prompt(root, fig_id: str, by: str | None = None) -> dict:
     if path.exists():
         archive_dir = path.parent / "archive"
         archive_dir.mkdir(parents=True, exist_ok=True)
-        archived = archive_dir / f"{fig_id}.v{old_version}.md"
+        if variant_id:
+            archived = archive_dir / \
+                f"{fig_id}.{variant_id}.v{old_version}.md"
+        else:
+            archived = archive_dir / f"{fig_id}.v{old_version}.md"
         archived.write_text(path.read_text(encoding="utf-8"),
                             encoding="utf-8")
     path.write_text(text, encoding="utf-8")
 
-    update_provenance_row(root, fig_id, {
-        "prompt_version": str(version),
-        "policy_snapshot_ref": (contract.get("policy_check") or {}).get(
-            "policy_snapshot_ref"),
-    }, by=by or "light-figure prompt build")
-
     return {
-        "fig_id": fig_id,
-        "prompt": f"{PROMPTS_DIR}/{fig_id}.md",
+        "prompt": f"{PROMPTS_DIR}/{path.name}",
         "version": version,
         "archived": str(archived.relative_to(root)) if archived else None,
     }
+
+
+def build_prompt(root, fig_id: str, by: str | None = None,
+                 variants: list | None = None) -> dict:
+    """生成提示词产物。
+
+    variants=None → 单版（行为与既有口径逐字兼容，文件
+    schematic/prompts/<fig_id>.md）；variants=[...] → 多版并行：
+    每版独立文件与 version，变体集合登记进合同 prompt_variants 与
+    账面，已选变体不在新集合内时选定自动清空（须重选）。
+    """
+    root = Path(root)
+    ctx = _prompt_context(root, fig_id)
+    contract = ctx["contract"]
+
+    if variants is None:
+        out = _render_prompt_file(root, fig_id, ctx, None)
+        update_provenance_row(root, fig_id, {
+            "prompt_version": str(out["version"]),
+            "policy_snapshot_ref": (contract.get("policy_check") or {})
+            .get("policy_snapshot_ref"),
+        }, by=by or "light-figure prompt build")
+        return {
+            "fig_id": fig_id,
+            "prompt": out["prompt"],
+            "version": out["version"],
+            "archived": out["archived"],
+        }
+
+    ids: list[str] = []
+    for v in variants:
+        if v not in ids:
+            ids.append(v)
+    if not ids:
+        raise PromptError(["变体列表为空：至少给一个变体 id"
+                           f"（词表 {sorted(schema.PROMPT_VARIANTS)}）"])
+    unknown = [v for v in ids if v not in schema.PROMPT_VARIANTS]
+    if unknown:
+        raise PromptError([
+            f"未知提示词变体 {unknown}：词表为 "
+            f"{sorted(schema.PROMPT_VARIANTS)}（变体只在构图/密度/"
+            "布局流向三维上区分，不许自创）"])
+    built = []
+    for v in ids:
+        out = _render_prompt_file(root, fig_id, ctx, v)
+        built.append({"variant_id": v, "file": out["prompt"],
+                      "version": out["version"],
+                      "archived": out["archived"]})
+    prev_selected = (contract.get("prompt_variants") or {}).get(
+        "selected_variant")
+    selected = prev_selected if prev_selected in ids else None
+    contract["prompt_variants"] = {
+        "variants": [{"variant_id": b["variant_id"], "file": b["file"],
+                      "version": b["version"]} for b in built],
+        "selected_variant": selected,
+    }
+    save_contract(root, contract)
+    prov_updates = {
+        "prompt_variants": ids,
+        "selected_variant": selected,
+        "policy_snapshot_ref": (contract.get("policy_check") or {}).get(
+            "policy_snapshot_ref"),
+    }
+    if selected is not None:
+        # 选定保留时账面 prompt_version 同步到所选变体的新 version
+        sel = next(b for b in built if b["variant_id"] == selected)
+        prov_updates["prompt_version"] = str(sel["version"])
+    update_provenance_row(root, fig_id, prov_updates,
+                          by=by or "light-figure prompt build")
+    return {"fig_id": fig_id, "variants": built,
+            "selected_variant": selected}
+
+
+def select_variant(root, fig_id: str, variant_id: str,
+                   by: str | None = None) -> dict:
+    """变体选定落字：合同 prompt_variants.selected_variant + 账面
+    selected_variant / prompt_version（取所选变体的当前 version）。
+    未构建登记的变体不许选。"""
+    root = Path(root)
+    pkg = load_package(root)
+    if pkg["head"] is None:
+        raise PromptError(["图包不存在（先 init）"])
+    contract = pkg["contracts"].get(fig_id)
+    if contract is None:
+        raise PromptError([f"图 {fig_id} 无图合同（先 intake 并补齐合同）"])
+    pv = contract.get("prompt_variants") or {}
+    entries = {e.get("variant_id"): e for e in pv.get("variants") or []
+               if isinstance(e, dict)}
+    if variant_id not in entries:
+        raise PromptError([
+            f"图 {fig_id} 的变体 {variant_id!r} 未构建登记"
+            f"（已登记：{sorted(entries)}）：先 prompt build --variants "
+            "构建再选定"])
+    pv["selected_variant"] = variant_id
+    contract["prompt_variants"] = pv
+    save_contract(root, contract)
+    version = entries[variant_id].get("version")
+    update_provenance_row(root, fig_id, {
+        "selected_variant": variant_id,
+        "prompt_version": str(version),
+    }, by=by or "light-figure prompt select")
+    return {"fig_id": fig_id, "selected_variant": variant_id,
+            "version": version}

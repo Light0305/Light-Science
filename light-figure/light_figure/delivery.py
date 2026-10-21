@@ -220,6 +220,11 @@ def _correspondence(root, pkg, row, entry) -> dict:
             manifest = load_pptx_manifest(root, fig_id) or {}
             mpath = pptx_manifest_path(root, fig_id)
             mrel = f"schematic/redraw/{fig_id}.pptx-manifest.json"
+        elif schematic_backend(contract) == "illustrator":
+            from .aibuild import ai_manifest_path, load_ai_manifest
+            manifest = load_ai_manifest(root, fig_id) or {}
+            mpath = ai_manifest_path(root, fig_id)
+            mrel = f"schematic/redraw/{fig_id}.ai-manifest.json"
         else:
             manifest = load_manifest(root, fig_id) or {}
             mpath = root / "schematic" / "redraw" \
@@ -287,6 +292,26 @@ def _delivery_row(root, pkg, row, captions) -> dict:
             out["powerpoint_note"] = (
                 "PPT 文件层产物（python-pptx 构建 + OPC 反读证据），"
                 "未过 PowerPoint 实机验证（FIG-D02：如实标注）")
+            redraw_route = build.get("backend")
+        elif backend == "illustrator":
+            from .aibuild import load_ai_manifest
+            manifest = load_ai_manifest(root, fig_id) or {}
+            build = manifest.get("build") or {}
+            out["files"] = [{"path": art_rel,
+                             "sha256": sha256_file(artifact),
+                             "role": "illustrator_source"}]
+            out["illustrator_verified"] = \
+                build.get("illustrator_verified")
+            if build.get("illustrator_verified") is True:
+                out["illustrator_note"] = (
+                    "Illustrator 生产路线产物（ExtendScript 构建脚本"
+                    "实机执行 + DOM 枚举回读对账已登记，证据等级 "
+                    "dom_readback）")
+            else:
+                out["illustrator_note"] = (
+                    "Illustrator 生产路线产物未经实机 DOM 回读对账"
+                    "登记验证（如实标注：verified 只认 ai extract "
+                    "合格登记）")
             redraw_route = build.get("backend")
         else:
             manifest = load_manifest(root, fig_id) or {}

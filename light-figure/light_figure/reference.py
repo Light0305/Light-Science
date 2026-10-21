@@ -8,6 +8,12 @@
   三项清单（逐标签逐字核对 / 逐结构对领域事实核对 / 公式分子式
   数值算对）须由核对人逐项明示落字才算完成；披露 ≠ 免责，照描
   不核事实是红项，验收不许由登记动作顺带自动完成。
+
+- 变体所据（2026-10-21 补丁）：合同已登记提示词变体集
+  （prompt_variants）时，登记须以 variant 指明所据变体且与
+  selected_variant 一致——未选定 / 未指明 / 与选定不一致均拦；
+  所据变体记入账面 reference_variant，验收同口径复核并记入验收
+  记录。无变体集的单版图不设此门（存量兼容）。
 """
 
 from __future__ import annotations
@@ -41,9 +47,32 @@ def reference_relpath(root, fig_id) -> str | None:
     return None
 
 
+def _variant_gate(pkg, fig_id: str, variant) -> str | None:
+    """变体模式下参考图登记的所据变体门：返回应记账的所据变体；
+    非变体模式返回 variant 原值（可为 None）。不过门抛 ReferenceError。"""
+    contract = pkg["contracts"].get(fig_id) or {}
+    pv = contract.get("prompt_variants") or {}
+    if not (pv.get("variants") or []):
+        return variant
+    selected = pv.get("selected_variant")
+    if not selected:
+        raise ReferenceError([
+            f"图 {fig_id} 已构建提示词变体但未选定：参考图登记须先经 "
+            "prompt select 选定变体（未选定不许进登记/验收）"])
+    if variant is None:
+        raise ReferenceError([
+            f"图 {fig_id} 参考图登记须以 --variant 指明所据变体"
+            f"（已选定：{selected}）"])
+    if variant != selected:
+        raise ReferenceError([
+            f"图 {fig_id} 参考图所据变体 {variant!r} 与已选定变体 "
+            f"{selected!r} 不一致：按选定变体生成的参考图才许登记"])
+    return variant
+
+
 def register_reference(root, fig_id: str, image_path,
                        model_name=None, model_version=None,
-                       by=None) -> dict:
+                       by=None, variant=None) -> dict:
     root = Path(root)
     pkg = load_package(root)
     if pkg["head"] is None:
@@ -55,6 +84,7 @@ def register_reference(root, fig_id: str, image_path,
     if row.get("line") != "schematic":
         raise ReferenceError([f"图 {fig_id} 不是方法图线：参考图登记"
                                 "只服务方法图线"])
+    based_on = _variant_gate(pkg, fig_id, variant)
     source = Path(image_path)
     if not source.exists():
         raise ReferenceError([f"参考图文件不存在：{image_path}"])
@@ -73,6 +103,8 @@ def register_reference(root, fig_id: str, image_path,
     if model_name:
         updates["generation_model"] = {
             "name": model_name, "version": model_version}
+    if based_on:
+        updates["reference_variant"] = based_on
     entry = update_provenance_row(root, fig_id, updates,
                                   by=by or "light-figure reference add")
     return {
@@ -80,6 +112,7 @@ def register_reference(root, fig_id: str, image_path,
         "reference": f"{REFERENCE_DIR}/{dest.name}",
         "sha256": digest,
         "generation_model": entry.get("generation_model"),
+        "reference_variant": entry.get("reference_variant"),
     }
 
 
@@ -102,11 +135,34 @@ def accept_reference(root, fig_id: str, by: str,
             f"验收清单未逐项明示：{missing}（约束 9 三项——逐标签逐字"
             "核对 / 逐结构对领域事实核对 / 公式分子式数值算对——缺一"
             "不许记完成）"])
+    # 变体所据复核（2026-10-21 补丁）：变体模式下验收须确认参考图
+    # 所据变体与选定一致，所据变体记入验收记录。
+    contract = pkg["contracts"].get(fig_id) or {}
+    pv = contract.get("prompt_variants") or {}
+    ref_variant = entry.get("reference_variant")
+    if pv.get("variants"):
+        selected = pv.get("selected_variant")
+        if not selected:
+            raise ReferenceError([
+                f"图 {fig_id} 提示词变体未选定：参考图验收须先经 "
+                "prompt select 选定变体（未选定不许进验收）"])
+        if not ref_variant:
+            raise ReferenceError([
+                f"图 {fig_id} 参考图登记未指明所据变体（变体模式）："
+                "换图重登记时以 --variant 指明所据变体后才许验收"])
+        if ref_variant != selected:
+            raise ReferenceError([
+                f"图 {fig_id} 参考图所据变体 {ref_variant!r} 与已选定"
+                f"变体 {selected!r} 不一致，不许验收"])
+    acceptance = {
+        "done": True, "by": by, "at": today(),
+        "checks": {c: True for c in ACCEPTANCE_CHECKS},
+    }
+    if ref_variant:
+        acceptance["variant"] = ref_variant
     update_provenance_row(root, fig_id, {
-        "reference_acceptance": {
-            "done": True, "by": by, "at": today(),
-            "checks": {c: True for c in ACCEPTANCE_CHECKS},
-        },
+        "reference_acceptance": acceptance,
     }, by=by)
     return {"fig_id": fig_id, "accepted_by": by,
-            "checks": ACCEPTANCE_CHECKS}
+            "checks": ACCEPTANCE_CHECKS,
+            "variant": ref_variant}

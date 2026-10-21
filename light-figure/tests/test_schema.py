@@ -44,9 +44,11 @@ def test_tolerance_relaxed_directions():
     assert schema.tolerance_relaxed("alignment_pt", True) is False
 
 
-def test_r_enable_conditions_are_the_three_from_d2():
+def test_r_enable_conditions_from_d2_plus_user_specified():
+    # D2 三条件 + 2026-10-21 补丁增设 user_specified（用户明确指定用 R）
     assert sorted(schema.R_ENABLE_CONDITIONS) == [
-        "library_r_only", "pipeline_in_r", "r_decisive_advantage"]
+        "library_r_only", "pipeline_in_r", "r_decisive_advantage",
+        "user_specified"]
 
 
 def test_audit_vocabularies():

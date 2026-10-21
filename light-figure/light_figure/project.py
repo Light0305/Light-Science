@@ -304,9 +304,13 @@ def schematic_backend(contract) -> str:
 
 def schematic_artifact_relpath(contract, fig_id: str) -> str:
     """方法图最终产物相对路径（审计/交付/账面复验共用同一口径）：
-    visio 线 = schematic/redraw/<fig>.vsdx；powerpoint 线 = .pptx。"""
-    if schematic_backend(contract) == "powerpoint":
+    visio 线 = schematic/redraw/<fig>.vsdx；powerpoint 线 = .pptx；
+    illustrator 线 = .ai（ExtendScript 实机重建后存回本包）。"""
+    backend = schematic_backend(contract)
+    if backend == "powerpoint":
         return f"schematic/redraw/{fig_id}.pptx"
+    if backend == "illustrator":
+        return f"schematic/redraw/{fig_id}.ai"
     return f"schematic/redraw/{fig_id}.vsdx"
 
 

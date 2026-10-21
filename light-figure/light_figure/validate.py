@@ -439,8 +439,9 @@ def check_contract(contract, rep: Report):
             rep.error("contract.schematic_backend_vocab",
                       f"方法图 {fig_id} 的 schematic_backend "
                       f"{backend!r} 不在 {schema.SCHEMATIC_BACKENDS}"
-                      "（FIG-D02：方法线原生后端只有 Visio 主线与 "
-                      "PowerPoint 第二后端）",
+                      "（三路平权：Visio / PowerPoint / Illustrator "
+                      "三条原生复刻生产路线对等登记，FIG-D02 后端集 + "
+                      "用户 2026-10-21 推翻 FIG-D03 精修定位）",
                       where=where)
         refine = contract.get("illustrator_refinement")
         if refine is not None:
@@ -450,6 +451,59 @@ def check_contract(contract, rep: Report):
                   f"数据图 {fig_id} 不许登记 schematic_backend（数据图"
                   "不归 PPT/Visio 方法线后端，FIG-D02 定位）",
                   where=where)
+
+    # 提示词多版变体（2026-10-21 补丁）：合同 prompt_variants 形态——
+    # 变体 id 须在词表内、不重复、文件合命名规则、选定须在集合内。
+    pv = contract.get("prompt_variants")
+    if pv is not None:
+        if line != "schematic":
+            rep.error("prompt.variants_on_data",
+                      f"数据图 {fig_id} 不许登记提示词变体 "
+                      "prompt_variants（变体只服务方法图线）",
+                      where=where)
+        elif not isinstance(pv, dict) \
+                or not isinstance(pv.get("variants"), list) \
+                or not pv.get("variants"):
+            rep.error("prompt.variants_malformed",
+                      f"方法图 {fig_id} 的 prompt_variants 须为对象且 "
+                      "variants 为非空列表（每版 {variant_id, file, "
+                      "version}）",
+                      where=where)
+        else:
+            seen_variants = set()
+            for entry in pv.get("variants") or []:
+                if not isinstance(entry, dict):
+                    rep.error("prompt.variants_malformed",
+                              f"方法图 {fig_id} 的变体条目须为对象",
+                              where=where)
+                    continue
+                vid = entry.get("variant_id")
+                if vid not in schema.PROMPT_VARIANTS:
+                    rep.error("prompt.variant_vocab",
+                              f"方法图 {fig_id} 的变体 {vid!r} 不在变体"
+                              f"词表 {sorted(schema.PROMPT_VARIANTS)}"
+                              "（变体只在构图/密度/布局流向三维上区分）",
+                              where=where)
+                    continue
+                if vid in seen_variants:
+                    rep.error("prompt.variant_duplicate",
+                              f"方法图 {fig_id} 的变体 {vid} 重复登记",
+                              where=where)
+                seen_variants.add(vid)
+                expected = f"schematic/prompts/{fig_id}.{vid}.md"
+                if entry.get("file") != expected:
+                    rep.error("prompt.variant_file_mismatch",
+                              f"方法图 {fig_id} 变体 {vid} 的文件登记 "
+                              f"{entry.get('file')!r} 与命名规则 "
+                              f"{expected} 不符",
+                              where=where)
+            selected = pv.get("selected_variant")
+            if selected is not None and selected not in seen_variants:
+                rep.error("prompt.selected_variant_unknown",
+                          f"方法图 {fig_id} 的 selected_variant "
+                          f"{selected!r} 不在已登记变体集合 "
+                          f"{sorted(seen_variants)} 内",
+                          where=where)
 
     if line == "schematic":
         policy = contract.get("policy_check")
@@ -488,10 +542,13 @@ def check_contract(contract, rep: Report):
 
 
 def check_illustrator_refinement(fig_id, refine, rep: Report, where):
-    """Illustrator 精修段（FIG-D03，条件路线）：合同可选段形态校验。
+    """Illustrator 精修段（FIG-D03 遗留合同段）：形态校验（兼容保留）。
 
-    只验登记形态——真机回读在有 Illustrator 的环境执行，记录形态
-    （对象计数 / 文本逐字对账 / 锚点包围盒 / 印前检查项）在此定版。
+    FIG-D03 的精修定位已被用户 2026-10-21 推翻：Illustrator 现为
+    第三条生产路线（aibuild 的 ai manifest + ExtendScript 构建 +
+    DOM 回读对账，印前五项终检在该 manifest 的 preflight 段）。
+    本段仅为 v1.0/v1.1 既有合同的兼容校验而保留，新图不许再以
+    精修段代替生产路线登记。
     """
     if not isinstance(refine, dict):
         rep.error("contract.illustrator_malformed",
@@ -561,6 +618,13 @@ def check_backend(pkg, rep: Report):
                 rep.error("backend.r_without_basis",
                           "包级后端为 R 但缺 D2 启用条件依据 reason_code"
                           f"（须为 {sorted(schema.R_ENABLE_CONDITIONS)} 之一）",
+                          where="backend.json")
+            elif code == "user_specified" \
+                    and not _nonempty(reg.get("reason")):
+                rep.error("backend.r_without_reason",
+                          "包级后端为 R 且依据为 user_specified（用户指定）"
+                          "但缺依据说明 reason（D2：用户指定也须落字，"
+                          "无 reason 照样拦）",
                           where="backend.json")
     else:
         rep.warning("backend.undecided",

@@ -78,8 +78,10 @@ def test_produce_records_palette_decision(produced_pkg):
 
 
 def test_schematic_backend_vocab(filled_pkg):
+    # 三路平权后 illustrator 已是合法后端（用户 2026-10-21 推翻
+    # FIG-D03）：词表外样本改用 photoshop，断言不变。
     contract = schematic_contract()
-    contract["schematic_backend"] = "illustrator"
+    contract["schematic_backend"] = "photoshop"
     save_contract(filled_pkg["root"], contract)
     assert "contract.schematic_backend_vocab" in _codes(
         filled_pkg["root"])

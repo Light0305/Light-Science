@@ -435,20 +435,118 @@ def _open_db(root):
     return sqlite3.connect(db_path)
 
 
+def _query_units(query: str) -> list:
+    """查询侧证据单元：拉丁/数字 token 原样成单元，中文取相邻字对
+    （bigram）成单元——单字命中多是巧合子串（如「采集」对「数据集」），
+    不构成词法证据；相邻字对才是中文的词级信号。查询只有一个单元
+    时（如两字词）该单元即全部证据，不再加门槛。"""
+    tokens = tokenize(query)
+    units: list = []
+    i = 0
+    while i < len(tokens):
+        tok = tokens[i]
+        if len(tok) == 1 and "一" <= tok <= "鿿":
+            j = i
+            while j < len(tokens) and len(tokens[j]) == 1 \
+                    and "一" <= tokens[j] <= "鿿":
+                j += 1
+            run = tokens[i:j]
+            if len(run) == 1:
+                units.append((run[0],))
+            else:
+                units.extend(tuple(run[k:k + 2])
+                             for k in range(len(run) - 1))
+            i = j
+        else:
+            units.append((tok,))
+            i += 1
+    return units
+
+
+def _matched_units(unit_set: set, chunk_tokens: list) -> int:
+    """块与查询共享的证据单元数（bigram 须在块内相邻出现）。"""
+    seq = set()
+    for k in range(len(chunk_tokens) - 1):
+        seq.add((chunk_tokens[k], chunk_tokens[k + 1]))
+    seq.update((t,) for t in chunk_tokens)
+    return len(unit_set & seq)
+
+
 def search_fts(root, query: str, limit: int = 10) -> list:
     con = _open_db(root)
     try:
-        tokens = tokenize(query)
-        if not tokens:
+        units = _query_units(query)
+        if not units:
             return []
-        expr = " OR ".join(f'"{t}"' for t in tokens)
+        unit_set = set(units)
+        expr = " OR ".join(
+            " ".join(f'"{t}"' for t in u) for u in units)
         rows = con.execute(
-            "SELECT chunk_id, source_kind, source_id FROM chunks_fts "
-            "WHERE chunks_fts MATCH ? LIMIT ?", (expr, limit)).fetchall()
-        return [{"chunk_id": r[0], "source_kind": r[1], "source_id": r[2]}
-                for r in rows]
+            "SELECT chunk_id, source_kind, source_id, bm25(chunks_fts) "
+            "FROM chunks_fts WHERE chunks_fts MATCH ? "
+            "ORDER BY bm25(chunks_fts) LIMIT ?",
+            (expr, max(limit * 20, 200))).fetchall()
+        if len(unit_set) <= 1:
+            rows = rows[:limit]
+            return [{"chunk_id": r[0], "source_kind": r[1],
+                     "source_id": r[2], "score": r[3]} for r in rows]
+        texts = {r[0]: r[1] for r in con.execute(
+            "SELECT c0, c3 FROM chunks_fts_content").fetchall()}
+        out = []
+        for r in rows:
+            chunk_tokens = (texts.get(r[0]) or "").split()
+            if _matched_units(unit_set, chunk_tokens) >= 2:
+                out.append({"chunk_id": r[0], "source_kind": r[1],
+                            "source_id": r[2], "score": r[3]})
+                if len(out) >= limit:
+                    break
+        return out
     finally:
         con.close()
+
+
+# 跨语言扩展用的停用字（与 bench 判据无关，仅剔语法字对）。
+_EXPAND_STOP_CHARS = set("的了是在与及中为有个其之和或把被从向")
+
+
+def expand_query(root, query: str) -> str:
+    """跨语言查询扩展（伪相关反馈）：纯拉丁查询对中文语料先向量
+    召回 top-8 块，从其 token 流中抽高频中文 bigram 拼回查询，
+    使中文事实获得词法路与更贴合的向量表示。查询含中文时原样
+    返回（不触发）；抽不到可靠 bigram（至少在 2 个块中出现）
+    时也原样返回，绝不凭空造词。"""
+    tokens = tokenize(query)
+    if any(len(t) == 1 and "一" <= t <= "鿿" for t in tokens):
+        return query
+    try:
+        top = search_vector(root, query, limit=8)
+    except Exception:
+        return query
+    if not top:
+        return query
+    con = _open_db(root)
+    try:
+        texts = {r[0]: r[1] for r in con.execute(
+            "SELECT c0, c3 FROM chunks_fts_content").fetchall()}
+    finally:
+        con.close()
+    from collections import Counter
+    counts: Counter = Counter()
+    for row in top:
+        toks = (texts.get(row["chunk_id"]) or "").split()
+        grams = set()
+        for k in range(len(toks) - 1):
+            a, b = toks[k], toks[k + 1]
+            if len(a) == 1 and len(b) == 1 \
+                    and "一" <= a <= "鿿" and "一" <= b <= "鿿" \
+                    and a not in _EXPAND_STOP_CHARS \
+                    and b not in _EXPAND_STOP_CHARS:
+                grams.add(a + b)
+        counts.update(grams)
+    picked = [g for g, c in counts.most_common(6) if c >= 2]
+    if not picked:
+        return query
+    return query + " " + " ".join(picked)
 
 
 def search_vector(root, query: str, limit: int = 10) -> list:

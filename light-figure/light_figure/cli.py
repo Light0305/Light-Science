@@ -1,6 +1,7 @@
 """light-figure CLI：init / intake / validate / advance / report /
-style build / produce / prompt build / reference add|accept /
+style build / produce / prompt build|select / reference add|accept /
 redraw init|install|build|extract / pptx init|install|build|extract /
+pptx com-script|com-verify / ai init|install|build|extract /
 recheck / svg-check / audit run|audit-status|audit note /
 provenance set|show / deliver。
 
@@ -21,11 +22,14 @@ from .gates import GateError, advance, status_summary
 from .intake import IntakeError, run_intake
 from .produce import ProduceError, produce_data_figure
 from .project import init_package, load_package, provenance_row
-from .prompt import PromptError, build_prompt
+from .prompt import PromptError, build_prompt, select_variant
 from .provenance import ProvenanceError, provenance_history, \
     update_provenance_row
+from .aibuild import AiError, extract_ai, generate_build_scripts, \
+    init_ai_manifest, install_ai_manifest
 from .pptxbuild import PptxError, build_pptx, \
-    extract_and_reconcile_pptx, init_pptx_manifest, install_pptx_manifest
+    extract_and_reconcile_pptx, generate_com_script, \
+    init_pptx_manifest, install_pptx_manifest, register_com_verify
 from .recheck import RecheckError, run_recheck
 from .redraw import RedrawError, build_vsdx, extract_and_reconcile, \
     init_manifest, install_manifest
@@ -39,7 +43,7 @@ from .validate import validate_package
 _ERRORS = (IntakeError, GateError, FileExistsError, StyleError,
            ProduceError, PromptError, ReferenceError, RedrawError,
            AuditError, ProvenanceError, DeliveryError, PptxError,
-           RecheckError, SvgBridgeError)
+           RecheckError, SvgBridgeError, AiError)
 
 
 def _print(obj):
@@ -105,6 +109,15 @@ def main(argv=None) -> int:
     sp.add_argument("root")
     sp.add_argument("fig_id")
     sp.add_argument("--by", default=None)
+    sp.add_argument("--variants", default=None,
+                    help="多版并行变体（逗号分隔的变体 id，如 "
+                         "compact,spacious,layered）；缺省 = 单版")
+    sp = prompt_sub.add_parser("select", help="变体选定落字"
+                                              "（合同 + 账面）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("variant")
+    sp.add_argument("--by", default=None)
 
     p = sub.add_parser("reference", help="参考图入包登记与验收")
     ref_sub = p.add_subparsers(dest="reference_cmd", required=True)
@@ -114,6 +127,8 @@ def main(argv=None) -> int:
     sp.add_argument("--image", required=True)
     sp.add_argument("--model-name", default=None)
     sp.add_argument("--model-version", default=None)
+    sp.add_argument("--variant", default=None,
+                    help="所据提示词变体（变体模式必填且须与已选定一致）")
     sp.add_argument("--by", default=None)
     sp = ref_sub.add_parser("accept", help="参考图验收落字（约束 9 三项清单）")
     sp.add_argument("root")
@@ -157,6 +172,42 @@ def main(argv=None) -> int:
     sp = pptx_sub.add_parser("extract", help="成品反读并与 manifest 对账")
     sp.add_argument("root")
     sp.add_argument("fig_id")
+    sp = pptx_sub.add_parser("com-script", help="生成 PowerPoint COM "
+                                                "构建脚本（实现形态）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--by", default=None)
+    sp = pptx_sub.add_parser("com-verify", help="登记 COM 枚举回读 + "
+                                                "导出物并对账")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--record", required=True,
+                    help="构建脚本产出的 com-verify JSON 路径")
+    sp.add_argument("--by", default=None)
+
+    p = sub.add_parser("ai", help="Illustrator 生产路线（三路平权："
+                                  "ExtendScript 构建 + DOM 回读）")
+    ai_sub = p.add_subparsers(dest="ai_cmd", required=True)
+    sp = ai_sub.add_parser("init", help="生成 ai manifest 骨架")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp = ai_sub.add_parser("install", help="登记 ai manifest"
+                                           "（全量契约校验）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--manifest", required=True)
+    sp = ai_sub.add_parser("build", help="生成 ExtendScript 构建脚本"
+                                         "与回读脚本（文本产物）")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--by", default=None)
+    sp = ai_sub.add_parser("extract", help="登记 DOM 枚举回读并与 "
+                                           "manifest 对账")
+    sp.add_argument("root")
+    sp.add_argument("fig_id")
+    sp.add_argument("--readback", required=True,
+                    help="readback.jsx 产出的 dom-readback JSON 路径")
+    sp.add_argument("--by", default=None)
 
     p = sub.add_parser("recheck", help="本地复核环（FIG-D11：文件层"
                                        "结构量测，不依赖外部服务）")
@@ -165,8 +216,8 @@ def main(argv=None) -> int:
     p.add_argument("--panels", default=None,
                    help="局部复检面板集（逗号分隔）：范围落复检记录")
 
-    p = sub.add_parser("svg-check", help="Illustrator 精修 SVG 桥入口"
-                                         "受限子集校验（FIG-D03）")
+    p = sub.add_parser("svg-check", help="SVG 桥（Illustrator 导入备选"
+                                         "路径）受限子集校验")
     p.add_argument("path")
 
     p = sub.add_parser("audit", help="审计引擎（七门）")
@@ -242,13 +293,23 @@ def main(argv=None) -> int:
             _print(produce_data_figure(args.root, args.fig_id,
                                        by=args.by))
         elif args.cmd == "prompt":
-            _print(build_prompt(args.root, args.fig_id, by=args.by))
+            if args.prompt_cmd == "select":
+                _print(select_variant(args.root, args.fig_id,
+                                      args.variant, by=args.by))
+            else:
+                variants = None
+                if args.variants:
+                    variants = [v.strip() for v in
+                                args.variants.split(",") if v.strip()]
+                _print(build_prompt(args.root, args.fig_id, by=args.by,
+                                    variants=variants))
         elif args.cmd == "reference":
             if args.reference_cmd == "add":
                 _print(register_reference(
                     args.root, args.fig_id, args.image,
                     model_name=args.model_name,
-                    model_version=args.model_version, by=args.by))
+                    model_version=args.model_version, by=args.by,
+                    variant=args.variant))
             else:
                 checks = {c: bool(getattr(args, c))
                           for c in ACCEPTANCE_CHECKS}
@@ -286,9 +347,34 @@ def main(argv=None) -> int:
                         "shapes": len(manifest.get("shapes") or [])})
             elif args.pptx_cmd == "build":
                 _print(build_pptx(args.root, args.fig_id, by=args.by))
+            elif args.pptx_cmd == "com-script":
+                _print(generate_com_script(args.root, args.fig_id,
+                                           by=args.by))
+            elif args.pptx_cmd == "com-verify":
+                _print(register_com_verify(args.root, args.fig_id,
+                                           args.record, by=args.by))
             else:
                 _print(extract_and_reconcile_pptx(args.root,
                                                   args.fig_id))
+        elif args.cmd == "ai":
+            if args.ai_cmd == "init":
+                manifest = init_ai_manifest(args.root, args.fig_id)
+                _print({"fig_id": args.fig_id,
+                        "manifest": f"schematic/redraw/{args.fig_id}"
+                                    ".ai-manifest.json",
+                        "status": manifest["status"]})
+            elif args.ai_cmd == "install":
+                manifest = install_ai_manifest(args.root, args.fig_id,
+                                               args.manifest)
+                _print({"fig_id": args.fig_id,
+                        "status": manifest["status"],
+                        "shapes": len(manifest.get("shapes") or [])})
+            elif args.ai_cmd == "build":
+                _print(generate_build_scripts(args.root, args.fig_id,
+                                              by=args.by))
+            else:
+                _print(extract_ai(args.root, args.fig_id,
+                                  args.readback, by=args.by))
         elif args.cmd == "recheck":
             panels = [s.strip() for s in args.panels.split(",")
                       if s.strip()] if args.panels else None

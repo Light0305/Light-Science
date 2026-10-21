@@ -468,6 +468,46 @@ def gate_contract(ctx: _Ctx) -> dict:
                                f" {residue.get('class')!r} 不在合法类别"})
         metrics = {"backend": "powerpoint",
                    "build_recorded": bool(build)}
+    elif _schematic_backend(ctx) == "illustrator":
+        from .aibuild import load_ai_manifest
+        manifest = load_ai_manifest(ctx.root, ctx.fig_id)
+        if manifest is None:
+            findings.append({
+                "level": "fail", "code": "contract.manifest_missing",
+                "message": "方法图（illustrator 后端）缺 ai manifest"
+                           "（单一真相源）"})
+            return _gate("contract", _compose(findings), findings)
+        build = manifest.get("build") or {}
+        if not build:
+            findings.append({
+                "level": "warn", "code": "contract.build_unrecorded",
+                "message": "成品 .ai 无构建记录（未生成 ExtendScript "
+                           "构建脚本或未登记）"})
+        elif build.get("illustrator_verified") is True:
+            readback = manifest.get("dom_readback") or {}
+            app = readback.get("app") or {}
+            qualified = (manifest.get("reconciliation") or {}).get(
+                "ok") is True and bool(app.get("name")) \
+                and bool(app.get("version")) \
+                and bool(build.get("verified_by"))
+            if not qualified:
+                findings.append({
+                    "level": "fail",
+                    "code": "contract.illustrator_verified_false_claim",
+                    "message": "Illustrator 产物被标 illustrator_verified"
+                               "=true 但无合格登记（DOM 回读对账未过 / "
+                               "回读缺应用名版本 / 无 verified_by 落字）："
+                               "未经实机 DOM 回读对账不许声称通过"
+                               "（三路 verified 纪律同构）"})
+        for residue in manifest.get("bitmap_residue") or []:
+            if residue.get("class") not in schema.BITMAP_RESIDUE_CLASSES:
+                findings.append({
+                    "level": "fail", "code": "contract.residue_class",
+                    "message": f"位图残留 {residue.get('residue_id')} 类别"
+                               f" {residue.get('class')!r} 不在合法类别"})
+        metrics = {"backend": "illustrator",
+                   "build_recorded": bool(build),
+                   "evidence_level": build.get("evidence_level")}
     else:
         manifest = load_manifest(ctx.root, ctx.fig_id)
         if manifest is None:
@@ -640,11 +680,83 @@ def _gate_native_pptx(ctx: _Ctx) -> dict:
     return _gate("native", _compose(findings), findings, metrics)
 
 
+def _gate_native_ai(ctx: _Ctx) -> dict:
+    """Illustrator 原生性（三路平权）：.ai 二进制本机不可解析——
+    原生性证据 = DOM 枚举回读对账记录（ai extract 落字）：无回读即
+    NOT_AUDITABLE（不许声称已审）；回读在场时逐项硬判：对账未过
+    FAIL、未登记置入位图 FAIL、无原生对象只有整页置入图（参考图
+    整图贴入冒充重绘）FAIL、登记置入项分辨率不足 FAIL——与另两路
+    「整页一张大图」硬拦同口径，只是证据面换成宿主 DOM 回读。"""
+    from .aibuild import load_ai_manifest
+    manifest = load_ai_manifest(ctx.root, ctx.fig_id)
+    if manifest is None:
+        return _na("native", "方法图（illustrator 后端）缺 ai "
+                             "manifest，DOM 回读无从审计")
+    readback = manifest.get("dom_readback") or {}
+    if not readback:
+        return _na("native", "成品 .ai 未登记 DOM 枚举回读"
+                             "（ai extract）：.ai 二进制不可本机解析，"
+                             "无回读不许声称原生性已审")
+    findings = []
+    reconciliation = manifest.get("reconciliation") or {}
+    if reconciliation.get("ok") is not True:
+        findings.append({
+            "level": "fail", "code": "native.reconciliation_failed",
+            "message": "DOM 回读对账未过："
+                       + "；".join(reconciliation.get("diffs") or [])})
+    placed = readback.get("placed_items") or []
+    shapes = readback.get("shapes") or []
+    residue_names = {f"residue-{r.get('residue_id')}"
+                     for r in manifest.get("bitmap_residue") or []}
+    for item in placed:
+        if item.get("shape_id") not in residue_names:
+            findings.append({
+                "level": "fail", "code": "native.unregistered_bitmap",
+                "message": f"成品含未登记置入位图 "
+                           f"{item.get('shape_id')}（参考图位图严禁"
+                           "混入成品：位图只许登记过的六类残留）"})
+        ppi = item.get("effective_ppi")
+        if isinstance(ppi, (int, float)) \
+                and ppi < schema.AI_PLACED_PPI_FLOOR:
+            findings.append({
+                "level": "fail", "code": "native.placed_image_low_res",
+                "message": f"置入项 {item.get('shape_id')} 有效分辨率 "
+                           f"{ppi} ppi < {schema.AI_PLACED_PPI_FLOOR}"
+                           "（位图残留须高清，与另两路同口径）"})
+    page = (manifest.get("canvas") or {}).get("page_size_in") or [0, 0]
+    natives = [s for s in shapes
+               if not str(s.get("shape_id")).startswith("arrow-")]
+    if placed and not natives and page[0]:
+        big = [p for p in placed
+               if isinstance(p.get("width"), (int, float))
+               and p["width"] >= page[0] * 0.9
+               and isinstance(p.get("height"), (int, float))
+               and p["height"] >= page[1] * 0.9]
+        if big:
+            findings.append({
+                "level": "fail", "code": "native.full_page_bitmap",
+                "message": "成品无原生对象、只有整页置入位图：参考图"
+                           "整图贴入冒充重绘，硬拦（三路同口径）"})
+    metrics = {"backend": "illustrator",
+               "native_objects": len(shapes),
+               "placed_items": len(placed)}
+    if not findings:
+        findings.append({
+            "level": "info", "code": "native.ok",
+            "message": f"DOM 回读对账在场且无差：原生对象 "
+                       f"{len(shapes)} 个、登记置入项 {len(placed)} 个"
+                       "（证据面为 Illustrator DOM 枚举回读）"})
+    return _gate("native", _compose(findings), findings, metrics)
+
+
 def gate_native(ctx: _Ctx) -> dict:
     if ctx.line != "schematic":
-        return _skip("native", "原生性门只审方法图成品（.vsdx / .pptx）")
+        return _skip("native", "原生性门只审方法图成品"
+                               "（.vsdx / .pptx / .ai）")
     if _schematic_backend(ctx) == "powerpoint":
         return _gate_native_pptx(ctx)
+    if _schematic_backend(ctx) == "illustrator":
+        return _gate_native_ai(ctx)
     try:
         zf = zipfile.ZipFile(ctx.artifact)
     except Exception as e:

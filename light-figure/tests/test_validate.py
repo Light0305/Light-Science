@@ -175,6 +175,34 @@ def test_package_level_r_needs_basis(filled_pkg):
     assert validate_package(filled_pkg["root"])["ok"]
 
 
+# ------------------------------------------- user_specified（2026-10-21 补丁）
+
+def test_r_override_user_specified_with_reason_passes(filled_pkg):
+    mutate_backend(filled_pkg, base_backend(overrides=[
+        {"fig_id": FIG_DATA, "backend": "r",
+         "reason_code": "user_specified",
+         "reason": "用户明确指定本图用 R/ggplot 实现"}]))
+    assert validate_package(filled_pkg["root"])["ok"]
+
+
+def test_r_override_user_specified_without_reason_rejected(filled_pkg):
+    # 用户指定也须落 reason：无 reason 照样拦（不因 user_specified 豁免）
+    mutate_backend(filled_pkg, base_backend(overrides=[
+        {"fig_id": FIG_DATA, "backend": "r",
+         "reason_code": "user_specified"}]))
+    assert "backend.r_without_reason" in codes(filled_pkg["root"])
+
+
+def test_package_level_r_user_specified_needs_reason(filled_pkg):
+    mutate_backend(filled_pkg, base_backend(
+        backend="r", reason_code="user_specified"))
+    assert "backend.r_without_reason" in codes(filled_pkg["root"])
+    mutate_backend(filled_pkg, base_backend(
+        backend="r", reason_code="user_specified",
+        reason="用户指定整包数据图用 R 实现"))
+    assert validate_package(filled_pkg["root"])["ok"]
+
+
 def test_schematic_figure_cannot_have_backend_override(filled_pkg):
     mutate_backend(filled_pkg, base_backend(overrides=[
         {"fig_id": FIG_METHOD, "backend": "python"}]))

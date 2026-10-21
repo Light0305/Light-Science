@@ -288,6 +288,67 @@ def _recheck_schematic(root, pkg, fig_id, contract, record,
                 "media_vs_residue", "pass",
                 f"图片对象 {len(pics)} 个均有残留登记"))
         return
+    if backend == "illustrator":
+        # Illustrator 线：.ai 二进制不可本机解析，复核只消费 ai
+        # extract 登记的 DOM 枚举回读（页尺寸/语义 ID 钉扎/置入项
+        # 对残留登记/对账结论），与另两路的反抽复核同口径、证据面
+        # 换成宿主 DOM 回读。无回读即 fail 点名（不许默认通过）。
+        from .aibuild import load_ai_manifest
+        manifest = load_ai_manifest(root, fig_id) or {}
+        readback = manifest.get("dom_readback") or {}
+        if not readback:
+            findings.append(_finding(
+                "dom_readback", "fail",
+                "Illustrator 成品未登记 DOM 枚举回读（ai extract）："
+                ".ai 二进制不可本机解析，复核只认登记回读"))
+            return
+        page_in = (manifest.get("canvas") or {}).get("page_size_in") \
+            or [0, 0]
+        actual = (readback.get("document") or {}).get(
+            "page_size_in") or []
+        if len(actual) != 2 or abs(actual[0] - page_in[0]) > 0.02 \
+                or abs(actual[1] - page_in[1]) > 0.02:
+            findings.append(_finding(
+                "page_size", "fail",
+                f"DOM 回读页尺寸 {actual} 与 manifest 标定 "
+                f"{page_in} 不符"))
+        else:
+            findings.append(_finding(
+                "page_size", "pass",
+                f"DOM 回读页尺寸 {actual} 与标定一致"))
+        shapes = readback.get("shapes") or []
+        missing = [s["shape_id"] for s in shapes
+                   if s.get("user_semantic_id") != s["shape_id"]]
+        if missing:
+            findings.append(_finding(
+                "semantic_ids", "fail",
+                "DOM 回读对象 User ID 钉扎缺失/不符："
+                + "、".join(missing)))
+        else:
+            findings.append(_finding(
+                "semantic_ids", "pass",
+                f"{len(shapes)} 个回读对象的 User ID 钉扎齐备"))
+        declared = {r.get("residue_id")
+                    for r in manifest.get("bitmap_residue") or []}
+        pics = readback.get("placed_items") or []
+        stray = [p["shape_id"] for p in pics
+                 if str(p["shape_id"])[len("residue-"):]
+                 not in declared]
+        if stray:
+            findings.append(_finding(
+                "media_vs_residue", "fail",
+                "未登记的置入项：" + "、".join(stray)))
+        else:
+            findings.append(_finding(
+                "media_vs_residue", "pass",
+                f"置入项 {len(pics)} 个均有残留登记"))
+        reconciliation = manifest.get("reconciliation") or {}
+        if reconciliation.get("ok") is not True:
+            findings.append(_finding(
+                "reconciliation", "fail",
+                "DOM 回读对账未过："
+                + "；".join(reconciliation.get("diffs") or [])))
+        return
     # visio 线
     from .redraw import extract_shapes, load_manifest
     manifest = load_manifest(root, fig_id) or {}

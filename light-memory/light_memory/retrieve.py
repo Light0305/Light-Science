@@ -201,6 +201,33 @@ def _relation_route(pkg: dict, seed_scores: dict, recipe: dict) -> dict:
         adjacency.setdefault(b, []).append((a, w))
         degree[a] = degree.get(a, 0) + 1
         degree[b] = degree.get(b, 0) + 1
+    # 事实自身的 derived_from 派生链也是图边（与 derived-from 关系行
+    # 同口径：类型权重 0.6、来源计数 1）——派生事实与其源事实互为
+    # 邻居，否则沉淀好的派生链在检索期等于不存在。派生边另记一份
+    # 邻接：派生是内容同源关系（同一事件的两种沉淀），种子间可沿
+    # 派生边互相强化；取代边是替换关系，其邻居按定义是旧版，
+    # 不作相关性强化（强化语义只走派生边，见 _relation_route 主循环）。
+    derived_w = (schema.RELATION_TYPES.get("derived-from") or {}
+                 ).get("weight") or 0.6
+    derived_adj: dict[str, list] = {}
+    for rel in pkg.get("relations") or []:
+        if rel.get("status") == "resolved" \
+                and rel.get("type") == "derived-from":
+            a, b = rel.get("from_id"), rel.get("to_id")
+            if a in facts and b in facts:
+                derived_adj.setdefault(a, []).append((b, derived_w))
+                derived_adj.setdefault(b, []).append((a, derived_w))
+    for f in pkg.get("facts") or []:
+        a = f.get("fact_id")
+        for b in f.get("derived_from") or []:
+            if a not in facts or b not in facts or a == b:
+                continue
+            adjacency.setdefault(a, []).append((b, derived_w))
+            adjacency.setdefault(b, []).append((a, derived_w))
+            derived_adj.setdefault(a, []).append((b, derived_w))
+            derived_adj.setdefault(b, []).append((a, derived_w))
+            degree[a] = degree.get(a, 0) + 1
+            degree[b] = degree.get(b, 0) + 1
     seed_types = set(recipe.get("seed_fact_types") or [])
     facts_by_id = {f.get("fact_id"): f for f in pkg.get("facts") or []}
     frontier = {}
@@ -210,6 +237,13 @@ def _relation_route(pkg: dict, seed_scores: dict, recipe: dict) -> dict:
             s *= 1.5
         frontier[fid] = s
     scores: dict[str, float] = {}
+    # 派生强化：种子沿派生边到达另一种子时，被到达者获得传播分
+    # （同一事件的源事实与派生教训互为第二信号）；只记分、不入
+    # frontier，避免种子团内部的分數自我放大。
+    for fid, s in frontier.items():
+        for nb, w in derived_adj.get(fid, []):
+            if nb in frontier and nb != fid:
+                scores[nb] = max(scores.get(nb, 0.0), s * w)
     current = frontier
     for hop in range(int(recipe.get("hops") or 2)):
         decay = 0.5 ** hop
@@ -252,12 +286,18 @@ def _route_hits(root, pkg, query: str, recipe: dict, degraded: list):
             degraded.append("索引与真相不一致（stale）："
                             + "、".join(status["changed"])
                             + "；结果基于旧索引，索引重建后复核")
+        eff_query = query
         try:
-            add("fts", index_mod.search_fts(root, query, limit=30))
+            eff_query = index_mod.expand_query(root, query)
+        except Exception:
+            eff_query = query
+        try:
+            add("fts", index_mod.search_fts(root, eff_query, limit=30))
         except Exception:
             degraded.append("词法路执行失败，已跳过")
         try:
-            add("vector", index_mod.search_vector(root, query, limit=30),
+            add("vector", index_mod.search_vector(root, eff_query,
+                                                  limit=30),
                 score_key="score")
         except Exception:
             degraded.append("向量路执行失败，已降级为词法 + 关系路")

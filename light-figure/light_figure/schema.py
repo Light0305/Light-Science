@@ -83,10 +83,14 @@ BACKEND_DECISION_SOURCES = [
 DEFAULT_BACKEND = "python"  # 拍板 D2
 
 # D2：R 启用条件（满足其一才许覆写为 R，且须逐图登记依据）
+# user_specified（2026-10-21 补丁）：用户按自身需求明确指定用 R——
+# 指定本身即依据来源，但 reason 仍须落字说明（谁指定、为何指定），
+# 无 reason 照样拦（validate 的 reason 强制不因本值豁免）。
 R_ENABLE_CONDITIONS = {
     "r_decisive_advantage": "图种在 R 侧有决定性优势（声明式组图/collect 收敛、ggplot 扩展专属图种）",
     "pipeline_in_r": "项目数据管线本身在 R 内（源数据与分析同语言）",
     "library_r_only": "目标刊/图种在数据图库中只有 R 侧样式/成例条目",
+    "user_specified": "用户明确指定用 R（按用户需求选 R 实现；仍须登记 reason 落字说明）",
 }
 
 # ---------------------------------------------------------------- 期刊合同
@@ -180,15 +184,33 @@ DEGRADATION_PATHS = ["normal", "no_ai_reference"]
 
 # ---------------------------------------------------------------- 方法图后端（v1.1）
 
-# 方法线原生后端（FIG-D02 裁决修订：Visio 主线 + PowerPoint 第二原生
-# 后端）；数据图不归 PPT（演示图表无诚实门登记面）。
-SCHEMATIC_BACKENDS = ["visio", "powerpoint"]
+# 方法线原生后端三路平权（用户 2026-10-21 裁决，推翻第二轮 FIG-D03
+# 的 Illustrator 精修定位）：Visio / PowerPoint / Illustrator 三路均
+# 为可对参考图做原生复刻的生产路线，合同 schematic_backend 逐图
+# 分流、缺省 visio（存量兼容）；数据图不归三后端（数据图走代码线）。
+SCHEMATIC_BACKENDS = ["visio", "powerpoint", "illustrator"]
 DEFAULT_SCHEMATIC_BACKEND = "visio"
 
 # powerpoint_verified 口径（与 visio_verified 同构）：文件层构建
 # （python-pptx + OPC 反读）只给 file_layer 证据，恒标 false；
-# true 只许 COM 路线在 Windows + PowerPoint 实机原生导出验证后落。
+# true 只许 COM 路线在 Windows + PowerPoint 实机执行构建脚本 +
+# export-to-verify 回读无差、且执行者经 com-verify 登记落字后落
+# （登记纪律见 pptxbuild.register_com_verify 与构建单 J3）。
 PPTX_EVIDENCE_LEVELS = ["file_layer", "com_native"]
+
+# illustrator_verified 口径（三路同构）：ExtendScript 构建脚本生成
+# 只给 script 证据，恒标 false；true 只许 DOM 枚举回读对账无差 +
+# 回读带 Illustrator 应用名/版本 + 执行者经 ai extract --by 落字
+# 后落（登记纪律见 aibuild.extract_ai 与构建单 J3）。
+AI_EVIDENCE_LEVELS = ["script", "dom_readback"]
+
+# Illustrator 语义 ID 钉扎落点（构建单 J1）：Illustrator 无
+# ShapeSheet 对应物，取「对象 name = 语义 ID + PageItem.note 写
+# 本标记 + 语义 ID」双写，DOM 枚举回读按 note 对账（ie3jp 以 note
+# 锚定对象身份的实证形态）；与 Visio User 段、PPTX name+descr
+# 构成三路等价钉扎。
+AI_USER_ID_MARKER = "light-figure:user-id="
+AI_ARROW_MARKER = "light-figure:arrow="
 
 # ---------------------------------------------------------------- Visio 重绘（F5）
 
@@ -244,6 +266,45 @@ AUDIT_GATES = [
 # Figure 消费三库登记表，不直接翻仓文件（约束 16 / 草案 §四）
 SISTER_LIBRARIES = ["method_gallery", "visio_components", "data_gallery"]
 
+# ------------------------------------------------- 提示词多版变体（2026-10-21 补丁）
+
+# 方法图提示词多版并行：同一图库三元组与角色色板之下，变体只在
+# 构图 / 密度 / 布局流向三维上区分（三维口径与合同 density_stance、
+# 六维拆解的 layout_flow / information_density 同源），供用户按项目与
+# 论文实情选版。每版独立文件 schematic/prompts/<fig_id>.<variant>.md、
+# 六段完整、既有纪律（正文无 hex / 标签度量拦截 / 配色确认门）逐版
+# 适用、独立 version 迭代与归档。变体集合与 selected_variant 登记于
+# 合同 prompt_variants 与 provenance 账面；参考图登记/验收须指明所据
+# 变体且与选定一致，未选定不许进登记/验收。
+PROMPT_VARIANTS = {
+    "compact": {
+        "label": "紧凑型",
+        "composition": "单行主流向紧凑排布：模块沿主数据流首尾相接，"
+                       "次级模块挂主干侧枝，面板间距压到最小",
+        "density": "高密度：每框一概念、箭头带语义标签，信息在图内自包含",
+        "layout_flow": "左入右出水平流（输入在左、产出在右）",
+        "extra_negative": "不许为紧凑把标签缩到不可读或把模块框叠放",
+    },
+    "spacious": {
+        "label": "舒展型",
+        "composition": "宽松网格排布：核心模块居中放大，次级模块四周"
+                       "留白分隔，一眼先读主干",
+        "density": "低密度：只画核心模块与主干箭头，次要细节移入图注",
+        "layout_flow": "左入右出水平流（分段推进，段间留白）",
+        "extra_negative": "不许以留白为名省略元素清单内的模块"
+                          "（留白是间距，不是删减）",
+    },
+    "layered": {
+        "label": "分层型",
+        "composition": "自上而下分层排布：按处理层级横向成带，同层"
+                       "模块并排，层间以纵向箭头连接",
+        "density": "中密度：按层递进展开细节，上层概括、下层展开",
+        "layout_flow": "自上而下纵向流（顶层输入、底层产出）",
+        "extra_negative": "不许跨层回指箭头绕行或斜穿其他层"
+                          "（回指走层侧通道）",
+    },
+}
+
 # ------------------------------------------------- 配色决定与参考拆解（v1.1）
 
 # FIG-D08：配色决定来源三选一（期刊合同导出 / gallery 锚 / 用户指定）
@@ -263,10 +324,17 @@ REFERENCE_BREAKDOWN_DIMS = [
     "special_elements",     # 特殊元素
 ]
 
-# ------------------------------------------------- Illustrator 精修段（v1.1，FIG-D03）
+# --------------------------------------- Illustrator 路线（FIG-D03 已被推翻）
 
-# 条件路线：宿主（正版 Illustrator，Win/Mac）可用才成立；缺宿主
-# 回落 Visio/SVG 路并如实落字。readback 为 DOM 回读对账记录形态。
+# 第二轮 FIG-D03 曾把 Illustrator 写死为精修路线，用户 2026-10-21
+# 裁决推翻：Illustrator 是第三条生产路线（见 SCHEMATIC_BACKENDS）。
+# 本段两组词表分工：
+# - ILLUSTRATOR_REFINE_STATUSES：合同 illustrator_refinement 段的
+#   存量校验词表（v1.1 落地，其他后端的印前登记仍可引用），保留
+#   兼容不删；它不再是 Illustrator 的路线身份。
+# - ILLUSTRATOR_PREFLIGHT_ITEMS：印前五项，现为 Illustrator 生产
+#   路线的交付前终检段——由 DOM 回读事实机械计算、落 ai manifest
+#   的 preflight 段（构建单 J4），true = 检出问题、须处置。
 ILLUSTRATOR_REFINE_STATUSES = [
     "planned", "svg_checked", "in_refinement",
     "readback_recorded", "done",
@@ -274,10 +342,14 @@ ILLUSTRATOR_REFINE_STATUSES = [
 ILLUSTRATOR_PREFLIGHT_ITEMS = [
     "rgb_mixed",        # RGB 混入 CMYK 工作流
     "broken_links",     # 断链置入图
-    "low_res_images",   # 低分辨率置入图
+    "low_res_images",   # 低分辨率置入图（有效 ppi 低于地板）
     "white_overprint",  # 白色叠印
-    "pdfx",             # PDF/X 合规
+    "pdfx",             # PDF/X 合规（导出面不可用/不合规）
 ]
+
+# Illustrator 回读置入图有效分辨率地板（与 recheck 的位图分辨率
+# 口径同源：期刊位图有效分辨率下限）
+AI_PLACED_PPI_FLOOR = 200
 
 # ---------------------------------------------------------------- 逐图状态行
 

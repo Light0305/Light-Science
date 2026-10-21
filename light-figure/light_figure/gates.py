@@ -167,8 +167,24 @@ def _produced_gaps(pkg) -> list:
                 gaps.append(f"数据图 {fig_id} 账面源数据哈希与实物不符")
         else:
             if not prompt_path(root, fig_id).exists():
-                gaps.append(f"方法图 {fig_id} 缺提示词产物 "
-                            f"schematic/prompts/{fig_id}.md（跑 prompt build）")
+                # 变体模式（2026-10-21 补丁）：变体集文件齐备且已选定
+                # 与单版产物等价满足；集在场但未选定单独点名。
+                pv_contract = pkg["contracts"].get(fig_id) or {}
+                pv = pv_contract.get("prompt_variants") or {}
+                pv_entries = pv.get("variants") or []
+                pv_files_ok = bool(pv_entries) and all(
+                    (root / str(e.get("file") or "")).exists()
+                    for e in pv_entries if isinstance(e, dict))
+                if pv_files_ok and pv.get("selected_variant"):
+                    pass
+                elif pv_files_ok:
+                    gaps.append(f"方法图 {fig_id} 提示词变体未选定："
+                                "prompt select 选定变体后才许过 produced "
+                                "门（未选定不许进登记/验收）")
+                else:
+                    gaps.append(f"方法图 {fig_id} 缺提示词产物 "
+                                f"schematic/prompts/{fig_id}.md"
+                                "（跑 prompt build）")
             ref_rel = reference_relpath(root, fig_id)
             if ref_rel is None:
                 gaps.append(f"方法图 {fig_id} 参考图未入包登记"
@@ -207,6 +223,59 @@ def _produced_gaps(pkg) -> list:
                                     "（pptx extract 须无未登记差集）")
                 artifact = root / pptx_relpath(fig_id)
                 artifact_label = "成品 .pptx（pptx build 构建）"
+            elif backend == "illustrator":
+                from .aibuild import (
+                    ai_relpath, load_ai_manifest, validate_ai_manifest,
+                )
+                manifest = load_ai_manifest(root, fig_id)
+                if manifest is None:
+                    gaps.append(f"方法图 {fig_id} 缺 ai manifest"
+                                "（ai install 登记，单一真相源）")
+                else:
+                    gaps.extend(validate_ai_manifest(manifest,
+                                                     root=root))
+                    if manifest.get("status") not in ("built",
+                                                      "verified"):
+                        gaps.append(f"方法图 {fig_id} ai manifest "
+                                    f"状态为 {manifest.get('status')}："
+                                    "须先 ai build 生成 ExtendScript "
+                                    "构建脚本并在 Illustrator 实机执行")
+                    reconciliation = manifest.get("reconciliation") \
+                        or {}
+                    if reconciliation.get("ok") is not True:
+                        gaps.append(f"方法图 {fig_id} DOM 回读对账未过"
+                                    "（ai extract 须登记 DOM 枚举回读"
+                                    "且无未登记差集）")
+                    preflight = manifest.get("preflight")
+                    if not isinstance(preflight, dict):
+                        gaps.append(f"方法图 {fig_id} 印前终检"
+                                    "（preflight）未落字：Illustrator "
+                                    "路线交付前五项终检须由 ai extract "
+                                    "按 DOM 回读事实计算登记")
+                    else:
+                        missing_pf = [
+                            key for key in
+                            schema.ILLUSTRATOR_PREFLIGHT_ITEMS
+                            if key not in preflight]
+                        if missing_pf:
+                            gaps.append(
+                                f"方法图 {fig_id} 印前终检缺项："
+                                + "、".join(
+                                    schema.ILLUSTRATOR_PREFLIGHT_OPEN[
+                                        key] for key in missing_pf)
+                                + "（终检事实未齐，不许默认无问题）")
+                        open_pf = [key for key, hit
+                                   in preflight.items() if hit is True]
+                        if open_pf:
+                            gaps.append(
+                                f"方法图 {fig_id} 印前终检有未处置问题："
+                                + "、".join(
+                                    schema.ILLUSTRATOR_PREFLIGHT_OPEN.get(
+                                        key, key) for key in open_pf)
+                                + "（处置后重新回读登记才许过门）")
+                artifact = root / ai_relpath(fig_id)
+                artifact_label = "成品 .ai（Illustrator 实机经 " \
+                                 "ExtendScript 构建脚本生成后存回）"
             else:
                 manifest = load_manifest(root, fig_id)
                 if manifest is None:
