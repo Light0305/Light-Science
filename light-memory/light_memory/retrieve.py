@@ -160,6 +160,38 @@ def set_recipe(root, name: str, patch: dict, *, by: str) -> dict:
 
 # ---------------------------------------------------------------- 内部
 
+#: 包级进程内缓存：键为包路径，值为（文件签名，pkg）。签名 = 包内
+#: 全部登记文件（project.FILES）的 (名, mtime_ns, size)；任一文件
+#: 被改写即失效重读。本模块的强度记账改事实后立即 save_facts
+#: 落盘，签名随之变化，不会读到记账前状态；其余命令各自走
+#: load_package，不受此缓存影响。旧实现每查每包全量解析四账
+#: （含从不被召回消费的 events），是尾延迟三成本点之一（D-S1）。
+_PKG_CACHE: dict = {}
+
+
+def _pkg_signature(root) -> tuple:
+    sig = []
+    for name in project_mod.FILES.values():
+        p = Path(root) / name
+        if p.exists():
+            st = p.stat()
+            sig.append((name, st.st_mtime_ns, st.st_size))
+        else:
+            sig.append((name, -1, -1))
+    return tuple(sig)
+
+
+def _load_pkg_cached(root) -> dict:
+    root = Path(root)
+    sig = _pkg_signature(root)
+    cached = _PKG_CACHE.get(str(root))
+    if cached and cached[0] == sig:
+        return cached[1]
+    pkg = project_mod.load_package(root)
+    _PKG_CACHE[str(root)] = (sig, pkg)
+    return pkg
+
+
 def _root_label(pkg: dict, root) -> str:
     memory = pkg.get("memory") or {}
     return (memory.get("project") or {}).get("id") or \
@@ -378,6 +410,55 @@ def _fuse(hits: dict, weights: dict) -> list:
     return [(key, round(score, 6)) for key, score in out]
 
 
+def _interleave_by_project(all_items: list, roots: list) -> list:
+    """跨项目合并保底（D-S3 口径，写死留痕）：
+
+    - 触发条件：配方 scope == cross 且来源包 >= 2（单包或非跨
+      项目配方仍走全局融合分排序，行为不变）。
+    - 合成方式：按包内名次轮转交织——条目先按来源包分组（组内
+      保持各包融合序），再逐名次轮转：第 r 轮依次取各包的第 r
+      条。轮转顺序（包优先级）由各包首条融合分降序定，同分按
+      roots 给定顺序。
+    - 保底语义：n 个包时，任一包的本地第 r 名在合并序中位置
+      <= n*r（先行包 <= n*(r-1) + 其优先级序号）——每个项目在
+      合并前段都有保底名额，不被他包高分条目整体挤出。
+    - 条目集合与组内相对序与全局分排序完全一致：纯排序变更，
+      不增删条目。
+    """
+    groups: dict[str, list] = {}
+    order: list[str] = []
+    for rroot, _pkg in roots:
+        key = str(rroot)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+    for item in all_items:
+        groups.setdefault(item["root"], []).append(item)
+    for key in groups:
+        if key not in order:
+            order.append(key)
+    present = [k for k in order if groups[k]]
+
+    def top_score(key):
+        return groups[key][0]["score"]
+
+    priority = [present[i] for i in sorted(
+        range(len(present)),
+        key=lambda i: (-top_score(present[i]), i))]
+    merged = []
+    depth = 0
+    remaining = True
+    while remaining:
+        remaining = False
+        for key in priority:
+            lst = groups[key]
+            if depth < len(lst):
+                merged.append(lst[depth])
+                remaining = True
+        depth += 1
+    return merged
+
+
 # ---------------------------------------------------------------- 回供
 
 def recall(root, query: str, *, recipe: str = "default", as_of=None,
@@ -391,7 +472,7 @@ def recall(root, query: str, *, recipe: str = "default", as_of=None,
     """
     started = time.monotonic()
     root = Path(root)
-    pkg = project_mod.load_package(root)
+    pkg = _load_pkg_cached(root)
     memory = pkg.get("memory")
     if memory is None:
         raise RetrieveError([f"记忆项目不存在或缺登记头：{root}"])
@@ -409,7 +490,7 @@ def recall(root, query: str, *, recipe: str = "default", as_of=None,
     roots = [(root, pkg)]
     if eff_recipe.get("scope") == "cross" or extra_roots:
         for extra in extra_roots:
-            epkg = project_mod.load_package(extra)
+            epkg = _load_pkg_cached(extra)
             if epkg.get("memory") is None:
                 raise RetrieveError(
                     [f"跨项目作用域的包不存在或缺登记头：{extra}"])
@@ -469,7 +550,12 @@ def recall(root, query: str, *, recipe: str = "default", as_of=None,
                               "结构化失败，不冒充无记忆（MM-22）",
                     "recipe": recipe, "query": query}
 
-    all_items.sort(key=lambda i: -i["score"])
+    if len(roots) >= 2 and eff_recipe.get("scope") == "cross":
+        # 跨项目保底名额（D-S3）：按包内名次轮转交织，口径见
+        # _interleave_by_project。其余情形维持全局融合分排序。
+        all_items = _interleave_by_project(all_items, roots)
+    else:
+        all_items.sort(key=lambda i: -i["score"])
     all_items = all_items[:eff_caps["max_items"]]
 
     # ---- 渐进披露：depth 0 索引行 / 1 全文 / 2 出处锚点 ---------------

@@ -26,7 +26,8 @@ import sqlite3
 from pathlib import Path
 
 from . import project as project_mod
-from .util import component_hash, read_jsonl, sha256_file, utcnow
+from .util import (component_hash, load_structured, read_jsonl,
+                   sha256_file, utcnow)
 
 INDEX_DIR = ".index"
 INDEX_DB = "memory_index.sqlite"
@@ -249,9 +250,42 @@ def _vec_backend(con) -> str:
 
 # ---------------------------------------------------------------- 真相清单
 
+#: truth_manifest 进程内备忘：键为包路径，值为（文件签名，清单）。
+#: 签名 = 逐文件 (相对名, mtime_ns, size)；任一真相文件或笔记被
+#: 改写签名即变、备忘自然失效——校验语义与每次全量算哈希一致，
+#: 只是把「每查一次全量哈希」降为「每查一次 stat」（D-S1）。
+_MANIFEST_CACHE: dict = {}
+
+
+def _manifest_signature(root) -> tuple:
+    sig = []
+    for name in project_mod.TRUTH_FILES:
+        p = root / name
+        if p.exists():
+            st = p.stat()
+            sig.append((name, st.st_mtime_ns, st.st_size))
+        else:
+            sig.append((name, -1, -1))
+    notes_dir = root / "notes"
+    if notes_dir.exists():
+        for p in sorted(notes_dir.rglob("*.md")):
+            st = p.stat()
+            sig.append((str(p.relative_to(root)),
+                        st.st_mtime_ns, st.st_size))
+    return tuple(sig)
+
+
 def truth_manifest(root) -> dict:
-    """逐真相文件算哈希（索引台账与对账的范围，MM-05）。"""
+    """逐真相文件算哈希（索引台账与对账的范围，MM-05）。
+
+    结果按文件签名备忘（见 _MANIFEST_CACHE）：签名未变直接回
+    备忘副本，变了才重算——对账结论不变，成本不再随规模线性涨。
+    """
     root = Path(root)
+    sig = _manifest_signature(root)
+    cached = _MANIFEST_CACHE.get(str(root))
+    if cached and cached[0] == sig:
+        return dict(cached[1])
     manifest = {}
     for name in project_mod.TRUTH_FILES:
         p = root / name
@@ -261,7 +295,8 @@ def truth_manifest(root) -> dict:
     if notes_dir.exists():
         for p in sorted(notes_dir.rglob("*.md")):
             manifest[str(p.relative_to(root))] = sha256_file(p)
-    return manifest
+    _MANIFEST_CACHE[str(root)] = (sig, manifest)
+    return dict(manifest)
 
 
 def _collect_chunks(pkg: dict, root) -> list:
@@ -472,6 +507,25 @@ def _matched_units(unit_set: set, chunk_tokens: list) -> int:
     return len(unit_set & seq)
 
 
+def _texts_by_ids(con, chunk_ids) -> dict:
+    """按 chunk_id 取 FTS 切分文本（只取候选行）。
+
+    D-S1：旧实现每次查询整表载入 chunks_fts_content（O(规模)），
+    改为按候选 ID 分批 IN 查询——候选数由 MATCH 结果界定
+    （<= max(limit*20, 200)），与索引规模无关。
+    """
+    out = {}
+    ids = list(dict.fromkeys(chunk_ids))
+    for i in range(0, len(ids), 500):
+        part = ids[i:i + 500]
+        marks = ",".join("?" for _ in part)
+        for cid, text in con.execute(
+                "SELECT c0, c3 FROM chunks_fts_content "
+                f"WHERE c0 IN ({marks})", part):
+            out[cid] = text
+    return out
+
+
 def search_fts(root, query: str, limit: int = 10) -> list:
     con = _open_db(root)
     try:
@@ -490,8 +544,7 @@ def search_fts(root, query: str, limit: int = 10) -> list:
             rows = rows[:limit]
             return [{"chunk_id": r[0], "source_kind": r[1],
                      "source_id": r[2], "score": r[3]} for r in rows]
-        texts = {r[0]: r[1] for r in con.execute(
-            "SELECT c0, c3 FROM chunks_fts_content").fetchall()}
+        texts = _texts_by_ids(con, [r[0] for r in rows])
         out = []
         for r in rows:
             chunk_tokens = (texts.get(r[0]) or "").split()
@@ -526,8 +579,7 @@ def expand_query(root, query: str) -> str:
         return query
     con = _open_db(root)
     try:
-        texts = {r[0]: r[1] for r in con.execute(
-            "SELECT c0, c3 FROM chunks_fts_content").fetchall()}
+        texts = _texts_by_ids(con, [row["chunk_id"] for row in top])
     finally:
         con.close()
     from collections import Counter
@@ -549,21 +601,49 @@ def expand_query(root, query: str) -> str:
     return query + " " + " ".join(picked)
 
 
-def search_vector(root, query: str, limit: int = 10) -> list:
-    pkg = project_mod.load_package(root)
-    resolved = resolve_embedder(pkg.get("memory") or {})
-    emb = resolved["embedder"]
-    qv = getattr(emb, "embed_query", emb.embed)(query)
-    con = _open_db(root)
+#: 向量行进程内缓存：键为索引库路径，值为（文件签名，解析后的
+#: 向量行）。索引是影子派生物（可整删重建）：库文件一变（重建/
+#: 替换）签名即变、缓存失效重读，结果与每次全量读完全一致；
+#: 省掉的是每查一次对全部向量做 json.loads 的 O(规模) 解析（D-S1）。
+_VECTOR_CACHE: dict = {}
+
+
+def _vector_rows(root) -> list:
+    db_path = Path(root) / INDEX_DIR / INDEX_DB
+    if not db_path.exists():
+        raise IndexError_(["索引不存在：先运行 index rebuild"])
+    st = db_path.stat()
+    sig = (st.st_mtime_ns, st.st_size)
+    cached = _VECTOR_CACHE.get(str(db_path))
+    if cached and cached[0] == sig:
+        return cached[1]
+    con = sqlite3.connect(db_path)
     try:
-        rows = con.execute(
+        raw = con.execute(
             "SELECT chunk_id, source_kind, source_id, vector FROM chunks"
         ).fetchall()
     finally:
         con.close()
+    rows = [(cid, kind, sid, json.loads(vec_json))
+            for cid, kind, sid, vec_json in raw]
+    _VECTOR_CACHE[str(db_path)] = (sig, rows)
+    return rows
+
+
+def _memory_head(root):
+    """只读登记头（向量路只需嵌入登记，不必整包解析；D-S1）。"""
+    p = Path(root) / project_mod.FILES["memory"]
+    if not p.exists():
+        return None
+    return load_structured(p)
+
+
+def search_vector(root, query: str, limit: int = 10) -> list:
+    resolved = resolve_embedder(_memory_head(root) or {})
+    emb = resolved["embedder"]
+    qv = getattr(emb, "embed_query", emb.embed)(query)
     scored = []
-    for cid, kind, sid, vec_json in rows:
-        vec = json.loads(vec_json)
+    for cid, kind, sid, vec in _vector_rows(root):
         dot = sum(a * b for a, b in zip(qv, vec))
         scored.append({"chunk_id": cid, "source_kind": kind,
                        "source_id": sid, "score": round(dot, 6)})

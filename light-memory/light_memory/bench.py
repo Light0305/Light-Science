@@ -16,8 +16,9 @@
     - include_by_project：{陈述片段: 项目标签}（跨项目题：命中且
       分组正确才算对，混答即错）
     - refusal：true 表示记忆中无此信息，拒答判据 = top-5 内无
-      有据命中——词法/关系路命中且与查询共享至少 2 个实义 token
-      （单字 OR 命中共用字不算证据；向量弱命中不算证据，属无据）
+      有据命中——有据命中须经词法/关系路命中且达到正证据门槛
+      （证据单元口径见 _item_evidenced：命中单元 >= 2 且覆盖
+      查询单元 >= 1/3；向量弱命中不算证据，属无据）
 
 随包迷你题集 mini_bench.jsonl 由一期真实冒烟数据派生（火鸡项目
 迷你世界：结论两代/失败教训/同名方法跨项目/释义与拒答），
@@ -218,18 +219,39 @@ def build_mini_world(base) -> dict:
 
 # ---------------------------------------------------------------- 运行器
 
-#: 拒答判据用的停用 token（共用字单字命中不算证据）。
-_REFUSAL_STOPWORDS = {"的", "对", "在", "了", "是", "与", "及", "中",
-                      "为", "有", "个", "其", "之", "和", "或", "把",
-                      "被", "从", "向", "the", "a", "an", "of", "to"}
+#: 拒答判据——正证据门槛（D-S2 口径，写死留痕）：
+#: 「有据命中」须同时满足两条：
+#: (1) 证据单元命中数 >= min(2, 查询证据单元总数)。证据单元与
+#:     索引层 FTS 门同一口径（index._query_units：中文取相邻字
+#:     对 bigram、拉丁/数字取整词）——中文单字巧合不算证据：
+#:     「葡萄园」与查询「葡萄糖」只共享 1 个 bigram 单元（葡萄），
+#:     不达门槛。旧判据（单字 token 集交集 >= 2、无覆盖要求）
+#:     在中文单字切分下对同域文本几乎恒成立（葡萄+园/糖任一
+#:     两字即凑满），是弃答失效的判据侧根源，已废弃。
+#: (2) 单元覆盖率（命中单元 / 查询单元总数）>= 1/3：只沾一两
+#:     个词、与问题主体无关的条目不算证据；陈述问题所问之事
+#:     的真实证据通常能覆盖查询单元的实质部分。
+EVIDENCE_MIN_UNITS = 2
+EVIDENCE_MIN_COVERAGE = 1.0 / 3.0
 
 
-def _evidence_overlap(query: str, text: str) -> int:
-    """查询与条目的实义 token 交集数（拒答判据的证据强度）。"""
-    qtokens = {t for t in index_mod.tokenize(query)
-               if t not in _REFUSAL_STOPWORDS}
-    ttokens = set(index_mod.tokenize(text))
-    return len(qtokens & ttokens)
+def _evidence_units(query: str, text: str) -> tuple:
+    """(命中证据单元数, 查询证据单元总数)：与索引层同一口径。"""
+    unit_set = set(index_mod._query_units(query))
+    if not unit_set:
+        return 0, 0
+    matched = index_mod._matched_units(
+        unit_set, index_mod.tokenize(text))
+    return matched, len(unit_set)
+
+
+def _item_evidenced(query: str, item: dict) -> bool:
+    """条目是否达到正证据门槛（拒答判据的证据强度，两条全过）。"""
+    matched, total = _evidence_units(query, item.get("match_text") or "")
+    if total == 0:
+        return False
+    need = min(EVIDENCE_MIN_UNITS, total)
+    return matched >= need and matched / total >= EVIDENCE_MIN_COVERAGE
 
 
 def _score_item(result: dict, expect: dict, query: str = "") -> tuple:
@@ -242,8 +264,7 @@ def _score_item(result: dict, expect: dict, query: str = "") -> tuple:
         evidenced = [i for i in items
                      if ("fts" in i["routes"]
                          or "relation" in i["routes"])
-                     and _evidence_overlap(
-                         query, i.get("match_text") or "") >= 2]
+                     and _item_evidenced(query, i)]
         detail["evidenced_hits"] = len(evidenced)
         return (len(evidenced) == 0), detail
     ok = True
@@ -326,8 +347,9 @@ def run_bench(set_path, world_dir, *, out=None) -> dict:
         "pass_line": None,
         "verdict": "not_judged",
         "note": "通过线待构建期首测后由用户定版；本报表只报数不判线"
-                "（MM-32）。释义类单列；拒答判据 = top-5 内无与查询"
-                "共享至少 2 个实义 token 的词法/关系有据命中。",
+                "（MM-32）。释义类单列；拒答判据 = top-5 内无达到"
+                "正证据门槛（证据单元命中 >= 2 且覆盖查询单元"
+                " >= 1/3）的词法/关系有据命中。",
         "categories": per_category,
         "overall": {
             "total": sum(c["total"] for c in per_category.values()),
