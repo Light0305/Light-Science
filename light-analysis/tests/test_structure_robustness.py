@@ -313,16 +313,37 @@ def test_structure_declaration_conflict_undetermined(tmp_path):
 DEMO_POINTS = [("estimator", ["mean_diff", "median_diff"]),
                ("outlier_handling", ["keep_all", "trim_extremes"])]
 THREE_POINTS = DEMO_POINTS + [("missing_data", ["complete_case", "impute"])]
+# 真留痕账本：subset / covariate_set 未登记计算语义（第五批词表外），
+# 封顶纪律的覆盖靠它，不靠已升格为真执行的点充数。
+CAP_POINTS = [("estimator", ["mean_diff", "median_diff"]),
+              ("subset", ["full_sample", "core_only"]),
+              ("covariate_set", ["unadjusted", "adjusted"])]
 
 
 def test_robustness_scope_of_demo_ledger():
+    # 第五批扩面后：演示账本两点（estimator / outlier_handling 的
+    # keep_all+trim_extremes）选项计算语义全登记 → 全部真执行。
     ledger = build_ledger([{"point": p, "options": o,
                             "theoretical_justification": "x"}
                            for p, o in DEMO_POINTS])
     scope = robustness_scope_of(ledger)
-    assert scope["computed"] == ["estimator"]
-    assert scope["trace_only"] == ["outlier_handling"]
-    assert scope["trace_only_fraction"] == 0.5
+    assert scope["computed"] == ["estimator", "outlier_handling"]
+    assert scope["trace_only"] == []
+    assert scope["trace_only_fraction"] == 0.0
+    assert scope["target_fraction"] == 0.5
+
+
+def test_robustness_scope_unregistered_option_stays_trace():
+    # 选项级诚实：missing_data 的 impute 未登记语义（impute 可指
+    # 均值/中位/模型填补，语义未定不许冒充已执行）→ 整点留痕并点名。
+    ledger = build_ledger([{"point": p, "options": o,
+                            "theoretical_justification": "x"}
+                           for p, o in THREE_POINTS])
+    scope = robustness_scope_of(ledger)
+    assert scope["computed"] == ["estimator", "outlier_handling"]
+    assert scope["trace_only"] == ["missing_data"]
+    assert scope["trace_only_fraction"] == 1 / 3
+    assert "impute" in scope["point_basis"]["missing_data"]
 
 
 def test_row_grade_scope_cap_pure():
@@ -343,21 +364,21 @@ def test_row_grade_scope_cap_pure():
     assert grade3 == "conclusive"
 
 
-def test_judge_rows_carry_scope_no_cap_at_half(pkg, tmp_path):
+def test_judge_rows_carry_scope_demo_fully_computed(pkg, tmp_path):
     root = _checked_with_points(pkg, DEMO_POINTS)
     _judge(root, tmp_path, {"L-OK": STRONG_POS})
     row = _current(root)["L-OK"]
     assert row["verdict"] == "positive"
     scope = row["robustness_scope"]
-    assert scope["computed"] == ["estimator"]
-    assert scope["trace_only"] == ["outlier_handling"]
-    assert scope["trace_only_fraction"] == 0.5
+    assert scope["computed"] == ["estimator", "outlier_handling"]
+    assert scope["trace_only"] == []
+    assert scope["trace_only_fraction"] == 0.0
     assert "稳健性覆盖封顶" not in (row["strength_cap_reason"] or "")
     assert validate_package(root) == []
 
 
 def test_judge_scope_cap_over_half(pkg, tmp_path):
-    root = _checked_with_points(pkg, THREE_POINTS)
+    root = _checked_with_points(pkg, CAP_POINTS)
     _judge(root, tmp_path, {"L-OK": STRONG_POS})
     row = _current(root)["L-OK"]
     assert row["verdict"] == "positive"
@@ -368,7 +389,7 @@ def test_judge_scope_cap_over_half(pkg, tmp_path):
 
 
 def test_conclude_inputs_carry_scope(pkg, tmp_path):
-    root = _checked_with_points(pkg, THREE_POINTS)
+    root = _checked_with_points(pkg, CAP_POINTS)
     _judge(root, tmp_path, {"L-OK": STRONG_POS})
     assert advance_package(root) == "judged"
     run_grade(root)

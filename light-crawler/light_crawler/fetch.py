@@ -362,8 +362,14 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
         "precheck_id": ctx["record"]["precheck_id"],
         "run_config_hash": ctx["record"].get("run_config_hash"),
         "requested": 0, "stored": 0, "not_modified": 0, "duplicates": 0,
+        "near_duplicates": 0,
         "errors": [], "refused": False,
     }
+    # 留存档位与近重配置在 run 启动时按登记定版（中途改登记不影响
+    # 在飞 run 的口径，run_config_hash 已把登记纳入哈希）。
+    tier = schema.effective_retention_tier(reg)
+    warc_archive = None
+    warc_rel = None
     dump_yaml(run_dir / "run.yaml", run_rec)
     project.append_event(root, "fetch_run_started", target_id=target_id,
                          detail=f"{run_id} 启动（通道 {channel}）",
@@ -558,6 +564,11 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
                                "回退链（须登记授权）或浏览器通道",
                         data={"run_id": run_id, "url": url,
                               "signals": shell["signals"]})
+            # 跨 run 近重检查（simhash 层）：在清洗件落盘前标注；
+            # 指纹入库与事件在 provenance 落账后（见下）。
+            nd_hit = storage.check_near_duplicate(root, reg, cleaned)
+            if nd_hit is not None:
+                cleaned["near_duplicate_cross_run"] = nd_hit
             cleaned_rel = None
             if cleaned["kind"] in ("html", "json", "text"):
                 cpath = run_dir / "cleaned" / f"{fp[:12]}.json"
@@ -565,6 +576,15 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
                 cpath.write_text(_json.dumps(
                     cleaned, ensure_ascii=False, indent=1), encoding="utf-8")
                 cleaned_rel = cpath.relative_to(Path(root)).as_posix()
+            warc_fields = {}
+            if tier == storage.WARC_TIER:
+                if warc_archive is None:
+                    warc_archive, warc_rel = storage.run_archive(
+                        root, run_dir)
+                ref = warc_archive.add_response(
+                    uri=resp.final_url, status=resp.status,
+                    headers=resp.headers, body=resp.body)
+                warc_fields = {"warc_path": warc_rel, **ref}
             prior_prov = storage.last_provenance_for(root, url)
             prov = storage.append_provenance(root, {
                 "kind": "fetch", "target_id": target_id, "run_id": run_id,
@@ -574,7 +594,7 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
                 "cleaned_path": cleaned_rel,
                 "precheck_ref": ctx["record"]["precheck_id"],
                 "run_config_hash": run_rec["run_config_hash"],
-                "retention_tier": storage.RETENTION_TIER,
+                "retention_tier": tier, **warc_fields,
                 "etag": next((v for k, v in resp.headers.items()
                               if k.lower() == "etag"), None),
                 "last_modified": next((v for k, v in resp.headers.items()
@@ -597,6 +617,22 @@ def fetch_run(root, target_id, urls=None, transport=None, sleep=None,
                 "last_seen_run": run_id,
             }
             storage.record_seen(root, seen[fp])
+            storage.record_content_fingerprint(
+                root, reg, cleaned=cleaned, prov_id=prov["prov_id"],
+                target_id=target_id, run_id=run_id, url=url)
+            if nd_hit is not None:
+                run_rec["near_duplicates"] += 1
+                project.append_event(
+                    root, "near_duplicate_detected",
+                    target_id=target_id,
+                    detail=f"{url} 与既有产物近重复（simhash 汉明距离 "
+                           f"{nd_hit['hamming_distance']} ≤ 阈值 "
+                           f"{nd_hit['hamming_threshold']}；来源产物 "
+                           f"{nd_hit['matched_prov_id']} / run "
+                           f"{nd_hit['matched_run_id']}）：只标记不处置，"
+                           "内容已照常落盘，去留由下游按版本链决定",
+                    data={"run_id": run_id, "url": url,
+                          "prov_id": prov["prov_id"], **nd_hit})
             run_rec["stored"] += 1
     finally:
         run_rec["finished_at"] = utcnow()
@@ -652,12 +688,22 @@ def import_file(root, target_id, file_path, note: str, by: str) -> dict:
         raise Refusal([f"导入文件不存在：{file_path}"])
     data = src.read_bytes()
     stored = storage.store_raw(root, data)
+    tier = schema.effective_retention_tier(reg)
+    warc_fields = {}
+    if tier == storage.WARC_TIER:
+        import mimetypes
+        arch, rel = storage.imports_archive(root)
+        ref = arch.add_resource(
+            uri=reg["base_url"], data=data,
+            content_type=mimetypes.guess_type(src.name)[0]
+            or "application/octet-stream")
+        warc_fields = {"warc_path": rel, **ref}
     prov = storage.append_provenance(root, {
         "kind": "manual_import", "target_id": target_id, "run_id": None,
         "url": reg["base_url"], "channel": "manual_import",
         "http_status": None, "bytes": len(data), **stored,
         "cleaned_path": None, "precheck_ref": None, "run_config_hash": None,
-        "retention_tier": storage.RETENTION_TIER,
+        "retention_tier": tier, **warc_fields,
         "source_file_name": src.name, "source_note": note, "imported_by": by,
         "fingerprint": storage.fingerprint("IMPORT", str(src)),
         "supersedes": None,
@@ -666,4 +712,24 @@ def import_file(root, target_id, file_path, note: str, by: str) -> dict:
                          detail=f"{by} 登记导入 {src.name}（{len(data)} 字节）："
                                 f"{note}",
                          data={"prov_id": prov["prov_id"]})
+    # 导入内容同样进指纹库并过跨 run 近重比对（口径与 fetch 一致：
+    # 先比对、后入库、命中只落事件不拦导入）。
+    from . import transport as _transport_mod
+    pseudo_cleaned = {"text": _transport_mod.decode_text(data, {})}
+    nd_hit = storage.check_near_duplicate(root, reg, pseudo_cleaned)
+    storage.record_content_fingerprint(
+        root, reg, cleaned=pseudo_cleaned, prov_id=prov["prov_id"],
+        target_id=target_id, run_id=None, url=reg["base_url"],
+        kind="manual_import")
+    if nd_hit is not None:
+        project.append_event(
+            root, "near_duplicate_detected", target_id=target_id,
+            detail=f"导入文件 {src.name} 与既有产物近重复（simhash "
+                   f"汉明距离 {nd_hit['hamming_distance']} ≤ 阈值 "
+                   f"{nd_hit['hamming_threshold']}；来源产物 "
+                   f"{nd_hit['matched_prov_id']} / run "
+                   f"{nd_hit['matched_run_id']}）：只标记不处置，"
+                   "导入已照常落盘",
+            data={"run_id": None, "url": reg["base_url"],
+                  "prov_id": prov["prov_id"], **nd_hit})
     return prov

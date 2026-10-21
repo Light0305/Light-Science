@@ -15,6 +15,8 @@
   unblock     熔断恢复（--by 具名 + --reason）
   browser-preauth  浏览器预授权名单（D1：list / add / remove，具名留痕）
   refusals    拒绝留痕清单（可查询，含原因与规则出处；--type 按类计数）
+  fingerprints simhash 指纹库清单（跨 run 近重检测的比对底库）
+  warc        WARC 全记录档回读校验（verify：逐记录复算摘要）
   events      事件账（可按目标过滤）
   status      工作区状态一行摘要
   validate    登记自洽 + provenance 哈希重算校验
@@ -32,7 +34,7 @@ from . import crawl as crawl_mod
 from . import discover as discover_mod
 from . import fetch as fetch_mod
 from . import precheck as precheck_mod
-from . import project, render, schema
+from . import project, render, schema, storage, warc
 from .util import load_yaml
 from .validate import validate_workspace
 
@@ -99,6 +101,14 @@ def main(argv=None) -> int:
     p.add_argument("--type", default=None,
                    help="只列某一类拒绝事件（如 render_escalation_blocked），"
                         "行末给出该类计数")
+    p = sub.add_parser("fingerprints")
+    p.add_argument("--target", default=None)
+    p = sub.add_parser("warc")
+    wsub = p.add_subparsers(dest="warc_cmd", required=True)
+    wp = wsub.add_parser("verify")
+    wp.add_argument("--file", default=None,
+                    help="只校验指定 WARC 文件（缺省校验 provenance "
+                         "引用的全部 WARC 档）")
     p = sub.add_parser("events"); p.add_argument("--target", default=None)
     sub.add_parser("status")
     sub.add_parser("validate")
@@ -233,6 +243,39 @@ def main(argv=None) -> int:
                       f"{e.get('detail')}")
             print(f"共 {len(rows)} 条拒绝留痕"
                   + (f"（类型 {args.type}）" if args.type else ""))
+        elif args.cmd == "fingerprints":
+            from . import simhash as simhash_mod
+            rows = simhash_mod.load_fingerprints(root)
+            if args.target:
+                rows = [r for r in rows
+                        if r.get("target_id") == args.target]
+            for r in rows:
+                print(f"{r.get('simhash')}\t{r.get('target_id')}\t"
+                      f"{r.get('run_id')}\t{r.get('prov_id')}\t"
+                      f"{r.get('url')}")
+            print(f"共 {len(rows)} 条指纹（跨 run 近重比对底库）")
+        elif args.cmd == "warc":
+            if args.file:
+                files = [args.file]
+            else:
+                files = sorted({r["warc_path"]
+                                for r in storage.read_provenance(root)
+                                if r.get("warc_path")})
+                files = [str(root / f) for f in files]
+            bad = 0
+            for f in files:
+                result = warc.verify_file(f)
+                n_resp = sum(1 for r in result["records"]
+                             if r["type"] == "response")
+                print(f"{f}：记录 {len(result['records'])} 条"
+                      f"（response {n_resp}），问题 "
+                      f"{len(result['problems'])}")
+                for prob in result["problems"]:
+                    print(f"  错误：{prob}")
+                bad += len(result["problems"])
+            if not files:
+                print("工作区无 WARC 档（无 warc_full 产物）")
+            return 2 if bad else 0
         elif args.cmd == "events":
             rows = project.read_events(root)
             if args.target:

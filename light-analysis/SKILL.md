@@ -1,7 +1,7 @@
 ---
 name: light-analysis
 description: Use when 需要对已交付的实验执行包下正式判定：逐登记行回写判定、做稳健性复判与结论强度分级，或向写作阶段交付结论包时。
-version: "1.2"
+version: "1.3"
 author: light-analysis contributors
 license: MIT
 ---
@@ -131,6 +131,9 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 10. 探索条目出现判定/强度词表（整词匹配）或缺 exploratory 标记 → 拒。
 11. counts 与 verdicts 机械汇总不一致 → 拒（汇总区不许手填）。
 12. row_ref/supersedes 只增链断裂 → 拒。
+13. 外部登记行（带 `external_result`）缺 `external_spot_check`
+    通过记录，或校验器按登记原文重跑抽验（§7.0 协议）未过 → 拒
+    （登记数字或抽验记录被篡改在此翻红）。
 
 ## 6. 状态机与门
 
@@ -175,19 +178,48 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
   `p_superiority`（经验 P(A>B)，并列 0.5，与 Mann-Whitney U/(n1·n2)
   恒等；只有摘要时正态近似变体）、`effect_and_ci`（Welch 均值差 +
   Hedges g + t 区间，t 分位数由不完全 Beta 自实现）、`tost`（双单侧
-  t，bounds 只许登记 SESOI）、`corrections`（BH/Holm/Bonferroni/BY，
-  与 statsmodels 文档口径对拍）、`design_analysis`（Type S/M 正态
-  近似闭式，D 只许外部代入）、`stouffer_combine`（带方向合并）。
-  复杂模型（混合模型/贝叶斯采样）不在计算集内：走外部登记，关键
-  数字由计算集按登记材料复算抽验，不一致即拦（拍板①）。
+  t，bounds 只许登记 SESOI）、`corrections`（11 法多重校正谱系：
+  FWER 侧 Bonferroni/Šidák/Holm/Holm-Šidák/Hochberg/Hommel，FDR 侧
+  BH/BY/两阶 BH/两阶 BKY/GBS；逐法与 statsmodels multipletests
+  对拍后才许入词表，对拍证据在包外抽验件
+  `05-analysis/external-crosscheck/`（冻结件）+ 包内冻结向量测试；
+  两阶法的校正 p 与族 α 绑定，是 BKY06 程序性质，provenance 落
+  alpha）、`design_analysis`（Type S/M 正态近似闭式，D 只许外部
+  代入）、`stouffer_combine`（带方向合并）。计算集全部数值与
+  scipy/statsmodels 的抽验已扩成可复跑抽验件（同上目录，含
+  Welch/配对/TOST/MW/符号检验/Stouffer/P（更优）/Type S-M 对
+  模拟，建批全段在容差内）。
+  复杂模型（混合模型/GLM/贝叶斯采样）不在计算集内：走**外部登记
+  + 抽验协议**（第五批落地，拍板①的执行形态）——判定材料以
+  `external_result` 登记外部结果（tool 名与版本 / model_kind /
+  model_spec / effect / se / df / ci / p_value /
+  reported_digits，可选 materials 对照材料与 posterior），judge
+  采信前先由 `light_analysis.external.spot_check_external` 逐项
+  复算：CI 两端由 effect/se/df 按登记水平复算、p 由 effect/se
+  复算（均按 reported_digits 的有效数字取整容差比对）、登记了
+  对照材料时 Welch 对照符号与偏差复核、登记了后验时方向概率
+  与 Φ(mean/sd) 复核（容差 0.01）。任一项不过 → 该行落
+  undetermined 并逐项点名；过验行以登记量为判定量（p_raw 取复算
+  p、与登记 p 在容差内一致或登记未给 p 时为唯一来源），规格集
+  不重算外部模型、逐规格行落 not_judged 点名协议，行内落
+  `external_result` 回显 + `external_spot_check` 明细 +
+  专用 robustness_scope 形态；model_kind=bayes_sampling 的行
+  同样过 §5.5 诊断门（无 diagnostics 登记 = missing，只许
+  undetermined）。校验器对带 external_result 的行重跑抽验，
+  登记或抽验记录被篡改即翻红。覆盖清单：模型类
+  mixed_model/glm/bayes_sampling/other × 上列四类抽验项，
+  抽验口径成文于 external.py 模块头，与本节同步。
 
 ### 7.1 A1 描述与分布核查（judge 前的规程步，工具做机械核对）
 
 1. 备判定材料文件（judge-data JSON）：逐可判登记行登记两臂
-   `treatment`/`reference` 原始值，或两臂分布四件套
-   `treatment_summary`/`reference_summary`；可带 `reference_label`、
-   `run_refs`、`bayes`+`diagnostics`（贝叶斯行）、`validity_residual`
-   （结果期发现的效度残余，只登记不倒填）。
+   `treatment`/`reference` 原始值（缺失值以 null 原样登记，由规
+   格的 missing_data 选择处置，不许材料层先删改），或两臂分布
+   四件套 `treatment_summary`/`reference_summary`，或外部登记
+   `external_result`（§7.0 抽验协议，与两臂材料不许同条目并存）；
+   可带 `reference_label`、`run_refs`、`bayes`+`diagnostics`
+   （贝叶斯行）、`validity_residual`（结果期发现的效度残余，
+   只登记不倒填）。
 2. 机械核对（judge 内置，未过逐项点名、整包或整行拦）：
    材料行 id 必须 ⊆ 登记行集（多出行 = 幻觉行，拒）；材料字段集
    只许白名单键（未知字段 = 幻觉列名，拒）；原始值臂长必须与对账
@@ -208,8 +240,20 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 2. **逐规格计算**：included 规格逐个算效应与双侧 p（estimator 决策
    点决定口径：mean_diff → Welch；median_diff → 中位差 +
    Mann-Whitney；摘要材料下秩类规格退化为 Welch 并在结果行 note
-   落字）。全部落 `spec_results.jsonl`；终态行与材料缺失行落显式
-   `not_judged` 行，矩阵账平（judged 门核）。
+   落字）。**数据准备类决策点先制备材料帧再计算**（第五批，
+   ANA-D04 扩面）：每规格按自己的 missing_data / transform /
+   outlier_handling 选择制备一帧，次序固定 缺失→变换→异常值；
+   主规格帧承载主量组与 TOST。制备语义写死：complete_case 按臂
+   剔除缺失（配对结构整对剔除、区组逐元素剔除）、mean_impute
+   按臂观测均值填补（一臂全缺失不可行）；log 整帧一致（含非正
+   值整帧退化为不变换并点名，不许平移凑数）；winsorize 按臂/
+   单位序列内分位（线性插值）裁剪；trim_extremes 删最大最小
+   各一（<3 退化并点名）。材料含缺失而规格无登记处置 → 该行
+   undetermined 点名；摘要材料无原始值，主动型准备选择退化为
+   未处理并在规格行 note 点名；某规格帧制备不可行（结构制备后
+   缺臂等）→ 退化为主规格帧并在该规格行 note 点名。全部落
+   `spec_results.jsonl`；终态行与材料缺失行落显式 `not_judged`
+   行，矩阵账平（judged 门核）。
 3. **联合推断摘要**（A4）：中位效应（逐规格取向效应中位数）、
    方向份额（同向规格占比；主效应与规格效应同 <SESOI 时按等价
    一致计同向——null 行的方向份额是等价口径不是符号口径）、
@@ -276,18 +320,26 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
   `strength[].inputs`，封顶来源写进 cap_reason。
 - 边界与局限随 grade 落盘（`--notes` JSON 补入或预置 conclusions）：
   结果期效度威胁只记局限、不许倒填 Design 登记（约束 6 的分析侧）。
-- **稳健性覆盖落字与封顶**（ANA-D04 短期）：真改计算的决策点只有
-  `estimator`（代码以 `COMPUTED_DECISION_POINTS` 声明，与逐规格
-  计算实现同源），冻结账本的其余决策点（如 outlier_handling）只
-  留痕不改计算、其规格与主规格数值成对相同。每条判定行落
-  `robustness_scope`（computed / trace_only /
-  trace_only_fraction），把「方向份额到底覆盖了哪几个维度的
-  稳健性」从文档局限升级为数据落字；留痕型决策点占比过半时，
-  方向性行强度封顶 `suggestive` 且 cap_reason 点名留痕点与占比
-  （null 行不读此封顶）。主张级只把 robustness_scope 落进
-  `strength[].inputs` 供判读——行级封顶已由行级最低档合成传导，
-  不叠加第二重封顶。outlier_handling 等决策点的真实计算属中期
-  事项，未做前不许把方向份额解读为全维稳健性。
+- **稳健性覆盖落字与封顶**（ANA-D04，第五批扩面后）：真改计算的
+  决策点与选项由代码 `COMPUTED_POINT_OPTIONS` 声明（与
+  `_prepare_frame` 实现同源）：estimator（mean_diff/median_diff）、
+  outlier_handling（keep_all/none/winsorize_1pct/winsorize_5pct/
+  trim_extremes）、missing_data（complete_case/mean_impute）、
+  transform（none/identity/log）。分类按**选项级**诚实判定：决策点
+  在词表内且账本声明的全部选项都在该点词表内才算 computed；任一
+  选项名未登记语义（如 missing_data 的 impute）整点仍 trace_only
+  并在 `point_basis` 点名未登记选项——不许按点名想当然声称已
+  执行。每条判定行落 `robustness_scope`（computed / trace_only /
+  trace_only_fraction / point_basis / target_fraction），把
+  「方向份额到底覆盖了哪几个维度的稳健性」落成数据；留痕占比过
+  半时方向性行强度封顶 `suggestive` 且 cap_reason 点名（null 行
+  不读此封顶，纪律不变）。**下降目标**：占比未过封顶线但超过
+  登记的下降目标（`spec.robustness_target`，缺省 0.5，只许开判
+  前登记）时行 note 点名留痕点与目标值、不改强度——覆盖缺口从
+  「过半才可见」提前到「超目标即点名」。主张级只把
+  robustness_scope 落进 `strength[].inputs` 供判读，不叠加第二
+  重封顶。词表外决策点（如 subset/covariate_set）仍只留痕，其
+  规格数值与主规格成对相同，不许把方向份额解读为全维稳健性。
 
 ### 7.5 复核子流程（与 Idea/Design 同构、分工收窄）
 
@@ -342,7 +394,8 @@ Design 现行导出（amendment 后的新登记行只许出现在新分析包）
 13. 回流条目只生成未代决策；补充消融未超 1 轮。
 14. `validate` 全量 0 错误；`ANALYSIS_REPORT.md` 计数与 verdicts 机械汇总一致。
 15. 结构落字逐行核：判定行 `structure` 区在案（声明行 mode/key/source/n_units 与材料对得上，未声明行 assumption 已落字）；声明与数据不符的行已落 undetermined 并点名，未被静默按独立口径判；同源警告在 warnings 与 note 双落。
-16. 稳健性覆盖逐行核：`robustness_scope` 与冻结账本决策点对得上；留痕过半时方向性行已封顶 suggestive 且 cap_reason 点名；conclusions 的 strength inputs 已带 robustness_scope。
+16. 稳健性覆盖逐行核：`robustness_scope` 与冻结账本决策点对得上（选项级判定，point_basis 在案）；数据准备类规格的逐规格效应真随选择而变（不是成对复制）；留痕过半时方向性行已封顶 suggestive 且 cap_reason 点名；超下降目标（target_fraction）已在 note 点名；conclusions 的 strength inputs 已带 robustness_scope。
+17. 外部登记行逐行核：抽验四项（CI/p 复算、材料对照、后验方向）在 `external_spot_check` 明细在案且全过；登记与抽验记录经 validate 复验未翻红；bayes_sampling 行诊断门状态在案。
 
 ## 9. 失败模式附录（v1.0 已知失效形态与处置）
 

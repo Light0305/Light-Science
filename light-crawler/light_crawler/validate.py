@@ -1,4 +1,4 @@
-"""工作区校验：登记自洽 + provenance 哈希重算 + 账本可解析。
+"""工作区校验：登记自洽 + provenance 哈希重算 + WARC 记录逐条复算 + 账本可解析。
 
 校验只读、逐项点名。与姊妹包口径一致：读不出的东西报点名错误，
 不猜、不修、不回写。
@@ -35,8 +35,10 @@ def validate_workspace(root) -> list:
                     f"{schema.REQUIRED_CONCURRENCY}（S6 定版被动过手脚？）")
 
     problems += storage.verify_store(root)
+    problems += storage.verify_warc_refs(root)
 
-    for name in ("events.jsonl", "provenance.jsonl", "seen.jsonl"):
+    for name in ("events.jsonl", "provenance.jsonl", "seen.jsonl",
+                 "fingerprints.jsonl"):
         path = root / name
         if path.exists():
             rows = read_jsonl(path)

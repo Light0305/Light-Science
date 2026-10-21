@@ -33,7 +33,11 @@ QUADRANTS = [
 GRADES = ["conclusive", "strong", "suggestive", "insufficient"]
 SUPPORT_VALUES = ["supported", "partial", "not_supported", "untested"]
 
-CORRECTION_METHODS = ["fdr_bh", "holm", "bonferroni", "fdr_by"]
+# 校正谱系（与 calc.CORRECTION_METHOD_NAMES 同源，逐法对拍后入集；
+# 两阶法 fdr_tsbh/fdr_tsbky 的校正 p 与族 alpha 绑定）
+CORRECTION_METHODS = ["fdr_bh", "holm", "bonferroni", "fdr_by",
+                      "sidak", "holm_sidak", "simes_hochberg", "hommel",
+                      "fdr_tsbh", "fdr_tsbky", "fdr_gbs"]
 DEFAULT_CORRECTION_METHOD = "fdr_bh"
 PRIMARY_CORRECTION_METHOD = "holm"
 

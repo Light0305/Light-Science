@@ -273,8 +273,13 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
                "status": "running", "started_at": utcnow(),
                "precheck_id": ctx["record"]["precheck_id"],
                "run_config_hash": ctx["record"].get("run_config_hash"),
-               "requested": 0, "stored": 0, "errors": [],
+               "requested": 0, "stored": 0, "near_duplicates": 0,
+               "errors": [],
                "refused": False, "job_id": job["job_id"]}
+    # 留存档位在 run 启动时按登记定版（与 fetch 同口径）。
+    tier = schema.effective_retention_tier(reg)
+    warc_archive = None
+    warc_rel = None
     dump_yaml(run_dir / "run.yaml", run_rec)
     project.append_event(
         root, "crawl_job_resumed" if resumed else "crawl_job_started",
@@ -588,6 +593,11 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
                                    "browser 通道",
                             data={"run_id": run_id, "url": url,
                                   "signals": shell["signals"]})
+            # 跨 run 近重检查（simhash 层，与 fetch 同口径）：清洗件
+            # 落盘前标注；指纹入库与事件在 provenance 落账后。
+            nd_hit = storage.check_near_duplicate(root, reg, cleaned)
+            if nd_hit is not None:
+                cleaned["near_duplicate_cross_run"] = nd_hit
             cleaned_rel = None
             if cleaned["kind"] in ("html", "json", "text"):
                 cpath = run_dir / "cleaned" / f"{fp[:12]}.json"
@@ -595,6 +605,15 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
                     cleaned, ensure_ascii=False, indent=1),
                     encoding="utf-8")
                 cleaned_rel = cpath.relative_to(Path(root)).as_posix()
+            warc_fields = {}
+            if tier == storage.WARC_TIER:
+                if warc_archive is None:
+                    warc_archive, warc_rel = storage.run_archive(
+                        root, run_dir)
+                ref = warc_archive.add_response(
+                    uri=resp.final_url, status=resp.status,
+                    headers=resp.headers, body=resp.body)
+                warc_fields = {"warc_path": warc_rel, **ref}
             prior_prov = storage.last_provenance_for(root, url)
             prov = storage.append_provenance(root, {
                 "kind": "fetch", "target_id": target_id,
@@ -604,7 +623,7 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
                 **stored, "cleaned_path": cleaned_rel,
                 "precheck_ref": ctx["record"]["precheck_id"],
                 "run_config_hash": run_rec["run_config_hash"],
-                "retention_tier": storage.RETENTION_TIER,
+                "retention_tier": tier, **warc_fields,
                 "etag": next((v for k, v in resp.headers.items()
                               if k.lower() == "etag"), None),
                 "last_modified": next((v for k, v in resp.headers.items()
@@ -636,6 +655,22 @@ def crawl_run(root, target_id, seeds=None, max_pages=None, transport=None,
                 "last_seen_run": run_id,
             }
             storage.record_seen(root, seen[fp])
+            storage.record_content_fingerprint(
+                root, reg, cleaned=cleaned, prov_id=prov["prov_id"],
+                target_id=target_id, run_id=run_id, url=url)
+            if nd_hit is not None:
+                run_rec["near_duplicates"] += 1
+                project.append_event(
+                    root, "near_duplicate_detected",
+                    target_id=target_id,
+                    detail=f"{url} 与既有产物近重复（simhash 汉明距离 "
+                           f"{nd_hit['hamming_distance']} ≤ 阈值 "
+                           f"{nd_hit['hamming_threshold']}；来源产物 "
+                           f"{nd_hit['matched_prov_id']} / run "
+                           f"{nd_hit['matched_run_id']}）：只标记不处置，"
+                           "内容已照常落盘，去留由下游按版本链决定",
+                    data={"run_id": run_id, "url": url,
+                          "prov_id": prov["prov_id"], **nd_hit})
             item["status"] = "done"
             item["prov_id"] = prov["prov_id"]
             item["rendered"] = rendered

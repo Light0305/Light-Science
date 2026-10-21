@@ -24,10 +24,20 @@
   区组缺臂、只有摘要材料）逐行落 undetermined 点名，绝不静默按独立
   样本判；未声明时走既有独立口径并在 structure 区落结构假设，两臂
   同源信号（run 引用交叠 / 两臂逐元素相同）点名警告不改判。
-- 稳健性覆盖（ANA-D04 短期）：真改计算的决策点只有
-  COMPUTED_DECISION_POINTS（与 _spec_effect 的实现同源），冻结账本
-  其余决策点只留痕；每行落 robustness_scope 机械列明，留痕点占比
-  过半时方向性行强度封顶 suggestive 并点名（grading.row_grade）。
+- 稳健性覆盖（ANA-D04，第五批扩面后口径）：真改计算的决策点与
+  选项由 COMPUTED_POINT_OPTIONS 声明（与 _prepare_frame 的实现
+  同源，选项级判定），词表外决策点/选项只留痕；每行落
+  robustness_scope 机械列明（computed / trace_only / 留痕占比 /
+  逐点依据 / 下降目标），留痕点占比过半时方向性行强度封顶
+  suggestive 并点名（grading.row_grade）；占比未过封顶线但超过
+  登记的下降目标时行 note 点名提示、不改强度。
+- 外部登记行（§7.0 外部抽验，第五批）：判定材料可登记外部工具
+  （混合模型 / GLM / 贝叶斯采样等计算集外模型）的结果
+  external_result，judge 前先经 light_analysis.external 抽验
+  （CI/p 由 effect 与 se 按登记 df 复算、材料对照、后验方向
+  概率），任一抽验不过 → 本行不判并点名；过验行以登记量为
+  判定量，规格集不重算外部模型，稳健性由抽验协议承载
+  （robustness_scope 落专用形态）。
 """
 
 from __future__ import annotations
@@ -36,7 +46,7 @@ import json
 import statistics
 from pathlib import Path
 
-from . import calc, grading, schema
+from . import calc, external, grading, schema
 from .project import (
     assign_row_refs, current_verdicts, load_package, refresh_counts,
     save_analysis, save_conclusions, save_spec_results, save_verdicts,
@@ -49,31 +59,74 @@ _DATA_KEYS = {"treatment", "reference", "treatment_summary",
               "reference_summary", "reference_label", "run_refs",
               "bayes", "diagnostics", "validity_residual",
               "pairing", "treatment_keys", "reference_keys",
-              "treatment_run_refs", "reference_run_refs"}
+              "treatment_run_refs", "reference_run_refs",
+              "external_result"}
 
-# ANA-D04：真改判定计算的决策点集——与 _spec_effect 的实际实现同源
-# （estimator 决定逐规格口径，其余决策点 v1 只留痕不改计算）。账本里
-# 不在此集的决策点一律 trace_only，robustness_scope 据此机械导出。
-COMPUTED_DECISION_POINTS = {"estimator"}
+# ANA-D04 扩面（第五批）：真改判定计算的决策点与受控选项词表——与
+# _prepare_frame 的实际实现同源（词表外不许声称真执行）。决策点在
+# 此表内、且账本声明的全部选项都在该点词表内，该点才算 computed；
+# 任一选项名未登记（语义未定义）则整点仍 trace_only 并在 point_basis
+# 点名未登记选项——分类按选项级诚实，不按点名想当然。
+COMPUTED_POINT_OPTIONS = {
+    "estimator": {"mean_diff", "median_diff"},
+    "outlier_handling": {"keep_all", "none", "winsorize_1pct",
+                         "winsorize_5pct", "trim_extremes"},
+    "missing_data": {"complete_case", "mean_impute"},
+    "transform": {"none", "identity", "log"},
+}
+#: 兼容名：受控词表覆盖的决策点集（分类真源是 robustness_scope_of
+#: 的选项级判定，不是本集合本身）。
+COMPUTED_DECISION_POINTS = set(COMPUTED_POINT_OPTIONS)
+
+#: 数据准备类决策点：施加于判定材料本身（次序固定 缺失→变换→异常值），
+#: 区别于 estimator 的统计口径选择。每个规格按自己的选择制备一帧。
+DATA_PREP_POINTS = ("missing_data", "transform", "outlier_handling")
+_WINSORIZE_QUANTILES = {"winsorize_1pct": (0.01, 0.99),
+                        "winsorize_5pct": (0.05, 0.95)}
+#: 稳健性下降目标缺省值：留痕占比超过它（但未过 1/2 封顶线）时行
+#: note 点名提示；登记值经 analysis.spec.robustness_target 覆盖，
+#: 只许在判定前登记（判定行落当轮目标快照）。
+ROBUSTNESS_TARGET_DEFAULT = 0.5
 
 
-def robustness_scope_of(ledger) -> dict:
-    """由冻结账本机械导出稳健性覆盖（ANA-D04 短期落字）。
+def robustness_scope_of(ledger, target=None) -> dict:
+    """由冻结账本机械导出稳健性覆盖（ANA-D04，选项级判定）。
 
     方向份额只反映 computed 决策点维度的稳健性；trace_only 决策点的
     规格与主规格数值成对相同，不许被读成「该维度也验过」。
     """
-    points = [d.get("point") for d in (ledger or {}).get("decisions") or []]
-    computed = [p for p in points if p in COMPUTED_DECISION_POINTS]
-    trace = [p for p in points if p not in COMPUTED_DECISION_POINTS]
-    total = len(points)
+    decisions = (ledger or {}).get("decisions") or []
+    computed, trace, point_basis = [], [], {}
+    for d in decisions:
+        point = d.get("point")
+        declared = [o.get("name") if isinstance(o, dict) else o
+                    for o in d.get("options") or []]
+        vocab = COMPUTED_POINT_OPTIONS.get(point)
+        if vocab is None:
+            trace.append(point)
+            point_basis[point] = "trace_only：决策点未登记计算语义"
+            continue
+        unknown = [o for o in declared if o not in vocab]
+        if unknown:
+            trace.append(point)
+            point_basis[point] = ("trace_only：选项 "
+                                  + " / ".join(str(o) for o in unknown)
+                                  + " 未登记计算语义")
+        else:
+            computed.append(point)
+            point_basis[point] = "computed：选项计算语义已登记并真执行"
+    total = len(decisions)
     return {
         "computed": computed,
         "trace_only": trace,
         "trace_only_fraction": (len(trace) / total) if total else 0.0,
-        "basis": "真改计算的决策点集由 light_analysis.judge."
-                 "COMPUTED_DECISION_POINTS 声明（与逐规格计算实现同源），"
-                 "账本其余决策点只留痕不改计算（ANA-D04）",
+        "point_basis": point_basis,
+        "target_fraction": (ROBUSTNESS_TARGET_DEFAULT if target is None
+                            else target),
+        "basis": "真改计算的决策点与选项词表由 light_analysis.judge."
+                 "COMPUTED_POINT_OPTIONS 声明（与 _prepare_frame 实现"
+                 "同源，选项级判定），账本词表外决策点/选项只留痕"
+                 "不改计算（ANA-D04）",
     }
 
 
@@ -294,9 +347,13 @@ def _load_judge_data(root, data_path):
 def _arms(entry):
     """取两臂计算输入：原始值优先；只有摘要时走 summary 口径并标注。"""
     if entry.get("treatment") is not None and entry.get("reference") is not None:
+        # 缺失值（null）原样保留：由数据准备帧按规格 missing_data
+        # 选择处置（_prepare_frame），不在此处静默转数或丢弃。
         return {"form": "raw",
-                "a": [float(x) for x in entry["treatment"]],
-                "b": [float(x) for x in entry["reference"]]}
+                "a": [None if x is None else float(x)
+                      for x in entry["treatment"]],
+                "b": [None if x is None else float(x)
+                      for x in entry["reference"]]}
     ts, rs = entry.get("treatment_summary"), entry.get("reference_summary")
     if ts and rs:
         for tag, s in (("treatment_summary", ts), ("reference_summary", rs)):
@@ -391,6 +448,194 @@ def _same_origin_warnings(entry, arms):
                      "配对结构——本行按独立样本口径判，该事实只警告"
                      "落字（ANA-D03）")
     return warns
+
+
+# ---------------------------------------------------------------- 数据准备帧
+# ANA-D04 扩面：数据准备类决策点（missing_data / transform /
+# outlier_handling）按规格选择真制备材料帧。次序固定：缺失 → 变换 →
+# 异常值。主规格帧承载主量组（q / TOST / Type S-M）；每规格按自己
+# 的选择制备自己的帧供 _spec_effect。词表外选项一律退化为未处理
+# 口径并在帧 note 点名（不许静默执行未登记语义，也不许伪装执行）。
+
+class _PrepError(Exception):
+    """数据准备不可行（主规格帧）：调用方落 undetermined 并点名。"""
+
+
+def _prep_choices_of(spec) -> dict:
+    ch = (spec or {}).get("choices") or {}
+    return {p: ch.get(p) for p in DATA_PREP_POINTS}
+
+
+def _prep_key(spec) -> tuple:
+    """帧缓存键：规格的数据准备选择三元组（同键共享同一帧）。"""
+    ch = (spec or {}).get("choices") or {}
+    return tuple(ch.get(p) for p in DATA_PREP_POINTS)
+
+
+def _prep_active(point, choice) -> bool:
+    """该选择是否真会改动原始材料（恒等选择不算主动）。"""
+    if choice is None:
+        return False
+    if point == "missing_data":
+        return choice in ("mean_impute",)  # complete_case 对无缺失恒等，
+        # 对有缺失在 _prepare_frame 内按存在性判定，此处只管摘要退化口径
+    if point == "transform":
+        return choice == "log"
+    if point == "outlier_handling":
+        return choice in _WINSORIZE_QUANTILES or choice == "trim_extremes"
+    return False
+
+
+def _missing_arm(vals, choice):
+    """单臂缺失处置：complete_case 丢弃缺失位；mean_impute 以本臂
+    观测均值填补（全缺失抛 _PrepError，不许编造填补值）。"""
+    vals = list(vals)
+    if choice == "mean_impute":
+        obs = [v for v in vals if v is not None]
+        if not obs:
+            raise _PrepError("mean_impute 不可行：一臂全部缺失，"
+                             "无观测均值可填补")
+        m = sum(obs) / len(obs)
+        return [m if v is None else v for v in vals]
+    return [v for v in vals if v is not None]
+
+
+def _apply_outlier(vals, choice, notes, what):
+    """异常值处置（单序列）：缩尾按臂/单位序列内分位；去极值删
+    最大最小各一（序列 <3 退化为不处理并点名）。"""
+    vals = list(vals)
+    if choice is None or choice in ("keep_all", "none"):
+        return vals
+    if choice in _WINSORIZE_QUANTILES:
+        lo_q, hi_q = _WINSORIZE_QUANTILES[choice]
+        return calc.winsorize_values(vals, lo_q, hi_q)
+    if choice == "trim_extremes":
+        if len(vals) < 3:
+            notes.append(f"{what}仅 {len(vals)} 个值：trim_extremes "
+                         "退化为不处理（不足 3 个值删极值无意义）")
+            return vals
+        return sorted(vals)[1:-1]
+    return vals  # 未登记选项：中央点名已在 _prepare_frame 落字，此处恒等
+
+
+def _transform_pair(a, b, choice, notes):
+    """变换按帧一致施加：两臂同变换或同退化——一臂变换一臂不换
+    的对照无定义（log 含非正值时整帧退化并点名一次）。"""
+    if choice is None or choice in ("none", "identity"):
+        return list(a), list(b)
+    if choice == "log":
+        a, b = list(a), list(b)
+        if any(v <= 0 for v in a) or any(v <= 0 for v in b):
+            notes.append("材料含非正值：log 变换整帧退化为不变换"
+                         "（不许对非正值取对数或平移凑数）")
+            return a, b
+        import math as _math
+        return ([_math.log(v) for v in a], [_math.log(v) for v in b])
+    return list(a), list(b)  # 未登记选项：中央点名已落字，此处恒等
+
+
+class _Frame:
+    """一帧制备好的判定材料：arms（制备后）+ units（结构声明时由
+    制备后两臂导出）+ notes（退化/回退点名，落 spec_results）。"""
+
+    def __init__(self, arms, units, notes):
+        self.arms = arms
+        self.units = units
+        self.notes = notes
+
+
+def _prepare_frame(spec, arms, entry, decl) -> _Frame:
+    """按规格的数据准备选择制备一帧材料。
+
+    - 摘要材料（form=summary）：无原始值可制备，主动型准备选择
+      （缩尾/去极值/log）退化为未处理并点名（与 median 估计量对
+      摘要退化同一纪律）；缺失类选择对摘要无意义（摘要按定义完整）。
+    - 原始材料 + 无结构声明：缺失按臂处置 → 变换按臂 → 异常值按臂。
+    - 原始材料 + 结构声明：缺失在配对键/区组元素层处置（配对
+      complete_case 整对剔除、两臂键集保持一致）→ 变换按臂施加于
+      原始值（绝不对差值取对数）→ 由制备后两臂导出判定单位 →
+      异常值施加于单位序列。
+    主规格帧制备失败抛 _PrepError / ValueError（调用方点名落行）。
+    """
+    choices = _prep_choices_of(spec)
+    notes: list[str] = []
+    for point in DATA_PREP_POINTS:
+        choice = choices.get(point)
+        if choice is not None and point in COMPUTED_POINT_OPTIONS \
+                and choice not in COMPUTED_POINT_OPTIONS[point]:
+            notes.append(f"数据准备规格 {point}={choice} 未登记计算"
+                         "语义，按未处理口径执行（留痕，ANA-D04）")
+    if arms.get("form") == "summary":
+        for point in DATA_PREP_POINTS:
+            if _prep_active(point, choices.get(point)):
+                notes.append(f"摘要材料无原始值：数据准备规格 "
+                             f"{point}={choices.get(point)} 退化为"
+                             "未处理口径")
+        return _Frame(arms, None, notes)
+
+    a = list(arms["a"])
+    b = list(arms["b"])
+    miss = choices.get("missing_data")
+    has_missing = any(v is None for v in a) or any(v is None for v in b)
+    tr = choices.get("transform")
+    ol = choices.get("outlier_handling")
+
+    if decl is None:
+        if has_missing:
+            if miss not in ("complete_case", "mean_impute"):
+                raise _PrepError(
+                    f"判定材料含缺失值，但本规格 missing_data 选择为 "
+                    f"{miss!r}（未登记缺失处置语义）：不许静默丢弃"
+                    "或按 0 填充")
+            a = _missing_arm(a, miss)
+            b = _missing_arm(b, miss)
+        a, b = _transform_pair(a, b, tr, notes)
+        a = _apply_outlier(a, ol, notes, "处理臂")
+        b = _apply_outlier(b, ol, notes, "对照臂")
+        return _Frame({"form": "raw", "a": a, "b": b}, None, notes)
+
+    # 结构声明：先缺失（保持键集一致）→ 变换（原始值层）→ 导出单位
+    if entry.get("treatment_keys") is None \
+            or entry.get("reference_keys") is None:
+        raise ValueError(
+            f"声明 {decl['mode']} 结构（键 {decl['key']}）但判定材料缺 "
+            "treatment_keys/reference_keys 对齐键：声明了结构就必须给"
+            "两臂逐元素对齐键，不许按位置或独立样本凑（ANA-D03）")
+    ka = list(entry.get("treatment_keys") or [])
+    kb = list(entry.get("reference_keys") or [])
+    if has_missing:
+        if miss == "mean_impute":
+            a = _missing_arm(a, miss)
+            b = _missing_arm(b, miss)
+        elif miss == "complete_case":
+            if decl["mode"] == "paired":
+                drop = {k for k, v in zip(ka, a) if v is None}
+                drop |= {k for k, v in zip(kb, b) if v is None}
+                a = [v for v, k in zip(a, ka) if k not in drop]
+                ka = [k for k in ka if k not in drop]
+                b = [v for v, k in zip(b, kb) if k not in drop]
+                kb = [k for k in kb if k not in drop]
+            else:  # blocked：逐元素剔除，区组键随元素走
+                keep_a = [i for i, v in enumerate(a) if v is not None]
+                a = [a[i] for i in keep_a]
+                ka = [ka[i] for i in keep_a]
+                keep_b = [i for i, v in enumerate(b) if v is not None]
+                b = [b[i] for i in keep_b]
+                kb = [kb[i] for i in keep_b]
+        else:
+            raise _PrepError(
+                f"判定材料含缺失值，但本规格 missing_data 选择为 "
+                f"{miss!r}（未登记缺失处置语义）：不许静默丢弃或"
+                "按 0 填充")
+    a, b = _transform_pair(a, b, tr, notes)
+    ent2 = dict(entry)
+    ent2["treatment"] = a
+    ent2["reference"] = b
+    ent2["treatment_keys"] = ka
+    ent2["reference_keys"] = kb
+    units = _structure_units(ent2, decl)
+    units = _apply_outlier(units, ol, notes, "判定单位序列")
+    return _Frame({"form": "raw", "a": a, "b": b}, units, notes)
 
 
 def _spec_effect(spec, arms, sign, units=None):
@@ -538,6 +783,97 @@ def _decide(*, effect, p_adj, p_ab, alpha, gamma, joint, type_m,
     return "undetermined", "undetermined", notes
 
 
+_EXTERNAL_STRUCTURE = {"mode": None, "assumption": "external_registered",
+                       "key": None, "source": "external_result",
+                       "n_units": None, "warnings": []}
+
+
+def _external_scope(target) -> dict:
+    """外部登记行的稳健性覆盖形态：规格集不适用，抽验协议承载。"""
+    return {"computed": [], "trace_only": [], "trace_only_fraction": 0.0,
+            "point_basis": {}, "target_fraction": target,
+            "basis": "外部登记行：规格集稳健性不适用于外部模型结果，"
+                     "稳健性由外部抽验协议承载（§7.0 外部抽验）"}
+
+
+def _judge_external_line(lid, snap, entry, *, sesoi_entry, sesoi, sign,
+                         direction_word, fam_alpha, scope_target,
+                         computed, spec_result_rows, included, skip):
+    """外部登记行第一遍：抽验 → 以登记量组装判定量（规格集不重算）。
+
+    抽验不过 / 与两臂材料并存 → skip 落 undetermined 点名；过验行
+    p_raw 取复算 p（与登记 p 在有效数字容差内一致，或登记未给 p
+    时即为唯一来源），TOST 与 Type S/M 按登记 effect/se 走包内机械。
+    """
+    reg = entry["external_result"]
+    structure = dict(_EXTERNAL_STRUCTURE)
+    if any(entry.get(k) is not None for k in
+           ("treatment", "reference", "treatment_summary",
+            "reference_summary")):
+        skip(lid, snap,
+             "external_result 与两臂材料同条目并存：外部登记行不许再带"
+             "包内计算材料（§7.0 抽验纪律），本行不判",
+             structure=structure)
+        return
+    chk = external.spot_check_external(reg)
+    if not chk["passed"]:
+        skip(lid, snap,
+             "外部登记抽验未过，本行不判：" + "；".join(chk["failures"]),
+             structure=structure)
+        return
+    eff_raw = float(reg["effect"])
+    se = float(reg["se"])
+    df = reg.get("df")
+    effect = sign * eff_raw
+    ci = reg["ci"]
+    level = ci.get("level", 0.95)
+    if sign > 0:
+        lo, hi = float(ci["lo"]), float(ci["hi"])
+    else:
+        lo, hi = -float(ci["hi"]), -float(ci["lo"])
+    p_rec = next(c["recomputed"] for c in chk["checks"]
+                 if c["name"] == "p_value")
+    p_better = calc.norm_cdf(effect / se)
+    q = {"effect": effect, "se": se, "df": df,
+         "interval": {"kind": "ci", "level": level, "lo": lo, "hi": hi},
+         "hedges_g": None, "p_raw": p_rec,
+         "p_better": p_better, "p_worse": 1.0 - p_better,
+         "provenance": {"method": "external_result",
+                        "tool": reg.get("tool"),
+                        "model_kind": reg.get("model_kind"),
+                        "inputs_hash": component_hash(reg)}}
+    tost_res = calc.tost(effect, se, df if df is not None else 1e5,
+                         sesoi, alpha=fam_alpha)
+    da = calc.design_analysis(sesoi, se, alpha=fam_alpha)
+    joint = {"median_effect": effect,
+             "direction_share": 1.0 if effect != 0 else 0.0,
+             "stouffer_p": p_rec, "specs_used": []}
+    computed[lid] = {
+        "snap": snap, "entry": entry, "sign": sign,
+        "direction_word": direction_word, "sesoi": sesoi,
+        "sesoi_entry": sesoi_entry, "q": q, "joint": joint,
+        "tost": tost_res, "design_analysis": da,
+        "structure": structure, "base_note": [],
+        "scope": _external_scope(scope_target),
+        # 贝叶斯采样登记行同样受诊断门约束：第二遍按包内既有口径
+        # 强制过门（无 diagnostics 登记 = missing，只许 undetermined）。
+        "bayes_gate": reg.get("model_kind") == "bayes_sampling",
+        "external": {
+            "registration": reg,
+            "spot_check": {"passed": True, "checks": chk["checks"]},
+            "n_checks": len(chk["checks"]),
+            "df_approx": df is None,
+            "p_registered": reg.get("p_value"),
+        },
+    }
+    for spec in included:
+        spec_result_rows.append({
+            "spec_id": spec["spec_id"], "registry_line_id": lid,
+            "status": "not_judged",
+            "reason": "外部登记行：规格集不重算外部模型，稳健性由外部"
+                      "抽验协议承载（§7.0）"})
+
+
 def run_judge(root, data_path, decided_by=None) -> dict:
     """执行判定：前置门 → 逐行计算 → 按族校正 → 落字 → spec_results 账平。"""
     root = Path(root)
@@ -637,7 +973,14 @@ def run_judge(root, data_path, decided_by=None) -> dict:
     analyst = analysis.get("analyst") or {}
     decided_by = decided_by or analyst.get("name") or "light-analysis judge"
 
-    scope = robustness_scope_of(ledger)
+    target = spec_cfg.get("robustness_target")
+    if target is not None and (not isinstance(target, (int, float))
+                                or isinstance(target, bool)
+                                or not (0.0 <= float(target) <= 1.0)):
+        raise JudgeError([f"spec.robustness_target={target!r} 非法："
+                          "稳健性下降目标须为 [0,1] 数值（判定前登记）"])
+    scope = robustness_scope_of(
+        ledger, target=float(target) if target is not None else None)
 
     # ---- 第一遍：逐行计算量组与逐规格结果（校正须全行 p 齐后统一做）
     computed = {}
@@ -683,6 +1026,21 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                        "的登记快照，缺失或不完整不许猜测、不用临时值）")
             continue
         sesoi = float(sesoi_entry["sesoi_value"])
+        reg = reg_rows.get(lid) or {}
+        direction_word = ((reg.get("primary_metric") or {}).get("direction")
+                          or "higher")
+        sign = 1 if direction_word != "lower" else -1
+        # 外部登记行（§7.0 外部抽验）：先抽验、后判定；抽验不过或与
+        # 两臂材料并存 → 本行不判并点名。过验行以登记量为判定量。
+        if entry.get("external_result") is not None:
+            _judge_external_line(
+                lid, snap, entry, sesoi_entry=sesoi_entry, sesoi=sesoi,
+                sign=sign, direction_word=direction_word,
+                fam_alpha=(fam_by_line.get(lid) or {}).get("alpha", 0.05),
+                scope_target=scope["target_fraction"],
+                computed=computed, spec_result_rows=spec_result_rows,
+                included=included, skip=_skip_line)
+            continue
         try:
             arms = _arms(entry)
         except ValueError as e:
@@ -711,13 +1069,6 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                            "原始值，摘要无从对齐（ANA-D03）",
                            structure=structure)
                 continue
-            try:
-                units = _structure_units(entry, decl)
-            except ValueError as e:
-                _skip_line(lid, snap, f"结构声明与材料不符：{e}",
-                           structure=structure)
-                continue
-            structure["n_units"] = len(units)
         else:
             structure = {"mode": "independent",
                          "assumption": "undeclared_independent_default",
@@ -733,26 +1084,52 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                        structure=structure)
             continue
 
-        reg = reg_rows.get(lid) or {}
-        direction_word = ((reg.get("primary_metric") or {}).get("direction")
-                          or "higher")
-        sign = 1 if direction_word != "lower" else -1
-        q = _primary_quantities(arms, sign, units=units)
+        # 数据准备帧（ANA-D04 扩面）：主规格的选择先制备主帧——主
+        # 量组、结构单位、TOST 全部取自主帧；制备不可行（缺失无
+        # 登记处置 / 结构与制备后材料不符）逐行落 undetermined 点名。
+        try:
+            frame_primary = _prepare_frame(primary, arms, entry, decl)
+        except (_PrepError, ValueError) as e:
+            _skip_line(lid, snap, f"数据准备不可行：{e}",
+                       structure=structure)
+            continue
+        units = frame_primary.units
+        if decl is not None:
+            structure["n_units"] = len(units)
+        q = _primary_quantities(frame_primary.arms, sign, units=units)
 
-        # 逐规格计算（联合推断材料）
+        # 逐规格计算（联合推断材料）：每规格按自己的数据准备选择
+        # 制备帧（同选择共享帧缓存），规格帧制备失败退化为主帧并点名。
         spec_effects, spec_ps, spec_signs = [], [], []
+        frames = {_prep_key(primary): frame_primary}
         for spec in included:
-            eff, p, degraded = _spec_effect(spec, arms, sign, units=units)
+            key = _prep_key(spec)
+            fr = frames.get(key)
+            if fr is None:
+                try:
+                    fr = _prepare_frame(spec, arms, entry, decl)
+                except (_PrepError, ValueError) as e:
+                    fr = _Frame(
+                        frame_primary.arms, frame_primary.units,
+                        list(frame_primary.notes) + [
+                            f"规格 {spec['spec_id']} 数据准备不可行"
+                            f"（{e}），退化为主规格帧口径"])
+                frames[key] = fr
+            eff, p, degraded = _spec_effect(spec, fr.arms, sign,
+                                            units=fr.units)
             spec_effects.append(eff)
             spec_ps.append(p)
             spec_signs.append(1 if eff > 0 else (-1 if eff < 0 else 0))
+            note_bits = list(fr.notes)
+            if degraded:
+                note_bits.append(degraded)
             spec_result_rows.append({
                 "spec_id": spec["spec_id"], "registry_line_id": lid,
                 "status": "computed",
                 "effect_size": {"type": (spec.get("choices") or {}).get(
                     "estimator", "mean_diff"), "value": eff},
                 "p_value": p,
-                "note": degraded,
+                "note": "；".join(note_bits) or None,
                 "provenance": q["provenance"] if spec is primary else None,
             })
         direction_sign = 1 if q["effect"] > 0 else (-1 if q["effect"] < 0 else 0)
@@ -812,16 +1189,23 @@ def run_judge(root, data_path, decided_by=None) -> dict:
             type_m=da["type_m"], type_m_max=type_m_max,
             tost_pass=c["tost"]["result"] == "pass",
             null_precision_warning=bool(snap.get("null_precision_warning")))
+        row_scope = c.get("scope") or scope
         grade, cap_reason = grading.row_grade(
             verdict, joint["direction_share"],
             type_m=da["type_m"], tost_p=c["tost"]["p_tost"], alpha=alpha,
-            robustness_scope=scope)
+            robustness_scope=row_scope)
         note_parts = list(gate_notes)
         if verdict in ("positive", "negative", "null"):
-            note_parts.append(
-                f"按冻结判据落字：主规格 {primary['spec_id']}、"
-                f"方向份额 {joint['direction_share']:.2f}、"
-                f"中位效应 {joint['median_effect']:.4g}")
+            if c.get("external"):
+                note_parts.append(
+                    "按冻结判据落字：外部登记量经抽验采信（抽验明细见 "
+                    "external_spot_check），方向份额按单点登记口径记 "
+                    f"{joint['direction_share']:.2f}")
+            else:
+                note_parts.append(
+                    f"按冻结判据落字：主规格 {primary['spec_id']}、"
+                    f"方向份额 {joint['direction_share']:.2f}、"
+                    f"中位效应 {joint['median_effect']:.4g}")
         st = c["structure"]
         if st["mode"] in ("paired", "blocked"):
             unit_label = "对" if st["mode"] == "paired" else "区组"
@@ -830,6 +1214,26 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                 f"{st['n_units']} 个{unit_label}、声明来源 "
                 f"{st['source']}）：效应与 TOST 走差值序列口径（ANA-D03）")
         note_parts.extend(st.get("warnings") or [])
+        if c.get("external"):
+            xn = c["external"]
+            tool = xn["registration"].get("tool") or {}
+            note_parts.append(
+                f"外部登记行：{tool.get('name')} {tool.get('version')} 的 "
+                f"{xn['registration'].get('model_kind')} 结果，抽验 "
+                f"{xn['n_checks']} 项全过后采信；规格集不重算外部模型"
+                "（§7.0 外部抽验）")
+            if xn["df_approx"]:
+                note_parts.append("登记未给 df：TOST 按 df=1e5 的正态"
+                                  "近似口径计算，口径在此点名")
+        elif verdict in ("positive", "negative", "null") \
+                and scope["trace_only_fraction"] > scope["target_fraction"] \
+                and scope["trace_only_fraction"] <= 0.5:
+            note_parts.append(
+                f"稳健性留痕占比 {scope['trace_only_fraction']:.2f} 超过"
+                f"下降目标 {scope['target_fraction']:.2f}（留痕点："
+                + "、".join(scope["trace_only"])
+                + "）：覆盖未达登记目标，本行未因此封顶（封顶线 0.50），"
+                  "缺口如实登记（ANA-D04）")
         row = schema.verdict_row(
             lid, verdict, claim_ref=snap.get("claim_ref"),
             quadrant=quadrant,
@@ -837,7 +1241,8 @@ def run_judge(root, data_path, decided_by=None) -> dict:
             criteria_ref=(f"登记行冻结判据 direction={c['direction_word']}，"
                           f"SESOI 指针 {c['sesoi_entry']['sesoi_pointer']}"),
             direction=c["direction_word"],
-            effect_size={"type": "mean_diff", "value": q["effect"]},
+            effect_size={"type": "external_effect" if c.get("external")
+                         else "mean_diff", "value": q["effect"]},
             interval=q["interval"],
             p_ab=p_claim, p_ab_gamma=gamma,
             n_effective=snap.get("n_effective"), n_registered=snap.get("n_registered"),
@@ -853,12 +1258,15 @@ def run_judge(root, data_path, decided_by=None) -> dict:
                   "ci90_in_bounds": c["tost"]["ci90_in_bounds"],
                   "result": c["tost"]["result"]},
             correction=corr,
-            structure=c["structure"], robustness_scope=scope,
+            structure=c["structure"], robustness_scope=row_scope,
             strength_grade=grade, strength_cap_reason=cap_reason,
             note="；".join(note_parts),
             decided_by=decided_by, decided_at=today())
         row["joint"] = joint
         row["calc_provenance"] = q["provenance"]
+        if c.get("external"):
+            row["external_result"] = c["external"]["registration"]
+            row["external_spot_check"] = c["external"]["spot_check"]
         row["distribution_ref"] = {
             "source": "judge-data", "data_file": str(data_path),
             "reference_label": c["entry"].get("reference_label"),
@@ -866,7 +1274,8 @@ def run_judge(root, data_path, decided_by=None) -> dict:
         }
         if c["entry"].get("validity_residual"):
             row["validity_residual"] = c["entry"]["validity_residual"]
-        if c["entry"].get("bayes") or c["entry"].get("diagnostics"):
+        if c["entry"].get("bayes") or c["entry"].get("diagnostics") \
+                or c.get("bayes_gate"):
             row["bayes"] = True
             diag = c["entry"].get("diagnostics")
             row["diagnostics"] = diag

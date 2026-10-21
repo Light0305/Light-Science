@@ -18,10 +18,14 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from . import extractors as _extractors
+from . import schema as _schema
+from . import simhash as _simhash
 from . import transport as _transport
+from . import warc as _warc
 from .util import append_jsonl, read_jsonl, sha256_bytes, sha256_file, utcnow
 
 RETENTION_TIER = "lightweight_raw_plus_hash"
+WARC_TIER = "warc_full"
 
 
 def store_raw(root, data: bytes) -> dict:
@@ -201,6 +205,64 @@ def clean_content(data: bytes, content_type: str, profile: str = "html_text_v1",
     return out
 
 
+# ------------------------------------------------- 跨 run 近重（simhash 层）
+
+def check_near_duplicate(root, reg, cleaned: dict):
+    """新内容与指纹库的跨 run 近重比对（见 simhash 模块口径）。
+
+    返回标注段（命中）或 None（未启用 / 未命中）。标注段随清洗件
+    落盘、随事件落账：点名来源产物 / 来源 run / 实际距离 / 生效
+    阈值。enabled=false 的目标全量退出本层：既不比对、也不入库
+    （record_content_fingerprint 同口径），退出本身在登记里留痕。
+    """
+    cfg = _schema.near_duplicate_config(reg)
+    if not cfg["enabled"]:
+        return None
+    match = _simhash.find_match(
+        root, cleaned.get("text") or "", cfg["hamming_threshold"])
+    if match is None:
+        return None
+    row = match["row"]
+    return {
+        "simhash": match["simhash"],
+        "hamming_distance": match["hamming_distance"],
+        "hamming_threshold": cfg["hamming_threshold"],
+        "matches_within_threshold": match["matches_within_threshold"],
+        "matched_prov_id": row.get("prov_id"),
+        "matched_target_id": row.get("target_id"),
+        "matched_run_id": row.get("run_id"),
+        "matched_url": row.get("url"),
+    }
+
+
+def record_content_fingerprint(root, reg, *, cleaned: dict, prov_id,
+                               target_id, run_id, url, kind="fetch"):
+    """内容落盘且 provenance 已落账后，把 simhash 指纹入指纹库。
+
+    须在 check_near_duplicate 之后调用：先比对旧库、再入库本条，
+    否则内容会与自己「近重」。返回入库行或 None（本层已禁用）。
+    """
+    if not _schema.near_duplicate_config(reg)["enabled"]:
+        return None
+    return _simhash.record_fingerprint(
+        root, text=cleaned.get("text") or "", prov_id=prov_id,
+        target_id=target_id, run_id=run_id, url=url, kind=kind)
+
+
+# ------------------------------------------------------- WARC 全记录档
+
+def run_archive(root, run_dir) -> tuple:
+    """本 run 的 WARC 归档器与相对路径（runs/<run_id>/archive.warc）。"""
+    path = Path(run_dir) / "archive.warc"
+    return _warc.WarcArchive(path), path.relative_to(Path(root)).as_posix()
+
+
+def imports_archive(root) -> tuple:
+    """人工导入的 WARC 归档器与相对路径（warc/imports.warc，追加写）。"""
+    path = Path(root) / "warc" / "imports.warc"
+    return _warc.WarcArchive(path), path.relative_to(Path(root)).as_posix()
+
+
 def verify_store(root) -> list:
     """validate 用：逐条 provenance 重算原始哈希，对不上逐项点名。"""
     problems = []
@@ -220,4 +282,35 @@ def verify_store(root) -> list:
             problems.append(
                 f"{row.get('prov_id')}：原始哈希不符（登记 {row.get('sha256')}，"
                 f"实算 {actual}）")
+    return problems
+
+
+def verify_warc_refs(root) -> list:
+    """validate 用：provenance 中带 warc 引用的行，逐条回查 WARC 记录。
+
+    每个被引用的 WARC 文件只解析一次（warc.verify_file 逐记录复算
+    block/payload 摘要）；再逐行核对记录 id 在档、偏移对位。问题
+    逐条点名到 prov_id。轻量档行无 warc 引用，不进本检查。
+    """
+    problems = []
+    by_file: dict = {}
+    for row in read_provenance(root):
+        if row.get("warc_path"):
+            by_file.setdefault(row["warc_path"], []).append(row)
+    for rel, rows in by_file.items():
+        result = _warc.verify_file(Path(root) / rel)
+        for p in result["problems"]:
+            problems.append(f"{rel}：{p}")
+        by_id = {r["record_id"]: r for r in result["records"]}
+        for row in rows:
+            rec = by_id.get(row.get("warc_record_id"))
+            if rec is None:
+                problems.append(
+                    f"{row.get('prov_id')}：WARC 记录 "
+                    f"{row.get('warc_record_id')} 不在 {rel} 中")
+            elif row.get("warc_offset") is not None \
+                    and rec["offset"] != row["warc_offset"]:
+                problems.append(
+                    f"{row.get('prov_id')}：WARC 偏移不符（登记 "
+                    f"{row.get('warc_offset')}，实位 {rec['offset']}）")
     return problems

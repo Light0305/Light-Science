@@ -111,6 +111,17 @@ def run_precheck(root, target_id, robots_timeout: float = 10.0) -> dict:
     if not terms:
         missing.append("terms_basis（站点条款/API 条款依据指针）未登记")
 
+    # ---- 留存档位（S3 现行口径：两档均可登记，本行只落裁决事实；
+    # 档位词表本身在 checks["registration"] 已由 validate_target 把关）
+    tier = schema.effective_retention_tier(reg)
+    checks["retention"] = {
+        "ok": True,
+        "tier": tier,
+        "form": ("ISO 28500 WARC 全记录（另附轻量档原始字节 + 哈希）"
+                 if tier == "warc_full" else
+                 "原始响应文件 + 哈希（内容寻址）"),
+    }
+
     # ---- robots（失败关闭；逐个登记 URL 模式各查一遍）
     urls_to_check = [reg["base_url"]] + list(reg.get("url_patterns") or [])
     fetched = robots.fetch_robots(reg["base_url"], timeout=robots_timeout)

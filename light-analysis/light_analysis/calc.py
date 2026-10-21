@@ -8,8 +8,11 @@
   Beta 连续分数自实现，不引 scipy）。
 - `tost`：双单侧 t 检验（bounds 只许由调用方传入登记 SESOI，本模块不
   决定 bounds）+ 90% CI 落界判定。
-- `corrections`：BH-FDR / Holm / Bonferroni / BY 对 p 向量的机械校正，
-  与 statsmodels multipletests 文档口径对拍。
+- `corrections`：11 法多重校正谱系对 p 向量的机械校正（FWER：Bonferroni /
+  Šidák / Holm / Holm-Šidák / Hochberg / Hommel；FDR：BH / BY / 两阶
+  BH / 两阶 BKY / GBS），逐法与 statsmodels multipletests 对拍后入集
+  （对拍证据在 05-analysis/external-crosscheck/ 冻结件）。两阶法的
+  校正 p 与 α 绑定（BKY06 程序性质），provenance 落 alpha。
 - `design_analysis`：Type S/M 设计分析三元组（Gelman & Carlin 2014
   正态近似闭式）。D 只许外部代入（冻结 SESOI / 外部先验），本模块
   不从数据效应反推 D——事后功效禁令在调用层由字段纪律守（约束 11）。
@@ -553,21 +556,188 @@ def by_adjust(pvals) -> list:
     return _clip01([x * c_m for x in bh_adjust(pvals)])
 
 
-_CORRECTION_FUNCS = {"fdr_bh": bh_adjust, "holm": holm_adjust,
-                     "bonferroni": bonferroni_adjust, "fdr_by": by_adjust}
-
-
-def corrections(pvals, method) -> dict:
-    """按受控词表方法校正一个 p 向量（一个校正族的一次应用）。"""
-    fn = _CORRECTION_FUNCS.get(method)
-    if fn is None:
-        raise ValueError(f"校正方法 {method!r} 不在受控词表 "
-                         f"{sorted(_CORRECTION_FUNCS)}")
+def sidak_adjust(pvals) -> list:
+    """Šidák：单步校正 1 − (1 − p)^m（独立性假设下精确）。"""
     pvals = [float(p) for p in pvals]
-    adj = fn(pvals)
+    m = len(pvals)
+    return _clip01([1.0 - (1.0 - p) ** m for p in pvals])
+
+
+def holm_sidak_adjust(pvals) -> list:
+    """Holm-Šidák：Holm 逐步向下骨架，每步用 Šidák 因子 1 − (1 − p)^k。"""
+    pvals = [float(p) for p in pvals]
+    m = len(pvals)
+    if m == 0:
+        return []
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj_sorted = [0.0] * m
+    running = 0.0
+    for rank in range(1, m + 1):
+        i = order[rank - 1]
+        running = max(running, 1.0 - (1.0 - pvals[i]) ** (m - rank + 1))
+        adj_sorted[rank - 1] = running
+    out = [0.0] * m
+    for rank, i in enumerate(order):
+        out[i] = adj_sorted[rank]
+    return _clip01(out)
+
+
+def hochberg_adjust(pvals) -> list:
+    """Hochberg（simes-hochberg）：逐步向上，校正 p 取自大到小单调化
+    min_{j≥rank} (m − j + 1) · p_(j)（Simes 骨架，独立/正依赖口径）。"""
+    pvals = [float(p) for p in pvals]
+    m = len(pvals)
+    if m == 0:
+        return []
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj_sorted = [0.0] * m
+    running = 1.0
+    for rank in range(m, 0, -1):
+        i = order[rank - 1]
+        running = min(running, pvals[i] * (m - rank + 1))
+        adj_sorted[rank - 1] = running
+    out = [0.0] * m
+    for rank, i in enumerate(order):
+        out[i] = adj_sorted[rank]
+    return _clip01(out)
+
+
+def _simes_p(sorted_vals) -> float:
+    """Simes 交集检验 p：min_k (j · s_(k) / k)，s 已升序。"""
+    j = len(sorted_vals)
+    return min(j * v / k for k, v in enumerate(sorted_vals, start=1))
+
+
+def hommel_adjust(pvals) -> list:
+    """Hommel（1988）：校正 p = 含该假设的一切交集假设 Simes p 的最大值。
+
+    按 Wright (1992) 的等价化简逐个计算：对假设 i，只需考虑由
+    p_i 与其余 p 中最大的 j−1 个组成的交集（j = 1..m）。
+    与 statsmodels multipletests hommel 对拍一致（见外部抽验件）。
+    """
+    import bisect
+
+    pvals = [float(p) for p in pvals]
+    m = len(pvals)
+    if m == 0:
+        return []
+    out = []
+    for i in range(m):
+        rest_desc = sorted((pvals[k] for k in range(m) if k != i),
+                           reverse=True)
+        cur = [pvals[i]]
+        best = 0.0
+        for j in range(1, m + 1):
+            if j > 1:
+                bisect.insort(cur, rest_desc[j - 2])
+            best = max(best, _simes_p(cur))
+        out.append(best)
+    return _clip01(out)
+
+
+def _twostage_adjust(pvals, alpha, bky) -> list:
+    """两阶自适应 FDR（Benjamini–Krieger–Yekutieli 2006）的校正 p。
+
+    第一阶以 α' 跑 BH（bky 时 α' = α/(1+α)，tsbh 时 α' = α），
+    r1 = 第一阶拒绝数；r1 ∈ {0, m} 时校正 p = BH 校正 p × fact
+    （fact：bky 为 1+α，tsbh 为 1）；否则以 m̂0 = m − r1 估真零数，
+    校正 p = BH 校正 p × (m̂0/m) × fact。校正 p 因此与 α 绑定
+    （程序本身的性质，statsmodels 同口径并在其文档明示）。
+    """
+    pvals = [float(p) for p in pvals]
+    m = len(pvals)
+    if m == 0:
+        return []
+    if not (0.0 < alpha < 1.0):
+        raise ValueError(f"两阶校正的 alpha 须在 (0,1) 内，现为 {alpha}")
+    bh = bh_adjust(pvals)
+    fact = (1.0 + alpha) if bky else 1.0
+    a1 = alpha / fact
+    r1 = sum(1 for x in bh if x <= a1)
+    if r1 == 0 or r1 == m:
+        return _clip01([x * fact for x in bh])
+    scale = (m - r1) / m * fact
+    return _clip01([x * scale for x in bh])
+
+
+def fdr_tsbh_adjust(pvals, alpha=0.05) -> list:
+    """两阶 BH（Benjamini–Hochberg 两阶法）：第一阶在 α 本身跑 BH。"""
+    return _twostage_adjust(pvals, alpha, bky=False)
+
+
+def fdr_tsbky_adjust(pvals, alpha=0.05) -> list:
+    """两阶 BKY（Benjamini–Krieger–Yekutieli 2006 Definition 6）。"""
+    return _twostage_adjust(pvals, alpha, bky=True)
+
+
+def fdr_gbs_adjust(pvals) -> list:
+    """GBS 自适应逐步向下（Gavrilov–Benjamini–Sarkar 2009）。
+
+    升序 p_(i)：q_i = ((m + 1 − i)/i) · p_(i)/(1 − p_(i))，
+    先自小到大取 running max、再自大到小取 running min。
+    p = 1 时 q 记 +inf（末位经裁剪落 1），与 statsmodels 同口径。
+    """
+    pvals = [float(p) for p in pvals]
+    m = len(pvals)
+    if m == 0:
+        return []
+    order = sorted(range(m), key=lambda i: pvals[i])
+    qs = []
+    for rank in range(1, m + 1):
+        p = pvals[order[rank - 1]]
+        q = float("inf") if p >= 1.0 else (m + 1 - rank) / rank * p / (1.0 - p)
+        qs.append(q)
+    raw = []
+    running = 0.0
+    for q in qs:
+        running = max(running, q)
+        raw.append(running)
+    adj_sorted = [0.0] * m
+    running = float("inf")
+    for rank in range(m, 0, -1):
+        running = min(running, raw[rank - 1])
+        adj_sorted[rank - 1] = running
+    out = [0.0] * m
+    for rank, i in enumerate(order):
+        out[i] = adj_sorted[rank]
+    return _clip01(out)
+
+
+#: α 无关方法：函数只吃 p 向量。
+_CORRECTION_FUNCS = {"fdr_bh": bh_adjust, "holm": holm_adjust,
+                     "bonferroni": bonferroni_adjust, "fdr_by": by_adjust,
+                     "sidak": sidak_adjust, "holm_sidak": holm_sidak_adjust,
+                     "simes_hochberg": hochberg_adjust,
+                     "hommel": hommel_adjust, "fdr_gbs": fdr_gbs_adjust}
+#: α 绑定方法（两阶法）：函数吃 (p 向量, alpha)，校正 p 随 α 变。
+_CORRECTION_FUNCS_ALPHA = {"fdr_tsbh": fdr_tsbh_adjust,
+                           "fdr_tsbky": fdr_tsbky_adjust}
+CORRECTION_METHOD_NAMES = sorted(
+    list(_CORRECTION_FUNCS) + list(_CORRECTION_FUNCS_ALPHA))
+
+
+def corrections(pvals, method, alpha=0.05) -> dict:
+    """按受控词表方法校正一个 p 向量（一个校正族的一次应用）。
+
+    alpha 只对两阶法（fdr_tsbh / fdr_tsbky）有意义：其校正 p 与
+    目标 FDR 水平绑定（BKY06 程序性质）；其余方法忽略 alpha。
+    逐法与 statsmodels multipletests 对拍后才许入集——对拍证据在
+    05-analysis/external-crosscheck/（冻结件），包内测试钉冻结向量。
+    """
+    pvals = [float(p) for p in pvals]
+    params = {"method": method, "m": len(pvals)}
+    if method in _CORRECTION_FUNCS_ALPHA:
+        adj = _CORRECTION_FUNCS_ALPHA[method](pvals, alpha)
+        params["alpha"] = alpha
+        params["alpha_bound"] = True
+    elif method in _CORRECTION_FUNCS:
+        adj = _CORRECTION_FUNCS[method](pvals)
+    else:
+        raise ValueError(f"校正方法 {method!r} 不在受控词表 "
+                         f"{CORRECTION_METHOD_NAMES}")
     return {"method": method, "p_raw": pvals, "p_adj": adj,
             "provenance": _prov(f"correction_{method}", {"pvals": pvals},
-                                {"method": method, "m": len(pvals)})}
+                                params)}
 
 
 def corrections_by_family(items, families) -> dict:
@@ -577,6 +747,7 @@ def corrections_by_family(items, families) -> dict:
     [{family_id, member_line_ids, method, alpha}]。
     返回 {line_id: {family_id, method, p_raw, p_adj}}。
     行不在任何族内 → 抛错（族是字段，不许有无族之行，约束 6）。
+    两阶法的 alpha 取族声明值（缺省 0.05）。
     """
     by_id = {it["line_id"]: it for it in items}
     out = {}
@@ -586,7 +757,7 @@ def corrections_by_family(items, families) -> dict:
         if not members:
             continue
         res = corrections([by_id[lid]["p_raw"] for lid in members],
-                          fam["method"])
+                          fam["method"], alpha=fam.get("alpha") or 0.05)
         for lid, raw, adj in zip(members, res["p_raw"], res["p_adj"]):
             out[lid] = {"family_id": fam["family_id"],
                         "method": fam["method"], "p_raw": raw, "p_adj": adj}
@@ -594,6 +765,36 @@ def corrections_by_family(items, families) -> dict:
     if missing:
         raise ValueError(f"判定行未落入任何校正族：{missing}（约束 6：family 须声明）")
     return out
+
+
+# ---------------------------------------------------------------- 数据准备原语
+# 多重宇宙真执行（ANA-D04 扩面）：数据准备类决策点（missing_data /
+# transform / outlier_handling）的计算原语。纯数据变换、不产判定量，
+# 无 provenance（规格选择本身落 spec_results 的 choices 可查）。
+
+def quantile_linear(sorted_vals, q) -> float:
+    """线性插值分位数（numpy method='linear' 同口径），输入须已升序。"""
+    n = len(sorted_vals)
+    if n == 0:
+        raise ValueError("quantile_linear 需要非空序列")
+    if n == 1:
+        return float(sorted_vals[0])
+    pos = q * (n - 1)
+    lo = int(math.floor(pos))
+    hi = min(lo + 1, n - 1)
+    frac = pos - lo
+    return float(sorted_vals[lo]) * (1.0 - frac) + float(sorted_vals[hi]) * frac
+
+
+def winsorize_values(vals, lo_q, hi_q) -> list:
+    """按 [P_lo, P_hi] 分位裁剪（缩尾）：界外值拉回分位点，不删样本。"""
+    vals = [float(v) for v in vals]
+    if not vals:
+        return []
+    s = sorted(vals)
+    lo = quantile_linear(s, lo_q)
+    hi = quantile_linear(s, hi_q)
+    return [min(max(v, lo), hi) for v in vals]
 
 
 # ---------------------------------------------------------------- Type S/M
@@ -651,7 +852,13 @@ def stouffer_combine(pvals, signs) -> dict:
     zs = []
     for p, s in zip(pvals, signs):
         p = min(max(float(p), 1e-300), 1.0 - 1e-16)
-        z = norm_ppf(1.0 - p / 2.0)
+        arg = 1.0 - p / 2.0
+        if arg >= 1.0:
+            # p 小到 1 − p/2 在双精度下与 1 不可分辨（p=0 的退化
+            # 规格，如零方差单位序列）：z 在最大可分辨分位饱和，
+            # 不许让 norm_ppf(1.0) 把整包判定打崩（第五批修复）。
+            arg = 1.0 - 1e-16
+        z = norm_ppf(arg)
         zs.append(z if s > 0 else (-z if s < 0 else 0.0))
     z_comb = sum(zs) / math.sqrt(len(zs))
     p_comb = 2.0 * (1.0 - norm_cdf(abs(z_comb)))

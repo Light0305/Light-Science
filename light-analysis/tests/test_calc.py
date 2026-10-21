@@ -225,6 +225,14 @@ def test_stouffer_combine():
     assert opposite["p_two_sided"] == pytest.approx(1.0)
 
 
+def test_stouffer_zero_p_saturates_not_crashes():
+    # 第五批修复：p=0（零方差规格的退化 p）曾使 1 − p/2 在双精度
+    # 下等于 1.0、norm_ppf(1.0) 抛错打崩整包判定；现 z 饱和不崩。
+    out = calc.stouffer_combine([0.0, 0.04], [1, 1])
+    assert out["p_two_sided"] < 0.01
+    assert out["z"] > 5.0
+
+
 def test_calc_results_carry_provenance():
     r = calc.effect_and_ci([3, 4, 5, 6], [1, 2, 2, 3])
     prov = r["provenance"]

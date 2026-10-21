@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from . import schema
+from . import external, schema
 from .project import current_verdicts, load_package
 from .specs import verify_ledger_hash
 
@@ -192,6 +192,21 @@ def _validate_verdict_row(errors, row, snap_line, families_by_id, spec_ids):
             if corr.get("p_raw") is not None and corr.get("p_adj") is not None \
                     and corr["p_adj"] < corr["p_raw"] - _EPS:
                 errors.append(f"{where}：p_adj 不应小于 p_raw（校正只许收紧）")
+
+    # ---- 外部登记行复验（§7.0）：带 external_result 的行必须带通过
+    # 的抽验记录，且校验器按登记原文重跑抽验——篡改登记数字或抽验
+    # 记录在此翻红（防伪造门，与 D-ANA-1 的机器可读终态同哲学）。
+    if row.get("external_result") is not None:
+        chk_rec = row.get("external_spot_check")
+        if not chk_rec or chk_rec.get("passed") is not True:
+            errors.append(f"{where}：外部登记行缺 external_spot_check "
+                          "通过记录（§7.0 抽验是采信前提，不许缺席）")
+        else:
+            recheck = external.spot_check_external(row["external_result"])
+            if not recheck["passed"]:
+                errors.append(
+                    f"{where}：外部登记复验未过："
+                    + "；".join(recheck["failures"]))
 
     # ---- 双 n（约束 12）
     if verdict in schema.DIRECTIONAL_VERDICTS:

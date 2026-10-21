@@ -27,9 +27,19 @@ PURPOSE_KINDS = (
 #: 明确出界的用途：单篇全文获取归 literature 双轨，登记即拒。
 FORBIDDEN_PURPOSE_KINDS = ("single_fulltext",)
 
-#: 留存档位（S3：v1 只有轻量档；warc_full 为 ISO 28500 全记录档，v1.1）
-RETENTION_TIERS = ("lightweight_raw_plus_hash",)
-RESERVED_RETENTION_TIERS = ("warc_full",)
+#: 留存档位（S3）。lightweight_raw_plus_hash（默认）：原始响应文件 +
+#: 哈希（内容寻址）；warc_full：ISO 28500 WARC 全记录档——在轻量档
+#: 之上另把每次响应写成 WARC response 记录（人工导入写 resource
+#: 记录），逐记录带 block/payload 摘要、可回读逐条校验（warc.py，
+#: 纯标准库实现，无第三方依赖）。warc_full 原为预留档（登记即拒），
+#: 第五批计算扩面（2026-10-21，PLAN §13 P1）落地后转正式可用档。
+RETENTION_TIERS = ("lightweight_raw_plus_hash", "warc_full")
+RESERVED_RETENTION_TIERS = ()
+
+#: 跨 run 近重检测（simhash）默认汉明距离阈值：64 位指纹距离不大于
+#: 此值记近重命中。逐目标可在登记 near_duplicate.hamming_threshold
+#: 覆盖（0 至 64）；命中只检测 + 登记 + 落事件，永不丢弃内容。
+DEFAULT_NEAR_DUP_HAMMING_THRESHOLD = 3
 
 #: 个人数据风险（HC-5：high 登记即拒；low 须最小必要范围说明）
 PERSONAL_DATA_RISKS = ("none", "low", "high")
@@ -122,6 +132,8 @@ EVENT_TYPES = (
     "browser_preauthorization_applied",  # D1：预检命中名单、免逐个确认生效
     "robots_cache_reused",     # D8：执行期复用预检 24h 内 robots 缓存
     "robots_cache_invalidated",  # D8：缓存哈希不符/本体缺失，作废后重取
+    # ---- 第五批计算扩面新增（2026-10-21，PLAN §13 P1） ----
+    "near_duplicate_detected",  # simhash 跨 run 近重命中（只标记不处置内容）
 )
 
 #: refusals 命令认的拒绝类事件。
@@ -216,11 +228,26 @@ def validate_target(reg: dict) -> list:
 
     tier = reg.get("retention_tier", "lightweight_raw_plus_hash")
     if tier in RESERVED_RETENTION_TIERS:
-        problems.append(
-            f"retention_tier {tier}（WARC，ISO 28500 全记录档）为 v1.1 档，"
-            "v1 只做 lightweight_raw_plus_hash（S3）")
+        problems.append(f"retention_tier {tier} 为预留档，尚未开放登记")
     elif tier not in RETENTION_TIERS:
         problems.append(f"retention_tier {tier!r} 不在词表 {list(RETENTION_TIERS)}")
+
+    nd = reg.get("near_duplicate")
+    if nd is not None:
+        if not isinstance(nd, dict):
+            problems.append(
+                "near_duplicate 须为映射（enabled / hamming_threshold）")
+        else:
+            en = nd.get("enabled")
+            if en is not None and not isinstance(en, bool):
+                problems.append("near_duplicate.enabled 须为布尔值")
+            th = nd.get("hamming_threshold")
+            if th is not None and (isinstance(th, bool)
+                                   or not isinstance(th, int)
+                                   or not 0 <= th <= 64):
+                problems.append(
+                    "near_duplicate.hamming_threshold 须为 0 至 64 的整数"
+                    "（64 位 simhash 的汉明距离）")
 
     risk = reg.get("personal_data_risk", "none")
     if risk not in PERSONAL_DATA_RISKS:
@@ -296,3 +323,28 @@ def effective_interval(reg: dict, crawl_delay_sec=None,
     value = max(candidates.values())
     return {"effective_interval_sec": value, "inputs": candidates,
             "decided_by": max(candidates, key=candidates.get)}
+
+
+def near_duplicate_config(reg: dict) -> dict:
+    """跨 run 近重检测的生效配置：登记 near_duplicate 段覆盖包级默认。
+
+    返回 {"enabled": bool, "hamming_threshold": int}。缺省开启、阈值
+    取 DEFAULT_NEAR_DUP_HAMMING_THRESHOLD；enabled=false 是逐目标显式
+    关闭（关闭本身随登记留痕，不许执行层临时关）。生效值会逐次写进
+    近重事件与清洗件标注（阈值留痕口径）。
+    """
+    nd = reg.get("near_duplicate") or {}
+    if not isinstance(nd, dict):
+        nd = {}
+    th = nd.get("hamming_threshold")
+    if isinstance(th, bool) or not isinstance(th, int) \
+            or not 0 <= th <= 64:
+        th = DEFAULT_NEAR_DUP_HAMMING_THRESHOLD
+    return {"enabled": bool(nd.get("enabled", True)),
+            "hamming_threshold": th}
+
+
+def effective_retention_tier(reg: dict) -> str:
+    """目标生效留存档位：登记值，缺省轻量档（storage 落盘层共用）。"""
+    tier = (reg or {}).get("retention_tier") or "lightweight_raw_plus_hash"
+    return tier if tier in RETENTION_TIERS else "lightweight_raw_plus_hash"

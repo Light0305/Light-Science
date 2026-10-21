@@ -1,7 +1,7 @@
 ---
 name: light-crawler
 description: Use when 需要为 Light-Science 科研项目从外部来源批量获取数据（数据集、文献线索批、整刊 OA 全文批、基准或排行榜页面快照），或登记新数据源、查询某目标的合规预检结论与熔断状态时。
-version: "1.2"
+version: "1.3"
 author: light-crawler contributors
 license: MIT
 ---
@@ -31,7 +31,7 @@ license: MIT
 | C0 | 目标登记 | 每个数据源先登记再抓取：源名、base_url、URL 模式、所属项目、用途（purpose_kind）、消费方（consumer）、通道类型、条款依据指针。无登记的目标执行层拒绝访问（形态学 reverse-skill 的 scope 硬门） |
 | C1 | 合规预检 | 对登记目标逐项产出预检记录：robots 结论（失败关闭口径）、条款依据、通道合法性、速率裁决、个人数据标记、登录态。ready_to_fetch 是代码计算值，不靠任何人声明 |
 | C2 | 获取 | 按 C1 裁决执行（通道优先级在登记/预检层已定，见 §4）：节流按 §6 公式加自适应（只加严或回落裁决值）；断点与增量靠已见集与 frontier 任务（crawl：策略链播种 + 发现扩展 + job 落盘续跑），被拒即停 |
-| C3 | 清洗 | 原始响应留存 + 清洗件双存；清洗规则按目标登记的 clean_profile 选档，不散装在代码里；近重复只标记不删除 |
+| C3 | 清洗 | 原始响应留存 + 清洗件双存；清洗规则按目标登记的 clean_profile 选档，不散装在代码里；近重复两层都只标记不删除——run 内 shingle Jaccard 标记（clean_content）与跨 run simhash 检测（fingerprints.jsonl 指纹库 + near_duplicate_detected 事件，点名来源 run / 实际距离 / 生效阈值；阈值登记 near_duplicate.hamming_threshold 可配、默认 3，enabled=false 逐目标全量退出本层） |
 | C4 | 落盘与 provenance | 每条产物带 provenance：源 URL、获取时间、通道、run 配置哈希、原始响应哈希、预检记录指针、留存档位；版本链以 supersedes 指针管理，旧版保留 |
 | C5 | 增量更新 | 已见集（请求指纹）+ 条件请求（ETag/Last-Modified，304 不落新版）；节奏按登记 rhythm（manual/daily/weekly），变更只产新版本与事件，不自动改写下游已消费的数据 |
 | C6 | 回供与回流 | 供数形态见 §9；失败与被拒（robots 禁、条款禁、HTTP 回绝、熔断、越域、量上限）一律落 events.jsonl 并可成清单查询，不许静默换姿势重试 |
@@ -53,7 +53,7 @@ license: MIT
 |---|---|
 | S1 浏览器默认关 | 登记 channel=browser 时，预检须 browser_enabled=true 且 browser_reason 非空才继续裁决；且项目锁 allow_browser=false 时直接 blocked；浏览器属高危通道另须人工确认。**D1 预授权名单（2026-10-21 批准）**：具名者可把已登记目标列入项目锁 lock.browser_preauthorized（条目含 target_id / listed_by / reason / listed_at，增删各落一条事件），名单内目标以名单层理由替代逐目标开启手续、预检免逐个 confirm 直接 effective（豁免依据落预检记录 confirmation_waiver + browser_preauthorization_applied 事件）；名单外目标维持三段手续原样，allow_browser=false 对名单内同样 blocked（锁只紧不松）。这不是全局默认开：名单之外默认关不变。执行器随包提供（v1.1）：Chromium CDP 渲染器经 CLI fetch 与 crawl 注入；库层 fetch_run 仍走 browser_fetcher 注入契约，未注入时如实拒绝并留痕（不假装能跑） |
 | S2 登录态（口径沿革） | v1 全关出自第二轮 S1–S7 整批批准；用户 2026-10-21 指出该条款其本人从未单独注意、现立场为可以绕。现行口径 = 凭据访问通道：login_state 可取 user_account / institutional，逐目标必填 entitlement_basis（权限依据）与 credential_ref（只许 vault: 引用、凭据本体永不落盘）、channel 须为 browser（会话由浏览器承载）；预检落 credentials 检查行（不验真实有效性）；执行须由接入运行环境注入 credential_provider，会话失效落 credential_session_invalid 并按 HC-8 熔断记账；provenance 只记权限依据、引用与脱敏账号标识。替代通道 import 保留（来源说明 + 经手人必填）。无权限绕越不建——此为构建方（Muse）边界，非用户口径 |
-| S3 轻量留存 | v1 只做原始响应文件 + 哈希，provenance 明示 retention_tier=lightweight_raw_plus_hash；WARC 全记录档（WARC 为 ISO 28500 标准，非 W3C）登记即拒并指向 v1.1 |
+| S3 留存两档 | 默认轻量档 lightweight_raw_plus_hash：原始响应文件 + 哈希（内容寻址），provenance 明示 retention_tier。warc_full 全记录档（WARC 为 ISO 28500 标准，非 W3C；第五批计算扩面 2026-10-21 落地，PLAN §13 P1）：在轻量档之上把每次响应另写为 WARC response 记录（一 run 一档 runs/<run_id>/archive.warc、首条 warcinfo；人工导入写 resource 记录进 warc/imports.warc），逐记录带 block/payload 摘要（sha1 + Base32），validate 与 warc verify 逐条复算；实现为包内纯标准库（warc.py），无第三方依赖、不装假档。两档差异 = 轻量档只有响应字节本体 + 哈希，全记录档另有可回读、可逐条验签的归档记录；抓取纪律与合规门不因档位而异。warc_full 原为预留档（登记即拒），本批起转正式可用档 |
 | S4 预检分级 | 低危通道（official_api、open_data）预检全过自动生效；高危通道（web_page、browser）须具名 confirm 才生效，确认动作落预检账留痕；唯一豁免 = D1 预授权名单内的 browser 目标（名单层具名登记即确认依据，豁免逐条落账，见 S1 行） |
 | S5 文献边界 | purpose_kind 词表只有批量与非文献五类；single_fulltext 登记即拒 |
 | S6 速率公式 | 见 §6 定版表；并发固定 1，登记其他值即拒 |
@@ -97,9 +97,9 @@ license: MIT
 
 ## §8 落盘形态与 provenance 字段
 
-工作区（项目根 data-sources/）布局：crawler.yaml 登记头（顶层 status 由代码维护：任一目标熔断即 attention）、targets/<id>/（target.yaml 登记 + state.yaml 运行状态）、prechecks/<id>.jsonl、events.jsonl、seen.jsonl、provenance.jsonl、store/（原始响应内容寻址，同一哈希只存一份）、runs/<run_id>/（run.yaml + cleaned/ 清洗件）、locks/。
+工作区（项目根 data-sources/）布局：crawler.yaml 登记头（顶层 status 由代码维护：任一目标熔断即 attention）、targets/<id>/（target.yaml 登记 + state.yaml 运行状态）、prechecks/<id>.jsonl、events.jsonl、seen.jsonl、provenance.jsonl、fingerprints.jsonl（simhash 跨 run 指纹库）、store/（原始响应内容寻址，同一哈希只存一份）、runs/<run_id>/（run.yaml + cleaned/ 清洗件 + archive.warc〔warc_full 档时〕）、warc/imports.warc（warc_full 档的人工导入归档）、locks/。
 
-每条 fetch 类 provenance 必含字段：prov_id、at、kind、target_id、run_id、url、final_url、channel、http_status、bytes、sha256、raw_path、cleaned_path、precheck_ref、run_config_hash、retention_tier、etag、last_modified、fingerprint、supersedes。人工导入行 kind=manual_import，另含 source_file_name、source_note、imported_by，且 channel 落 manual_import 与抓取产物分开读。run 配置哈希由登记 + 速率裁决合成，同一目标的登记或裁决一变，哈希即变，产物可回溯到当时的确切配置。
+每条 fetch 类 provenance 必含字段：prov_id、at、kind、target_id、run_id、url、final_url、channel、http_status、bytes、sha256、raw_path、cleaned_path、precheck_ref、run_config_hash、retention_tier（登记生效值）、etag、last_modified、fingerprint、supersedes。warc_full 档的行另含 warc_path、warc_record_id、warc_offset（在归档中定位本条记录）。人工导入行 kind=manual_import，另含 source_file_name、source_note、imported_by，且 channel 落 manual_import 与抓取产物分开读。run 配置哈希由登记 + 速率裁决合成，同一目标的登记或裁决一变，哈希即变，产物可回溯到当时的确切配置。
 
 ## §9 回供接口
 
@@ -111,7 +111,7 @@ license: MIT
 
 ## §10 命令面
 
-init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ discover（--target：发现 pass，端点/链接/sitemap 登记进发现账）/ crawl（--target，--max-pages，--no-discover，--fresh：frontier 任务，断点自动续跑）/ sources（--target：发现账清单）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ browser-preauth（list / add --target --by --reason / remove --target --by --reason：D1 预授权名单维护，增删均具名留痕）/ refusals（--type 可按拒绝类过滤并给出该类计数，如 render_escalation_blocked）/ events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
+init / register（--file，--update）/ targets / precheck / confirm（--by 具名 + --note）/ gate-check（--json）/ fetch（--target，--url 可重复，--refetch-seen 只影响增量跳过、不绕任何合规门）/ discover（--target：发现 pass，端点/链接/sitemap 登记进发现账）/ crawl（--target，--max-pages，--no-discover，--fresh：frontier 任务，断点自动续跑）/ sources（--target：发现账清单）/ import（--note 与 --by 必填）/ unblock（--by + --reason）/ browser-preauth（list / add --target --by --reason / remove --target --by --reason：D1 预授权名单维护，增删均具名留痕）/ refusals（--type 可按拒绝类过滤并给出该类计数，如 render_escalation_blocked）/ fingerprints（--target 可过滤：simhash 指纹库清单）/ warc verify（--file 可指定单档：WARC 逐记录复算校验，有问题退出码 2）/ events / status / validate / render。全部命令从工作区根以 --root 指定 data-sources/ 运行。fetch 的错误输出即点名清单：缺什么、被哪条规则挡、合法替代是什么，一次说清（学 rea 工具契约「错误消息指回合法操作面」的写法）。
 
 ## §11 失败模式（接入模型自查）
 
@@ -129,7 +129,7 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 
 1. 浏览器执行器已随包（CDP 主通道），但环境依赖真实存在：本机无 Chromium 时如实拒绝并指路；回环/内网目标在 Chrome 152 的 Local Network Access 检查下走传输桥接渲染（engine 标注 cdp+fetch-bridge，渲染的是目标站真实响应字节）；dump-dom 降级在个别 Chromium 构建上无输出（实测本机 build 对 about:blank 亦无输出），此时以 RenderError 如实呈现、不冒充渲染成功。
 2. 清洗层两档（2026-10-21 第三批快修落地）：轻档 html_text_v1（标题/meta/可见文本 + JSON 透传）与深档 trafilatura_v1（extractors.py 注册表：trafilatura 深度抽取 + 元数据，按 clean_profile 选档）。深档是可选依赖：未安装或抽取失败时如实降级回轻档并在清洗件 extractor 段留痕，不冒充深档产物。抽取质量由自有标注页回归集钉住（eval/：6 页 fixture + 人工标注 + 双档对照报表）；登记外档位名按轻档路径处理（profile 字段回显登记值）。
-3. WARC 全记录档（ISO 28500）未做（S3 定版）；高价值易变源的现场级留存在当前只有原始字节 + 哈希。
+3. WARC 全记录档已落地（第五批，见 §4 S3 行），两点如实注记：(a) 写出为不压缩 .warc（审计取向：偏移稳定、摘要逐条可复算），回读兼容 gzip 封装；(b) response 记录的 HTTP 报文由传输部件（状态行 / 响应头 / 实体）重构——实体在传输层已解压解块，故重构报文剔除 Content-Encoding / Transfer-Encoding 并按实体实长重写 Content-Length，记录内部自洽、摘要复算可过；原始字节本体另由 store/ 内容寻址原样留存（provenance sha256 并行作证），两条证据链并存。高价值易变源的现场级留存据此成立。
 4. 增量靠已见集 + 条件请求 + crawl 任务续跑，rhythm 字段只登记节奏口径，定时调度不在本包（由项目侧调度或 leader 编排）。
 5. crawl 任务内失败条目（5xx/传输错误）不自动重试：状态落 failed 并留痕，续跑只处理 pending；恢复靠 fresh 新任务或人工处置——防重试风暴与速率失控，是有意口径不是缺失。
 6. 凭据通道的 CLI 形态不持有凭据：credential_provider 只能由接入运行环境（Secure Vault）注入，CLI 直跑凭据目标会如实拒绝并点名注入路径；预检不验证凭据真实有效性，有效性由执行期会话成败与熔断记账兜底。
@@ -158,3 +158,4 @@ init / register（--file，--update）/ targets / precheck / confirm（--by 具�
 - **凭据访问通道**：见 §4 S2 现行口径。会话由浏览器通道承载（cookie 经 CDP 在导航前注入），provenance 记 entitlement（basis / credential_ref / 脱敏 account_label）与 cookie 名，凭据值全程不落盘（测试以全工作区扫描断言）。
 - **未动的默认**：浏览器默认关（S1）、通道优先级（HC-3）、并发 1、429 即停不重试、模板间隔下限、robots 失败关闭——均照旧；认为它们限制能力的条目连同风险与建议写入工作区 20-build/crawler-decision-list.md 交用户拍板，本批未自行放开任何一条。
 - **决策落地批（同日续批，用户全按推荐批准）**：D1 浏览器预授权名单落码（project 名单管理 + precheck 豁免合成 + CLI browser-preauth，名单外三段手续原样）；D8 robots 缓存对齐落码（预检落原文哈希缓存、执行期 resolve_robots 统一复用，清偿 phase5 遗留问题 (1)）；D3 维持逐目标确认，render_escalation_blocked 计数以 refusals --type 钉死可查；D6 维持公式与下限，rate_basis 用法示例已写入 §6。其余 D2/D4/D5/D7/D9/D10 按批准维持现状，无代码变更。验收 = tests/test_decisions_impl.py 11 项，全量 88 项全绿。
+- **第五批计算扩面（2026-10-21，PLAN §13 P1）**：两项。(1) **simhash 跨 run 近重检测**（simhash.py + storage 胶水）：对清洗件文本算 64 位 simhash（词元特征、特征哈希取 sha256——不用进程加盐的内置 hash，指纹跨 run 跨进程恒可比），指纹行（指纹/文本哈希/prov/target/run/url）持久化 fingerprints.jsonl；新内容落盘前与全库比对，汉明距离 ≤ 生效阈值（登记 near_duplicate.hamming_threshold 可配、默认 3）即命中——命中只标记不处置：清洗件落 near_duplicate_cross_run 标注、provenance 照常落账、near_duplicate_detected 事件点名来源 prov/run/实际距离/生效阈值/阈值内命中数，内容一份不少。与既有精确层的关系：duplicate_skipped 是请求层精确（同 URL 已见）、store/ 内容寻址是存储层精确（字节全同同哈希）、全同文本不重复报近重（归精确层）；本层只补「内容小改、URL 可同可不同」的近重。enabled=false 的目标全量退出本层（不比对不入库）。(2) **WARC 留存档**（warc.py，纯标准库）：见 §4 S3 行与 §12.3 注记；warc_full 由预留拒收转正式可用档，登记/预检（落 checks.retention）/落盘（fetch/crawl/导入三路）/校验（validate + warc verify）四处同步；预留档集清空，杜绝「登记了跑不起来」的假装档。合规层未动一字：预检/robots/速率/熔断/凭据通道全部照旧，WARC 只改留存形态。验收口径与数字见 20-build/surpass-batch5-crawler.md。

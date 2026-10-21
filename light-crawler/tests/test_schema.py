@@ -21,10 +21,43 @@ def test_concurrency_must_be_one():
     assert any("concurrency" in p for p in problems)
 
 
-def test_warc_tier_reserved_for_v11():
+def test_warc_tier_opened_by_batch5():
+    # 沿革：v1 时 warc_full 为预留档、登记即拒（旧钉
+    # test_warc_tier_reserved_for_v11）；第五批计算扩面（PLAN §13
+    # P1）WARC 落地后转正式可用档，本钉随之改口径。
     problems = schema.validate_target(
         make_reg("https://example.org", retention_tier="warc_full"))
-    assert any("ISO 28500" in p for p in problems)
+    assert problems == []
+
+
+def test_unknown_retention_tier_rejected():
+    problems = schema.validate_target(
+        make_reg("https://example.org", retention_tier="tape_archive"))
+    assert any("retention_tier" in p for p in problems)
+
+
+def test_near_duplicate_config_validation():
+    ok = schema.validate_target(make_reg(
+        "https://example.org",
+        near_duplicate={"enabled": True, "hamming_threshold": 5}))
+    assert ok == []
+    for bad in ({"hamming_threshold": 65}, {"hamming_threshold": -1},
+                {"hamming_threshold": True}, {"enabled": "yes"}):
+        problems = schema.validate_target(
+            make_reg("https://example.org", near_duplicate=bad))
+        assert any("near_duplicate" in p for p in problems), bad
+    problems = schema.validate_target(
+        make_reg("https://example.org", near_duplicate="off"))
+    assert any("near_duplicate" in p for p in problems)
+
+
+def test_near_duplicate_config_defaults_and_override():
+    assert schema.near_duplicate_config({}) == {
+        "enabled": True,
+        "hamming_threshold": schema.DEFAULT_NEAR_DUP_HAMMING_THRESHOLD}
+    cfg = schema.near_duplicate_config(
+        {"near_duplicate": {"enabled": False, "hamming_threshold": 7}})
+    assert cfg == {"enabled": False, "hamming_threshold": 7}
 
 
 def test_single_fulltext_purpose_out_of_scope():
