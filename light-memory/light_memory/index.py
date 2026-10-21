@@ -507,6 +507,35 @@ def _matched_units(unit_set: set, chunk_tokens: list) -> int:
     return len(unit_set & seq)
 
 
+_ID_RE = re.compile(r"[A-Za-z]{1,}\d*(?:[-.]\d+)+|[A-Za-z]\d+\b")
+
+
+def query_identifiers(query: str) -> list:
+    """查询中的标识符形 token（FM-3.1 / F-0001 / C1 之类）：字母
+    打头、含数字、带分隔符或字母数字连写。纯自然语言词（不含
+    数字）不入——标识符是 ID 型查询的直接证据，须与普通词法
+    梯度分开对待（检索深度与排序批口径）。"""
+    out = []
+    for m in _ID_RE.finditer(query or ""):
+        s = m.group(0)
+        if len(s) >= 2 and any(c.isdigit() for c in s):
+            out.append(s.lower())
+    return out
+
+
+def identifier_seqs(query: str) -> list:
+    """标识符的 token 序列形态（与索引文本同一 tokenizer）。"""
+    return [tokenize(s) for s in query_identifiers(query)]
+
+
+def tokens_contain_seq(tokens: list, seq: list) -> bool:
+    """seq 是否在 tokens 中连续出现（标识符逐字命中的核验）。"""
+    if not seq or len(seq) > len(tokens):
+        return False
+    return any(tokens[i:i + len(seq)] == seq
+               for i in range(len(tokens) - len(seq) + 1))
+
+
 def _texts_by_ids(con, chunk_ids) -> dict:
     """按 chunk_id 取 FTS 切分文本（只取候选行）。
 
