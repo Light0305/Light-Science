@@ -269,6 +269,7 @@ Use cases, problems, missing domain support and reproducible suggestions are all
 - Email: [1833058953@qq.com](mailto:1833058953@qq.com)
 - GitHub: [@Light0305](https://github.com/Light0305)
 - Related projects: [Light-UI-UX](https://github.com/Light0305/Light-UI-UX) · [Light-WeChat](https://github.com/Light0305/Light-WeChat)
+- AI Shop:[LightChuan-Shop](https://lightchuan.shop)
 
 <table align="center">
   <tr><th align="center">Support the author</th><th align="center">WeChat</th><th align="center">Official account</th></tr>
