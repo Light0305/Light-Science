@@ -261,7 +261,7 @@ flowchart TB
 - 邮箱：[1833058953@qq.com](mailto:1833058953@qq.com)
 - GitHub：[@Light0305](https://github.com/Light0305)
 - 相关项目：[Light-UI-UX](https://github.com/Light0305/Light-UI-UX) · [Light-WeChat](https://github.com/Light0305/Light-WeChat)
-- AI小店:[LightChuan-Shop](https://lightchuan.shop)
+- AI小店：[LightChuan-Shop](https://lightchuan.shop)
 
 <table align="center">
   <tr><th align="center">支持作者</th><th align="center">微信交流</th><th align="center">公众号</th></tr>
